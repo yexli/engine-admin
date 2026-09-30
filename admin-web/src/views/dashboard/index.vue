@@ -47,8 +47,15 @@ function renderChart() {
   const { hours, events, aiCalls } = overview.value.activity;
   chart.setOption({
     tooltip: { trigger: "axis" },
-    legend: { data: ["世界事件", "AI 调用"], bottom: 0 },
-    grid: { left: 40, right: 16, top: 24, bottom: 40 },
+    legend: {
+      data: ["世界事件", "AI 调用"],
+      top: 0,
+      right: 0,
+      itemWidth: 16,
+      itemHeight: 8,
+      icon: "roundRect"
+    },
+    grid: { left: 40, right: 16, top: 36, bottom: 28 },
     xAxis: { type: "category", data: hours, boundaryGap: false },
     yAxis: { type: "value", minInterval: 1 },
     series: [
@@ -93,8 +100,10 @@ onBeforeUnmount(() => {
 
 const statCards = () => [
   {
-    zh: "世界数（引擎直读）",
+    zh: "世界数",
     en: "Worlds",
+    /** 引擎直读标注（tooltip） */
+    tip: "来自 World Engine 直读",
     value: String(engineWorlds.value.length),
     icon: "ep/compass",
     color: "#409eff"
@@ -102,13 +111,15 @@ const statCards = () => [
   {
     zh: "活跃世界",
     en: "Active Worlds",
+    tip: "运行中的世界数（Mock 聚合）",
     value: String(overview.value?.stats.activeWorlds ?? "—"),
     icon: "ep/video-play",
     color: "#67c23a"
   },
   {
-    zh: "实体数（引擎直读）",
+    zh: "实体数",
     en: "Entities",
+    tip: "来自 World Engine 直读",
     value: String(engineWorlds.value.reduce((s, w) => s + w.entities, 0)),
     icon: "ep/user",
     color: "#e6a23c"
@@ -116,13 +127,15 @@ const statCards = () => [
   {
     zh: "每分钟事件",
     en: "Events / min",
+    tip: "平台事件速率（Mock 聚合）",
     value: String(overview.value?.stats.eventsPerMin ?? "—"),
     icon: "ep/bell",
     color: "#f56c6c"
   },
   {
-    zh: "AI 请求（24h）",
-    en: "AI Requests",
+    zh: "AI 请求",
+    en: "Requests · 24h",
+    tip: "近 24 小时模型调用次数（Mock 聚合）",
     value: String(overview.value?.stats.aiRequests24h ?? "—"),
     icon: "ep/coin",
     color: "#9a66e4"
@@ -130,6 +143,7 @@ const statCards = () => [
   {
     zh: "记忆条目",
     en: "Memory Records",
+    tip: "全部记忆库文档数（Mock 聚合）",
     value: String(overview.value?.stats.memoryRecords ?? "—"),
     icon: "ep/collection",
     color: "#00b2a9"
@@ -164,23 +178,34 @@ const statCards = () => [
         class="mb-3"
       >
         <el-card shadow="never" class="h-full">
-          <div class="flex items-center justify-between">
-            <div>
-              <BiText
-                :zh="card.zh"
-                :en="card.en"
-                class="text-[--el-text-color-secondary]! text-xs!"
-              />
-              <div v-loading="loading" class="text-2xl font-semibold mt-1">
+          <div class="flex items-start justify-between gap-2">
+            <div class="min-w-0">
+              <div
+                class="text-sm font-medium text-[--el-text-color-primary] truncate"
+                :title="card.tip"
+              >
+                {{ card.zh }}
+              </div>
+              <div
+                class="text-[11px] font-mono text-[--el-text-color-secondary] truncate mb-1"
+              >
+                {{ card.en }}
+              </div>
+              <div
+                v-loading="loading"
+                class="text-[26px] leading-8 font-semibold tabular-nums"
+              >
                 {{ card.value }}
               </div>
             </div>
-            <div
-              class="w-10 h-10 rounded-full flex items-center justify-center"
-              :style="{ background: `${card.color}1a`, color: card.color }"
-            >
-              <IconifyIconOffline :icon="card.icon" class="text-xl" />
-            </div>
+            <el-tooltip :content="card.tip" placement="top">
+              <div
+                class="w-9 h-9 shrink-0 rounded-lg flex items-center justify-center cursor-default"
+                :style="{ background: `${card.color}14`, color: card.color }"
+              >
+                <IconifyIconOffline :icon="card.icon" class="text-lg" />
+              </div>
+            </el-tooltip>
           </div>
         </el-card>
       </el-col>

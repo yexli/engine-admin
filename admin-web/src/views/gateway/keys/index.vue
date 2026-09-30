@@ -121,13 +121,11 @@ onMounted(load);
 
 <template>
   <div class="p-4">
-    <el-alert
-      type="info"
-      :closable="false"
-      show-icon
-      class="mb-3"
-      title="Key 全程脱敏展示（sk-****xxxx），明文仅在创建/重新生成时出现一次；历史明文不可查看（Mock 数据）"
-    />
+    <div class="flex justify-end mb-1">
+      <MockTag
+        detail="Key 全程脱敏展示（sk-****xxxx），明文仅在创建/重新生成时出现一次；历史明文不可查看（Mock 数据）"
+      />
+    </div>
     <el-card shadow="never">
       <div class="flex flex-wrap items-center gap-2 mb-3">
         <el-select
@@ -168,7 +166,8 @@ onMounted(load);
       </el-alert>
 
       <el-table v-loading="loading" :data="list" stripe>
-        <el-table-column prop="name" label="密钥名称 Key Name" min-width="130">
+        <el-table-column prop="name" min-width="130"
+          ><template #header><BiText zh="密钥名称" en="Key Name" /></template>
           <template #default="{ row }">
             <span class="font-medium">{{ row.name }}</span>
           </template>
@@ -182,8 +181,11 @@ onMounted(load);
             <span class="font-mono text-xs">{{ row.maskedKey }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="owner" label="所有者 Owner" width="100" />
-        <el-table-column label="权限 Permissions" min-width="150">
+        <el-table-column prop="owner" width="100"
+          ><template #header><BiText zh="所有者" en="Owner" /></template
+        ></el-table-column>
+        <el-table-column min-width="150"
+          ><template #header><BiText zh="权限" en="Permissions" /></template>
           <template #default="{ row }">
             <el-tag
               v-for="p in row.permissions"
@@ -201,15 +203,18 @@ onMounted(load);
             >
           </template>
         </el-table-column>
-        <el-table-column label="创建时间 Created" width="110">
+        <el-table-column width="110"
+          ><template #header><BiText zh="创建时间" en="Created" /></template>
           <template #default="{ row }">{{
             fmtTime(row.createdAt).slice(0, 10)
           }}</template>
         </el-table-column>
-        <el-table-column label="最近使用 Last Used" width="110">
+        <el-table-column width="110"
+          ><template #header><BiText zh="最近使用" en="Last Used" /></template>
           <template #default="{ row }">{{ timeAgo(row.lastUsedAt) }}</template>
         </el-table-column>
-        <el-table-column label="状态 Status" width="100" align="center">
+        <el-table-column width="100" align="center"
+          ><template #header><BiText zh="状态" en="Status" /></template>
           <template #default="{ row }">
             <el-tag
               :type="

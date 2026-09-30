@@ -72,13 +72,11 @@ onMounted(load);
 
 <template>
   <div class="p-4">
-    <el-alert
-      type="info"
-      :closable="false"
-      show-icon
-      class="mb-3"
-      title="角色权限为 Mock（内置角色第一版不可修改）；权限码与前端按钮级权限一一对应（见 docs/ADMIN-PERMISSION.md）"
-    />
+    <div class="flex justify-end mb-1">
+      <MockTag
+        detail="角色权限为 Mock（内置角色第一版不可修改）；权限码与前端按钮级权限一一对应（见 docs/ADMIN-PERMISSION.md）"
+      />
+    </div>
     <div v-loading="loading">
       <el-alert
         v-if="error"

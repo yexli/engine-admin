@@ -67,13 +67,11 @@ onMounted(load);
 
 <template>
   <div class="p-4">
-    <el-alert
-      type="info"
-      :closable="false"
-      show-icon
-      class="mb-3"
-      title="记忆记录为 Mock（Memory HTTP API 待建）；删除按钮需要 memory:write 权限"
-    />
+    <div class="flex justify-end mb-1">
+      <MockTag
+        detail="记忆记录为 Mock（Memory HTTP API 待建）；删除按钮需要 memory:write 权限"
+      />
+    </div>
     <el-card shadow="never">
       <div class="flex flex-wrap items-center gap-2 mb-3">
         <el-input
@@ -150,7 +148,8 @@ onMounted(load);
       </el-alert>
 
       <el-table v-loading="loading" :data="list" stripe>
-        <el-table-column prop="id" label="记忆 ID Memory ID" min-width="100">
+        <el-table-column prop="id" min-width="100"
+          ><template #header><BiText zh="记忆" en="ID Memory ID" /></template>
           <template #default="{ row }">
             <el-button
               text
@@ -166,23 +165,23 @@ onMounted(load);
             </el-button>
           </template>
         </el-table-column>
-        <el-table-column
-          prop="entity"
-          label="实体 Entity"
-          min-width="130"
-          show-overflow-tooltip
-        />
-        <el-table-column label="类型 Type" width="110">
+        <el-table-column prop="entity" min-width="130" show-overflow-tooltip
+          ><template #header><BiText zh="实体" en="Entity" /></template
+        ></el-table-column>
+        <el-table-column width="110"
+          ><template #header><BiText zh="类型" en="Type" /></template>
           <template #default="{ row }">
             <el-tag size="small" effect="plain">{{ row.type }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="内容 Content" min-width="260">
+        <el-table-column min-width="260"
+          ><template #header><BiText zh="内容" en="Content" /></template>
           <template #default="{ row }">{{
             truncate(row.content, 46)
           }}</template>
         </el-table-column>
-        <el-table-column label="重要度 Importance" width="110" align="center">
+        <el-table-column width="110" align="center"
+          ><template #header><BiText zh="重要度" en="Importance" /></template>
           <template #default="{ row }">
             <el-rate
               :model-value="row.importance * 2.5"
@@ -191,7 +190,8 @@ onMounted(load);
             />
           </template>
         </el-table-column>
-        <el-table-column label="创建时间 Created" width="150">
+        <el-table-column width="150"
+          ><template #header><BiText zh="创建时间" en="Created" /></template>
           <template #default="{ row }">{{ fmtTime(row.createdAt) }}</template>
         </el-table-column>
         <el-table-column label="操作" width="90" fixed="right">

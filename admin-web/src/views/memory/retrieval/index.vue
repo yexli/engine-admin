@@ -36,13 +36,11 @@ async function search() {
 
 <template>
   <div class="p-4">
-    <el-alert
-      type="info"
-      :closable="false"
-      show-icon
-      class="mb-3"
-      title="检索调试台（Mock 后端，形状与真实向量检索一致）：验证 Memory 是否正常工作"
-    />
+    <div class="flex justify-end mb-1">
+      <MockTag
+        detail="检索调试台（Mock 后端，形状与真实向量检索一致）：验证 Memory 是否正常工作"
+      />
+    </div>
     <el-card shadow="never" class="mb-3">
       <el-form inline @submit.prevent="search">
         <el-form-item label="查询 Query">
@@ -101,7 +99,8 @@ async function search() {
       </el-alert>
 
       <el-table v-if="results.length" :data="results" stripe>
-        <el-table-column label="记忆内容 Memory" min-width="280">
+        <el-table-column min-width="280"
+          ><template #header><BiText zh="记忆内容" en="Memory" /></template>
           <template #default="{ row }">
             <div class="text-sm">{{ row.content }}</div>
             <div
@@ -111,7 +110,8 @@ async function search() {
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="相关度 Score" width="150">
+        <el-table-column width="150"
+          ><template #header><BiText zh="相关度" en="Score" /></template>
           <template #default="{ row }">
             <div class="flex items-center gap-2">
               <el-progress
@@ -129,8 +129,11 @@ async function search() {
             </div>
           </template>
         </el-table-column>
-        <el-table-column prop="source" label="来源 Source" width="120" />
-        <el-table-column label="元数据 Metadata" min-width="180">
+        <el-table-column prop="source" width="120"
+          ><template #header><BiText zh="来源" en="Source" /></template
+        ></el-table-column>
+        <el-table-column min-width="180"
+          ><template #header><BiText zh="元数据" en="Metadata" /></template>
           <template #default="{ row }">
             <span class="text-xs" :title="JSON.stringify(row.metadata)">
               {{ JSON.stringify(row.metadata) }}

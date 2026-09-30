@@ -154,11 +154,9 @@
               :title="`关系 Relations（${detailRelations.length}）`"
             >
               <el-table :data="detailRelations" size="small">
-                <el-table-column
-                  prop="target"
-                  label="对象 Target"
-                  min-width="100"
-                />
+                <el-table-column prop="target" min-width="100"
+                  ><template #header><BiText zh="对象" en="Target" /></template
+                ></el-table-column>
                 <el-table-column prop="type" label="类型" min-width="90" />
                 <el-table-column prop="value" label="数值" width="80" />
               </el-table>

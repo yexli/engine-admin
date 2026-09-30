@@ -35,3 +35,71 @@
 .html-weakness {
   filter: invert(80%);
 }
+
+/* ============================================================
+   管理后台打磨层（Platform Polish）
+   —— 统一卡片 / 表格 / 滚动条 / 双语排版的视觉细节
+   ============================================================ */
+
+/* ---------- 数字排版：指标与表格一律等宽数字 ---------- */
+.el-table .cell,
+.el-pagination,
+.el-descriptions__content {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- 双语文本：英文小字不折行（窄表头防挤压换行） ---------- */
+.bi-en {
+  white-space: nowrap;
+}
+
+/* ---------- 卡片：统一圆角、悬浮微抬升 ---------- */
+.el-card {
+  border-radius: 8px;
+  transition:
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.el-card.is-never-shadow:hover {
+  box-shadow: var(--el-box-shadow-light);
+}
+
+/* ---------- 表格：表头底色字重、行悬浮过渡 ---------- */
+.el-table {
+  --el-table-header-bg-color: var(--el-fill-color-light);
+  --el-table-header-text-color: var(--el-text-color-primary);
+}
+
+.el-table th.el-table__cell {
+  font-weight: 600;
+}
+
+.el-table .el-table__row {
+  transition: background-color 0.15s ease;
+}
+
+/* ---------- 全局滚动条（Webkit 内核） ---------- */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgb(144 147 153 / 30%);
+  border-radius: 4px;
+
+  &:hover {
+    background: rgb(144 147 153 / 55%);
+  }
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* ---------- 页脚弱化 ---------- */
+.footer {
+  color: var(--el-text-color-secondary);
+  font-size: 12px;
+}

@@ -49,13 +49,11 @@ onMounted(load);
 
 <template>
   <div class="p-4">
-    <el-alert
-      type="info"
-      :closable="false"
-      show-icon
-      class="mb-3"
-      title="平台日志为 Mock（聚合日志查询 API 待建，见 ADMIN-API-GAP.md）"
-    />
+    <div class="flex justify-end mb-1">
+      <MockTag
+        detail="平台日志为 Mock（聚合日志查询 API 待建，见 ADMIN-API-GAP.md）"
+      />
+    </div>
     <el-card shadow="never">
       <div class="flex flex-wrap items-center gap-2 mb-3">
         <el-select
@@ -132,35 +130,34 @@ onMounted(load);
       </el-alert>
 
       <el-table v-loading="loading" :data="list" stripe size="small">
-        <el-table-column label="时间 Time" width="160">
+        <el-table-column width="160"
+          ><template #header><BiText zh="时间" en="Time" /></template>
           <template #default="{ row }">{{ fmtTime(row.time) }}</template>
         </el-table-column>
-        <el-table-column label="级别 Level" width="80" align="center">
+        <el-table-column width="80" align="center"
+          ><template #header><BiText zh="级别" en="Level" /></template>
           <template #default="{ row }">
             <el-tag :type="levelTag(row.level)" size="small">{{
               row.level
             }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="service" label="服务 Service" width="130" />
-        <el-table-column label="世界 World" width="100">
+        <el-table-column prop="service" width="130"
+          ><template #header><BiText zh="服务" en="Service" /></template
+        ></el-table-column>
+        <el-table-column width="100"
+          ><template #header><BiText zh="世界" en="World" /></template>
           <template #default="{ row }">{{ row.worldId ?? "—" }}</template>
         </el-table-column>
-        <el-table-column
-          prop="requestId"
-          label="请求 ID Request ID"
-          min-width="130"
-        >
+        <el-table-column prop="requestId" min-width="130"
+          ><template #header><BiText zh="请求" en="ID Request ID" /></template>
           <template #default="{ row }">
             <span class="font-mono text-xs">{{ row.requestId }}</span>
           </template>
         </el-table-column>
-        <el-table-column
-          prop="message"
-          label="消息 Message"
-          min-width="240"
-          show-overflow-tooltip
-        />
+        <el-table-column prop="message" min-width="240" show-overflow-tooltip
+          ><template #header><BiText zh="消息" en="Message" /></template
+        ></el-table-column>
         <template #empty>
           <el-empty description="暂无日志" :image-size="64" />
         </template>

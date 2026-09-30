@@ -48,13 +48,11 @@ onMounted(load);
 
 <template>
   <div class="p-4">
-    <el-alert
-      type="info"
-      :closable="false"
-      show-icon
-      class="mb-3"
-      title="AI 调用记录为 Mock；列表默认不显示完整 Prompt，点击行进详情查看（真实化见 ADMIN-API-GAP.md）"
-    />
+    <div class="flex justify-end mb-1">
+      <MockTag
+        detail="AI 调用记录为 Mock；列表默认不显示完整 Prompt，点击行进详情查看（真实化见 ADMIN-API-GAP.md）"
+      />
+    </div>
     <el-card shadow="never">
       <div class="flex flex-wrap items-center gap-2 mb-3">
         <el-input
@@ -136,17 +134,24 @@ onMounted(load);
         size="small"
         @row-click="openDetail"
       >
-        <el-table-column label="时间 Time" width="160">
+        <el-table-column width="160"
+          ><template #header><BiText zh="时间" en="Time" /></template>
           <template #default="{ row }">{{ fmtTime(row.time) }}</template>
         </el-table-column>
-        <el-table-column label="模型 Model" min-width="160">
+        <el-table-column min-width="160"
+          ><template #header><BiText zh="模型" en="Model" /></template>
           <template #default="{ row }">
             <span class="font-mono text-xs">{{ row.model }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="provider" label="提供方 Provider" width="100" />
-        <el-table-column prop="worldId" label="世界 World" width="100" />
-        <el-table-column label="延迟 Latency" width="90" align="right">
+        <el-table-column prop="provider" width="100"
+          ><template #header><BiText zh="提供方" en="Provider" /></template
+        ></el-table-column>
+        <el-table-column prop="worldId" width="100"
+          ><template #header><BiText zh="世界" en="World" /></template
+        ></el-table-column>
+        <el-table-column width="90" align="right"
+          ><template #header><BiText zh="延迟" en="Latency" /></template>
           <template #default="{ row }">
             <span
               :class="row.latencyMs > 5000 ? 'text-[--el-color-danger]' : ''"
@@ -160,7 +165,8 @@ onMounted(load);
             >{{ row.promptTokens }} / {{ row.completionTokens }}</template
           >
         </el-table-column>
-        <el-table-column label="状态 Status" width="90" align="center">
+        <el-table-column width="90" align="center"
+          ><template #header><BiText zh="状态" en="Status" /></template>
           <template #default="{ row }">
             <el-tag
               :type="row.status === 'success' ? 'success' : 'danger'"

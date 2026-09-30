@@ -52,13 +52,11 @@ onMounted(load);
 
 <template>
   <div class="p-4">
-    <el-alert
-      type="info"
-      :closable="false"
-      show-icon
-      class="mb-3"
-      title="系统设置为 Mock（设置持久化 API 待建，见 ADMIN-API-GAP.md）；修改需要 system:manage 权限"
-    />
+    <div class="flex justify-end mb-1">
+      <MockTag
+        detail="系统设置为 Mock（设置持久化 API 待建，见 ADMIN-API-GAP.md）；修改需要 system:manage 权限"
+      />
+    </div>
     <div v-loading="loading">
       <el-alert
         v-if="error"

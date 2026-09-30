@@ -65,13 +65,11 @@ onMounted(load);
 
 <template>
   <div class="p-4">
-    <el-alert
-      type="info"
-      :closable="false"
-      show-icon
-      class="mb-3"
-      title="错误记录为 Mock（错误聚合 API 待建，见 ADMIN-API-GAP.md）；支持确认/解决工作流"
-    />
+    <div class="flex justify-end mb-1">
+      <MockTag
+        detail="错误记录为 Mock（错误聚合 API 待建，见 ADMIN-API-GAP.md）；支持确认/解决工作流"
+      />
+    </div>
     <el-card shadow="never">
       <div class="flex flex-wrap items-center gap-2 mb-3">
         <el-select
@@ -154,13 +152,17 @@ onMounted(load);
           }
         "
       >
-        <el-table-column label="错误 ID Error ID" width="100">
+        <el-table-column width="100"
+          ><template #header><BiText zh="错误" en="ID Error ID" /></template>
           <template #default="{ row }">
             <span class="font-mono text-xs">{{ row.id }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="service" label="服务 Service" width="120" />
-        <el-table-column label="世界 World" width="100">
+        <el-table-column prop="service" width="120"
+          ><template #header><BiText zh="服务" en="Service" /></template
+        ></el-table-column>
+        <el-table-column width="100"
+          ><template #header><BiText zh="世界" en="World" /></template>
           <template #default="{ row }">{{ row.worldId ?? "—" }}</template>
         </el-table-column>
         <el-table-column prop="type" label="类型" min-width="150">
@@ -168,16 +170,15 @@ onMounted(load);
             <span class="font-mono text-xs">{{ row.type }}</span>
           </template>
         </el-table-column>
-        <el-table-column
-          prop="message"
-          label="消息 Message"
-          min-width="240"
-          show-overflow-tooltip
-        />
-        <el-table-column label="时间 Time" width="160">
+        <el-table-column prop="message" min-width="240" show-overflow-tooltip
+          ><template #header><BiText zh="消息" en="Message" /></template
+        ></el-table-column>
+        <el-table-column width="160"
+          ><template #header><BiText zh="时间" en="Time" /></template>
           <template #default="{ row }">{{ fmtTime(row.time) }}</template>
         </el-table-column>
-        <el-table-column label="状态 Status" width="120" align="center">
+        <el-table-column width="120" align="center"
+          ><template #header><BiText zh="状态" en="Status" /></template>
           <template #default="{ row }">
             <el-tag :type="statusTag(row.status)" size="small">{{
               row.status

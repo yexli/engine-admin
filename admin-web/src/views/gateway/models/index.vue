@@ -59,13 +59,11 @@ onMounted(load);
 
 <template>
   <div class="p-4">
-    <el-alert
-      type="info"
-      :closable="false"
-      show-icon
-      class="mb-3"
-      title="Model 清单为 Mock（数据驱动，不把厂商写死在页面结构中；管理面 API 待建，见 ADMIN-API-GAP.md）"
-    />
+    <div class="flex justify-end mb-1">
+      <MockTag
+        detail="Model 清单为 Mock（数据驱动，不把厂商写死在页面结构中；管理面 API 待建，见 ADMIN-API-GAP.md）"
+      />
+    </div>
     <el-card shadow="never">
       <div class="flex flex-wrap items-center gap-2 mb-3">
         <el-input
@@ -115,17 +113,17 @@ onMounted(load);
       </el-alert>
 
       <el-table v-loading="loading" :data="list" stripe>
-        <el-table-column prop="name" label="模型 Model" min-width="180">
+        <el-table-column prop="name" min-width="180"
+          ><template #header><BiText zh="模型" en="Model" /></template>
           <template #default="{ row }">
             <span class="font-mono font-medium">{{ row.name }}</span>
           </template>
         </el-table-column>
-        <el-table-column
-          prop="provider"
-          label="提供方 Provider"
-          min-width="110"
-        />
-        <el-table-column label="能力 Capabilities" min-width="220">
+        <el-table-column prop="provider" min-width="110"
+          ><template #header><BiText zh="提供方" en="Provider" /></template
+        ></el-table-column>
+        <el-table-column min-width="220"
+          ><template #header><BiText zh="能力" en="Capabilities" /></template>
           <template #default="{ row }">
             <el-tag
               v-for="c in row.capabilities"
@@ -138,7 +136,8 @@ onMounted(load);
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="上下文 Context" width="110" align="right">
+        <el-table-column width="110" align="right"
+          ><template #header><BiText zh="上下文" en="Context" /></template>
           <template #default="{ row }"
             >{{ (row.contextWindow / 1000).toFixed(0) }}K</template
           >
@@ -151,7 +150,8 @@ onMounted(load);
             }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="状态 Status" width="100" align="center">
+        <el-table-column width="100" align="center"
+          ><template #header><BiText zh="状态" en="Status" /></template>
           <template #default="{ row }">
             <el-tag
               :type="row.status === 'enabled' ? 'success' : 'danger'"

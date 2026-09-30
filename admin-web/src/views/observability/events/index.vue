@@ -54,13 +54,11 @@ function reset() {
 
 <template>
   <div class="p-4">
-    <el-alert
-      type="info"
-      :closable="false"
-      show-icon
-      class="mb-3"
-      title="平台事件流为 Mock（跨世界聚合事件流 API 待建）；查看单个世界的事实请到 Runtime → Events（真实引擎数据）"
-    />
+    <div class="flex justify-end mb-1">
+      <MockTag
+        detail="平台事件流为 Mock（跨世界聚合事件流 API 待建）；查看单个世界的事实请到 Runtime → Events（真实引擎数据）"
+      />
+    </div>
     <el-card shadow="never">
       <div class="flex flex-wrap items-center gap-2 mb-3">
         <el-input
@@ -130,10 +128,12 @@ function reset() {
       </el-alert>
 
       <el-table v-loading="loading" :data="list" stripe size="small">
-        <el-table-column label="时间 Time" width="160">
+        <el-table-column width="160"
+          ><template #header><BiText zh="时间" en="Time" /></template>
           <template #default="{ row }">{{ fmtTime(row.time) }}</template>
         </el-table-column>
-        <el-table-column prop="id" label="事件 ID Event ID" width="100">
+        <el-table-column prop="id" width="100"
+          ><template #header><BiText zh="事件" en="ID Event ID" /></template>
           <template #default="{ row }">
             <span class="font-mono text-xs">{{ row.id }}</span>
           </template>
@@ -143,11 +143,15 @@ function reset() {
             <span class="font-mono text-xs">{{ row.type }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="worldId" label="世界 World" width="100" />
-        <el-table-column label="行为者 Actor" min-width="110">
+        <el-table-column prop="worldId" width="100"
+          ><template #header><BiText zh="世界" en="World" /></template
+        ></el-table-column>
+        <el-table-column min-width="110"
+          ><template #header><BiText zh="行为者" en="Actor" /></template>
           <template #default="{ row }">{{ row.actor ?? "—" }}</template>
         </el-table-column>
-        <el-table-column label="对象 Target" min-width="110">
+        <el-table-column min-width="110"
+          ><template #header><BiText zh="对象" en="Target" /></template>
           <template #default="{ row }">{{ row.target ?? "—" }}</template>
         </el-table-column>
         <el-table-column label="分级" width="70" align="center">
@@ -157,7 +161,8 @@ function reset() {
             >
           </template>
         </el-table-column>
-        <el-table-column label="状态 Status" width="110" align="center">
+        <el-table-column width="110" align="center"
+          ><template #header><BiText zh="状态" en="Status" /></template>
           <template #default="{ row }">
             <el-tag
               :type="row.status === 'delivered' ? 'success' : 'danger'"

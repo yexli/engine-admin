@@ -50,13 +50,11 @@ onMounted(load);
 
 <template>
   <div class="p-4">
-    <el-alert
-      type="info"
-      :closable="false"
-      show-icon
-      class="mb-3"
-      title="第一版 Rules 仅支持查看与启停，不提供 TypeScript 在线编辑（Mock 数据，见 ADMIN-API-GAP.md）"
-    />
+    <div class="flex justify-end mb-1">
+      <MockTag
+        detail="第一版 Rules 仅支持查看与启停，不提供 TypeScript 在线编辑（Mock 数据，见 ADMIN-API-GAP.md）"
+      />
+    </div>
     <el-card shadow="never">
       <div class="flex flex-wrap items-center gap-2 mb-3">
         <el-input
@@ -104,28 +102,26 @@ onMounted(load);
       </el-alert>
 
       <el-table v-loading="loading" :data="list" stripe>
-        <el-table-column prop="name" label="规则 Rule Name" min-width="140">
+        <el-table-column prop="name" min-width="140"
+          ><template #header><BiText zh="规则" en="Rule Name" /></template>
           <template #default="{ row }">
             <span class="font-mono">{{ row.name }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="command" label="命令 Command" min-width="130">
+        <el-table-column prop="command" min-width="130"
+          ><template #header><BiText zh="命令" en="Command" /></template>
           <template #default="{ row }">
             <el-tag size="small" effect="plain">{{ row.command }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column
-          prop="extension"
-          label="扩展 Extension"
-          min-width="120"
-        />
-        <el-table-column
-          prop="priority"
-          label="优先级 Priority"
-          width="90"
-          align="center"
-        />
-        <el-table-column label="状态 Status" width="100" align="center">
+        <el-table-column prop="extension" min-width="120"
+          ><template #header><BiText zh="扩展" en="Extension" /></template
+        ></el-table-column>
+        <el-table-column prop="priority" width="90" align="center"
+          ><template #header><BiText zh="优先级" en="Priority" /></template
+        ></el-table-column>
+        <el-table-column width="100" align="center"
+          ><template #header><BiText zh="状态" en="Status" /></template>
           <template #default="{ row }">
             <el-tag
               :type="row.status === 'enabled' ? 'success' : 'danger'"

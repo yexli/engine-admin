@@ -82,13 +82,11 @@ onMounted(load);
 
 <template>
   <div class="p-4">
-    <el-alert
-      type="info"
-      :closable="false"
-      show-icon
-      class="mb-3"
-      title="Provider 清单为 Mock；「联通性测试」直连真实 Gateway（127.0.0.1:8788，在线时可用）。管理面 API 待建（ADMIN-API-GAP.md）"
-    />
+    <div class="flex justify-end mb-1">
+      <MockTag
+        detail="Provider 清单为 Mock；「联通性测试」直连真实 Gateway（127.0.0.1:8788，在线时可用）。管理面 API 待建（ADMIN-API-GAP.md）"
+      />
+    </div>
     <el-card shadow="never">
       <div class="flex flex-wrap items-center gap-2 mb-3">
         <el-select
@@ -127,23 +125,23 @@ onMounted(load);
       </el-alert>
 
       <el-table v-loading="loading" :data="list" stripe>
-        <el-table-column prop="name" label="提供方 Provider" min-width="130">
+        <el-table-column prop="name" min-width="130"
+          ><template #header><BiText zh="提供方" en="Provider" /></template>
           <template #default="{ row }">
             <span class="font-medium">{{ row.name }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="type" label="类型 Type" min-width="130">
+        <el-table-column prop="type" min-width="130"
+          ><template #header><BiText zh="类型" en="Type" /></template>
           <template #default="{ row }">
             <el-tag size="small" effect="plain">{{ row.type }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column
-          prop="endpoint"
-          label="端点 Endpoint"
-          min-width="220"
-          show-overflow-tooltip
-        />
-        <el-table-column label="状态 Status" width="100" align="center">
+        <el-table-column prop="endpoint" min-width="220" show-overflow-tooltip
+          ><template #header><BiText zh="端点" en="Endpoint" /></template
+        ></el-table-column>
+        <el-table-column width="100" align="center"
+          ><template #header><BiText zh="状态" en="Status" /></template>
           <template #default="{ row }">
             <el-tag
               :type="
@@ -159,7 +157,8 @@ onMounted(load);
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="模型 Models" min-width="180">
+        <el-table-column min-width="180"
+          ><template #header><BiText zh="模型" en="Models" /></template>
           <template #default="{ row }">
             <el-tag
               v-for="m in row.models.slice(0, 2)"
@@ -178,7 +177,8 @@ onMounted(load);
             </span>
           </template>
         </el-table-column>
-        <el-table-column label="最近检查 Last Check" min-width="130">
+        <el-table-column min-width="130"
+          ><template #header><BiText zh="最近检查" en="Last Check" /></template>
           <template #default="{ row }">
             {{ timeAgo(row.lastCheckAt) }}
             <span

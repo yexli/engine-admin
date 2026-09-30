@@ -37,13 +37,11 @@ onMounted(load);
 
 <template>
   <div class="p-4">
-    <el-alert
-      type="info"
-      :closable="false"
-      show-icon
-      class="mb-3"
-      title="扩展命令目录为 Mock；带「引擎可执行」标记的命令与引擎内置规则一致，可在命令调试台真实执行"
-    />
+    <div class="flex justify-end mb-1">
+      <MockTag
+        detail="扩展命令目录为 Mock；带「引擎可执行」标记的命令与引擎内置规则一致，可在命令调试台真实执行"
+      />
+    </div>
     <el-card shadow="never">
       <div class="flex flex-wrap items-center gap-2 mb-3">
         <el-input
@@ -94,18 +92,17 @@ onMounted(load);
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column
-          prop="extension"
-          label="扩展 Extension"
-          min-width="120"
-        />
+        <el-table-column prop="extension" min-width="120"
+          ><template #header><BiText zh="扩展" en="Extension" /></template
+        ></el-table-column>
         <el-table-column
           prop="description"
           label="说明"
           min-width="280"
           show-overflow-tooltip
         />
-        <el-table-column label="状态 Status" width="100" align="center">
+        <el-table-column width="100" align="center"
+          ><template #header><BiText zh="状态" en="Status" /></template>
           <template #default="{ row }">
             <el-tag
               :type="row.status === 'enabled' ? 'success' : 'danger'"

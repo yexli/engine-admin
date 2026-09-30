@@ -139,7 +139,9 @@ function serviceTag(s: string) {
           </template>
         </el-table-column>
         <el-table-column prop="version" label="版本" width="100" />
-        <el-table-column prop="uptime" label="运行时长 Uptime" width="110" />
+        <el-table-column prop="uptime" width="110"
+          ><template #header><BiText zh="运行时长" en="Uptime" /></template
+        ></el-table-column>
         <el-table-column prop="detail" label="详情" min-width="240" />
         <template #empty>
           <el-empty description="暂无服务数据" :image-size="60" />

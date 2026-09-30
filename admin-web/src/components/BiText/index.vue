@@ -2,7 +2,7 @@
 <template>
   <span class="inline-flex items-baseline gap-1.5 leading-tight">
     <span>{{ zh }}</span>
-    <span v-if="en" class="font-mono text-[11px] font-normal opacity-60">
+    <span v-if="en" class="bi-en font-mono text-[11px] font-normal opacity-60">
       {{ en }}
     </span>
   </span>

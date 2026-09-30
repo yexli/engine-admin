@@ -53,13 +53,11 @@ onMounted(load);
 
 <template>
   <div class="p-4">
-    <el-alert
-      type="info"
-      :closable="false"
-      show-icon
-      class="mb-3"
-      title="第一版 Pipeline 只做查看 / 启停 / 测试，不做 DAG 在线编辑器（Mock 数据，见 ADMIN-API-GAP.md）"
-    />
+    <div class="flex justify-end mb-1">
+      <MockTag
+        detail="第一版 Pipeline 只做查看 / 启停 / 测试，不做 DAG 在线编辑器（Mock 数据，见 ADMIN-API-GAP.md）"
+      />
+    </div>
     <el-row :gutter="12">
       <el-col v-for="row in list" :key="row.id" :md="8" :xs="24" class="mb-3">
         <el-card shadow="never" class="h-full">

@@ -18,13 +18,11 @@ onMounted(load);
 
 <template>
   <div class="p-4">
-    <el-alert
-      type="info"
-      :closable="false"
-      show-icon
-      class="mb-3"
-      title="Embedding 模型与统计为 Mock（Embedding 调用统计 API 待建，见 ADMIN-API-GAP.md）"
-    />
+    <div class="flex justify-end mb-1">
+      <MockTag
+        detail="Embedding 模型与统计为 Mock（Embedding 调用统计 API 待建，见 ADMIN-API-GAP.md）"
+      />
+    </div>
     <div v-loading="loading">
       <el-alert
         v-if="error"
@@ -78,23 +76,20 @@ onMounted(load);
 
       <el-card v-if="info" shadow="never" header="Embedding Models">
         <el-table :data="info.models" stripe>
-          <el-table-column prop="name" label="模型 Model" min-width="200">
+          <el-table-column prop="name" min-width="200"
+            ><template #header><BiText zh="模型" en="Model" /></template>
             <template #default="{ row }">
               <span class="font-mono">{{ row.name }}</span>
             </template>
           </el-table-column>
-          <el-table-column
-            prop="provider"
-            label="提供方 Provider"
-            min-width="120"
-          />
-          <el-table-column
-            prop="dimension"
-            label="维度 Dimension"
-            width="110"
-            align="center"
-          />
-          <el-table-column label="状态 Status" width="100" align="center">
+          <el-table-column prop="provider" min-width="120"
+            ><template #header><BiText zh="提供方" en="Provider" /></template
+          ></el-table-column>
+          <el-table-column prop="dimension" width="110" align="center"
+            ><template #header><BiText zh="维度" en="Dimension" /></template
+          ></el-table-column>
+          <el-table-column width="100" align="center"
+            ><template #header><BiText zh="状态" en="Status" /></template>
             <template #default="{ row }">
               <el-tag
                 :type="row.status === 'enabled' ? 'success' : 'info'"

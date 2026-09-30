@@ -50,6 +50,10 @@ app.component("Perms", Perms);
 import BiText from "@/components/BiText/index.vue";
 app.component("BiText", BiText);
 
+// 全局注册 Mock 数据徽标（诚实标注数据口径）
+import MockTag from "@/components/MockTag/index.vue";
+app.component("MockTag", MockTag);
+
 // 全局注册vue-tippy
 import "tippy.js/dist/tippy.css";
 import "tippy.js/themes/light.css";

@@ -135,13 +135,11 @@ onMounted(load);
 
 <template>
   <div class="p-4">
-    <el-alert
-      type="info"
-      :closable="false"
-      show-icon
-      class="mb-3"
-      title="用户服务为 Mock（登录账号 admin/admin123、operator/operator123、viewer/viewer123）；真实用户体系待建（ADMIN-API-GAP.md）"
-    />
+    <div class="flex justify-end mb-1">
+      <MockTag
+        detail="用户服务为 Mock（登录账号 admin/admin123、operator/operator123、viewer/viewer123）；真实用户体系待建（ADMIN-API-GAP.md）"
+      />
+    </div>
     <el-card shadow="never">
       <div class="flex flex-wrap items-center gap-2 mb-3">
         <el-input

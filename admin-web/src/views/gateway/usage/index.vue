@@ -36,13 +36,11 @@ onMounted(load);
 
 <template>
   <div class="p-4">
-    <el-alert
-      type="info"
-      :closable="false"
-      show-icon
-      class="mb-3"
-      title="Usage 数据为 Mock（管理面聚合 API 待建，见 ADMIN-API-GAP.md）；支持时间 / World / Model / Provider 筛选"
-    />
+    <div class="flex justify-end mb-1">
+      <MockTag
+        detail="Usage 数据为 Mock（管理面聚合 API 待建，见 ADMIN-API-GAP.md）；支持时间 / World / Model / Provider 筛选"
+      />
+    </div>
 
     <!-- 汇总卡 -->
     <el-row v-if="data?.summary" :gutter="12" class="mb-3">
@@ -162,61 +160,53 @@ onMounted(load);
         stripe
         size="small"
       >
-        <el-table-column label="时间 Time" min-width="150">
+        <el-table-column min-width="150"
+          ><template #header><BiText zh="时间" en="Time" /></template>
           <template #default="{ row }">{{
             fmtTime((row as UsageRow).time)
           }}</template>
         </el-table-column>
-        <el-table-column prop="model" label="模型 Model" min-width="150">
+        <el-table-column prop="model" min-width="150"
+          ><template #header><BiText zh="模型" en="Model" /></template>
           <template #default="{ row }">
             <span class="font-mono text-xs">{{ (row as UsageRow).model }}</span>
           </template>
         </el-table-column>
-        <el-table-column
-          prop="provider"
-          label="提供方 Provider"
-          min-width="100"
-        />
-        <el-table-column prop="worldId" label="世界 World" min-width="90" />
-        <el-table-column
-          prop="capability"
-          label="能力 Capability"
-          min-width="100"
-        >
+        <el-table-column prop="provider" min-width="100"
+          ><template #header><BiText zh="提供方" en="Provider" /></template
+        ></el-table-column>
+        <el-table-column prop="worldId" min-width="90"
+          ><template #header><BiText zh="世界" en="World" /></template
+        ></el-table-column>
+        <el-table-column prop="capability" min-width="100"
+          ><template #header><BiText zh="能力" en="Capability" /></template>
           <template #default="{ row }">
             <el-tag size="small" type="info" effect="plain">{{
               (row as UsageRow).capability
             }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column
-          prop="promptTokens"
-          label="输入 Tokens Prompt"
-          width="100"
-          align="right"
-        />
-        <el-table-column
-          prop="completionTokens"
-          label="输出 Tokens Completion"
-          width="130"
-          align="right"
-        />
-        <el-table-column label="成本 Cost" width="90" align="right">
+        <el-table-column prop="promptTokens" width="100" align="right"
+          ><template #header><BiText zh="输入" en="Tokens Prompt" /></template
+        ></el-table-column>
+        <el-table-column prop="completionTokens" width="130" align="right"
+          ><template #header
+            ><BiText zh="输出" en="Tokens Completion" /></template
+        ></el-table-column>
+        <el-table-column width="90" align="right"
+          ><template #header><BiText zh="成本" en="Cost" /></template>
           <template #default="{ row }"
             >${{ (row as UsageRow).cost.toFixed(4) }}</template
           >
         </el-table-column>
-        <el-table-column
-          prop="latencyMs"
-          label="延迟 Latency"
-          width="90"
-          align="right"
-        >
+        <el-table-column prop="latencyMs" width="90" align="right"
+          ><template #header><BiText zh="延迟" en="Latency" /></template>
           <template #default="{ row }"
             >{{ (row as UsageRow).latencyMs }}ms</template
           >
         </el-table-column>
-        <el-table-column label="状态 Status" width="90" align="center">
+        <el-table-column width="90" align="center"
+          ><template #header><BiText zh="状态" en="Status" /></template>
           <template #default="{ row }">
             <el-tag
               :type="

@@ -145,13 +145,11 @@ onMounted(load);
 
 <template>
   <div class="p-4">
-    <el-alert
-      type="info"
-      :closable="false"
-      show-icon
-      class="mb-3"
-      title="Model Router 数据为 Mock：Capability → Primary / Fallback；管理面 API 待建（ADMIN-API-GAP.md）"
-    />
+    <div class="flex justify-end mb-1">
+      <MockTag
+        detail="Model Router 数据为 Mock：Capability → Primary / Fallback；管理面 API 待建（ADMIN-API-GAP.md）"
+      />
+    </div>
     <el-card shadow="never">
       <div class="flex flex-wrap items-center gap-2 mb-3">
         <el-button :loading="loading" @click="load">
@@ -181,39 +179,36 @@ onMounted(load);
       </el-alert>
 
       <el-table v-loading="loading" :data="list" stripe>
-        <el-table-column
-          prop="capability"
-          label="能力 Capability"
-          min-width="110"
-        >
+        <el-table-column prop="capability" min-width="110"
+          ><template #header><BiText zh="能力" en="Capability" /></template>
           <template #default="{ row }">
             <el-tag size="small">{{ row.capability }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="主模型 Primary" min-width="150">
+        <el-table-column min-width="150"
+          ><template #header><BiText zh="主模型" en="Primary" /></template>
           <template #default="{ row }">
             <span class="font-mono text-sm">{{
               row.primary ?? "（未设置）"
             }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="备模型 Fallback" min-width="150">
+        <el-table-column min-width="150"
+          ><template #header><BiText zh="备模型" en="Fallback" /></template>
           <template #default="{ row }">
             <span class="font-mono text-sm text-[--el-text-color-secondary]">
               {{ row.fallback ?? "—" }}
             </span>
           </template>
         </el-table-column>
-        <el-table-column
-          prop="priority"
-          label="优先级 Priority"
-          width="90"
-          align="center"
-        />
+        <el-table-column prop="priority" width="90" align="center"
+          ><template #header><BiText zh="优先级" en="Priority" /></template
+        ></el-table-column>
         <el-table-column label="Budget/日" width="100" align="right">
           <template #default="{ row }">${{ row.budgetPerDay }}</template>
         </el-table-column>
-        <el-table-column label="状态 Status" width="90" align="center">
+        <el-table-column width="90" align="center"
+          ><template #header><BiText zh="状态" en="Status" /></template>
           <template #default="{ row }">
             <el-tag
               :type="row.status === 'enabled' ? 'success' : 'danger'"

@@ -52,13 +52,11 @@ onMounted(load);
 
 <template>
   <div class="p-4">
-    <el-alert
-      type="info"
-      :closable="false"
-      show-icon
-      class="mb-3"
-      title="当前扩展数据为 Mock（引擎规则经代码注册，运行时清单 API 待建，见 docs/ADMIN-API-GAP.md）"
-    />
+    <div class="flex justify-end mb-1">
+      <MockTag
+        detail="当前扩展数据为 Mock（引擎规则经代码注册，运行时清单 API 待建，见 docs/ADMIN-API-GAP.md）"
+      />
+    </div>
     <el-card shadow="never">
       <div class="flex flex-wrap items-center gap-2 mb-3">
         <el-input
@@ -99,7 +97,8 @@ onMounted(load);
       </el-alert>
 
       <el-table v-loading="loading" :data="list" stripe>
-        <el-table-column prop="name" label="名称 Name" min-width="140">
+        <el-table-column prop="name" min-width="140"
+          ><template #header><BiText zh="名称" en="Name" /></template>
           <template #default="{ row }">
             <span class="font-mono">{{ row.name }}</span>
             <el-tag size="small" class="ml-2" effect="plain"
@@ -109,11 +108,12 @@ onMounted(load);
         </el-table-column>
         <el-table-column
           prop="description"
-          label="描述 Description"
           min-width="240"
           show-overflow-tooltip
-        />
-        <el-table-column label="能力 Capabilities" min-width="240">
+          ><template #header><BiText zh="描述" en="Description" /></template
+        ></el-table-column>
+        <el-table-column min-width="240"
+          ><template #header><BiText zh="能力" en="Capabilities" /></template>
           <template #default="{ row }">
             <el-tag
               v-for="c in row.capabilities.slice(0, 3)"
@@ -132,7 +132,8 @@ onMounted(load);
             </span>
           </template>
         </el-table-column>
-        <el-table-column label="状态 Status" width="100" align="center">
+        <el-table-column width="100" align="center"
+          ><template #header><BiText zh="状态" en="Status" /></template>
           <template #default="{ row }">
             <el-tag
               :type="row.status === 'enabled' ? 'success' : 'danger'"

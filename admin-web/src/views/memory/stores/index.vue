@@ -18,13 +18,11 @@ onMounted(load);
 
 <template>
   <div class="p-4">
-    <el-alert
-      type="info"
-      :closable="false"
-      show-icon
-      class="mb-3"
-      title="Memory Store 清单为 Mock（memory/ 为纯库，HTTP API 待建，见 ADMIN-API-GAP.md）"
-    />
+    <div class="flex justify-end mb-1">
+      <MockTag
+        detail="Memory Store 清单为 Mock（memory/ 为纯库，HTTP API 待建，见 ADMIN-API-GAP.md）"
+      />
+    </div>
     <el-row :gutter="12">
       <el-col v-for="s in list" :key="s.id" :md="8" :xs="24" class="mb-3">
         <el-card shadow="never">
