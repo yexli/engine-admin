@@ -1,0 +1,34 @@
+{
+  "name": "world-engine",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "World Driving Engine —— 与具体应用无关的世界模拟内核。可独立运行、独立测试，经 Adapter 被多个游戏与 AI 应用复用。",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./http": {
+      "types": "./dist/http/index.d.ts",
+      "default": "./dist/http/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "example": "vitest run examples"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.3",
+    "typescript": "^6.0.3",
+    "vitest": "^5.0.1"
+  }
+}

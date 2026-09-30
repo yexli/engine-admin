@@ -1,0 +1,29 @@
+{
+  "name": "world-gateway",
+  "version": "0.7.0",
+  "type": "module",
+  "description": "AI World Gateway —— OpenAI 兼容 API 网关（方案 §65 AI Cloud Layer）。不自产智能：把标准 OpenAI 客户端请求翻译成游戏注册的 AI 能力提供方调用。零运行时依赖。",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.3",
+    "typescript": "^6.0.3",
+    "vitest": "^5.0.1"
+  }
+}

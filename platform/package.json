@@ -1,0 +1,24 @@
+{
+  "name": "world-platform",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "World Platform API（Phase 1 · 平台 API 标准化）——统一公共入口：鉴权（API Key）、Public/Admin/Internal 分层、world-agent 虚拟模型管线（任务分析 → 能力路由 → 世界上下文 → 网关模型调用 → 结果整合）。零运行时依赖。",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.3",
+    "typescript": "^6.0.3",
+    "vitest": "^5.0.1"
+  }
+}
