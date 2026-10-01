@@ -14,6 +14,7 @@ export { createGatewayClient } from './upstream/gateway.ts';
 export type { ChatMessage } from './upstream/gateway.ts';
 export { buildWorldContext } from './worldagent/context.ts';
 export { runWorldAgent, worldAgentResponse, extractWorldId } from './worldagent/pipeline.ts';
+export * from './evolution/index.ts';
 export { WORLD_AGENT_MODEL } from './http/protocol.ts';
 export { createWorldPlatform } from './http/protocol.ts';
 export { startPlatformServer } from './http/server.ts';

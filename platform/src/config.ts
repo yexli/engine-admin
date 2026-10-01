@@ -50,6 +50,10 @@ export interface PlatformConfig {
   sessionsFile: string;
   /** 系统设置持久化（M3.4） */
   settingsFile: string;
+  /** 演化运行账本目录（JSONL，每世界一文件；Phase C） */
+  evolutionDir: string;
+  /** 演化提案走的能力通道（缺省 reasoning） */
+  evolutionCapability: string;
   /** 记忆库服务地址（M5 后特性：嵌入配置鉴权代理的目标） */
   memoryBaseUrl: string;
 }
@@ -85,6 +89,8 @@ export function resolvePlatformConfig(
     usersFile: resolveFrom(env['PLATFORM_USERS_FILE'] ?? resolve(dataDir, 'users.json'), cwd),
     sessionsFile: resolveFrom(env['PLATFORM_SESSIONS_FILE'] ?? resolve(dataDir, 'sessions.json'), cwd),
     settingsFile: resolveFrom(env['PLATFORM_SETTINGS_FILE'] ?? resolve(dataDir, 'settings.json'), cwd),
+    evolutionDir: resolveFrom(env['PLATFORM_EVOLUTION_DIR'] ?? resolve(dataDir, 'evolution'), cwd),
+    evolutionCapability: env['PLATFORM_EVOLUTION_CAPABILITY'] ?? 'reasoning',
     memoryBaseUrl: env['PLATFORM_MEMORY_URL'] ?? 'http://127.0.0.1:8789',
   };
 }

@@ -258,6 +258,8 @@ export interface ManagedRuntime {
   readonly platformUrl: string;
   /** 引擎客户端（M4.1 可观测聚合用：/v1/worlds、/events 只读） */
   readonly engine: EngineClient;
+  /** 能力路由器（演化运行时等扩展按能力选模型用；只读代理，replaceRoutes 仍归本运行时） */
+  readonly router: ModelRouter;
   /** 当前活动配置快照 */
   readonly config: ModelConfig;
   /** 提交新配置并原子替换双侧快照；冲突/校验失败抛错且不换快照 */
@@ -363,6 +365,9 @@ export async function startManagedRuntime(opts: ManagedRuntimeOptions): Promise<
     },
     get engine() {
       return opts.engine;
+    },
+    get router() {
+      return router;
     },
     get config() {
       return opts.configStore.current();

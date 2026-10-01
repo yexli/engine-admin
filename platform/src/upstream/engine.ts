@@ -78,6 +78,18 @@ export function createEngineClient(opts: EngineClientOptions): EngineClient {
       const events = (res.body as { events?: unknown[] } | null)?.events ?? [];
       return { ok: true, events };
     },
+
+    async executeCommand(worldId, cmd) {
+      const res = await request('POST', `/v1/worlds/${encodeURIComponent(worldId)}/commands`, cmd);
+      if (res.status !== 200) {
+        return { ok: false, status: res.status, error: describe(res.body, '命令提交失败') };
+      }
+      const body = res.body as { ok?: boolean; events?: string[]; reason?: string } | null;
+      return {
+        ok: true,
+        result: { ok: body?.ok === true, events: Array.isArray(body?.events) ? body.events : [], ...(body?.reason !== undefined ? { reason: body.reason } : {}) },
+      };
+    },
   };
 }
 

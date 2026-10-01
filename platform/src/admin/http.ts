@@ -29,6 +29,11 @@
      GET  /v1/obs/events                      跨世界事件流（引擎只读聚合，M4.1）
      GET  /v1/obs/errors                      失败请求登记（数据面投影，只读，M4.1）
      GET  /v1/obs/overview                    Dashboard 聚合（M4.1）
+     GET  /v1/evolution/worlds                演化账本世界清单（Phase C）
+     POST /v1/evolution/worlds/:id/tick      触发一次演化闭环 [gateway:manage]
+     GET  /v1/evolution/worlds/:id/runs      演化运行留痕（新 → 旧）
+     GET  /v1/evolution/worlds/:id/runs/:rid 单次运行完整因果链
+     POST /v1/evolution/worlds/:id/intent    意图处置（OOC 隔离闸）[gateway:manage]
      GET  /healthz                            零信息探活
 
    安全姿态（M3 起双凭证）：
@@ -71,6 +76,7 @@ import type { ApiKeyRecord, PlatformPermission } from '../types.ts';
 import { PLATFORM_PERMISSIONS } from '../types.ts';
 import type { UsageReader } from '../usage/recorder.ts';
 import { queryUsage, PAGE_SIZE_CAP } from '../usage/query.ts';
+import type { EvolutionRuntime } from '../evolution/runtime.ts';
 
 const MAX_BODY_BYTES = 1024 * 1024;
 
@@ -96,6 +102,8 @@ export interface AdminServerOptions {
   users?: UserStore;
   /** 系统设置（M3.4；缺省未装配 → settings 路由 404 not_configured） */
   settings?: SettingsStore;
+  /** AI World Evolution Runtime（Phase C；缺省未装配 → evolution 路由 404 not_configured） */
+  evolution?: EvolutionRuntime;
   /** 记忆库服务地址（M5 后特性：嵌入配置鉴权代理目标；缺省 8789） */
   memoryBaseUrl?: string;
 }
@@ -896,6 +904,107 @@ export function startAdminServer(opts: AdminServerOptions): Promise<AdminServer>
           recentErrors: errors,
         },
       };
+    }
+
+    /* ---------- AI World Evolution Runtime（Phase C：演化控制台数据面） ----------
+       GET  /v1/evolution/worlds                 有演化账本的世界清单
+       POST /v1/evolution/worlds/:id/tick        触发一次演化闭环 [gateway:manage]
+       GET  /v1/evolution/worlds/:id/runs        运行留痕清单（新 → 旧）
+       GET  /v1/evolution/worlds/:id/runs/:rid   单次运行完整因果链
+       POST /v1/evolution/worlds/:id/intent      意图处置（OOC 隔离闸）[gateway:manage]
+       未装配 evolution 运行时 → 404 not_configured（与 keys/usage 同姿态）。 */
+    if (path === '/v1/evolution/worlds' && method === 'GET') {
+      if (!opts.evolution) httpErr(404, 'not_configured', '本管理面未装配演化运行时');
+      const worldsRes = await opts.runtime.engine.proxy('GET', '/v1/worlds');
+      const list = (worldsRes.body as { worlds?: { worldId?: string }[] })?.worlds ?? [];
+      const engineIds = new Set(list.map((w) => w.worldId).filter((v): v is string => typeof v === 'string'));
+      const evo = opts.evolution;
+      const ids = [...new Set([...evo.knownWorlds(), ...engineIds])];
+      return {
+        status: 200,
+        body: {
+          worlds: ids.map((id) => {
+            const latest = evo.runs(id, 1)[0] ?? null;
+            return {
+              worldId: id,
+              inEngine: engineIds.has(id),
+              hasRuns: latest !== null,
+              latestRunStatus: latest?.status ?? null,
+            };
+          }),
+        },
+      };
+    }
+
+    const evoWorldMatch = path.match(/^\/v1\/evolution\/worlds\/([^/]+)$/);
+    const evoRunsMatch = path.match(/^\/v1\/evolution\/worlds\/([^/]+)\/runs$/);
+    const evoRunMatch = path.match(/^\/v1\/evolution\/worlds\/([^/]+)\/runs\/([^/]+)$/);
+    const evoTickMatch = path.match(/^\/v1\/evolution\/worlds\/([^/]+)\/tick$/);
+    const evoIntentMatch = path.match(/^\/v1\/evolution\/worlds\/([^/]+)\/intent$/);
+
+    if (evoWorldMatch || evoRunsMatch || evoRunMatch || evoTickMatch || evoIntentMatch) {
+      if (!opts.evolution) httpErr(404, 'not_configured', '本管理面未装配演化运行时');
+      const evo = opts.evolution;
+      const worldId = decodeURIComponent((evoWorldMatch ?? evoRunsMatch ?? evoRunMatch ?? evoTickMatch ?? evoIntentMatch)![1]!);
+
+      if (evoTickMatch && method === 'POST') {
+        requirePerm('gateway:manage');
+        const trigger = parseJson(raw ?? Buffer.from('{}')) as { trigger?: unknown };
+        const t = trigger?.trigger === 'api' || trigger?.trigger === 'auto' ? trigger.trigger : 'admin';
+        const run = await evo.tick(worldId, t);
+        return { status: 200, body: run };
+      }
+      if (evoIntentMatch && method === 'POST') {
+        requirePerm('gateway:manage');
+        const body = parseJson(raw) as { kind?: unknown; text?: unknown; actorId?: unknown; command?: unknown };
+        if (body?.kind !== 'ic_action' && body?.kind !== 'ooc' && body?.kind !== 'narrative') {
+          httpErr(400, 'malformed', "kind 必须是 'ic_action' | 'ooc' | 'narrative'");
+        }
+        if (typeof body.text !== 'string' || body.text.length === 0 || body.text.length > 2000) {
+          httpErr(400, 'malformed', 'text 必须是 1-2000 字符的字符串');
+        }
+        if (body.command !== undefined && (typeof body.command !== 'object' || body.command === null || Array.isArray(body.command))) {
+          httpErr(400, 'malformed', 'command 必须是对象或缺省');
+        }
+        const cmd = body.command as Record<string, unknown> | undefined;
+        if (cmd !== undefined && typeof cmd['type'] !== 'string') {
+          httpErr(400, 'malformed', 'command.type 必须是字符串');
+        }
+        const outcome = await evo.dispatchIntent(worldId, {
+          kind: body.kind,
+          text: body.text,
+          ...(typeof body.actorId === 'string' ? { actorId: body.actorId } : {}),
+          ...(cmd !== undefined
+            ? {
+                command: {
+                  type: cmd['type'] as string,
+                  ...(cmd['targetId'] !== undefined ? { targetId: String(cmd['targetId']) } : {}),
+                  ...(typeof cmd['amount'] === 'number' ? { amount: cmd['amount'] as number } : {}),
+                  ...(cmd['text'] !== undefined ? { text: String(cmd['text']) } : {}),
+                  ...(cmd['payload'] !== undefined && typeof cmd['payload'] === 'object' && !Array.isArray(cmd['payload'])
+                    ? { payload: cmd['payload'] as Record<string, unknown> }
+                    : {}),
+                },
+              }
+            : {}),
+        });
+        return { status: 200, body: outcome };
+      }
+      if (evoRunsMatch && method === 'GET') {
+        const sp = url.searchParams;
+        const nRaw = Number(sp.get('n') ?? 20);
+        const n = Number.isFinite(nRaw) ? Math.max(1, Math.min(200, Math.floor(nRaw))) : 20;
+        return { status: 200, body: { worldId, runs: evo.runs(worldId, n) } };
+      }
+      if (evoRunMatch && method === 'GET') {
+        const run = evo.run(worldId, decodeURIComponent(evoRunMatch[2]!));
+        if (!run) httpErr(404, 'run_not_found', `演化运行 '${evoRunMatch[2]}' 不在世界 '${worldId}' 的账本中`);
+        return { status: 200, body: run };
+      }
+      if (evoWorldMatch && method === 'GET') {
+        const runs = evo.runs(worldId, 50);
+        return { status: 200, body: { worldId, runs } };
+      }
     }
 
     /* ---------- 嵌入模型配置（记忆库菜单；鉴权代理到 memory 服务） ----------

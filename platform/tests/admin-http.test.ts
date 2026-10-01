@@ -61,6 +61,7 @@ const stubEngine: EngineClient = {
     }
     return { status: 404, body: {} };
   },
+  executeCommand: async () => ({ ok: true, result: { ok: true, events: [] } }),
   getEvents: async (worldId) => ({
     ok: true,
     events: [

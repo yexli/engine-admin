@@ -94,6 +94,7 @@ const stubEngine: EngineClient = {
   proxy: async () => ({ status: 404, body: { error: { message: 'no engine in test' } } }),
   getState: async () => ({ ok: false, status: 404, error: 'no engine in test' }),
   getEvents: async () => ({ ok: false, status: 404, error: 'no engine in test' }),
+  executeCommand: async () => ({ ok: false, status: 404, error: 'no engine in test' }),
 };
 
 async function harness(): Promise<{ runtime: ManagedRuntime; adminKey: string }> {

@@ -131,6 +131,14 @@ export interface EngineClient {
   getState(worldId: string): Promise<{ ok: true; state: unknown } | { ok: false; status: number; error: string }>;
   /** world-agent 内部取最近世界事实 */
   getEvents(worldId: string, n: number): Promise<{ ok: true; events: unknown[] } | { ok: false; status: number; error: string }>;
+  /** 演化运行时提交命令（POST /v1/worlds/{id}/commands；命令链结果原样返回） */
+  executeCommand(
+    worldId: string,
+    cmd: { type: string; actorId?: string; targetId?: string; amount?: number; text?: string; payload?: Record<string, unknown> },
+  ): Promise<
+    | { ok: true; result: { ok: boolean; events: string[]; reason?: string } }
+    | { ok: false; status: number; error: string }
+  >;
 }
 
 export interface GatewayChatOk {

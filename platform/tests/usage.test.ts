@@ -168,6 +168,7 @@ describe('server 层流式计量代记', () => {
       proxy: async () => ({ status: 200, body: {} }),
       getState: async () => ({ ok: false, status: 404, error: 'x' }),
       getEvents: async () => ({ ok: false, status: 404, error: 'x' }),
+      executeCommand: async () => ({ ok: false, status: 404, error: 'x' }),
     };
     const server = await startPlatformServer({
       keys,

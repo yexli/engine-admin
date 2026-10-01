@@ -19,6 +19,7 @@
 import { resolvePlatformConfig } from '../dist/config.js';
 import { KeyStore } from '../dist/keys/keystore.js';
 import { createEngineClient } from '../dist/upstream/engine.js';
+import { createGatewayClient } from '../dist/upstream/gateway.js';
 import { SecretStore } from '../dist/admin/secrets.js';
 import { ModelConfigStore } from '../dist/admin/model-config.js';
 import { startManagedRuntime } from '../dist/admin/managed-runtime.js';
@@ -28,6 +29,7 @@ import { createUsageRecorder } from '../dist/usage/recorder.js';
 import { SessionStore } from '../dist/admin/sessions.js';
 import { UserStore } from '../dist/admin/users.js';
 import { SettingsStore } from '../dist/admin/settings.js';
+import { createEvolutionJournal, createEvolutionRuntime, gatewayDriver } from '../dist/evolution/index.js';
 
 const config = resolvePlatformConfig(process.env, process.cwd());
 
@@ -96,6 +98,28 @@ console.log(`[managed]   config  : ${config.modelConfigFile}（revision ${runtim
 console.log(`[managed]   secrets : ${config.secretsFile}`);
 console.log('[managed]   签发公共 API Key：node scripts/keyctl.mjs create --name <名称>');
 
+/* ---------- AI World Evolution Runtime（Phase B/C） ----------
+   驱动 = 受管网关（世界推演默认走 reasoning 通道；未配模型时 tick
+   诚实地 failed[driver/model_unavailable]，不影响世界）。
+   账本 = platform/data/evolution/{worldId}.jsonl（Phase C 因果链数据面）。 */
+const evolutionJournal = createEvolutionJournal({ dir: config.evolutionDir });
+const evolutionLoaded = evolutionJournal.load();
+if (evolutionLoaded.skippedCorrupt > 0) {
+  console.warn(`[managed] ⚠ 演化账本装载：${evolutionLoaded.loaded} 条成功，${evolutionLoaded.skippedCorrupt} 行损坏被跳过（platform/data/evolution）`);
+}
+const evolution = createEvolutionRuntime(
+  {
+    engine,
+    driver: gatewayDriver({
+      gateway: createGatewayClient({ baseUrl: runtime.gatewayUrl }),
+      router: runtime.router,
+      capability: config.evolutionCapability,
+    }),
+  },
+  evolutionJournal,
+);
+console.log(`[managed]   evolution: ${config.evolutionDir}（账本；提案能力 '${config.evolutionCapability}'）`);
+
 const admin = await startAdminServer({
   runtime,
   adminToken: config.adminToken,
@@ -107,6 +131,7 @@ const admin = await startAdminServer({
   sessions,
   users,
   settings,
+  evolution,
   memoryBaseUrl: config.memoryBaseUrl,
 });
 console.log(`[managed]   admin   : ${admin.url}  （仅回环；Admin Web 必须经服务端反代注入 x-admin-token 访问，令牌绝不下发浏览器）`);
