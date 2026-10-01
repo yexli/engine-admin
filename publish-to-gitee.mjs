@@ -22,7 +22,7 @@ const PUB = path.join(ROOT, '.publish');
 const REMOTE = 'https://gitee.com/yeli52/world-engine-admin.git';
 
 const INCLUDE_DIRS = ['world-engine', 'platform', 'admin-web', 'scripts', 'deploy', 'docs'];
-const INCLUDE_FILES = ['publish-to-gitee.mjs', '.dockerignore'];
+const INCLUDE_FILES = ['README.md', 'publish-to-gitee.mjs', '.dockerignore'];
 
 const SKIP_DIR = new Set([
   'node_modules', 'dist', '.git', '.mimosa', '.npm-cache', '.pnpm-store',
