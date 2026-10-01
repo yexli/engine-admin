@@ -1,89 +1,211 @@
-<!-- Scheduler 面板：引擎 V1.0 的调度器无查询 HTTP API（API Gap），此处给出缺口说明与数据契约 -->
+<!-- Scheduler 面板：M1.2 起接真实调度观测（GET /v1/worlds/{id}/scheduler，bus 只读面） -->
 <template>
   <div>
-    <el-alert type="info" :closable="false" show-icon class="mb-3">
+    <div class="flex flex-wrap items-center gap-2 mb-3">
+      <el-button
+        :type="polling ? 'primary' : 'default'"
+        size="small"
+        @click="toggle"
+      >
+        <IconifyIconOffline
+          :icon="polling ? 'ep/video-pause' : 'ep/video-play'"
+          class="mr-1"
+        />
+        {{ polling ? `轮询中（${interval / 1000}s）` : "开始轮询" }}
+      </el-button>
+      <el-button size="small" :loading="loading" @click="load">
+        <IconifyIconOffline icon="ep/refresh" class="mr-1" />刷新
+      </el-button>
+    </div>
+
+    <el-alert
+      v-if="error"
+      type="error"
+      :closable="false"
+      class="mb-3"
+      show-icon
+    >
       <template #title>
-        引擎 V1.0 内置事件调度器（延迟事件 / 重试 / 死信），但尚未提供 HTTP
-        查询接口。本页为缺口占位，缺口已记录在 docs/ADMIN-API-GAP.md。
+        加载失败：{{ error }}
+        <el-button text type="primary" size="small" @click="load">重试</el-button>
       </template>
     </el-alert>
 
-    <el-row :gutter="12">
-      <el-col :md="14" class="mb-3">
-        <el-card shadow="never">
-          <template #header>
-            <div class="flex items-center justify-between">
-              <BiText zh="计划事件（建议接口）" en="Scheduled Events" />
-              <el-tooltip
-                content="引擎暂无 GET /v1/worlds/{id}/scheduler"
-                placement="top"
-              >
-                <el-tag size="small" type="warning">API Gap</el-tag>
-              </el-tooltip>
+    <template v-if="view">
+      <el-row :gutter="12" class="mb-3">
+        <el-col :xs="12" :md="4" v-for="item in statCards" :key="item.label">
+          <el-card shadow="never">
+            <div class="text-xs text-[--el-text-color-secondary]">
+              {{ item.label }}
             </div>
-          </template>
-          <el-table :data="[]" size="default">
+            <div class="text-xl font-semibold">{{ item.value }}</div>
+          </el-card>
+        </el-col>
+      </el-row>
+
+      <el-tabs v-model="tab">
+        <el-tab-pane
+          :label="`定时事件 Scheduled（${view.stats.scheduled}）`"
+          name="scheduled"
+        >
+          <el-table :data="view.scheduled" size="default" stripe>
+            <el-table-column prop="event.id" min-width="110">
+              <template #header><BiText zh="事件 ID" en="Event ID" /></template>
+            </el-table-column>
+            <el-table-column prop="event.type" min-width="150">
+              <template #header><BiText zh="类型" en="Type" /></template>
+              <template #default="{ row }">
+                <span class="font-mono text-xs">{{ row.event.type }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column width="170" align="center">
+              <template #header>
+                <BiText
+                  :zh="`到期日（世界当前 D${currentDay ?? '—'}）`"
+                  en="Due Day"
+                />
+              </template>
+              <template #default="{ row }">
+                <el-tooltip
+                  :content="
+                    currentDay !== null && row.dueDay <= currentDay
+                      ? '已到期（等待调度分发）'
+                      : '未到期'
+                  "
+                  placement="top"
+                >
+                  <el-tag
+                    :type="
+                      currentDay !== null && row.dueDay <= currentDay
+                        ? 'warning'
+                        : 'info'
+                    "
+                    size="small"
+                  >
+                    D{{ row.dueDay
+                    }}{{
+                      currentDay !== null && row.dueDay <= currentDay
+                        ? " · 已到期"
+                        : ""
+                    }}
+                  </el-tag>
+                </el-tooltip>
+              </template>
+            </el-table-column>
+            <template #empty>
+              <el-empty description="无定时事件" :image-size="60" />
+            </template>
+          </el-table>
+        </el-tab-pane>
+
+        <el-tab-pane
+          :label="`延后重投 Deferred（${view.stats.deferred}）`"
+          name="deferred"
+        >
+          <el-table :data="view.deferred" size="default" stripe>
             <el-table-column prop="id" min-width="110">
               <template #header><BiText zh="事件 ID" en="Event ID" /></template>
             </el-table-column>
-            <el-table-column prop="type" min-width="140">
+            <el-table-column prop="type" min-width="150">
               <template #header><BiText zh="类型" en="Type" /></template>
+              <template #default="{ row }">
+                <span class="font-mono text-xs">{{ row.type }}</span>
+              </template>
             </el-table-column>
-            <el-table-column prop="executeAt" min-width="120">
-              <template #header
-                ><BiText zh="执行时间" en="Execute At"
-              /></template>
-            </el-table-column>
-            <el-table-column prop="status" width="110">
-              <template #header><BiText zh="状态" en="Status" /></template>
-            </el-table-column>
-            <el-table-column prop="retry" width="70" align="center">
-              <template #header><BiText zh="重试" en="Retry" /></template>
-            </el-table-column>
-            <el-table-column prop="createdAt" min-width="120">
-              <template #header
-                ><BiText zh="创建时间" en="Created At"
-              /></template>
+            <el-table-column width="100" align="center">
+              <template #header><BiText zh="天 / 刻" en="D·T" /></template>
+              <template #default="{ row }">D{{ row.day }}·{{ row.tick }}</template>
             </el-table-column>
             <template #empty>
               <el-empty
-                description="待引擎提供调度器查询 API 后启用"
-                :image-size="64"
+                description="无延后事件（语义事件单 tick 超限时延后到下个 tick 重投）"
+                :image-size="60"
               />
             </template>
           </el-table>
-        </el-card>
-      </el-col>
+        </el-tab-pane>
 
-      <el-col :md="10" class="mb-3">
-        <el-card shadow="never" header="引擎侧已有能力（代码层）">
-          <el-descriptions :column="1" border size="small">
-            <el-descriptions-item label="事件入队">
-              WorldEventBus.schedule(e, delayDays) → 到期 due(day) 分发
-            </el-descriptions-item>
-            <el-descriptions-item label="重试与死信">
-              重试计数、deadLetters()、onDeadLetter 钩子
-            </el-descriptions-item>
-            <el-descriptions-item label="统计">
-              stats(): subscribers / scheduled / deadLetters / tickEmitted /
-              deferred
-            </el-descriptions-item>
-            <el-descriptions-item label="当前观测替代">
-              Events 面板可观察已分发的事实（含因果链）
-            </el-descriptions-item>
-          </el-descriptions>
-          <div class="mt-3 text-xs text-[--el-text-color-secondary]">
-            建议接口：GET /v1/worlds/{id}/scheduler → { scheduled: WorldEvent[],
-            deadLetters: WorldEvent[], stats: {...} }（无需修改 Core，仅在 HTTP
-            层暴露）
-          </div>
-        </el-card>
-      </el-col>
-    </el-row>
+        <el-tab-pane
+          :label="`死信 Dead Letters（${view.stats.deadLetters}）`"
+          name="dead"
+        >
+          <el-table :data="view.deadLetters" size="default" stripe>
+            <el-table-column prop="id" min-width="110">
+              <template #header><BiText zh="事件 ID" en="Event ID" /></template>
+            </el-table-column>
+            <el-table-column prop="type" min-width="150">
+              <template #header><BiText zh="类型" en="Type" /></template>
+              <template #default="{ row }">
+                <span class="font-mono text-xs">{{ row.type }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column width="100" align="center">
+              <template #header><BiText zh="天 / 刻" en="D·T" /></template>
+              <template #default="{ row }">D{{ row.day }}·{{ row.tick }}</template>
+            </el-table-column>
+            <template #empty>
+              <el-empty
+                description="无死信（超限 / 链过深 / 队列满的事件进入死信队列）"
+                :image-size="60"
+              />
+            </template>
+          </el-table>
+        </el-tab-pane>
+      </el-tabs>
+    </template>
+
+    <el-empty
+      v-else-if="!loading && !error"
+      description="请先选择世界"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
+import { computed, ref, watch } from "vue";
+import { getSchedulerView, type SchedulerView } from "@/api/runtime";
+import { getWorld } from "@/api/world";
+import { useAsyncData } from "@/composables/useAsyncData";
+import { usePolling } from "@/composables/usePolling";
+
 defineOptions({ name: "SchedulerPanel" });
-defineProps<{ worldId: string }>();
+
+const props = defineProps<{ worldId: string }>();
+
+const interval = 5000;
+const view = ref<SchedulerView | null>(null);
+const currentDay = ref<number | null>(null);
+const { loading, error, run } = useAsyncData();
+
+const tab = ref("scheduled");
+
+const statCards = computed(() => [
+  { label: "订阅者 Subscribers", value: view.value?.stats.subscribers ?? 0 },
+  { label: "定时 Scheduled", value: view.value?.stats.scheduled ?? 0 },
+  { label: "延后 Deferred", value: view.value?.stats.deferred ?? 0 },
+  { label: "死信 Dead Letters", value: view.value?.stats.deadLetters ?? 0 },
+  { label: "本 Tick 派发", value: view.value?.stats.tickEmitted ?? 0 }
+]);
+
+async function load() {
+  if (!props.worldId) return;
+  const res = await run(() => getSchedulerView(props.worldId));
+  if (res) view.value = res;
+  const info = await run(() => getWorld(props.worldId));
+  if (info) currentDay.value = info.time?.day ?? null;
+}
+
+const { polling, toggle, start } = usePolling(load, interval);
+
+watch(
+  () => props.worldId,
+  () => {
+    view.value = null;
+    load();
+    if (!polling.value) start();
+  },
+  { immediate: true }
+);
+
+defineExpose({ reload: load });
 </script>

@@ -21,9 +21,12 @@ import type {
 } from '../types.ts';
 import { authenticate, hasPermission, permissionDenied } from '../auth.ts';
 import type { KeyStore } from '../keys/keystore.ts';
+import type { ApiKeyRecord } from '../types.ts';
 import type { ChatMessage } from '../upstream/gateway.ts';
-import { runWorldAgent, worldAgentResponse } from '../worldagent/pipeline.ts';
+import { runWorldAgent, worldAgentResponse, extractWorldId } from '../worldagent/pipeline.ts';
 import type { ModelRouter } from '../router/modelrouter.ts';
+import type { UsageEntry, UsageSink } from '../usage/recorder.ts';
+import { randomUUID } from 'node:crypto';
 
 export const WORLD_AGENT_MODEL = 'world-agent';
 
@@ -37,6 +40,8 @@ export interface WorldPlatformInit {
   requestId?: () => string;
   /** 测试时钟注入点 */
   now?: () => number;
+  /** 结构化用量记录（M2.2；缺省不计量）。已鉴权请求记一条，与访问日志凭 requestId 对账 */
+  usage?: UsageSink;
 }
 
 export function createWorldPlatform(init: WorldPlatformInit): {
@@ -53,8 +58,39 @@ export function createWorldPlatform(init: WorldPlatformInit): {
   }
 
   async function handle(req: PlatformRequest): Promise<PlatformResponse> {
+    const startedAt = Date.now();
     const method = req.method.toUpperCase();
     const path = normalizePath(req.path);
+
+    /* ---------- 计量辅助（M2.2）：只记已鉴权请求；失败也如实留痕 ---------- */
+    const meter = (
+      key: ApiKeyRecord,
+      entry: Pick<UsageEntry, 'kind' | 'status'> & Partial<Pick<UsageEntry, 'model' | 'route' | 'capability' | 'modelUsed' | 'fallbackUsed' | 'worldId' | 'promptTokens' | 'completionTokens' | 'totalTokens' | 'tokensEstimated' | 'error'>>,
+    ): void => {
+      if (!init.usage) return;
+      init.usage.record({
+        ts: new Date().toISOString(),
+        requestId: req.requestId ?? randomUUID(),
+        kind: entry.kind,
+        keyId: key.id,
+        tenantId: key.tenantId,
+        method,
+        path,
+        status: entry.status,
+        latencyMs: Date.now() - startedAt,
+        model: entry.model,
+        route: entry.route,
+        capability: entry.capability,
+        modelUsed: entry.modelUsed,
+        fallbackUsed: entry.fallbackUsed,
+        worldId: entry.worldId,
+        promptTokens: entry.promptTokens,
+        completionTokens: entry.completionTokens,
+        totalTokens: entry.totalTokens,
+        tokensEstimated: entry.tokensEstimated,
+        error: entry.error,
+      });
+    }
 
     /* ---------- 健康检查（免鉴权） ---------- */
     if (path === '/healthz' && method === 'GET') {
@@ -92,9 +128,11 @@ export function createWorldPlatform(init: WorldPlatformInit): {
     /* ---------- /v1/chat/completions ---------- */
     if (path === '/v1/chat/completions' && method === 'POST') {
       if (!hasPermission(key, 'chat:completions')) {
-        return json(403, errorBody('insufficient_permission', '当前 API Key 缺少权限：chat:completions'));
+        const d = permissionDenied('chat:completions');
+        meter(key, { kind: 'chat', status: d.status, error: d.code });
+        return json(d.status, errorBody(d.code, d.message));
       }
-      return handleChat(req);
+      return handleChat(req, key, meter);
     }
 
     /* ---------- /v1/worlds*（引擎权威，平台鉴权后透传） ---------- */
@@ -105,12 +143,14 @@ export function createWorldPlatform(init: WorldPlatformInit): {
       const perm = writeOp ? 'worlds:write' : 'worlds:read';
       if (!hasPermission(key, perm)) {
         const d = permissionDenied(perm);
+        meter(key, { kind: 'worlds', status: d.status, worldId: worldIdOfPath(path), error: d.code });
         return json(d.status, errorBody(d.code, d.message));
       }
       const query = req.query && Object.keys(req.query).length
         ? `?${new URLSearchParams(req.query).toString()}`
         : '';
       const res = await init.engine.proxy(method, `${path}${query}`, req.body);
+      meter(key, { kind: 'worlds', status: res.status, worldId: worldIdOfPath(path) });
       return json(res.status, res.body);
     }
 
@@ -124,18 +164,23 @@ export function createWorldPlatform(init: WorldPlatformInit): {
   }
 
   /* ---------------- chat/completions ---------------- */
-  async function handleChat(req: PlatformRequest): Promise<PlatformResponse> {
+  type Meter = (key: ApiKeyRecord, entry: Pick<UsageEntry, 'kind' | 'status'> & Partial<Pick<UsageEntry, 'model' | 'route' | 'capability' | 'modelUsed' | 'fallbackUsed' | 'worldId' | 'promptTokens' | 'completionTokens' | 'totalTokens' | 'tokensEstimated' | 'error'>>) => void;
+
+  async function handleChat(req: PlatformRequest, key: ApiKeyRecord, meter: Meter): Promise<PlatformResponse> {
     const body = req.body;
     if (!body || typeof body !== 'object' || Array.isArray(body)) {
+      meter(key, { kind: 'chat', status: 400, error: 'invalid_request_error' });
       return json(400, errorBody('invalid_request_error', '请求体必须是 JSON 对象'));
     }
     const b = body as Record<string, unknown>;
     const model = typeof b['model'] === 'string' ? b['model'] : '';
     if (!model) {
+      meter(key, { kind: 'chat', status: 400, error: 'invalid_request_error' });
       return json(400, errorBody('invalid_request_error', '缺少 model 字段'));
     }
     const messages = b['messages'];
     if (!Array.isArray(messages) || messages.length === 0) {
+      meter(key, { kind: 'chat', status: 400, model, error: 'invalid_request_error' });
       return json(400, errorBody('invalid_request_error', '缺少 messages 数组'));
     }
     const parsedMessages: ChatMessage[] = [];
@@ -144,9 +189,11 @@ export function createWorldPlatform(init: WorldPlatformInit): {
       const role = mm?.['role'];
       const content = mm?.['content'];
       if (role !== 'system' && role !== 'user' && role !== 'assistant') {
+        meter(key, { kind: 'chat', status: 400, model, error: 'invalid_request_error' });
         return json(400, errorBody('invalid_request_error', `非法消息 role：${String(role)}`));
       }
       if (typeof content !== 'string') {
+        meter(key, { kind: 'chat', status: 400, model, error: 'invalid_request_error' });
         return json(400, errorBody('invalid_request_error', '消息 content 必须是字符串'));
       }
       parsedMessages.push({ role, content });
@@ -155,6 +202,7 @@ export function createWorldPlatform(init: WorldPlatformInit): {
     /* world-agent：平台管线（Phase 1 非流式） */
     if (model === WORLD_AGENT_MODEL) {
       if (b['stream'] === true) {
+        meter(key, { kind: 'chat', status: 400, model, error: 'invalid_request_error' });
         return json(400, errorBody('invalid_request_error', 'world-agent 暂不支持流式（Phase 1 非流式）；请 stream=false 或直连具体通道'));
       }
       const result = await runWorldAgent(
@@ -163,17 +211,50 @@ export function createWorldPlatform(init: WorldPlatformInit): {
         parsedMessages,
       );
       if (!result.ok) {
+        meter(key, {
+          kind: 'chat',
+          status: result.status,
+          model,
+          route: 'world-agent',
+          worldId: extractWorldId(body),
+          error: result.code,
+        });
         return json(result.status, errorBody(result.code, result.message));
       }
-      return json(200, worldAgentResponse(result.result));
+      const resBody = worldAgentResponse(result.result);
+      /* 计量留痕直接取响应既有口径（tokens 为平台粗估，不重复实现） */
+      const usage = resBody['usage'] as { prompt_tokens: number; completion_tokens: number; total_tokens: number };
+      const platformMeta = resBody['platform'] as {
+        capability: string;
+        model_used: string;
+        fallback_used: boolean;
+        world_id: string | null;
+      };
+      meter(key, {
+        kind: 'chat',
+        status: 200,
+        model,
+        route: 'world-agent',
+        capability: platformMeta.capability,
+        modelUsed: platformMeta.model_used,
+        fallbackUsed: platformMeta.fallback_used,
+        worldId: platformMeta.world_id,
+        promptTokens: usage.prompt_tokens,
+        completionTokens: usage.completion_tokens,
+        totalTokens: usage.total_tokens,
+        tokensEstimated: true,
+      });
+      return json(200, resBody);
     }
 
     /* 其他模型：保真代理（JSON 与 SSE 均原样转发） */
     const proxied = await init.gateway.proxyChat(body);
     if (!proxied.ok) {
+      meter(key, { kind: 'chat', status: proxied.status, model, route: 'proxy', error: 'upstream_error' });
       return json(proxied.status, errorBody('upstream_error', proxied.error));
     }
-    return { kind: 'stream', status: proxied.status, headers: proxied.headers, body: proxied.stream };
+    /* 流的时延只有传输层知道：挂上计量元数据，泵完由 server.ts 代记 */
+    return { kind: 'stream', status: proxied.status, headers: proxied.headers, body: proxied.stream, usageMeta: { keyId: key.id, tenantId: key.tenantId, model } };
   }
 
   return { handle };
@@ -182,4 +263,10 @@ export function createWorldPlatform(init: WorldPlatformInit): {
 function normalizePath(p: string): string {
   const stripped = p.replace(/\/+$/, '');
   return stripped === '' ? '/' : stripped;
+}
+
+/** /v1/worlds/{id} 或 /v1/worlds/{id}/... → {id}；世界清单 → null（计量留痕用） */
+function worldIdOfPath(path: string): string | null {
+  const m = path.match(/^\/v1\/worlds\/([^/]+)(\/|$)/);
+  return m ? decodeURIComponent(m[1]!) : null;
 }

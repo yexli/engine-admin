@@ -48,7 +48,8 @@ export function createGatewayClient(opts: GatewayClientOptions): GatewayClient {
         });
         const text = await res.text();
         if (res.status !== 200) {
-          return { ok: false, status: res.status, error: extractError(text) ?? `网关返回 ${res.status}` };
+          const parsed = extractError(text);
+          return { ok: false, status: res.status, error: parsed?.message ?? `网关返回 ${res.status}`, code: parsed?.code };
         }
         const parsed = JSON.parse(text) as {
           choices?: Array<{ message?: { content?: string } }>;
@@ -99,11 +100,14 @@ export function createGatewayClient(opts: GatewayClientOptions): GatewayClient {
   };
 }
 
-function extractError(text: string): string | null {
+function extractError(text: string): { message: string; code?: string } | null {
   try {
-    const parsed = JSON.parse(text) as { error?: { message?: string } | string };
+    const parsed = JSON.parse(text) as { error?: { message?: string; code?: string } | string };
     if (parsed?.error) {
-      return typeof parsed.error === 'string' ? parsed.error : (parsed.error.message ?? null);
+      if (typeof parsed.error === 'string') return { message: parsed.error };
+      const message = parsed.error.message ?? null;
+      if (message === null) return null;
+      return { message, code: typeof parsed.error.code === 'string' ? parsed.error.code : undefined };
     }
   } catch {
     /* 非 JSON 错误体 */

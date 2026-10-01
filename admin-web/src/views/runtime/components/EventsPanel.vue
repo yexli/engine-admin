@@ -86,11 +86,20 @@
         <template #header><BiText zh="天 / 刻" en="Day·Tick" /></template>
         <template #default="{ row }">D{{ row.day }} · {{ row.tick }}</template>
       </el-table-column>
-      <el-table-column prop="cause" min-width="90" show-overflow-tooltip>
+      <el-table-column prop="cause" min-width="110" show-overflow-tooltip>
         <template #header><BiText zh="因果" en="Causal" /></template>
-        <template #default="{ row }">{{
-          row.cause ?? row.parent ?? "—"
-        }}</template>
+        <template #default="{ row }">
+          <span v-if="row.cause || row.parentId" class="inline-flex items-center gap-1">
+            <span class="font-mono text-xs">{{ row.cause ?? "—" }}</span>
+            <el-tooltip
+              :content="`派生事实：父事件 ${row.parentId}${row.sourceId ? `，源头 ${row.sourceId}` : ''}（点行看完整因果链）`"
+              placement="top"
+            >
+              <el-tag size="small" type="warning" effect="plain">链</el-tag>
+            </el-tooltip>
+          </span>
+          <span v-else class="text-[--el-text-color-secondary]">—</span>
+        </template>
       </el-table-column>
       <template #empty>
         <el-empty description="暂无事件" :image-size="60" />

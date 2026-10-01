@@ -1,4 +1,4 @@
-<!-- Entities 面板：实体列表 + 详情抽屉（真实引擎数据，从 state 派生） -->
+<!-- Entities 面板：M1.3 起走真实独立端点（服务端分页/筛选）；详情抽屉走实体端点 -->
 <template>
   <div>
     <div class="flex flex-wrap items-center gap-2 mb-3">
@@ -7,12 +7,15 @@
         placeholder="搜索实体 ID"
         clearable
         class="!w-56"
+        @keyup.enter="reload"
+        @clear="reload"
       />
       <el-select
         v-model="typeFilter"
         placeholder="类型筛选"
         clearable
         class="!w-36"
+        @change="reload"
       >
         <el-option label="npc" value="npc" />
         <el-option label="character" value="character" />
@@ -23,7 +26,7 @@
         <IconifyIconOffline icon="ep/refresh" class="mr-1" />刷新
       </el-button>
       <span class="text-xs text-[--el-text-color-secondary]">
-        实体视图由 World State 派生；修改请走命令调试台
+        服务端分页筛选；修改实体请走命令调试台
       </span>
     </div>
 
@@ -42,9 +45,15 @@
       </template>
     </el-alert>
 
+    <el-alert v-if="player" type="info" :closable="false" class="mb-3" show-icon>
+      <template #title>
+        玩家：{{ player.name }} · 位于 {{ player.loc }}（单列，不在下表）
+      </template>
+    </el-alert>
+
     <el-table
       v-loading="loading"
-      :data="filtered"
+      :data="entities"
       size="default"
       stripe
       @row-click="row => openDetail(row.id)"
@@ -109,6 +118,17 @@
       </template>
     </el-table>
 
+    <el-pagination
+      v-model:current-page="page"
+      v-model:page-size="pageSize"
+      :total="total"
+      layout="total, sizes, prev, pager, next"
+      :page-sizes="[20, 50, 100]"
+      class="mt-3 justify-end"
+      @current-change="load"
+      @size-change="reload"
+    />
+
     <!-- 实体详情抽屉 -->
     <el-drawer v-model="drawer" :title="`实体详情 · ${detailId}`" size="560px">
       <div v-loading="detailLoading">
@@ -139,7 +159,7 @@
 
           <el-collapse>
             <el-collapse-item title="属性袋 Attributes">
-              <JsonView :data="detail.raw.attributes ?? {}" height="220px" />
+              <JsonView :data="detail.attributes ?? {}" height="220px" />
             </el-collapse-item>
             <el-collapse-item title="背包 / 效果 Bag & Effects">
               <JsonView
@@ -173,7 +193,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
+import { ref, watch } from "vue";
 import {
   listEntities,
   getEntity,
@@ -189,31 +209,42 @@ const props = defineProps<{ worldId: string }>();
 
 const keyword = ref("");
 const typeFilter = ref("");
+const page = ref(1);
+const pageSize = ref(20);
+const total = ref(0);
 const entities = ref<EntityView[]>([]);
-const player = ref<{ name: string; loc: string } | null>(null);
+const player = ref<{ name: string; loc: string; bagCount: number } | null>(
+  null
+);
 const { loading, error, run } = useAsyncData();
 
 const drawer = ref(false);
 const detailId = ref("");
-const detail = ref<EntityView | null>(null);
+type EntityDetail = NonNullable<Awaited<ReturnType<typeof getEntity>>>;
+const detail = ref<EntityDetail["entity"] | null>(null);
 const detailRelations = ref<RelationView[]>([]);
 const { loading: detailLoading, run: runDetail } = useAsyncData();
 
-const filtered = computed(() =>
-  entities.value.filter(
-    e =>
-      (!keyword.value || e.id.includes(keyword.value)) &&
-      (!typeFilter.value || e.type === typeFilter.value)
-  )
-);
-
 async function load() {
   if (!props.worldId) return;
-  const res = await run(() => listEntities(props.worldId));
+  const res = await run(() =>
+    listEntities(props.worldId, {
+      q: keyword.value || undefined,
+      type: typeFilter.value || undefined,
+      page: page.value,
+      pageSize: pageSize.value
+    })
+  );
   if (res) {
     entities.value = res.entities;
+    total.value = res.total;
     player.value = res.player;
   }
+}
+
+function reload() {
+  page.value = 1;
+  load();
 }
 
 async function openDetail(id: string) {
@@ -235,6 +266,13 @@ function attColor(att: number): string {
   return "#e6a23c";
 }
 
-watch(() => props.worldId, load, { immediate: true });
+watch(
+  () => props.worldId,
+  () => {
+    page.value = 1;
+    load();
+  },
+  { immediate: true }
+);
 defineExpose({ reload: load });
 </script>

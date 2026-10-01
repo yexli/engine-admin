@@ -1,0 +1,16 @@
+# 构建上下文排除（deploy/Dockerfile.* 的 context 是仓库根）
+**/node_modules
+**/dist
+**/test-results
+**/playwright-report
+**/.eslintcache
+platform/data
+.git
+.idea
+.zcode
+docs
+publish-to-gitee.mjs
+pure-admin-thin-main
+pure-admin-thin-main.zip
+tianqiong2
+*.log

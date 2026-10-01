@@ -6,6 +6,7 @@ import { join } from 'node:path';
 import { KeyStore } from '../src/keys/keystore.ts';
 import { ModelRouter } from '../src/router/modelrouter.ts';
 import { createWorldPlatform } from '../src/http/protocol.ts';
+import type { UsageEntry, UsageSink } from '../src/usage/recorder.ts';
 import type { EngineClient, GatewayClient, PlatformRequest } from '../src/types.ts';
 
 const STATE = {
@@ -54,12 +55,15 @@ function setup(opts: { gateway?: GatewayClient; engine?: EngineClient; routes?: 
   if (opts.routes) {
     Object.assign(router['routes'], opts.routes);
   }
+  const entries: UsageEntry[] = [];
+  const usage: UsageSink = { record: (e) => entries.push(e) };
   const platform = createWorldPlatform({
     keys,
     engine: opts.engine ?? fakeEngine(),
     gateway: opts.gateway ?? fakeGateway(),
     router,
     requestId: () => 'req-test',
+    usage,
   });
   const call = (method: string, path: string, body?: unknown, token = plaintext, extraQuery?: Record<string, string>): Promise<{
     status: number;
@@ -74,7 +78,7 @@ function setup(opts: { gateway?: GatewayClient; engine?: EngineClient; routes?: 
         headers: token ? { authorization: `Bearer ${token}` } : {},
       } satisfies PlatformRequest)
       .then((r) => (r.kind === 'json' ? { status: r.status, body: r.body } : { status: r.status, body: '<stream>' }));
-  return { call, platform, plaintext, dir, keys };
+  return { call, platform, plaintext, dir, keys, entries };
 }
 
 describe('分层与鉴权', () => {
@@ -289,5 +293,127 @@ describe('非 world-agent 模型：保真代理', () => {
     });
     expect(res.status).toBe(502);
     expect((res.body as { error: { code: string } }).error.code).toBe('upstream_error');
+  });
+});
+
+describe('用量计量（M2.2）', () => {
+  it('world-agent 成功：完整路由留痕（capability/model_used/fallback/tokens/requestId）', async () => {
+    const { call, entries, plaintext } = setup({
+      routes: { roleplay: { primary: 'npc', fallback: 'narrative' } },
+    });
+    /* 隐私哨兵足够长，避免与随机 UUID 的子串偶发碰撞 */
+    const sentinel = `隐私探针-${Date.now()}-7f3a9c`;
+    const res = await call('POST', '/v1/chat/completions', {
+      model: 'world-agent',
+      world: 'w-main',
+      messages: [{ role: 'user', content: sentinel }],
+    });
+    expect(res.status).toBe(200);
+    expect(entries).toHaveLength(1);
+    const e = entries[0]!;
+    expect(e.kind).toBe('chat');
+    expect(e.route).toBe('world-agent');
+    expect(e.model).toBe('world-agent');
+    expect(e.modelUsed).toBe('npc');
+    expect(e.capability).toBe('roleplay');
+    expect(e.fallbackUsed).toBe(false);
+    expect(e.worldId).toBe('w-main');
+    expect(e.totalTokens).toBeGreaterThan(0);
+    expect(e.tokensEstimated).toBe(true);
+    expect(e.status).toBe(200);
+    expect(e.requestId).toBeTruthy();
+    expect(e.ts).toBeTruthy();
+    /* 隐私边界：绝不落 Prompt/响应原文 */
+    expect(JSON.stringify(e)).not.toContain(sentinel);
+    void plaintext;
+  });
+
+  it('fallback 接管也如实留痕（modelUsed = fallback）', async () => {
+    const { call, entries } = setup({
+      gateway: fakeGateway('（来自 fallback）', ['npc']),
+      routes: { roleplay: { primary: 'npc', fallback: 'narrative' } },
+    });
+    await call('POST', '/v1/chat/completions', {
+      model: 'world-agent',
+      world: 'w-main',
+      messages: [{ role: 'user', content: 'hi' }],
+    });
+    expect(entries[0]!.modelUsed).toBe('narrative');
+    expect(entries[0]!.fallbackUsed).toBe(true);
+  });
+
+  it('失败也记录：503 no_model_configured 带 error 码', async () => {
+    const { call, entries } = setup({
+      routes: { roleplay: { primary: null, fallback: null } },
+    });
+    const res = await call('POST', '/v1/chat/completions', {
+      model: 'world-agent',
+      world: 'w-main',
+      messages: [{ role: 'user', content: 'hi' }],
+    });
+    expect(res.status).toBe(503);
+    expect(entries).toHaveLength(1);
+    expect(entries[0]!.status).toBe(503);
+    expect(entries[0]!.error).toBe('no_model_configured');
+    expect(entries[0]!.totalTokens).toBeUndefined();
+  });
+
+  it('worlds 透传：kind=worlds + worldId；权限不足 403 同样留痕', async () => {
+    const { call, entries } = setup();
+    await call('GET', '/v1/worlds/w-main/state');
+    expect(entries).toHaveLength(1);
+    expect(entries[0]!.kind).toBe('worlds');
+    expect(entries[0]!.worldId).toBe('w-main');
+    expect(entries[0]!.status).toBe(200);
+
+    const n = entries.length;
+    await call('DELETE', '/v1/worlds/w-main'); /* 全权限 Key：worlds:write 放行，403 分支另测 */
+    expect(entries.length).toBe(n + 1);
+  });
+
+  it('权限不足（403）与鉴权失败（401）的计量边界', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'platform-proto-'));
+    const keys = new KeyStore(join(dir, 'keys.json'));
+    const { plaintext } = keys.create({ name: 'readonly', permissions: ['worlds:read'] });
+    const entries: UsageEntry[] = [];
+    const platform = createWorldPlatform({
+      keys,
+      engine: fakeEngine(),
+      gateway: fakeGateway(),
+      router: new ModelRouter(null),
+      usage: { record: (e) => entries.push(e) },
+    });
+    await platform.handle({
+      method: 'POST',
+      path: '/v1/worlds',
+      body: { worldId: 'w-x' },
+      headers: { authorization: `Bearer ${plaintext}` },
+    });
+    await platform.handle({
+      method: 'GET',
+      path: '/v1/models',
+      headers: { authorization: 'Bearer sk-world-bad' },
+    });
+    /* 已鉴权但权限不足 → 留痕；鉴权失败（401）→ 不计入 */
+    expect(entries).toHaveLength(1);
+    expect(entries[0]!.status).toBe(403);
+    expect(entries[0]!.error).toBe('insufficient_permission');
+    rmSync(dir, { recursive: true, force: true });
+  });
+
+  it('代理流：协议层挂 usageMeta（server 泵完代记），不在协议层重复记', async () => {
+    const { platform, plaintext, entries } = setup();
+    const out = await platform.handle({
+      method: 'POST',
+      path: '/v1/chat/completions',
+      body: { model: 'npc', messages: [{ role: 'user', content: 'hi' }] },
+      headers: { authorization: `Bearer ${plaintext}` },
+      requestId: 'req-proxy-1',
+    });
+    expect(out.kind).toBe('stream');
+    const meta = (out as { usageMeta?: { keyId: string; model: string } }).usageMeta;
+    expect(meta?.model).toBe('npc');
+    expect(meta?.keyId).toBeTruthy();
+    expect(entries).toHaveLength(0); /* 流时延只有传输层知道 */
   });
 });

@@ -3,6 +3,70 @@
 本文件记录 AI World Engine 的版本演进。格式参考 Keep a Changelog；版本线见 `docs/WORLD-ROADMAP.md`（方案 §69）。
 版本策略（semver）：0.x 期间允许带 CHANGELOG 注明的 API 调整；**1.0 起冻结公开 API**。
 
+## [1.0.3] - 2026-09-30 · M4 · G1 世界软暂停 / 恢复 / 关闭（公开 API 只增不改）
+
+管理后台 M4.2 的引擎侧落地。**先评审后动手**：语义裁定记录见
+`docs/G1-PAUSE-DESIGN-REVIEW.md`（决策点 4 的答案：HTTP 适配层软暂停已够管理后台，
+不需要 Runtime 级 pause）。Core（runtime/rules/state）**零改动**。
+
+### Added
+- **HTTP 生命周期路由**（`src/http/protocol.ts`）：
+  `POST /v1/worlds/{id}/pause`（重复暂停 409）、`POST /v1/worlds/{id}/resume`
+  （未暂停 409）、`DELETE /v1/worlds/{id}`（注册表摘除，走 V0.9 既有
+  `WorldRegistry.close()`；单世界模式 409 `close requires registry mode`）。
+- **软暂停闸门**：暂停中的世界 `POST .../commands`、`POST .../time` → 409
+  `world_paused`；全部读路由照常。暂停为进程内服务面标记（重启即解除；
+  世界状态持久化属 SavePort 范畴——裁定见评审记录 §3）。
+- **`WorldInfo.status?: 'running' | 'paused'`**（可选字段；关闭后的世界不出现在任何响应）。
+- 测试：`tests/http-lifecycle.test.ts`（3 用例，86 → 89）。
+
+### Fixed
+- **`WorldHandle.emitEvent` 事件环双记账**（M4.3 验证因果链时发现）：门面在
+  `bus.emit`（总线通配订阅已入环）之后又直推环一次，导致 `getEvents()`/HTTP
+  `GET .../events` 中同一事件出现两份。移除直推；+1 回归用例（89 → 90）。
+
+### 验收
+- 引擎 90 用例全绿；`tsc --noEmit` / build 通过。暂停/恢复不写 `updatedAt`
+  （运营动作不冒充世界推进）。
+
+## [1.0.2] - 2026-09-30 · M2 附带修复：relations 视图接受宿主 rels 单边形状（缺陷修复，零语义新增）
+
+管理后台 M2 里程碑回归时发现 M1 的缺陷（ADMIN-CONSOLE-ROADMAP M2 落地记录）：HTTP 适配层的
+实体关系边双视图把 `EntityDynamic.rels` 的值按**数组**消费（`Array.isArray(edges) ? edges : []`），
+而 `types.ts` 声明的形状是**单边**（`rels?: Record<string, RelEdge>`）——按声明形状写入的数据
+会被静默丢弃，entities/{eid} 与 relations 端点对合法宿主数据返回空；M1 测试为绕过按数组播种，
+触发 `tsc --noEmit` 门禁失败。
+
+### Fixed
+- `src/http/protocol.ts`：`entityDetailResponse` / `relations` 双视图改为单边与数组两种
+  宿主形状都接受（`Array.isArray(edges) ? edges : [edges]`）——声明的单边形状不再被丢弃，
+  数组形状向后兼容。
+- `tests/http-readonly.test.ts`：按声明形状播种（单边），typecheck 门禁恢复全绿。
+
+### 验收
+- 引擎 86 用例全绿；`tsc --noEmit` / `tsconfig.build` 通过。公开 API 冻结纪律不变（纯缺陷修复）。
+
+## [1.0.1] - 2026-09-30 · M1 只读数据面（观测端点，公开 API 只增不改）
+
+管理后台 M1 里程碑的引擎侧落地（ADMIN-CONSOLE-ROADMAP M1.2–M1.5）。**公开 API 冻结纪律：
+全部为增量只读面，既有形状零改动、零行为变化**（引擎 73 用例不动，新增 13 用例）。
+
+### Added
+- **HTTP 观测端点**（`src/http/protocol.ts`）：
+  `GET /v1/worlds/{id}/scheduler`（stats/scheduled/deferred/deadLetters，G4）、
+  `GET /v1/worlds/{id}/entities`（q/type/page/pageSize + player 概要，G3）、
+  `GET /v1/worlds/{id}/entities/{eid}`（详情 + rels 关系边）、
+  `GET /v1/worlds/{id}/locations`（驻留统计 + 位置完整性告警）、
+  `GET /v1/worlds/{id}/relations`（状态关系表 + 实体关系边双视图）、
+  `GET /v1/worlds/{id}/commands?n=`（最近命令历史，G5）。
+- **WorldInfo 元数据**（G2）：可选 `name/description/createdAt/updatedAt`；
+  创建参数白名单新增 `name(≤128)/description(≤512)`，经 World Definition 的
+  `metadata` 通道挂载进 `state.metadata`（随 SavePort 持久化）；成功的命令/推进
+  刷新 `updatedAt`（协议层 stamp，零 Core）。
+- **`WorldEventBus.scheduledEvents()`**：定时事件只读访问器（`{dueDay, event}` 列表）。
+- **`WorldRuntime.recentCommands(n)`**：命令历史环形缓冲（上限 100，快照留痕：
+  seq/at/tick/day/command/ok/reason/events/tookMs）。
+
 ## [1.0.0] - 2026-09-30 · Core Boundary 定型（V0.9→V1.0 Core Boundary Refactor）
 
 内核边界收敛 + 泛化验证（《V0.9-to-V1.0 Core Boundary Refactor》Phase 0–11 全部完成）。

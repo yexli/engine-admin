@@ -1,0 +1,90 @@
+# ============================================================
+# World Driving Engine 全栈（M5.3 部署定型）
+# ------------------------------------------------------------
+# 服务：engine(8787) / memory(8789) / platform(8790 公共 + 8791 管理，
+# 受管模式内嵌 gateway) / admin-web(80 → nginx 同源反代)。
+#
+# 首次使用：在 deploy/ 下建 .env（生成命令见 docs/DEPLOY.md）：
+#   PLATFORM_SECRET_MASTER_KEY=<openssl rand -hex 24>
+#   PLATFORM_ADMIN_TOKEN=<openssl rand -hex 16>
+#   PLATFORM_BOOTSTRAP_KEY=<sk-world- 开头随机串>
+# 启动：docker compose up -d --build
+# 入口：http://<主机>:8080（Admin Web，同源反代全部 API）
+#
+# 安全基线：
+# · 平台数据卷 platform-data 持久化密钥与会话——升级镜像不丢配置；
+# · 管理监听跨容器可达依赖 PLATFORM_ADMIN_ALLOW_NON_LOOPBACK=1
+#   （platform 容器启动时大声告警）——隔离由 compose 内网承担，
+#   8790/8791 仅绑定宿主回环；对外只暴露 8080 并建议加 TLS；
+# · 首次登录后立即修改内置账号口令（admin/admin123 为公开文档默认值）。
+# ============================================================
+name: world-stack
+
+services:
+  engine:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.base
+    image: world-stack-base
+    command: node scripts/run-demo-engine.mjs
+    ports:
+      - "127.0.0.1:8787:8787"
+    restart: unless-stopped
+
+  memory:
+    image: world-stack-base
+    command: node scripts/run-demo-memory.mjs
+    environment:
+      WORLD_API_URL: http://engine:8787
+    ports:
+      - "127.0.0.1:8789:8789"
+    depends_on:
+      - engine
+    restart: unless-stopped
+
+  platform:
+    image: world-stack-base
+    command: node platform/scripts/run-managed.mjs
+    environment:
+      PLATFORM_SECRET_MASTER_KEY: ${PLATFORM_SECRET_MASTER_KEY:?请在 deploy/.env 设置}
+      PLATFORM_ADMIN_TOKEN: ${PLATFORM_ADMIN_TOKEN:?请在 deploy/.env 设置}
+      PLATFORM_BOOTSTRAP_KEY: ${PLATFORM_BOOTSTRAP_KEY:-}
+      ENGINE_BASE_URL: http://engine:8787
+      PLATFORM_HOST: 0.0.0.0
+      PLATFORM_ADMIN_HOST: 0.0.0.0
+      PLATFORM_ADMIN_ALLOW_NON_LOOPBACK: "1"
+      PLATFORM_UPSTREAM_ALLOW_LOOPBACK: "1"
+      PLATFORM_ACCESS_LOG: "1"
+    ports:
+      - "127.0.0.1:8790:8790"
+      - "127.0.0.1:8791:8791"
+    volumes:
+      - platform-data:/stack/platform/data
+    depends_on:
+      - engine
+    restart: unless-stopped
+
+  admin-web:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.admin
+    image: world-stack-admin
+    environment:
+      PLATFORM_ADMIN_TOKEN: ${PLATFORM_ADMIN_TOKEN}
+      PLATFORM_ADMIN_UPSTREAM: platform:8791
+      PLATFORM_PUBLIC_UPSTREAM: platform:8790
+      WORLD_API_UPSTREAM: engine:8787
+      MEMORY_API_UPSTREAM: memory:8789
+      # 托管模式下 gateway 内嵌于 platform（内部回环），无独立 8788 上游；
+      # /gateway-api 为遗留直连通道，误命中时由引擎诚实 404
+      GATEWAY_API_UPSTREAM: engine:8787
+    ports:
+      - "8080:80"
+    depends_on:
+      - platform
+      - engine
+      - memory
+    restart: unless-stopped
+
+volumes:
+  platform-data:

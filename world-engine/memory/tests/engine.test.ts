@@ -129,3 +129,47 @@ describe('持久化（W8.4）', () => {
     expect(store.load()).toBeNull();
   });
 });
+
+/* 0.8.2 · setEmbed：热替换向量钩子（管理面配置嵌入模型后无需重建引擎） */
+describe('setEmbed 热替换', () => {
+  const talkFact = () => ({
+    id: 'evt_x',
+    type: 'talk',
+    day: 2,
+    actor: 'player',
+    target: 'lita',
+    witnesses: ['player', 'lita'],
+  });
+
+  it('未注入 → 基线分；注入后语义分 +0.2 并入；置 null 回基线', async () => {
+    const m = new MemoryEngine({});
+    m.ingestFact(talkFact());
+
+    /* 无钩子：基线分（置信 0.4 + 重要度 0.3）即可召回 */
+    const before = await m.recallScored('lita', '完全无关的查询词');
+    expect(before.length).toBeGreaterThan(0);
+    const baseScore = before[0].score;
+
+    /* 注入全同向量钩子 → 查询与候选余弦 = 1 → 语义分 +0.2 */
+    m.setEmbed({ embed: async (texts) => texts.map(() => [1]) });
+    const withEmbed = await m.recallScored('lita', '完全无关的查询词');
+    expect(withEmbed[0].score).toBeCloseTo(baseScore + 0.2, 5);
+
+    /* 置 null → 回基线 */
+    m.setEmbed(null);
+    const after = await m.recallScored('lita', '完全无关的查询词');
+    expect(after[0].score).toBeCloseTo(baseScore, 5);
+  });
+
+  it('钩子抛错 → 静默回词面（渐进增强，不崩）', async () => {
+    const m = new MemoryEngine({});
+    m.ingestFact(talkFact());
+    m.setEmbed({
+      embed: async () => {
+        throw new Error('上游挂了');
+      },
+    });
+    const hits = await m.recallScored('player', 'talk');
+    expect(hits.length).toBeGreaterThan(0); /* 词面命中照常返回 */
+  });
+});

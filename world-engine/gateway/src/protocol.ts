@@ -112,7 +112,14 @@ export function createGateway(init: GatewayInit = {}): {
         }
         return { status: 200, contentType: 'application/json', body: chatCompletionResponse(parsed.model, text) };
       } catch (err) {
-        return { status: 503, contentType: 'application/json', body: { error: { message: err instanceof Error ? err.message : String(err), type: 'upstream_error' } } };
+        /* 提供方结构化错误码（如凭证拒绝）随 503 透传——调用方据此区分
+           配置错误与瞬时故障，而不是把一切都冷却掉 */
+        const code = (err as { code?: string } | null)?.code;
+        return {
+          status: 503,
+          contentType: 'application/json',
+          body: { error: { message: err instanceof Error ? err.message : String(err), type: 'upstream_error', ...(code ? { code } : {}) } },
+        };
       }
     }
 

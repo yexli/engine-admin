@@ -1,0 +1,85 @@
+# ============================================================
+# Admin Web 生产 Nginx 配置（Model Control Plane）
+# ------------------------------------------------------------
+# 以模板形式置于 /etc/nginx/templates/default.conf.template，
+# 容器启动时由 nginx 镜像内置 envsubst 用环境变量实例化：
+#   PLATFORM_ADMIN_TOKEN    管理面令牌（服务端注入，绝不下发浏览器）
+#   PLATFORM_ADMIN_UPSTREAM 受管 Platform 私有管理监听（host:port，如 platform:8791）
+#   PLATFORM_PUBLIC_UPSTREAM 受管 Platform 公共监听（host:port，如 platform:8790）
+#   WORLD_API_UPSTREAM      World Engine（如 engine:8787；可选）
+#   MEMORY_API_UPSTREAM     World Memory API（如 memory:8789；可选）
+#   GATEWAY_API_UPSTREAM    AI Gateway（如 gateway:8788；可选）
+#
+# 安全基线：
+# · /control-api 是管理面唯一入口：令牌由本层注入 x-admin-token，
+#   前端 JS 不持有任何令牌；缺令牌实例化时管理写请求全部 401（fail closed）。
+# · 管理 UI 本身必须经 TLS 暴露——请在负载均衡/入口层终结 TLS，
+#   或把 listen 80 改为 listen 443 ssl 并挂载证书（见 platform/README.md）。
+# · 除以下 location 外不代理任何内部端口。
+# ============================================================
+
+# M3 会话感知注入：浏览器持登录会话（x-admin-session）时不注入主令牌，
+# 服务端按会话角色强制权限码；无会话的运维请求（curl/脚本）仍注入主令牌。
+map $http_x_admin_session $admin_injected_token {
+    default "";
+    "" "${PLATFORM_ADMIN_TOKEN}";
+}
+
+server {
+    listen 80;
+    server_name _;
+
+    root /usr/share/nginx/html;
+    index index.html;
+
+    # SPA 路由
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    # ---------- 管理面（受保护、同源） ----------
+    location /control-api/ {
+        proxy_pass http://${PLATFORM_ADMIN_UPSTREAM}/;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        # 服务端注入管理令牌（M3：会话感知——浏览器会话优先，见文件头 map）
+        proxy_set_header x-admin-token $admin_injected_token;
+        # 管理面"实测"为有界调用（≤30s），放宽读超时避免中途掐断
+        proxy_read_timeout 75s;
+        proxy_buffering off;
+        client_max_body_size 1m;
+    }
+
+    # ---------- 公共 API（与管理面隔离的独立路由） ----------
+    location /platform-api/ {
+        proxy_pass http://${PLATFORM_PUBLIC_UPSTREAM}/;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_read_timeout 75s;
+        proxy_buffering off;
+        client_max_body_size 2m;
+    }
+
+    # ---------- World Engine / AI Gateway（既有 dev 代理的生产等价物） ----------
+    location /world-api/ {
+        proxy_pass http://${WORLD_API_UPSTREAM}/;
+        proxy_set_header Host $host;
+        client_max_body_size 1m;
+    }
+
+    location /gateway-api/ {
+        proxy_pass http://${GATEWAY_API_UPSTREAM}/;
+        proxy_set_header Host $host;
+        proxy_buffering off;
+        client_max_body_size 1m;
+    }
+
+    # ---------- World Memory HTTP API（M1.1 起真实接入） ----------
+    location /memory-api/ {
+        proxy_pass http://${MEMORY_API_UPSTREAM}/;
+        proxy_set_header Host $host;
+        client_max_body_size 256k;
+    }
+}

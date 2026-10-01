@@ -8,25 +8,29 @@ defineOptions({ name: "GatewayUsage" });
 const data = ref<UsageData | null>(null);
 const page = ref(1);
 const pageSize = ref(20);
-const filters = ref({ model: "", provider: "", worldId: "", status: "" });
+/* 本页定位 = AI 用量：固定 kind=chat（worlds 透传记录经 group_by 也可查） */
+const filters = ref({ model: "", worldId: "", capability: "", status: "" });
 const { loading, error, run } = useAsyncData();
 
 async function load() {
-  const res = await run(() =>
-    listUsage({
-      page: page.value,
-      pageSize: pageSize.value,
-      model: filters.value.model || undefined,
-      provider: filters.value.provider || undefined,
-      worldId: filters.value.worldId || undefined,
-      status: filters.value.status || undefined
-    })
+  const res = await run(
+    () =>
+      listUsage({
+        kind: "chat",
+        page: page.value,
+        page_size: pageSize.value,
+        model: filters.value.model || undefined,
+        world_id: filters.value.worldId || undefined,
+        capability: filters.value.capability || undefined,
+        status: filters.value.status || undefined
+      }),
+    { silent: true }
   );
-  if (res?.data) data.value = res.data;
+  if (res) data.value = res;
 }
 
 function reset() {
-  filters.value = { model: "", provider: "", worldId: "", status: "" };
+  filters.value = { model: "", worldId: "", capability: "", status: "" };
   page.value = 1;
   load();
 }
@@ -36,12 +40,6 @@ onMounted(load);
 
 <template>
   <div class="p-4">
-    <div class="flex justify-end mb-1">
-      <MockTag
-        detail="Usage 数据为 Mock（管理面聚合 API 待建，见 ADMIN-API-GAP.md）；支持时间 / World / Model / Provider 筛选"
-      />
-    </div>
-
     <!-- 汇总卡 -->
     <el-row v-if="data?.summary" :gutter="12" class="mb-3">
       <el-col :xs="12" :md="6">
@@ -54,7 +52,7 @@ onMounted(load);
       </el-col>
       <el-col :xs="12" :md="6">
         <el-card shadow="never">
-          <div class="text-xs text-[--el-text-color-secondary]">Tokens</div>
+          <div class="text-xs text-[--el-text-color-secondary]">Total Tokens</div>
           <div class="text-xl font-semibold">
             {{ data.summary.totalTokens.toLocaleString() }}
           </div>
@@ -62,9 +60,12 @@ onMounted(load);
       </el-col>
       <el-col :xs="12" :md="6">
         <el-card shadow="never">
-          <div class="text-xs text-[--el-text-color-secondary]">Cost</div>
+          <div class="text-xs text-[--el-text-color-secondary]">
+            Tokens（输入 / 输出）
+          </div>
           <div class="text-xl font-semibold">
-            ${{ data.summary.totalCost.toFixed(4) }}
+            {{ data.summary.promptTokens.toLocaleString() }} /
+            {{ data.summary.completionTokens.toLocaleString() }}
           </div>
         </el-card>
       </el-col>
@@ -84,21 +85,9 @@ onMounted(load);
       <div class="flex flex-wrap items-center gap-2 mb-3">
         <el-input
           v-model="filters.model"
-          placeholder="Model（如 gpt-4o）"
+          placeholder="Model（world-agent 或模型 ID）"
           clearable
-          class="!w-44"
-          @change="
-            () => {
-              page = 1;
-              load();
-            }
-          "
-        />
-        <el-input
-          v-model="filters.provider"
-          placeholder="Provider"
-          clearable
-          class="!w-40"
+          class="!w-52"
           @change="
             () => {
               page = 1;
@@ -111,6 +100,18 @@ onMounted(load);
           placeholder="World ID"
           clearable
           class="!w-40"
+          @change="
+            () => {
+              page = 1;
+              load();
+            }
+          "
+        />
+        <el-input
+          v-model="filters.capability"
+          placeholder="Capability"
+          clearable
+          class="!w-36"
           @change="
             () => {
               page = 1;
@@ -166,40 +167,63 @@ onMounted(load);
             fmtTime((row as UsageRow).time)
           }}</template>
         </el-table-column>
-        <el-table-column prop="model" min-width="150"
+        <el-table-column min-width="180"
           ><template #header><BiText zh="模型" en="Model" /></template>
           <template #default="{ row }">
-            <span class="font-mono text-xs">{{ (row as UsageRow).model }}</span>
+            <div class="font-mono text-xs">
+              {{ (row as UsageRow).model }}
+              <template v-if="(row as UsageRow).modelUsed && (row as UsageRow).model !== (row as UsageRow).modelUsed">
+                <div class="text-[--el-text-color-secondary]">
+                  → {{ (row as UsageRow).modelUsed }}
+                </div>
+              </template>
+            </div>
           </template>
         </el-table-column>
-        <el-table-column prop="provider" min-width="100"
-          ><template #header><BiText zh="提供方" en="Provider" /></template
-        ></el-table-column>
-        <el-table-column prop="worldId" min-width="90"
-          ><template #header><BiText zh="世界" en="World" /></template
-        ></el-table-column>
-        <el-table-column prop="capability" min-width="100"
+        <el-table-column min-width="100"
+          ><template #header><BiText zh="提供方" en="Provider" /></template>
+          <template #default="{ row }">
+            {{ (row as UsageRow).provider ?? "—" }}
+          </template>
+        </el-table-column>
+        <el-table-column min-width="90"
+          ><template #header><BiText zh="世界" en="World" /></template>
+          <template #default="{ row }">
+            {{ (row as UsageRow).worldId ?? "—" }}
+          </template>
+        </el-table-column>
+        <el-table-column min-width="100"
           ><template #header><BiText zh="能力" en="Capability" /></template>
           <template #default="{ row }">
-            <el-tag size="small" type="info" effect="plain">{{
-              (row as UsageRow).capability
-            }}</el-tag>
+            <el-tag
+              v-if="(row as UsageRow).capability"
+              size="small"
+              type="info"
+              effect="plain"
+              >{{ (row as UsageRow).capability }}</el-tag
+            >
+            <span v-else>—</span>
           </template>
         </el-table-column>
-        <el-table-column prop="promptTokens" width="100" align="right"
-          ><template #header><BiText zh="输入" en="Tokens Prompt" /></template
-        ></el-table-column>
-        <el-table-column prop="completionTokens" width="130" align="right"
-          ><template #header
-            ><BiText zh="输出" en="Tokens Completion" /></template
-        ></el-table-column>
         <el-table-column width="90" align="right"
-          ><template #header><BiText zh="成本" en="Cost" /></template>
-          <template #default="{ row }"
-            >${{ (row as UsageRow).cost.toFixed(4) }}</template
-          >
+          ><template #header><BiText zh="输入" en="Prompt" /></template>
+          <template #default="{ row }">{{
+            (row as UsageRow).promptTokens ?? "—"
+          }}</template>
         </el-table-column>
-        <el-table-column prop="latencyMs" width="90" align="right"
+        <el-table-column width="90" align="right"
+          ><template #header><BiText zh="输出" en="Completion" /></template>
+          <template #default="{ row }">{{
+            (row as UsageRow).completionTokens ?? "—"
+          }}</template>
+        </el-table-column>
+        <el-table-column width="90" align="right"
+          ><template #header><BiText zh="合计" en="Total" /></template>
+          <template #default="{ row }">{{
+            (row as UsageRow).totalTokens ?? "—"
+          }}</template>
+        </el-table-column>
+        <el-table-column width="90" align="right"
           ><template #header><BiText zh="延迟" en="Latency" /></template>
           <template #default="{ row }"
             >{{ (row as UsageRow).latencyMs }}ms</template
@@ -208,18 +232,27 @@ onMounted(load);
         <el-table-column width="90" align="center"
           ><template #header><BiText zh="状态" en="Status" /></template>
           <template #default="{ row }">
-            <el-tag
-              :type="
-                (row as UsageRow).status === 'success' ? 'success' : 'danger'
-              "
-              size="small"
+            <el-tooltip
+              :content="(row as UsageRow).error ?? ''"
+              :disabled="!(row as UsageRow).error"
+              placement="top"
             >
-              {{ (row as UsageRow).status }}
-            </el-tag>
+              <el-tag
+                :type="
+                  (row as UsageRow).status === 'success' ? 'success' : 'danger'
+                "
+                size="small"
+              >
+                {{ (row as UsageRow).status }}
+              </el-tag>
+            </el-tooltip>
           </template>
         </el-table-column>
         <template #empty>
-          <el-empty description="暂无用量记录" :image-size="64" />
+          <el-empty
+            description="暂无用量记录（平台收到首个 AI 调用后开始累积）"
+            :image-size="64"
+          />
         </template>
       </el-table>
 

@@ -1,362 +1,267 @@
 <script setup lang="ts">
-import { onMounted, reactive, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
+import { useModelControl } from "@/composables/useModelControl";
 import {
-  listRouter,
-  createRouterEntry,
-  updateRouterEntry,
-  deleteRouterEntry,
-  testRouterEntry,
-  type RouterRow,
-  type RouterTestResult
-} from "@/api/router";
-import { listModels, type ModelRow } from "@/api/model";
+  MANAGED_CAPABILITIES,
+  CAPABILITY_META,
+  type ManagedCapability
+} from "@/api/modelControl";
 import { hasPerms } from "@/utils/auth";
 import { message } from "@/utils/message";
-import { useAsyncData } from "@/composables/useAsyncData";
-import { ElMessageBox } from "element-plus";
 
 defineOptions({ name: "GatewayRouter" });
 
-const list = ref<RouterRow[]>([]);
-const models = ref<ModelRow[]>([]);
-const { loading, error, run } = useAsyncData();
+const mc = useModelControl();
 const canManage = hasPerms("gateway:manage");
 
-const testingId = ref("");
-const testResult = ref<(RouterTestResult & { capability: string }) | null>(
-  null
-);
+/** el-table 行用对象包装（readonly 元组不能直接当 data） */
+const capabilityRows = MANAGED_CAPABILITIES.map(cap => ({ cap }));
+type CapRow = (typeof capabilityRows)[number];
 
-async function load() {
-  const [routerRes, modelRes] = await Promise.all([
-    run(() => listRouter()),
-    run(() => listModels({ pageSize: 100 }), { silent: true })
-  ]);
-  if (routerRes?.data) list.value = routerRes.data.list;
-  if (modelRes?.data) models.value = modelRes.data.list;
+const models = computed(() => mc.config.value?.models ?? []);
+const enabledModels = computed(() => models.value.filter(m => m.enabled));
+
+function modelLabel(id: string | null): string {
+  if (!id) return "（未指派）";
+  const m = models.value.find(x => x.id === id);
+  return m ? `${m.id}（${m.wireModel}）` : id;
 }
 
-const editDialog = ref(false);
-const editForm = reactive({
-  id: "",
-  capability: "",
-  primary: "",
-  fallback: "",
-  priority: 1,
-  budgetPerDay: 1,
-  status: "enabled" as "enabled" | "disabled"
-});
-const saving = ref(false);
-
-function openCreate() {
-  Object.assign(editForm, {
-    id: "",
-    capability: "",
-    primary: "",
-    fallback: "",
-    priority: 1,
-    budgetPerDay: 1,
-    status: "enabled"
-  });
-  editDialog.value = true;
+function setSlot(cap: ManagedCapability, slot: "primary" | "fallback", value: string | null) {
+  if (!mc.config.value) return;
+  mc.config.value.routes[cap][slot] = value || null;
+  mc.markDirty();
 }
 
-function openEdit(row: RouterRow) {
-  Object.assign(editForm, {
-    id: row.id,
-    capability: row.capability,
-    primary: row.primary ?? "",
-    fallback: row.fallback ?? "",
-    priority: row.priority,
-    budgetPerDay: row.budgetPerDay,
-    status: row.status
-  });
-  editDialog.value = true;
+/* ---------- 有界实测（只用当前生效 primary） ---------- */
+interface TestDisplay {
+  capability: ManagedCapability;
+  ok: boolean;
+  modelId: string | null;
+  elapsedMs: number;
+  reply: string | null;
+  errorCode: string | null;
+  errorMessage: string | null;
 }
+const testingCap = ref<ManagedCapability | null>(null);
+const testResult = ref<TestDisplay | null>(null);
 
-async function save() {
-  if (!editForm.capability.trim()) {
-    message("Capability 必填", { type: "warning" });
-    return;
-  }
-  saving.value = true;
-  try {
-    const payload = {
-      capability: editForm.capability.trim(),
-      primary: editForm.primary || null,
-      fallback: editForm.fallback || null,
-      priority: editForm.priority,
-      budgetPerDay: editForm.budgetPerDay,
-      status: editForm.status
-    };
-    const res = editForm.id
-      ? await updateRouterEntry(editForm.id, payload)
-      : await createRouterEntry(payload);
-    if (res) {
-      message(editForm.id ? "已保存" : "已新增路由规则", { type: "success" });
-      editDialog.value = false;
-      load();
-    }
-  } finally {
-    saving.value = false;
-  }
-}
-
-async function remove(row: RouterRow) {
-  await ElMessageBox.confirm(
-    `删除路由规则「${row.capability}」？该能力调用将失去主备模型。`,
-    "删除确认",
-    { type: "warning" }
-  );
-  const res = await run(() => deleteRouterEntry(row.id));
-  if (res) {
-    message("已删除", { type: "success" });
-    load();
-  }
-}
-
-async function toggleStatus(row: RouterRow) {
-  const next = row.status === "enabled" ? "disabled" : "enabled";
-  const res = await run(() => updateRouterEntry(row.id, { status: next }));
-  if (res) {
-    row.status = next;
-    message(`已${next === "enabled" ? "启用" : "禁用"}`, { type: "success" });
-  }
-}
-
-async function test(row: RouterRow) {
-  testingId.value = row.id;
+async function test(cap: ManagedCapability) {
+  testingCap.value = cap;
   testResult.value = null;
   try {
-    const res = await run(() => testRouterEntry(row.id), { silent: true });
-    if (res?.data) {
-      testResult.value = { ...res.data, capability: row.capability };
-      message(res.data.ok ? "路由测试通过" : "路由测试失败", {
-        type: res.data.ok ? "success" : "error"
-      });
+    const r = await mc.testRoute(cap);
+    if (r) {
+      testResult.value = {
+        capability: cap,
+        ok: r.ok,
+        modelId: r.modelId,
+        elapsedMs: r.elapsedMs,
+        reply: r.reply ?? null,
+        errorCode: r.error?.code ?? null,
+        errorMessage: r.error?.message ?? null
+      };
+      message(
+        r.ok
+          ? `能力「${CAPABILITY_META[cap].zh}」路由测试通过`
+          : `能力「${CAPABILITY_META[cap].zh}」路由测试失败`,
+        {
+          type: r.ok ? "success" : "error"
+        }
+      );
     }
   } finally {
-    testingId.value = "";
+    testingCap.value = null;
   }
 }
 
-onMounted(load);
+/** 草稿内整体清空某能力路由（诚实 503：宁缺毋滥） */
+function clearRoute(cap: ManagedCapability) {
+  if (!mc.config.value) return;
+  mc.config.value.routes[cap] = { primary: null, fallback: null };
+  mc.markDirty();
+}
+
+onMounted(() => mc.ensureLoaded());
 </script>
 
 <template>
   <div class="p-4">
-    <div class="flex justify-end mb-1">
-      <MockTag
-        detail="Model Router 数据为 Mock：Capability → Primary / Fallback；管理面 API 待建（ADMIN-API-GAP.md）"
-      />
-    </div>
     <el-card shadow="never">
       <div class="flex flex-wrap items-center gap-2 mb-3">
-        <el-button :loading="loading" @click="load">
-          <IconifyIconOffline icon="ep/refresh" class="mr-1" />刷新
-        </el-button>
+        <el-tag size="small" effect="plain">revision {{ mc.revision.value }}</el-tag>
+        <el-badge :value="mc.dirty.value" :hidden="mc.dirty.value === 0" type="warning">
+          <span class="text-xs text-[--el-text-color-secondary]">草稿未保存改动</span>
+        </el-badge>
+        <el-alert
+          v-if="mc.conflict.value"
+          title="配置已被其他人更新：已为你加载最新版本，请在最新配置上重做改动"
+          type="warning"
+          :closable="false"
+          class="!py-1"
+          show-icon
+        />
         <div class="flex-1" />
         <Perms value="gateway:manage">
-          <el-button type="primary" @click="openCreate">
-            <IconifyIconOffline icon="ep/plus" class="mr-1" />新增路由
+          <el-button
+            :loading="mc.saving.value"
+            :disabled="mc.revision.value === 0"
+            @click="mc.rollback()"
+          >
+            <IconifyIconOffline icon="ep/refresh-right" class="mr-1" />
+            回滚上一版
+          </el-button>
+          <el-button type="primary" :loading="mc.saving.value" @click="mc.save()">
+            <IconifyIconOffline icon="ep/check" class="mr-1" />
+            保存全部
           </el-button>
         </Perms>
+        <el-button :loading="mc.loading.value" @click="mc.refresh()">
+          <IconifyIconOffline icon="ep/refresh" class="mr-1" />刷新
+        </el-button>
       </div>
 
       <el-alert
-        v-if="error"
+        v-if="mc.dirty.value > 0"
+        type="warning"
+        :closable="false"
+        class="mb-3"
+        show-icon
+        :title="`有 ${mc.dirty.value} 项未保存改动：切换页面不会丢失，但刷新、关闭浏览器或点「刷新」会丢弃；点「保存全部」提交到服务端并即时生效。`"
+      />
+
+      <el-alert
+        v-if="mc.loadError.value"
         type="error"
         :closable="false"
         class="mb-3"
         show-icon
       >
         <template #title>
-          加载失败：{{ error }}
-          <el-button text type="primary" size="small" @click="load"
-            >重试</el-button
-          >
+          管理面连接失败：{{ mc.loadError.value }}
+          <el-button text type="primary" size="small" @click="mc.load()">重试</el-button>
         </template>
       </el-alert>
 
-      <el-table v-loading="loading" :data="list" stripe>
-        <el-table-column prop="capability" min-width="110"
+      <el-alert
+        type="info"
+        :closable="false"
+        class="mb-3"
+        show-icon
+        title="六个能力固定：主模型失败自动降级到备模型；未指派的能力对 world-agent 诚实返回 503。保存成功即时生效，无需重启。鼠标悬停能力名可查看其触发语义（由平台任务分析决定）。"
+      />
+
+      <el-table v-loading="mc.loading.value" :data="capabilityRows" stripe>
+        <el-table-column width="190"
           ><template #header><BiText zh="能力" en="Capability" /></template>
           <template #default="{ row }">
-            <el-tag size="small">{{ row.capability }}</el-tag>
+            <el-tooltip
+              :content="CAPABILITY_META[(row as CapRow).cap].desc"
+              placement="top"
+            >
+              <div>
+                <el-tag size="small">{{
+                  CAPABILITY_META[(row as CapRow).cap].zh
+                }}</el-tag>
+                <span
+                  class="text-xs text-[--el-text-color-secondary] font-mono ml-1"
+                  >{{ (row as CapRow).cap }}</span
+                >
+              </div>
+            </el-tooltip>
           </template>
         </el-table-column>
-        <el-table-column min-width="150"
-          ><template #header><BiText zh="主模型" en="Primary" /></template>
+        <el-table-column min-width="220"
+          ><template #header><BiText zh="主模型（仅启用模型可选）" en="Primary" /></template>
           <template #default="{ row }">
-            <span class="font-mono text-sm">{{
-              row.primary ?? "（未设置）"
-            }}</span>
+            <el-select
+              :model-value="mc.config.value?.routes[(row as CapRow).cap]?.primary ?? null"
+              filterable
+              clearable
+              placeholder="未指派（503）"
+              class="!w-full"
+              :disabled="!canManage"
+              @update:model-value="v => setSlot((row as CapRow).cap, 'primary', (v as string | null) || null)"
+            >
+              <el-option
+                v-for="m in enabledModels"
+                :key="m.id"
+                :label="`${m.id}（${m.wireModel}）`"
+                :value="m.id"
+              />
+            </el-select>
           </template>
         </el-table-column>
-        <el-table-column min-width="150"
+        <el-table-column min-width="220"
           ><template #header><BiText zh="备模型" en="Fallback" /></template>
           <template #default="{ row }">
-            <span class="font-mono text-sm text-[--el-text-color-secondary]">
-              {{ row.fallback ?? "—" }}
-            </span>
-          </template>
-        </el-table-column>
-        <el-table-column prop="priority" width="90" align="center"
-          ><template #header><BiText zh="优先级" en="Priority" /></template
-        ></el-table-column>
-        <el-table-column label="Budget/日" width="100" align="right">
-          <template #default="{ row }">${{ row.budgetPerDay }}</template>
-        </el-table-column>
-        <el-table-column width="90" align="center"
-          ><template #header><BiText zh="状态" en="Status" /></template>
-          <template #default="{ row }">
-            <el-tag
-              :type="row.status === 'enabled' ? 'success' : 'danger'"
-              size="small"
+            <el-select
+              :model-value="mc.config.value?.routes[(row as CapRow).cap]?.fallback ?? null"
+              filterable
+              clearable
+              placeholder="—"
+              class="!w-full"
+              :disabled="!canManage"
+              @update:model-value="v => setSlot((row as CapRow).cap, 'fallback', (v as string | null) || null)"
             >
-              {{ row.status === "enabled" ? "启用" : "禁用" }}
-            </el-tag>
+              <el-option
+                v-for="m in enabledModels"
+                :key="m.id"
+                :label="`${m.id}（${m.wireModel}）`"
+                :value="m.id"
+              />
+            </el-select>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="220" fixed="right">
+        <el-table-column label="操作" width="150" fixed="right">
           <template #default="{ row }">
             <el-button
               text
               size="small"
               type="primary"
-              :loading="testingId === row.id"
-              @click="test(row as RouterRow)"
+              :loading="testingCap === (row as CapRow).cap"
+              @click="test((row as CapRow).cap)"
             >
               测试
             </el-button>
-            <template v-if="canManage">
-              <el-button text size="small" @click="openEdit(row as RouterRow)"
-                >编辑</el-button
-              >
-              <el-button
-                text
-                size="small"
-                type="warning"
-                @click="toggleStatus(row as RouterRow)"
-              >
-                {{ row.status === "enabled" ? "禁用" : "启用" }}
-              </el-button>
-              <el-button
-                text
-                size="small"
-                type="danger"
-                @click="remove(row as RouterRow)"
-                >删除</el-button
-              >
-            </template>
+            <Perms value="gateway:manage">
+              <el-button text size="small" @click="clearRoute((row as CapRow).cap)">清空</el-button>
+            </Perms>
           </template>
         </el-table-column>
-        <template #empty>
-          <el-empty description="暂无路由规则" :image-size="64" />
-        </template>
       </el-table>
     </el-card>
 
-    <!-- 测试结果 -->
+    <!-- 测试结果（真实上游调用，只打当前生效 primary 链路） -->
     <el-dialog
       :model-value="!!testResult"
-      :title="`路由测试 · ${testResult?.capability}`"
-      width="480px"
+      :title="`路由测试 · ${testResult ? CAPABILITY_META[testResult.capability].zh : ''}（${testResult?.capability ?? ''}）`"
+      width="520px"
       @update:model-value="v => !v && (testResult = null)"
       @closed="testResult = null"
     >
-      <template v-if="testResult">
-        <el-descriptions :column="1" border size="small">
-          <el-descriptions-item label="结果">
-            <el-tag :type="testResult.ok ? 'success' : 'danger'" size="small">
-              {{ testResult.ok ? "通过" : "失败" }}
-            </el-tag>
-          </el-descriptions-item>
-          <el-descriptions-item label="模型">{{
-            testResult.model ?? "—"
-          }}</el-descriptions-item>
-          <el-descriptions-item label="延迟"
-            >{{ testResult.latencyMs }}ms</el-descriptions-item
-          >
-          <el-descriptions-item label="回复">{{
-            testResult.reply
-          }}</el-descriptions-item>
-        </el-descriptions>
-      </template>
-    </el-dialog>
-
-    <!-- 编辑 -->
-    <el-dialog
-      v-model="editDialog"
-      :title="editForm.id ? '编辑路由' : '新增路由'"
-      width="520px"
-    >
-      <el-form label-width="120px">
-        <el-form-item label="能力 Capability" required>
-          <el-input
-            v-model="editForm.capability"
-            placeholder="如 roleplay / narrative / fast"
-            :disabled="!!editForm.id"
-          />
-        </el-form-item>
-        <el-form-item label="主模型 Primary">
-          <el-select
-            v-model="editForm.primary"
-            filterable
-            clearable
-            placeholder="选择主模型"
-            class="!w-full"
-          >
-            <el-option
-              v-for="m in models"
-              :key="m.id"
-              :label="`${m.name}（${m.provider}）`"
-              :value="m.name"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="备模型 Fallback">
-          <el-select
-            v-model="editForm.fallback"
-            filterable
-            clearable
-            placeholder="选择备模型"
-            class="!w-full"
-          >
-            <el-option
-              v-for="m in models"
-              :key="m.id"
-              :label="`${m.name}（${m.provider}）`"
-              :value="m.name"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="优先级 Priority">
-          <el-input-number v-model="editForm.priority" :min="1" :max="99" />
-        </el-form-item>
-        <el-form-item label="Budget/日 (USD)">
-          <el-input-number
-            v-model="editForm.budgetPerDay"
-            :min="0"
-            :max="1000"
-            :precision="2"
-          />
-        </el-form-item>
-        <el-form-item label="状态 Status">
-          <el-switch
-            v-model="editForm.status"
-            active-value="enabled"
-            inactive-value="disabled"
-            active-text="启用"
-            inactive-text="禁用"
-          />
-        </el-form-item>
-      </el-form>
+      <el-descriptions v-if="testResult" :column="1" border size="small">
+        <el-descriptions-item label="结果">
+          <el-tag :type="testResult.ok ? 'success' : 'danger'" size="small">
+            {{ testResult.ok ? "通过" : "失败" }}
+          </el-tag>
+        </el-descriptions-item>
+        <el-descriptions-item label="实测模型">{{
+          testResult.modelId ?? "—"
+        }}</el-descriptions-item>
+        <el-descriptions-item label="耗时">{{ testResult.elapsedMs }}ms</el-descriptions-item>
+        <el-descriptions-item v-if="testResult.reply" label="回复">
+          <span class="font-mono text-sm">{{ testResult.reply }}</span>
+        </el-descriptions-item>
+        <el-descriptions-item v-if="testResult.errorCode" label="错误码">
+          <span class="font-mono text-sm">{{ testResult.errorCode }}</span>
+        </el-descriptions-item>
+        <el-descriptions-item v-if="testResult.errorMessage" label="错误信息">
+          {{ testResult.errorMessage }}
+        </el-descriptions-item>
+      </el-descriptions>
       <template #footer>
-        <el-button @click="editDialog = false">取消</el-button>
-        <el-button type="primary" :loading="saving" @click="save"
-          >保存</el-button
-        >
+        <el-button @click="testResult = null">关闭</el-button>
       </template>
     </el-dialog>
   </div>

@@ -11,8 +11,9 @@
 import { createServer, type Server } from 'node:http';
 import { randomUUID } from 'node:crypto';
 import type { KeyStore } from '../keys/keystore.ts';
-import type { EngineClient, GatewayClient } from '../types.ts';
+import type { EngineClient, GatewayClient, StreamResponse } from '../types.ts';
 import type { ModelRouter } from '../router/modelrouter.ts';
+import type { UsageSink } from '../usage/recorder.ts';
 import { createWorldPlatform } from './protocol.ts';
 
 const MAX_BODY_BYTES = 2 * 1024 * 1024;
@@ -28,6 +29,11 @@ export interface PlatformServerOptions {
   host?: string;
   /** 访问日志（默认开启；测试可关） */
   accessLog?: boolean;
+  /**
+   * 结构化用量记录（M2.2；缺省不计量）。JSON 路径由协议层记，
+   * 流式透传在泵完/中断时由本层代记（时延只有这里完整）。
+   */
+  usage?: UsageSink;
   /**
    * CORS 允许来源（默认 '*'）。
    * 安全说明：本 API 用 Bearer 头鉴权而非 Cookie，浏览器不会跨站自动携带
@@ -50,8 +56,35 @@ export function startPlatformServer(opts: PlatformServerOptions): Promise<Platfo
     gateway: opts.gateway,
     router: opts.router,
     version: opts.version,
+    usage: opts.usage,
   });
   const accessLog = opts.accessLog ?? true;
+
+  /** 流式透传的计量：泵完/中断时才有时延，协议层把 key/model 挂在 usageMeta 上 */
+  function recordStreamUsage(
+    out: StreamResponse,
+    method: string | undefined,
+    pathname: string,
+    requestId: string,
+    startedAt: number,
+    error: string | null,
+  ): void {
+    if (!opts.usage || !out.usageMeta) return;
+    opts.usage.record({
+      ts: new Date().toISOString(),
+      requestId,
+      kind: 'chat',
+      keyId: out.usageMeta.keyId,
+      tenantId: out.usageMeta.tenantId,
+      method: method ?? 'GET',
+      path: pathname,
+      status: out.status,
+      latencyMs: Date.now() - startedAt,
+      model: out.usageMeta.model,
+      route: 'proxy',
+      ...(error ? { error } : {}),
+    });
+  }
 
   const server: Server = createServer((req, res) => {
     const requestId = randomUUID();
@@ -104,6 +137,7 @@ export function startPlatformServer(opts: PlatformServerOptions): Promise<Platfo
           query,
           body,
           headers: req.headers as Record<string, string | string[] | undefined>,
+          requestId,
         })
         .then((out) => {
           if (out.kind === 'json') {
@@ -118,12 +152,16 @@ export function startPlatformServer(opts: PlatformServerOptions): Promise<Platfo
                 if (done) {
                   res.end();
                   logLine(accessLog, req.method, url.pathname, requestId, out.status, startedAt);
+                  recordStreamUsage(out, req.method, url.pathname, requestId, startedAt, null);
                   return;
                 }
                 res.write(Buffer.from(value));
                 return pump();
               });
-            pump().catch(() => res.end());
+            pump().catch((err) => {
+              res.end();
+              recordStreamUsage(out, req.method, url.pathname, requestId, startedAt, `stream_aborted: ${err instanceof Error ? err.message : String(err)}`);
+            });
           }
         })
         .catch((err) => {

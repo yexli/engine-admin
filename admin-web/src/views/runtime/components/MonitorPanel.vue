@@ -20,17 +20,18 @@
         <el-button size="small" type="warning" @click="timeDialog = true">
           <IconifyIconOffline icon="ep/timer" class="mr-1" />推进时间
         </el-button>
+        <el-button
+          size="small"
+          :type="paused ? 'success' : 'warning'"
+          @click="togglePause"
+        >
+          <IconifyIconOffline
+            :icon="paused ? 'ep/video-play' : 'ep/video-pause'"
+            class="mr-1"
+          />
+          {{ paused ? "恢复" : "暂停" }}
+        </el-button>
       </Perms>
-      <el-tooltip
-        content="引擎 V1.0 暂无暂停/恢复/关闭 API（见 ADMIN-API-GAP.md）"
-        placement="top"
-      >
-        <span>
-          <el-button size="small" disabled>
-            <IconifyIconOffline icon="ep/video-pause" class="mr-1" />暂停
-          </el-button>
-        </span>
-      </el-tooltip>
     </div>
 
     <el-alert
@@ -57,10 +58,22 @@
               summary.worldId
             }}</el-descriptions-item>
             <el-descriptions-item label="状态">
-              <el-tag type="success" size="small">assumed-running</el-tag>
-              <span class="text-xs text-[--el-text-color-secondary] ml-1"
-                >（引擎无暂停 API）</span
+              <el-tooltip
+                :content="
+                  paused
+                    ? '软暂停：命令与时间推进被拒绝（读操作照常）'
+                    : '正常运行（服务面受理命令与推进）'
+                "
+                placement="top"
               >
+                <el-tag
+                  :type="paused ? 'warning' : 'success'"
+                  size="small"
+                  class="cursor-default"
+                >
+                  {{ paused ? "paused（软暂停）" : "running" }}
+                </el-tag>
+              </el-tooltip>
             </el-descriptions-item>
             <el-descriptions-item label="刻 Tick">{{
               summary.tick
@@ -133,6 +146,94 @@
       </el-col>
     </el-row>
 
+    <!-- M1.2/M1.4：事件队列（scheduler）与最近命令（commands 历史） -->
+    <el-row v-if="summary" :gutter="12">
+      <el-col :md="10" class="mb-3">
+        <el-card shadow="never">
+          <template #header>
+            <div class="flex items-center justify-between">
+              <BiText zh="事件队列（调度观测）" en="Event Queue" />
+              <router-link to="/runtime/scheduler">
+                <el-button size="small" text type="primary"
+                  >调度详情</el-button
+                >
+              </router-link>
+            </div>
+          </template>
+          <el-descriptions v-if="scheduler" :column="2" border size="small">
+            <el-descriptions-item label="订阅者">{{
+              scheduler.stats.subscribers
+            }}</el-descriptions-item>
+            <el-descriptions-item label="定时事件">{{
+              scheduler.stats.scheduled
+            }}</el-descriptions-item>
+            <el-descriptions-item label="延后重投">{{
+              scheduler.stats.deferred
+            }}</el-descriptions-item>
+            <el-descriptions-item label="死信">
+              <el-tag
+                :type="scheduler.stats.deadLetters ? 'danger' : 'success'"
+                size="small"
+                >{{ scheduler.stats.deadLetters }}</el-tag
+              >
+            </el-descriptions-item>
+            <el-descriptions-item label="本 Tick 派发" :span="2">{{
+              scheduler.stats.tickEmitted
+            }}</el-descriptions-item>
+          </el-descriptions>
+          <el-empty v-else description="—" :image-size="40" />
+        </el-card>
+      </el-col>
+
+      <el-col :md="14" class="mb-3">
+        <el-card shadow="never">
+          <template #header>
+            <div class="flex items-center justify-between">
+              <BiText zh="Last Command（最近命令）" en="Last Command" />
+              <router-link to="/runtime/commands">
+                <el-button size="small" text type="primary">命令调试台</el-button>
+              </router-link>
+            </div>
+          </template>
+          <template v-if="lastCommand">
+            <el-descriptions :column="2" border size="small">
+              <el-descriptions-item label="命令">
+                <span class="font-mono">{{ lastCommand.command.type }}</span>
+              </el-descriptions-item>
+              <el-descriptions-item label="结果">
+                <el-tag
+                  :type="lastCommand.ok ? 'success' : 'danger'"
+                  size="small"
+                  >{{ lastCommand.ok ? "ok" : "rejected" }}</el-tag
+                >
+              </el-descriptions-item>
+              <el-descriptions-item label="时间" :span="2">{{
+                lastCommand.at
+              }}</el-descriptions-item>
+              <el-descriptions-item
+                v-if="lastCommand.reason"
+                label="拒绝原因"
+                :span="2"
+                >{{ lastCommand.reason }}</el-descriptions-item
+              >
+              <el-descriptions-item label="产生事件" :span="2">
+                <el-tag
+                  v-for="ev in lastCommand.events.slice(0, 6)"
+                  :key="ev"
+                  size="small"
+                  type="warning"
+                  class="mr-1"
+                  >{{ ev }}</el-tag
+                >
+                <span v-if="!lastCommand.events.length">—</span>
+              </el-descriptions-item>
+            </el-descriptions>
+          </template>
+          <el-empty v-else description="本世界还没有命令留痕" :image-size="40" />
+        </el-card>
+      </el-col>
+    </el-row>
+
     <el-empty v-else-if="!loading && !error" description="请先选择世界" />
 
     <!-- 推进时间 -->
@@ -163,9 +264,14 @@
 import { ref, watch } from "vue";
 import {
   getRuntimeSummary,
+  getSchedulerView,
   advanceTime,
-  type RuntimeSummary
+  type RuntimeSummary,
+  type SchedulerView
 } from "@/api/runtime";
+import { getCommandHistory } from "@/api/command";
+import { getWorld, pauseWorld, resumeWorld } from "@/api/world";
+import type { CommandHistoryEntry } from "@/api/types";
 import { useAsyncData } from "@/composables/useAsyncData";
 import { usePolling } from "@/composables/usePolling";
 import { message } from "@/utils/message";
@@ -176,16 +282,45 @@ const props = defineProps<{ worldId: string }>();
 
 const interval = 5000;
 const summary = ref<RuntimeSummary | null>(null);
+const scheduler = ref<SchedulerView | null>(null);
+const lastCommand = ref<CommandHistoryEntry | null>(null);
+const paused = ref(false);
 const { loading, error, run } = useAsyncData();
 
 const timeDialog = ref(false);
 const ticks = ref(12);
 const { loading: advancing, run: runAdvance } = useAsyncData();
 
+/** G1 软暂停：面板顶部提供暂停/恢复（状态来自世界清单） */
+async function loadPaused() {
+  if (!props.worldId) return;
+  const info = await getWorld(props.worldId).catch(() => null);
+  paused.value = info?.status === "paused";
+}
+
+async function togglePause() {
+  try {
+    const res = paused.value
+      ? await resumeWorld(props.worldId)
+      : await pauseWorld(props.worldId);
+    paused.value = res.status === "paused";
+    message(paused.value ? "已暂停（命令与推进被拒绝，读操作照常）" : "已恢复", {
+      type: "success"
+    });
+  } catch (e) {
+    message(e instanceof Error ? e.message : "操作失败", { type: "error" });
+  }
+}
+
 async function load() {
   if (!props.worldId) return;
   const res = await run(() => getRuntimeSummary(props.worldId));
   if (res) summary.value = res;
+  /* 调度观测 + 最近命令（失败不阻塞主面板） */
+  const sched = await run(() => getSchedulerView(props.worldId));
+  if (sched) scheduler.value = sched;
+  const hist = await run(() => getCommandHistory(props.worldId, 1));
+  if (hist) lastCommand.value = hist.commands[0] ?? null;
 }
 
 async function doAdvance() {
@@ -206,6 +341,7 @@ watch(
   () => {
     summary.value = null;
     load();
+    loadPaused();
     if (!polling.value) start();
   },
   { immediate: true }

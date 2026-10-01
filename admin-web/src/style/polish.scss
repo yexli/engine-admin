@@ -1,0 +1,102 @@
+/* ============================================================
+   管理台视觉打磨层（全局，一次生效所有页面）
+   ------------------------------------------------------------
+   只用 Element Plus CSS 变量（浅色/暗色主题自动适配），不改结构：
+   · 卡片：圆角、头部字重与分隔、悬停极轻抬升
+   · 表格：表头底色/字重、行悬停、密度观感
+   · 弹窗 / 抽屉 / 消息框：圆角与头部字重
+   · 标签 / 按钮：微调圆角
+   · 滚动条：窄条细杆（内容区）
+   · 数字：统计值等宽对齐
+   ============================================================ */
+
+/* ---------- 卡片 ---------- */
+.el-card {
+  border-radius: 10px;
+  border-color: var(--el-border-color-lighter);
+  transition: box-shadow 0.2s ease;
+}
+.el-card__header {
+  font-weight: 600;
+  border-bottom-color: var(--el-border-color-lighter);
+}
+.el-card.is-never-shadow:hover {
+  box-shadow: var(--el-box-shadow-light);
+}
+
+/* ---------- 表格 ---------- */
+.el-table {
+  --el-table-header-bg-color: var(--el-fill-color-light);
+  --el-table-header-text-color: var(--el-text-color-primary);
+}
+.el-table th.el-table__cell {
+  font-weight: 600;
+}
+.el-table .el-table__cell {
+  padding: 8px 0;
+}
+.el-table--striped .el-table__body tr.el-table__row--striped td.el-table__cell {
+  background: var(--el-fill-color-extra-light);
+}
+
+/* ---------- 弹窗 / 抽屉 / 消息框 ---------- */
+.el-dialog {
+  border-radius: 12px;
+}
+.el-dialog__title {
+  font-weight: 600;
+}
+.el-drawer__header {
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+.el-message-box {
+  border-radius: 10px;
+}
+.el-message-box__title {
+  font-weight: 600;
+}
+
+/* ---------- 标签 / 按钮 ---------- */
+.el-tag {
+  border-radius: 5px;
+}
+.el-button {
+  border-radius: 6px;
+}
+.el-button.is-text {
+  padding: 5px 8px;
+}
+
+/* ---------- 描述列表（详情视图） ---------- */
+.el-descriptions__label {
+  font-weight: 600;
+}
+
+/* ---------- 内容区滚动条（窄条细杆，浅/暗自适应） ---------- */
+.main-content::-webkit-scrollbar,
+.el-table__body-wrapper::-webkit-scrollbar,
+.el-scrollbar__wrap::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.main-content::-webkit-scrollbar-thumb,
+.el-table__body-wrapper::-webkit-scrollbar-thumb,
+.el-scrollbar__wrap::-webkit-scrollbar-thumb {
+  background: var(--el-border-color);
+  border-radius: 4px;
+}
+.main-content::-webkit-scrollbar-thumb:hover,
+.el-table__body-wrapper::-webkit-scrollbar-thumb:hover,
+.el-scrollbar__wrap::-webkit-scrollbar-thumb:hover {
+  background: var(--el-text-color-disabled);
+}
+.main-content::-webkit-scrollbar-track,
+.el-table__body-wrapper::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* ---------- 统计数字：等宽对齐（配合各页 tabular-nums 使用） ---------- */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}

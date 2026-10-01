@@ -28,6 +28,8 @@ export interface GatewayServer {
   readonly url: string;
   /** 动态注册提供方（提供方可热插：注册即出现在 /v1/models） */
   register(provider: GatewayProvider): void;
+  /** 整体替换提供方快照（进行中请求持有旧快照跑完，不受影响） */
+  replaceProviders(providers: readonly GatewayProvider[]): void;
   close(): Promise<void>;
 }
 
@@ -123,6 +125,7 @@ export function startGatewayServer(opts: GatewayServerOptions = {}): Promise<Gat
         port,
         url: `http://${opts.host ?? '127.0.0.1'}:${port}`,
         register: (p) => gateway.registry.register(p),
+        replaceProviders: (providers) => gateway.registry.replaceAll(providers),
         close: () =>
           new Promise<void>((resolveClose) => {
             server.close(() => resolveClose());

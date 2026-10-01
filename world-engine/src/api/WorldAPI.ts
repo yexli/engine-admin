@@ -152,8 +152,8 @@ export function createWorld<W extends EngineWorldState = EngineWorldState>(opts:
     emitEvent: (draft: EventEmit) => {
       const s = container.need();
       const ev = events.makeEvent({ ...draft, day: draft.day ?? Math.floor(s.t / CHEN_PER_DAY) + 1, tick: draft.tick ?? s.t });
+      /* 总线通配订阅已记账入环——这里不再直推（曾导致环内双份，M4.3 修复） */
       bus.emit(ev);
-      ring.push(ev);
       return ev;
     },
     setSavePort: (port: SavePort<W>) => {

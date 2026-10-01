@@ -3,9 +3,10 @@
  *  执行走真实引擎 POST /v1/worlds/{id}/commands。
  */
 import { http } from "@/utils/http";
-import type { CommandResult, WorldCommand } from "./types";
+import type { CommandHistoryEntry, CommandResult, WorldCommand } from "./types";
 
 export type { CommandResult, WorldCommand };
+export type { CommandHistoryEntry } from "./types";
 
 /** 命令参数说明（与引擎规则对齐，供调试台生成表单） */
 export interface CommandSpec {
@@ -186,5 +187,14 @@ export const executeCommand = (worldId: string, cmd: WorldCommand) => {
     "post",
     `/world-api/v1/worlds/${encodeURIComponent(worldId)}/commands`,
     { data: cmd }
+  );
+};
+
+/** 最近命令历史（新 → 旧；M1.4 起真实，Runtime 侧环形缓冲） */
+export const getCommandHistory = (worldId: string, n = 20) => {
+  return http.request<{ total: number; commands: CommandHistoryEntry[] }>(
+    "get",
+    `/world-api/v1/worlds/${encodeURIComponent(worldId)}/commands`,
+    { params: { n } }
   );
 };

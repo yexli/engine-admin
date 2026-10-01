@@ -66,7 +66,7 @@ export async function runWorldAgent(
       ok: false,
       status: 503,
       code: 'no_model_configured',
-      message: `能力 '${analysis.capability}' 未配置可用模型（primary/fallback 均缺失或冷却中）；请检查 platform/data/router.json`,
+      message: `能力 '${analysis.capability}' 未配置可用模型（primary/fallback 均缺失或冷却中）；请在管理台 Model Router 为该能力指派已启用的模型`,
     };
   }
 
@@ -77,28 +77,39 @@ export async function runWorldAgent(
 
   let modelUsed = selected.model;
   let usedFallback = selected.usedFallback;
-  let text = await callModel(deps, modelUsed, upstreamMessages);
-  if (text === null) {
+  let outcome = await callModel(deps, modelUsed, upstreamMessages);
+  if (!outcome.ok) {
     const { fallback } = deps.router.route(analysis.capability);
     if (fallback && fallback !== modelUsed) {
       usedFallback = true;
       modelUsed = fallback;
-      text = await callModel(deps, fallback, upstreamMessages);
+      const fb = await callModel(deps, fallback, upstreamMessages);
+      outcome = fb.ok ? fb : outcome;
     }
   }
-  if (text === null) {
+  if (!outcome.ok) {
+    if (outcome.credential) {
+      /* 配置错误要可见：不冷却、不伪装成瞬时故障 */
+      return {
+        ok: false,
+        status: 502,
+        code: 'upstream_credential_rejected',
+        message: `上游拒绝凭证：模型 '${modelUsed}' 的凭证被上游拒绝（401/403）。请在管理台更新对应供应商的凭证；该错误未触发冷却，修复后立即可用`,
+      };
+    }
+    const route = deps.router.route(analysis.capability);
     return {
       ok: false,
       status: 502,
       code: 'upstream_error',
-      message: `模型调用失败：'${analysis.capability}' 的主备模型均不可用（${deps.router.route(analysis.capability).primary} / ${deps.router.route(analysis.capability).fallback}）`,
+      message: `模型调用失败：'${analysis.capability}' 的主备模型均不可用（${route.primary} / ${route.fallback}）`,
     };
   }
 
   return {
     ok: true,
     result: {
-      text,
+      text: outcome.text,
       analysis,
       modelUsed,
       fallbackUsed: usedFallback,
@@ -107,19 +118,31 @@ export async function runWorldAgent(
   };
 }
 
-/** 调用网关；null = 失败（已记入路由冷却） */
+/**
+ * 调用网关；成功 → {ok:true,text}。
+ * 失败分类：凭证被上游拒绝（code=upstream_credential_rejected 或 401/403）
+ * 属配置错误——不进冷却（冷却会掩盖问题并让 fallback 之外的请求假装
+ * 「未配置」）；其余失败照旧进冷却触发降级。
+ */
+type CallOutcome =
+  | { ok: true; text: string }
+  | { ok: false; credential: boolean; error: string };
+
 async function callModel(
   deps: WorldAgentDeps,
   model: string,
   messages: ChatMessage[],
-): Promise<string | null> {
+): Promise<CallOutcome> {
   const res = await deps.gateway.chat(model, messages);
   if (res.ok) {
     deps.router.markHealthy(model);
-    return res.text;
+    return { ok: true, text: res.text };
   }
-  deps.router.markFailed(model);
-  return null;
+  const credential = res.code === 'upstream_credential_rejected' || res.status === 401 || res.status === 403;
+  if (!credential) {
+    deps.router.markFailed(model);
+  }
+  return { ok: false, credential, error: res.error };
 }
 
 /* ---------------- 响应组装（OpenAI 兼容 + platform 元数据） ---------------- */

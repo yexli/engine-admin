@@ -10,7 +10,6 @@ import { configCompressPlugin } from "./compress";
 import removeNoMatch from "vite-plugin-router-warn";
 import { visualizer } from "rollup-plugin-visualizer";
 import { codeInspectorPlugin } from "code-inspector-plugin";
-import { vitePluginFakeServer } from "vite-plugin-fake-server";
 
 export function getPluginsList(
   VITE_CDN: boolean,
@@ -39,13 +38,9 @@ export function getPluginsList(
      * vite-plugin-router-warn只在开发环境下启用，只处理vue-router文件并且只在服务启动或重启时运行一次，性能消耗可忽略不计
      */
     removeNoMatch(),
-    // mock支持
-    vitePluginFakeServer({
-      logger: false,
-      include: "mock",
-      infixName: false,
-      enableProd: true
-    }),
+    /* M5.1 Mock 清退：vite-plugin-fake-server 已移除——全部数据面为真实 API
+     （登录 /control-api/v1/admin/session、路由 /get-async-routes 改前端静态），
+     生产构建不再包含任何假路由。 */
     // svg组件化支持
     svgLoader(),
     // 自动按需加载图标

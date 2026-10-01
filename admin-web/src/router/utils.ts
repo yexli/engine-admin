@@ -26,8 +26,8 @@ const IFrame = () => import("@/layout/frame.vue");
 // https://cn.vitejs.dev/guide/features.html#glob-import
 const modulesRoutes = import.meta.glob("/src/views/**/*.{vue,tsx}");
 
-// 动态路由
-import { getAsyncRoutes } from "@/api/routes";
+// 动态路由（M5.1 Mock 清退：菜单全部为前端静态路由，src/router/modules；
+// 异步路由恒为空数组，接入真实后端权限服务时在此恢复服务端下发）
 
 function handRank(routeInfo: any) {
   const { name, path, parentId, meta } = routeInfo;
@@ -209,7 +209,7 @@ function initRouter() {
       });
     } else {
       return new Promise(resolve => {
-        getAsyncRoutes().then(({ data }) => {
+        Promise.resolve([]).then(data => {
           handleAsyncRoutes(cloneDeep(data));
           storageLocal().setItem(key, data);
           resolve(router);
@@ -218,7 +218,9 @@ function initRouter() {
     }
   } else {
     return new Promise(resolve => {
-      getAsyncRoutes().then(({ data }) => {
+      /* M5.1 Mock 清退：菜单全部为前端静态路由（src/router/modules），
+         异步路由恒为空数组；原 /get-async-routes 假服务已随 Mock 清退移除 */
+      Promise.resolve([]).then(data => {
         handleAsyncRoutes(cloneDeep(data));
         resolve(router);
       });

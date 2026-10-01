@@ -25,16 +25,14 @@ async function load() {
   const res = await run(() =>
     listUsers({
       page: page.value,
-      pageSize: pageSize.value,
+      page_size: pageSize.value,
       keyword: filters.value.keyword || undefined,
       role: filters.value.role || undefined,
       status: filters.value.status || undefined
     })
   );
-  if (res?.data) {
-    list.value = res.data.list;
-    total.value = res.data.total;
-  }
+  list.value = res?.list ?? [];
+  total.value = res?.total ?? 0;
 }
 
 /* 创建 */
@@ -42,6 +40,7 @@ const createDialog = ref(false);
 const creating = ref(false);
 const createForm = reactive({
   username: "",
+  password: "",
   nickname: "",
   role: "viewer",
   remark: ""
@@ -49,6 +48,7 @@ const createForm = reactive({
 
 function openCreate() {
   createForm.username = "";
+  createForm.password = "";
   createForm.nickname = "";
   createForm.role = "viewer";
   createForm.remark = "";
@@ -56,66 +56,69 @@ function openCreate() {
 }
 
 async function doCreate() {
-  if (!createForm.username.trim()) {
-    message("用户名必填", { type: "warning" });
+  if (!createForm.username.trim() || createForm.password.length < 6) {
+    message("用户名必填；口令至少 6 位", { type: "warning" });
     return;
   }
   creating.value = true;
   try {
-    const res = await createUser({
+    await createUser({
       username: createForm.username.trim(),
+      password: createForm.password,
       nickname: createForm.nickname || undefined,
-      roles: [createForm.role],
+      role: createForm.role,
       remark: createForm.remark || undefined
     });
-    if (res?.success) {
-      message(
-        "用户已创建（初始密码请通过安全渠道发放，第一版 Mock 未实现密码）",
-        { type: "success" }
-      );
-      createDialog.value = false;
-      load();
-    } else {
-      message(res?.msg ?? "创建失败", { type: "error" });
-    }
+    message("用户已创建", { type: "success" });
+    createDialog.value = false;
+    load();
+  } catch (e) {
+    message(e instanceof Error ? e.message : "创建失败", { type: "error" });
   } finally {
     creating.value = false;
   }
 }
 
-/* 编辑 / 启停 */
+/* 编辑 / 重置口令 / 启停 */
 const editDialog = ref(false);
 const saving = ref(false);
 const editForm = reactive({
   id: "",
+  username: "",
+  builtin: false,
   nickname: "",
-  roles: [] as string[],
-  remark: ""
+  role: "viewer",
+  remark: "",
+  password: ""
 });
 
 function openEdit(row: UserRow) {
   editForm.id = row.id;
+  editForm.username = row.username;
+  editForm.builtin = row.builtin;
   editForm.nickname = row.nickname;
-  editForm.roles = [...row.roles];
+  editForm.role = row.role;
   editForm.remark = row.remark;
+  editForm.password = "";
   editDialog.value = true;
 }
 
 async function saveEdit() {
   saving.value = true;
   try {
-    const res = await updateUser(editForm.id, {
+    await updateUser(editForm.id, {
       nickname: editForm.nickname,
-      roles: editForm.roles,
-      remark: editForm.remark
+      role: editForm.role,
+      remark: editForm.remark,
+      ...(editForm.password ? { password: editForm.password } : {})
     });
-    if (res?.success) {
-      message("已保存", { type: "success" });
-      editDialog.value = false;
-      load();
-    } else {
-      message(res?.msg ?? "保存失败", { type: "error" });
-    }
+    message(editForm.password ? "已保存（该用户全部会话已吊销，需重新登录）" : "已保存", {
+      type: "success"
+    });
+    editDialog.value = false;
+    load();
+  } catch (e) {
+    message(e instanceof Error ? e.message : "保存失败", { type: "error" });
   } finally {
     saving.value = false;
   }
@@ -123,10 +126,14 @@ async function saveEdit() {
 
 async function toggleStatus(row: UserRow) {
   const next = row.status === "active" ? "disabled" : "active";
-  const res = await run(() => updateUser(row.id, { status: next }));
-  if (res) {
+  try {
+    await updateUser(row.id, { status: next });
     row.status = next;
-    message(next === "active" ? "已启用" : "已停用", { type: "success" });
+    message(next === "active" ? "已启用" : "已停用（其全部会话已吊销）", {
+      type: "success"
+    });
+  } catch (e) {
+    message(e instanceof Error ? e.message : "操作失败", { type: "error" });
   }
 }
 
@@ -135,11 +142,13 @@ onMounted(load);
 
 <template>
   <div class="p-4">
-    <div class="flex justify-end mb-1">
-      <MockTag
-        detail="用户服务为 Mock（登录账号 admin/admin123、operator/operator123、viewer/viewer123）；真实用户体系待建（ADMIN-API-GAP.md）"
-      />
-    </div>
+    <el-alert
+      type="info"
+      :closable="false"
+      show-icon
+      class="mb-3"
+      title="本地三档用户（admin / operator / viewer），scrypt 加盐哈希存储于 data/users.json；停用与重置口令会即时吊销该用户的全部会话。"
+    />
     <el-card shadow="never">
       <div class="flex flex-wrap items-center gap-2 mb-3">
         <el-input
@@ -218,14 +227,22 @@ onMounted(load);
         <el-table-column prop="username" label="用户名" min-width="120">
           <template #default="{ row }">
             <span class="font-medium">{{ row.username }}</span>
+            <el-tag
+              v-if="row.builtin"
+              size="small"
+              type="info"
+              effect="plain"
+              class="ml-1"
+              >内置</el-tag
+            >
           </template>
         </el-table-column>
-        <el-table-column prop="nickname" label="昵称" min-width="120" />
-        <el-table-column label="角色" min-width="140">
+        <el-table-column prop="nickname" label="昵称" min-width="110">
+          <template #default="{ row }">{{ row.nickname || "—" }}</template>
+        </el-table-column>
+        <el-table-column label="角色" min-width="110">
           <template #default="{ row }">
-            <el-tag v-for="r in row.roles" :key="r" size="small" class="mr-1">{{
-              r
-            }}</el-tag>
+            <el-tag size="small">{{ row.role }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column label="状态" width="90" align="center">
@@ -238,11 +255,16 @@ onMounted(load);
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="创建时间" width="160">
-          <template #default="{ row }">{{ fmtTime(row.createdAt) }}</template>
+        <el-table-column label="创建时间" width="110">
+          <template #default="{ row }">{{
+            fmtTime(row.createdAt).slice(0, 10)
+          }}</template>
         </el-table-column>
-        <el-table-column label="最近登录" width="120">
+        <el-table-column label="最近登录" width="110">
           <template #default="{ row }">{{ timeAgo(row.lastLoginAt) }}</template>
+        </el-table-column>
+        <el-table-column prop="remark" label="备注" min-width="120">
+          <template #default="{ row }">{{ row.remark || "—" }}</template>
         </el-table-column>
         <el-table-column label="操作" width="170" fixed="right">
           <template #default="{ row }">
@@ -289,7 +311,20 @@ onMounted(load);
     <el-dialog v-model="createDialog" title="新增用户" width="480px">
       <el-form label-width="90px">
         <el-form-item label="用户名" required>
-          <el-input v-model="createForm.username" maxlength="32" />
+          <el-input
+            v-model="createForm.username"
+            maxlength="32"
+            placeholder="3-32 位字母数字-_"
+          />
+        </el-form-item>
+        <el-form-item label="口令" required>
+          <el-input
+            v-model="createForm.password"
+            type="password"
+            show-password
+            maxlength="64"
+            placeholder="至少 6 位"
+          />
         </el-form-item>
         <el-form-item label="昵称">
           <el-input v-model="createForm.nickname" maxlength="32" />
@@ -305,7 +340,7 @@ onMounted(load);
           </el-select>
         </el-form-item>
         <el-form-item label="备注">
-          <el-input v-model="createForm.remark" maxlength="100" />
+          <el-input v-model="createForm.remark" maxlength="128" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -317,20 +352,39 @@ onMounted(load);
     </el-dialog>
 
     <!-- 编辑 -->
-    <el-dialog v-model="editDialog" title="编辑用户" width="480px">
+    <el-dialog
+      v-model="editDialog"
+      :title="`编辑用户 · ${editForm.username}`"
+      width="480px"
+    >
       <el-form label-width="90px">
         <el-form-item label="昵称">
           <el-input v-model="editForm.nickname" maxlength="32" />
         </el-form-item>
         <el-form-item label="角色">
-          <el-checkbox-group v-model="editForm.roles">
-            <el-checkbox v-for="r in ROLES" :key="r.name" :value="r.name">{{
-              r.label
-            }}</el-checkbox>
-          </el-checkbox-group>
+          <el-select v-model="editForm.role">
+            <el-option
+              v-for="r in ROLES"
+              :key="r.name"
+              :label="`${r.label}（${r.name}）`"
+              :value="r.name"
+            />
+          </el-select>
+          <div class="text-xs text-[--el-text-color-secondary] w-full">
+            改角色会即时吊销该用户全部会话；最后一名启用的 admin 受末位保护
+          </div>
+        </el-form-item>
+        <el-form-item label="重置口令">
+          <el-input
+            v-model="editForm.password"
+            type="password"
+            show-password
+            maxlength="64"
+            placeholder="留空 = 不修改；重置后该用户需重新登录"
+          />
         </el-form-item>
         <el-form-item label="备注">
-          <el-input v-model="editForm.remark" maxlength="100" />
+          <el-input v-model="editForm.remark" maxlength="128" />
         </el-form-item>
       </el-form>
       <template #footer>

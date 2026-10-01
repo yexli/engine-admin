@@ -1,18 +1,24 @@
 /* ============================================================
-   World HTTP 协议适配器（V0.4→V0.9 · 方案 §64）
+   World HTTP 协议适配器（V0.4→V1.0.1 · 方案 §64）
    ------------------------------------------------------------
    把 §64 的 HTTP 路由映射到 World API——**World API 形状不变，
    这里只加传输层**（§19）。纯路由协议：输入已解析的
    { method, path, query, body }，输出 { status, body }——不碰
    socket、不碰 JSON 字符串，可无网络全量测试。
 
-   路由（方案 §64）：
-     POST /v1/worlds                  创建世界
+   路由（方案 §64 + M1 只读数据面）：
+     POST /v1/worlds                  创建世界（可带 name/description 元数据）
      GET  /v1/worlds                  世界清单
-     GET  /v1/worlds/{id}             世界信息
+     GET  /v1/worlds/{id}             世界信息（含元数据）
      GET  /v1/worlds/{id}/state       完整世界状态
      POST /v1/worlds/{id}/commands    提交命令（body = WorldCommand）
+     GET  /v1/worlds/{id}/commands    最近命令历史（环形缓冲，?n=50）
      GET  /v1/worlds/{id}/events?n=20 最近的世界事实
+     GET  /v1/worlds/{id}/scheduler   调度观测（stats / scheduled / deferred / deadLetters）
+     GET  /v1/worlds/{id}/entities    实体独立端点（分页 + 筛选）
+     GET  /v1/worlds/{id}/entities/{eid}  单实体详情（含关系边）
+     GET  /v1/worlds/{id}/locations   地点端点（分页 + 驻留统计）
+     GET  /v1/worlds/{id}/relations   关系端点（状态关系表 + 实体关系边）
      POST /v1/worlds/{id}/time        推进时间（body = { ticks })
 
    两种模式（V0.9，DR-003 兑现）：
@@ -24,7 +30,8 @@
    ============================================================ */
 import { createWorld, type CreateWorldOptions, type WorldHandle, type WorldTimeView } from '../api/WorldAPI.ts';
 import { WorldRegistryError, type WorldRegistry } from '../api/WorldRegistry.ts';
-import type { EngineWorldState } from '../types.ts';
+import type { CommandHistoryEntry } from '../runtime/WorldRuntime.ts';
+import type { EngineWorldState, EntityDynamic, LocationRecord, RelationRecord } from '../types.ts';
 
 /** 已解析的 HTTP 请求（传输层负责解析 URL / query / JSON body） */
 export interface HttpRequest {
@@ -41,12 +48,20 @@ export interface HttpResponse {
   body: unknown;
 }
 
-/** 世界概要（GET /v1/worlds[/{id}] 的载荷） */
+/** 世界概要（GET /v1/worlds[/{id}] 的载荷；M1.5 起带注册表层元数据） */
 export interface WorldInfo {
   worldId: string;
   location: string | null;
   entities: number;
   time: WorldTimeView | null;
+  /** 元数据（经 definition.metadata 挂载；未设置时缺省） */
+  name?: string;
+  description?: string;
+  /** ISO 8601 */
+  createdAt?: string;
+  updatedAt?: string;
+  /** 服务面状态（G1 软暂停，1.0.3）：paused = HTTP 层拒绝 commands/time 推进；关闭态不出现于任何响应 */
+  status?: 'running' | 'paused';
 }
 
 export interface WorldHttpInit<W extends EngineWorldState = EngineWorldState> {
@@ -111,7 +126,7 @@ const strArray = (v: unknown, maxLen: number): string[] | undefined =>
     ? (v as string[])
     : undefined;
 
-/** 创建参数白名单重建（labels 逐字段校验；未知键不透传） */
+/** 创建参数白名单重建（labels / name / description 逐字段校验；未知键不透传） */
 function sanitizeCreateOptions(body: unknown): Record<string, unknown> {
   if (!body || typeof body !== 'object' || Array.isArray(body)) return {};
   const b = body as Record<string, unknown>;
@@ -120,10 +135,13 @@ function sanitizeCreateOptions(body: unknown): Record<string, unknown> {
   const playerName = MAX_STR(64)(b['playerName']);
   const startLoc = MAX_STR(64)(b['startLoc']);
   const weather = MAX_STR(32)(b['weather']);
+  const name = MAX_STR(128)(b['name']);
+  const description = MAX_STR(512)(b['description']);
   if (worldId) out['worldId'] = worldId;
   if (playerName) out['playerName'] = playerName;
   if (startLoc) out['startLoc'] = startLoc;
   if (weather) out['weather'] = weather;
+  if (name || description) out['meta'] = { ...(name ? { name } : {}), ...(description ? { description } : {}) };
   if (b['labels'] && typeof b['labels'] === 'object' && !Array.isArray(b['labels'])) {
     const l = b['labels'] as Record<string, unknown>;
     const labels: Record<string, unknown> = {};
@@ -142,19 +160,235 @@ function sanitizeCreateOptions(body: unknown): Record<string, unknown> {
   return out;
 }
 
+/* ---------------- 查询参数净化（M1 只读端点） ---------------- */
+
+const clampInt = (v: string | undefined, dflt: number, lo: number, hi: number): number => {
+  const n = Number(v);
+  if (!Number.isFinite(n)) return dflt;
+  return Math.min(hi, Math.max(lo, Math.floor(n)));
+};
+
+const queryStr = (v: string | undefined, maxLen = 128): string | undefined =>
+  typeof v === 'string' && v.length > 0 && v.length <= maxLen ? v : undefined;
+
+/** 分页参数（page 从 1 起；pageSize 上限 200） */
+function pageOf(query: Record<string, string> | undefined): { page: number; pageSize: number } {
+  return { page: clampInt(query?.['page'], 1, 1, 100_000), pageSize: clampInt(query?.['pageSize'], 20, 1, 200) };
+}
+
+/** 实体列表行（服务端从状态派生；世界变大后前端不再全量拉 state，G3） */
+export interface EntitySummary {
+  id: string;
+  type: string;
+  att: number;
+  met: boolean;
+  location: string;
+  gold?: number;
+  bagCount: number;
+  relCount: number;
+  effectCount: number;
+  memCount: number;
+  attributes?: Record<string, unknown>;
+}
+
 /** 创建 HTTP 协议适配器。 */
 export function createWorldHttp<W extends EngineWorldState = EngineWorldState>(
   init: WorldHttpInit<W> = {},
 ): { handle(req: HttpRequest): Promise<HttpResponse> | HttpResponse; readonly world: WorldHandle<W> | null } {
   let world: WorldHandle<W> | null = init.world ?? null;
   const registry = init.registry ?? null;
+  /* ---------------- G1 软暂停（1.0.3 · 零 Core；裁定记录见 docs/G1-PAUSE-DESIGN-REVIEW.md） ----------------
+     服务面运营标记：暂停中的世界拒绝 commands/time 推进（409 world_paused），读照常；
+     进程内状态，不进存档——重启即解除（世界状态持久化属 SavePort 范畴）。 */
+  const pausedWorlds = new Set<string>();
+
+  /* ---------------- 元数据（M1.5 · G2：注册表/定义层挂载，零 Core） ---------------- */
+
+  function metaOf(w: WorldHandle<W>): Record<string, unknown> {
+    return (w.getState()?.metadata as Record<string, unknown> | undefined) ?? {};
+  }
+
+  function metaStr(m: Record<string, unknown>, key: string): string | undefined {
+    const v = m[key];
+    return typeof v === 'string' && v.length > 0 ? v : undefined;
+  }
 
   function info(h: WorldHandle<W>): WorldInfo {
+    const m = metaOf(h);
     return {
       worldId: h.worldId,
       location: h.query.get_location(),
       entities: h.query.get_entities().length,
       time: h.query.get_time(),
+      status: pausedWorlds.has(h.worldId) ? 'paused' : 'running',
+      ...(metaStr(m, 'name') ? { name: metaStr(m, 'name') } : {}),
+      ...(metaStr(m, 'description') ? { description: metaStr(m, 'description') } : {}),
+      ...(metaStr(m, 'createdAt') ? { createdAt: metaStr(m, 'createdAt') } : {}),
+      ...(metaStr(m, 'updatedAt') ? { updatedAt: metaStr(m, 'updatedAt') } : {}),
+    };
+  }
+
+  /** 创建/活动时间戳写入 state.metadata（协议层挂载；随 SavePort 持久化） */
+  function stampMeta(w: WorldHandle<W>, patch: Record<string, string>): void {
+    const s = w.getState();
+    if (!s) return;
+    s.metadata = { ...(s.metadata as Record<string, unknown> | undefined), ...patch };
+    w.container.sync();
+  }
+
+  /** 命令 / 推进成功后的活动时间戳（诚实语义：updatedAt = 最近一次成功的世界推进） */
+  function touch(w: WorldHandle<W>, res: { ok: boolean }): void {
+    if (res.ok) stampMeta(w, { updatedAt: new Date().toISOString() });
+  }
+
+  /* ---------------- M1.3 · G3：实体 / 地点 / 关系服务端派生 ---------------- */
+
+  function entityLocation(s: EngineWorldState, dy: EntityDynamic): string {
+    const attrLoc = dy.attributes?.['location'];
+    return typeof attrLoc === 'string' ? attrLoc : (s.player?.loc ?? '—');
+  }
+
+  function summarize(s: EngineWorldState, id: string, dy: EntityDynamic): EntitySummary {
+    return {
+      id,
+      type: dy.type ?? 'npc',
+      att: dy.att,
+      met: dy.met,
+      location: entityLocation(s, dy),
+      ...(dy.gold !== undefined ? { gold: dy.gold } : {}),
+      bagCount: dy.bag?.length ?? 0,
+      relCount: Object.keys(dy.rels ?? {}).length,
+      effectCount: dy.effects?.length ?? 0,
+      memCount: dy.mem?.length ?? 0,
+      ...(dy.attributes && Object.keys(dy.attributes).length ? { attributes: dy.attributes } : {}),
+    };
+  }
+
+  function listEntitiesResponse(w: WorldHandle<W>, query: Record<string, string> | undefined): HttpResponse {
+    const s = w.getState();
+    if (!s) return { status: 409, body: { error: 'world not started' } };
+    const type = queryStr(query?.['type'], 64);
+    const q = queryStr(query?.['q'])?.toLowerCase();
+    const { page, pageSize } = pageOf(query);
+
+    const all = Object.entries(s.npcs)
+      .map(([id, dy]) => ({ id, dy, sum: summarize(s, id, dy) }))
+      .filter(({ id, sum }) => (!type || sum.type === type) && (!q || id.toLowerCase().includes(q)))
+      .sort((a, b) => a.id.localeCompare(b.id));
+
+    return {
+      status: 200,
+      body: {
+        total: all.length,
+        page,
+        pageSize,
+        player: s.player ? { name: s.player.name, loc: s.player.loc, bagCount: s.player.bag?.length ?? 0 } : null,
+        entities: all.slice((page - 1) * pageSize, page * pageSize).map(({ sum }) => sum),
+      },
+    };
+  }
+
+  function entityDetailResponse(w: WorldHandle<W>, eid: string): HttpResponse {
+    const s = w.getState();
+    const dy = s?.npcs[eid];
+    if (!s || !dy) return { status: 404, body: { error: 'entity not found', entityId: eid } };
+    const relations = [];
+    for (const [other, edges] of Object.entries(dy.rels ?? {})) {
+      /* rels 是宿主侧邻接面：声明形状为单边（RelEdge），宿主也可能给
+         数组——两种都接受，声明的单边形状不得被静默丢弃 */
+      for (const edge of Array.isArray(edges) ? edges : [edges]) {
+        relations.push({ source: eid, target: other, type: edge.type, value: edge.val });
+      }
+    }
+    return {
+      status: 200,
+      body: { entity: { ...summarize(s, eid, dy), id: eid, raw: dy }, relations },
+    };
+  }
+
+  function listLocationsResponse(w: WorldHandle<W>, query: Record<string, string> | undefined): HttpResponse {
+    const s = w.getState();
+    if (!s) return { status: 409, body: { error: 'world not started' } };
+    const q = queryStr(query?.['q'])?.toLowerCase();
+    const { page, pageSize } = pageOf(query);
+
+    /* 驻留统计（与既有前端派生同语义）：实体 attributes.location 优先，回退玩家位置 */
+    const occupants = new Map<string, string[]>();
+    const push = (loc: string | null | undefined, who: string) => {
+      if (!loc) return;
+      const arr = occupants.get(loc) ?? [];
+      arr.push(who);
+      occupants.set(loc, arr);
+    };
+    push(s.player?.loc, `player:${s.player?.name ?? 'player'}`);
+    for (const [npcId, dy] of Object.entries(s.npcs)) {
+      const loc = entityLocation(s, dy);
+      push(loc === '—' ? undefined : loc, npcId);
+    }
+
+    const all = Object.entries(s.locations ?? {})
+      .map(([id, rec]: [string, LocationRecord]) => ({ ...rec, id, occupants: occupants.get(id) ?? [], entityCount: occupants.get(id)?.length ?? 0 }))
+      .filter((l) => !q || l.id.toLowerCase().includes(q))
+      .sort((a, b) => a.id.localeCompare(b.id));
+
+    const known = new Set(all.map((l) => l.id));
+    return {
+      status: 200,
+      body: {
+        total: all.length,
+        page,
+        pageSize,
+        locations: all.slice((page - 1) * pageSize, page * pageSize),
+        /* 出现在实体档案但不在地点表中的位置 id（数据完整性观察） */
+        unknown: [...occupants.keys()].filter((k) => !known.has(k)).sort(),
+      },
+    };
+  }
+
+  function listRelationsResponse(w: WorldHandle<W>, query: Record<string, string> | undefined): HttpResponse {
+    const s = w.getState();
+    if (!s) return { status: 409, body: { error: 'world not started' } };
+    const q = queryStr(query?.['q'])?.toLowerCase();
+    const { page, pageSize } = pageOf(query);
+    const match = (r: RelationRecord) =>
+      !q || r.source.toLowerCase().includes(q) || r.target.toLowerCase().includes(q) || r.type.toLowerCase().includes(q);
+
+    const stateAll = (s.relations ?? []).filter(match);
+    const edgeAll: RelationRecord[] = [];
+    for (const [owner, dy] of Object.entries(s.npcs)) {
+      for (const [other, edges] of Object.entries(dy.rels ?? {})) {
+        /* 同 entityDetail：单边与数组两种宿主形状都接受 */
+        for (const edge of Array.isArray(edges) ? edges : [edges]) {
+          const rec: RelationRecord = { source: owner, target: other, type: edge.type, value: edge.val };
+          if (match(rec)) edgeAll.push(rec);
+        }
+      }
+    }
+    return {
+      status: 200,
+      body: {
+        totals: { state: stateAll.length, edges: edgeAll.length },
+        page,
+        pageSize,
+        stateRelations: stateAll.slice((page - 1) * pageSize, page * pageSize),
+        edgeRelations: edgeAll.slice((page - 1) * pageSize, page * pageSize),
+      },
+    };
+  }
+
+  /* ---------------- M1.2 · G4：调度观测 ---------------- */
+
+  function schedulerResponse(w: WorldHandle<W>, query: Record<string, string> | undefined): HttpResponse {
+    const n = clampInt(query?.['n'], 50, 1, 500);
+    const bus = w.bus;
+    return {
+      status: 200,
+      body: {
+        stats: bus.stats(),
+        scheduled: bus.scheduledEvents().slice(0, n),
+        deferred: bus.deferredEvents().slice(0, n),
+        deadLetters: bus.deadLetters().slice(0, n),
+      },
     };
   }
 
@@ -171,6 +405,12 @@ export function createWorldHttp<W extends EngineWorldState = EngineWorldState>(
     if (segments[0] === 'v1' && segments[1] === 'worlds' && segments.length === 2) {
       if (method === 'POST') {
         const jsonOpts = sanitizeCreateOptions(req.body);
+        const now = new Date().toISOString();
+        const meta = (jsonOpts['meta'] as Record<string, string> | undefined) ?? {};
+        delete jsonOpts['meta'];
+        /* name/description 走 World Definition 的 metadata 通道（零 Core；随存档持久化） */
+        const defMeta = { ...(init.createOptions?.definition?.metadata ?? {}), ...meta, createdAt: now, updatedAt: now };
+        const definition = { ...(init.createOptions?.definition ?? {}), metadata: defMeta };
         if (registry) {
           /* 注册表模式：多世界共存（DR-003 兑现；id 必填，重复 409） */
           const worldId = typeof jsonOpts['worldId'] === 'string' ? (jsonOpts['worldId'] as string) : init.createOptions?.worldId;
@@ -178,7 +418,12 @@ export function createWorldHttp<W extends EngineWorldState = EngineWorldState>(
             return { status: 400, body: { error: 'registry mode requires "worldId"' } };
           }
           try {
-            const created = registry.create({ ...(init.createOptions ?? {}), ...jsonOpts, worldId } as CreateWorldOptions<W> & { worldId: string });
+            const created = registry.create({
+              ...(init.createOptions ?? {}),
+              ...jsonOpts,
+              definition,
+              worldId,
+            } as CreateWorldOptions<W> & { worldId: string });
             return { status: 201, body: info(created) };
           } catch (e) {
             if (e instanceof WorldRegistryError) {
@@ -191,7 +436,7 @@ export function createWorldHttp<W extends EngineWorldState = EngineWorldState>(
         if (world) {
           return { status: 409, body: { error: 'world already exists', worldId: world.worldId, hint: 'one world per server（DR-001/DR-003）；传 registry 启用多世界' } };
         }
-        world = createWorld<W>({ ...(init.createOptions ?? {}), ...jsonOpts } as CreateWorldOptions<W>);
+        world = createWorld<W>({ ...(init.createOptions ?? {}), ...jsonOpts, definition } as CreateWorldOptions<W>);
         return { status: 201, body: info(world) };
       }
       if (method === 'GET') {
@@ -214,7 +459,34 @@ export function createWorldHttp<W extends EngineWorldState = EngineWorldState>(
 
       if (segments.length === 3) {
         if (method === 'GET') return { status: 200, body: info(w) };
+        if (method === 'DELETE') {
+          /* G1 关闭：注册表摘除（V0.9 既有能力）；单世界模式不支持（单世界即进程本体） */
+          if (!registry) {
+            return { status: 409, body: { error: 'close requires registry mode', worldId: id } };
+          }
+          registry.close(id);
+          pausedWorlds.delete(id);
+          return { status: 200, body: { closed: true, worldId: id } };
+        }
         return { status: 405, body: { error: 'method not allowed' } };
+      }
+
+      /* ---------- G1 软暂停 / 恢复 ---------- */
+      if (segments.length === 4 && leaf === 'pause') {
+        if (method !== 'POST') return { status: 405, body: { error: 'method not allowed' } };
+        if (pausedWorlds.has(id)) {
+          return { status: 409, body: { error: 'world already paused', worldId: id } };
+        }
+        pausedWorlds.add(id);
+        return { status: 200, body: info(w) };
+      }
+      if (segments.length === 4 && leaf === 'resume') {
+        if (method !== 'POST') return { status: 405, body: { error: 'method not allowed' } };
+        if (!pausedWorlds.has(id)) {
+          return { status: 409, body: { error: 'world not paused', worldId: id } };
+        }
+        pausedWorlds.delete(id);
+        return { status: 200, body: info(w) };
       }
 
       if (segments.length === 4 && leaf === 'state') {
@@ -232,23 +504,65 @@ export function createWorldHttp<W extends EngineWorldState = EngineWorldState>(
 
       if (segments.length === 4 && leaf === 'commands') {
         if (method === 'POST') {
+          if (pausedWorlds.has(id)) {
+            return { status: 409, body: { error: 'world paused：暂停中的世界不接受命令推进（G1 软暂停；读操作不受影响）', worldId: id, code: 'world_paused' } };
+          }
           const cmd = sanitizeCommand(req.body);
           if (!cmd) {
             return { status: 400, body: { error: 'command body must be an object with a short string "type"' } };
           }
-          return { status: 200, body: w.executeCommand(cmd as unknown as Parameters<WorldHandle<W>['executeCommand']>[0]) };
+          const res = w.executeCommand(cmd as unknown as Parameters<WorldHandle<W>['executeCommand']>[0]);
+          touch(w, res);
+          return { status: 200, body: res };
         }
+        if (method === 'GET') {
+          /* M1.4 · G5：最近命令历史（Runtime 侧环形缓冲；新 → 旧） */
+          const n = clampInt(req.query?.['n'], 50, 1, 500);
+          const commands: CommandHistoryEntry[] = w.runtime.recentCommands(n);
+          return { status: 200, body: { total: commands.length, commands } };
+        }
+        return { status: 405, body: { error: 'method not allowed' } };
+      }
+
+      if (segments.length === 4 && leaf === 'scheduler') {
+        if (method === 'GET') return schedulerResponse(w, req.query);
+        return { status: 405, body: { error: 'method not allowed' } };
+      }
+
+      if (leaf === 'entities') {
+        if (segments.length === 4) {
+          if (method === 'GET') return listEntitiesResponse(w, req.query);
+          return { status: 405, body: { error: 'method not allowed' } };
+        }
+        if (segments.length === 5 && method === 'GET') {
+          return entityDetailResponse(w, decodeURIComponent(segments[4]));
+        }
+        return { status: 405, body: { error: 'method not allowed' } };
+      }
+
+      if (segments.length === 4 && leaf === 'locations') {
+        if (method === 'GET') return listLocationsResponse(w, req.query);
+        return { status: 405, body: { error: 'method not allowed' } };
+      }
+
+      if (segments.length === 4 && leaf === 'relations') {
+        if (method === 'GET') return listRelationsResponse(w, req.query);
         return { status: 405, body: { error: 'method not allowed' } };
       }
 
       if (segments.length === 4 && leaf === 'time') {
         if (method === 'POST') {
+          if (pausedWorlds.has(id)) {
+            return { status: 409, body: { error: 'world paused：暂停中的世界不接受时间推进（G1 软暂停；读操作不受影响）', worldId: id, code: 'world_paused' } };
+          }
           const ticks = (req.body as { ticks?: unknown } | undefined)?.ticks;
           const n = typeof ticks === 'number' ? ticks : Number(ticks);
           if (!Number.isFinite(n) || Math.floor(n) < 1) {
             return { status: 400, body: { error: 'body must be {"ticks": <positive number>}' } };
           }
-          return { status: 200, body: w.advanceTime(Math.floor(n)) };
+          const res = w.advanceTime(Math.floor(n));
+          touch(w, res);
+          return { status: 200, body: res };
         }
         return { status: 405, body: { error: 'method not allowed' } };
       }

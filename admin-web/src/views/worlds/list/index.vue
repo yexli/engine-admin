@@ -2,10 +2,10 @@
 import { computed, onMounted, reactive, ref } from "vue";
 import { useRouter } from "vue-router";
 import { ElMessageBox } from "element-plus";
-import { getWorlds, createWorld, advanceWorldTime } from "@/api/world";
+import { getWorlds, createWorld, advanceWorldTime, pauseWorld, resumeWorld, closeWorld } from "@/api/world";
 import type { WorldInfo } from "@/api/types";
 import { message } from "@/utils/message";
-import { useAsyncData } from "@/composables/useAsyncData";
+import { useAsyncData, fmtTime } from "@/composables/useAsyncData";
 import { usePolling } from "@/composables/usePolling";
 
 defineOptions({ name: "WorldList" });
@@ -39,6 +39,8 @@ const createDialog = ref(false);
 const creating = ref(false);
 const createForm = reactive({
   worldId: "",
+  name: "",
+  description: "",
   playerName: "",
   startLoc: "",
   weather: "",
@@ -48,6 +50,8 @@ const labelsError = ref("");
 
 function openCreate() {
   createForm.worldId = "";
+  createForm.name = "";
+  createForm.description = "";
   createForm.playerName = "";
   createForm.startLoc = "";
   createForm.weather = "";
@@ -98,6 +102,10 @@ async function doCreate() {
   try {
     await createWorld({
       worldId: createForm.worldId.trim(),
+      ...(createForm.name.trim() ? { name: createForm.name.trim() } : {}),
+      ...(createForm.description.trim()
+        ? { description: createForm.description.trim() }
+        : {}),
       ...(createForm.playerName ? { playerName: createForm.playerName } : {}),
       ...(createForm.startLoc ? { startLoc: createForm.startLoc } : {}),
       ...(createForm.weather ? { weather: createForm.weather } : {}),
@@ -147,13 +155,42 @@ function doAdvance() {
     .finally(() => (advancing.value = false));
 }
 
-/* ---------- 暂停/恢复/关闭（引擎暂无 API，占位） ---------- */
-function notAvailable(action: string) {
-  ElMessageBox.alert(
-    `引擎 V1.0 暂无「${action}」HTTP API（无鉴权/控制面）。缺口已记录在 docs/ADMIN-API-GAP.md。`,
-    "API Gap",
-    { confirmButtonText: "知道了" }
+/* ---------- 生命周期（引擎 1.0.3 G1 软暂停；语义见 docs/G1-PAUSE-DESIGN-REVIEW.md） ---------- */
+async function togglePause(row: WorldInfo) {
+  const pausing = (row.status ?? "running") === "running";
+  if (!pausing) {
+    await ElMessageBox.confirm(
+      `恢复世界「${row.worldId}」？恢复后命令与时间推进照常受理。`,
+      "恢复确认",
+      { type: "info", confirmButtonText: "恢复", cancelButtonText: "取消" }
+    );
+  }
+  try {
+    const res = pausing
+      ? await pauseWorld(row.worldId)
+      : await resumeWorld(row.worldId);
+    row.status = res.status ?? "running";
+    message(pausing ? "已暂停（命令与推进被拒绝，读操作照常）" : "已恢复", {
+      type: "success"
+    });
+  } catch (e) {
+    message(e instanceof Error ? e.message : "操作失败", { type: "error" });
+  }
+}
+
+async function close(row: WorldInfo) {
+  await ElMessageBox.confirm(
+    `关闭世界「${row.worldId}」？关闭后从注册表摘除，一切访问 404，不可恢复。`,
+    "关闭确认",
+    { type: "warning", confirmButtonText: "关闭", cancelButtonText: "取消" }
   );
+  try {
+    await closeWorld(row.worldId);
+    message("世界已关闭", { type: "success" });
+    load();
+  } catch (e) {
+    message(e instanceof Error ? e.message : "关闭失败", { type: "error" });
+  }
 }
 
 const { polling, toggle, start } = usePolling(load, 15_000);
@@ -224,6 +261,12 @@ function fmtWorldTime(w: WorldInfo): string {
                 {{ row.worldId }}
               </el-button>
             </router-link>
+            <div
+              v-if="row.name"
+              class="text-xs text-[--el-text-color-secondary] truncate"
+            >
+              {{ row.name }}
+            </div>
           </template>
         </el-table-column>
         <el-table-column min-width="180">
@@ -241,24 +284,41 @@ function fmtWorldTime(w: WorldInfo): string {
         <el-table-column prop="entities" width="110" align="center">
           <template #header><BiText zh="实体数" en="Entities" /></template>
         </el-table-column>
-        <el-table-column width="150">
+        <el-table-column width="120">
           <template #header><BiText zh="运行状态" en="Runtime" /></template>
-          <template #default>
+          <template #default="{ row }">
             <el-tooltip
-              content="引擎 V1.0 暂无运行状态查询，默认视为运行中"
+              :content="(row as WorldInfo).status === 'paused' ? '软暂停：命令与时间推进被拒绝（读操作照常）' : '正常运行（服务面受理命令与推进）'"
               placement="top"
             >
-              <el-tag type="success" size="small">assumed-running</el-tag>
+              <el-tag
+                :type="(row as WorldInfo).status === 'paused' ? 'warning' : 'success'"
+                size="small"
+              >
+                {{ (row as WorldInfo).status === "paused" ? "paused" : "running" }}
+              </el-tag>
             </el-tooltip>
           </template>
         </el-table-column>
-        <el-table-column min-width="150">
+        <el-table-column min-width="170">
           <template #header>
             <BiText zh="创建 / 更新" en="Created / Updated" />
           </template>
-          <template #default>
-            <span class="text-xs text-[--el-text-color-secondary]">
-              引擎未提供（API Gap）
+          <template #default="{ row }">
+            <template v-if="row.createdAt">
+              <div class="text-xs">{{ fmtTime(row.createdAt) }}</div>
+              <div
+                v-if="row.updatedAt && row.updatedAt !== row.createdAt"
+                class="text-xs text-[--el-text-color-secondary]"
+              >
+                → {{ fmtTime(row.updatedAt) }}
+              </div>
+            </template>
+            <span
+              v-else
+              class="text-xs text-[--el-text-color-secondary]"
+            >
+              —（世界创建于 M1 之前）
             </span>
           </template>
         </el-table-column>
@@ -279,18 +339,24 @@ function fmtWorldTime(w: WorldInfo): string {
                 推进时间
               </el-button>
             </Perms>
-            <el-tooltip content="引擎暂无暂停 API" placement="top">
-              <span>
-                <el-button text size="small" disabled>暂停</el-button>
-              </span>
-            </el-tooltip>
-            <el-tooltip content="引擎暂无关闭 API" placement="top">
-              <span>
-                <el-button text size="small" disabled type="danger"
-                  >关闭</el-button
-                >
-              </span>
-            </el-tooltip>
+            <Perms value="world:write">
+              <el-button
+                text
+                :type="(row as WorldInfo).status === 'paused' ? 'success' : 'warning'"
+                size="small"
+                @click="togglePause(row as WorldInfo)"
+              >
+                {{ (row as WorldInfo).status === "paused" ? "恢复" : "暂停" }}
+              </el-button>
+              <el-button
+                text
+                size="small"
+                type="danger"
+                @click="close(row as WorldInfo)"
+              >
+                关闭
+              </el-button>
+            </Perms>
           </template>
         </el-table-column>
         <template #empty>
@@ -323,6 +389,22 @@ function fmtWorldTime(w: WorldInfo): string {
             v-model="createForm.worldId"
             placeholder="如 w-main（必填，唯一）"
             maxlength="64"
+          />
+        </el-form-item>
+        <el-form-item label="名称 Name">
+          <el-input
+            v-model="createForm.name"
+            placeholder="世界显示名（可选，如：云涧大陆）"
+            maxlength="128"
+          />
+        </el-form-item>
+        <el-form-item label="描述 Description">
+          <el-input
+            v-model="createForm.description"
+            type="textarea"
+            :rows="2"
+            placeholder="世界描述（可选，≤512 字）"
+            maxlength="512"
           />
         </el-form-item>
         <el-form-item label="玩家名 Name">

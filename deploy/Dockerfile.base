@@ -1,0 +1,38 @@
+# ============================================================
+# 全栈运行时镜像（engine / memory / platform 共用）
+# ------------------------------------------------------------
+# 构建上下文 = 仓库根（见 deploy/docker-compose.yml）。
+# 镜像内完成 world-engine → gateway → memory → platform 的编译；
+# 三个服务以不同 command 复用本镜像（gateway 已内嵌于受管 platform，
+# 不单独起容器——见 docs/DEPLOY.md）。
+# ============================================================
+FROM node:22-alpine
+RUN corepack enable && npm i -g pnpm@11
+
+WORKDIR /stack
+COPY world-engine/package.json world-engine/pnpm-lock.yaml* ./world-engine/
+COPY world-engine/gateway/package.json world-engine/gateway/pnpm-lock.yaml* ./world-engine/gateway/
+COPY world-engine/memory/package.json world-engine/memory/pnpm-lock.yaml* ./world-engine/memory/
+COPY platform/package.json platform/pnpm-lock.yaml* ./platform/
+
+# 依赖安装（无锁文件或锁文件过期时不冻结，保证可重复构建）
+RUN cd world-engine && pnpm install --no-frozen-lockfile \
+ && cd gateway && pnpm install --no-frozen-lockfile \
+ && cd ../memory && pnpm install --no-frozen-lockfile \
+ && cd ../../platform && pnpm install --no-frozen-lockfile
+
+COPY world-engine/ ./world-engine/
+COPY platform/ ./platform/
+COPY scripts/ ./scripts/
+
+RUN cd world-engine && pnpm build \
+ && cd gateway && pnpm build \
+ && cd ../memory && pnpm build \
+ && cd ../../platform && pnpm build
+
+# 平台数据（keys/secrets/sessions/users/settings/usage/pipelines）落卷持久化
+VOLUME ["/stack/platform/data"]
+WORKDIR /stack
+
+# 缺省起引擎演示宿主；compose 中按服务覆盖 command
+CMD ["node", "scripts/run-demo-engine.mjs"]

@@ -18,7 +18,6 @@ describe('KeyStore', () => {
 
     expect(plaintext.startsWith('sk-world-')).toBe(true);
     expect(record.keyHash).toBe(hashKey(plaintext));
-    expect(record.status).toBe('active');
     expect(record.tenantId).toBe('default');
 
     store.flush();
@@ -29,7 +28,7 @@ describe('KeyStore', () => {
     expect(store.verify(plaintext)?.id).toBe(record.id);
   });
 
-  it('未知密钥 / 撤销 / 过期 → verify 返回 null', () => {
+  it('未知密钥 / 删除 / 过期 → verify 返回 null', () => {
     const file = tmpFile('keys.json');
     let now = 1_000_000;
     const store = new KeyStore(file, undefined, () => now);
@@ -45,11 +44,12 @@ describe('KeyStore', () => {
     now += 61_000;
     expect(store.verify(plaintext)).toBeNull(); // 过期
 
-    const { plaintext: p2 } = store.create({ name: 'to-revoke' });
+    const { plaintext: p2, record: r2 } = store.create({ name: 'to-delete' });
     expect(store.verify(p2)).not.toBeNull();
-    const rec = store.list().find((k) => k.name === 'to-revoke');
-    expect(rec && store.revoke(rec.id)).toBe(true);
-    expect(store.verify(p2)).toBeNull(); // 撤销
+    expect(store.remove(r2.id)).toBe(true);
+    expect(store.remove(r2.id)).toBe(false); // 幂等：已不存在
+    expect(store.verify(p2)).toBeNull(); // 删除（硬删，哈希已移除）
+    expect(store.list().some((k) => k.id === r2.id)).toBe(false);
     rmSync(file, { force: true });
   });
 
@@ -68,6 +68,22 @@ describe('KeyStore', () => {
 
     const b = new KeyStore(file);
     expect(b.verify(plaintext)?.name).toBe('persist');
+    rmSync(file, { force: true });
+  });
+
+  it('setExpiresAt：设置后立即失效、清除后恢复；未知 id → false（M2.1）', () => {
+    const file = tmpFile('keys.json');
+    let now = 1_000_000;
+    const store = new KeyStore(file, undefined, () => now);
+    const { plaintext, record } = store.create({ name: 'exp' });
+
+    expect(store.setExpiresAt('key-nope', new Date(now).toISOString())).toBe(false);
+    expect(store.setExpiresAt(record.id, new Date(now + 1_000).toISOString())).toBe(true);
+    now += 2_000;
+    expect(store.verify(plaintext)).toBeNull(); // 已过期
+
+    expect(store.setExpiresAt(record.id, null)).toBe(true);
+    expect(store.verify(plaintext)?.name).toBe('exp'); // 清除后恢复
     rmSync(file, { force: true });
   });
 

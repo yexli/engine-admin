@@ -1,6 +1,6 @@
 {
   "name": "world-memory",
-  "version": "0.8.0",
+  "version": "0.8.2",
   "type": "module",
   "description": "World Memory Engine —— 独立角色记忆引擎（方案 §16：Memory 是引擎之上的独立层）。事实摄取（感知边界）/ 衰减遗忘 / 检索（词面+可注入向量）/ 持久化端口。只读事实、绝不直接写世界状态。零运行时依赖。",
   "main": "dist/index.js",
@@ -9,6 +9,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
+    },
+    "./http": {
+      "types": "./dist/http/index.d.ts",
+      "default": "./dist/http/index.js"
     }
   },
   "files": [

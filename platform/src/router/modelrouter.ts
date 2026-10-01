@@ -57,6 +57,24 @@ export class ModelRouter {
     return this.routes[capability] ?? { primary: null, fallback: null };
   }
 
+  /**
+   * 托管模式热替换：整体换掉六能力路由（物理模型 ID 视图），
+   * 并清除不再被引用模型的冷却——配置已由运营改写，旧冷却状态
+   * 对新快照没有意义（被移除/变更的 ID 不应带着旧失败记录）。
+   */
+  replaceRoutes(routes: Partial<Record<Capability, CapabilityRoute>>): void {
+    this.routes = { ...DEFAULT_ROUTES, ...this.routes, ...routes };
+    const referenced = new Set<string>();
+    for (const cap of Object.keys(this.routes) as Capability[]) {
+      const r = this.routes[cap];
+      if (r?.primary) referenced.add(r.primary);
+      if (r?.fallback) referenced.add(r.fallback);
+    }
+    for (const id of [...this.cooldown.keys()]) {
+      if (!referenced.has(id)) this.cooldown.delete(id);
+    }
+  }
+
   /** 标记模型本次调用失败 → 进入冷却 */
   markFailed(model: string): void {
     this.cooldown.set(model, this.now() + COOLDOWN_MS);

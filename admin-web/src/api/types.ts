@@ -13,12 +13,19 @@ export interface WorldTimeView {
   weather: string | null;
 }
 
-/** 世界概要（GET /v1/worlds） */
+/** 世界概要（GET /v1/worlds；M1.5 起带注册表层元数据） */
 export interface WorldInfo {
   worldId: string;
   location: string | null;
   entities: number;
   time: WorldTimeView | null;
+  name?: string;
+  description?: string;
+  /** ISO 8601（经 definition.metadata 挂载；未设置时缺省） */
+  createdAt?: string;
+  updatedAt?: string;
+  /** 服务面状态（引擎 1.0.3 G1 软暂停）：paused = 拒绝命令/推进；关闭后的世界不出现在清单 */
+  status?: "running" | "paused";
 }
 
 /** 引擎实体关系边 */
@@ -99,8 +106,10 @@ export interface WorldEvent {
   cause?: string;
   witnesses?: string[];
   data?: Record<string, unknown>;
-  parent?: string;
-  rootCause?: string;
+  /** 因果链（引擎真实契约，M4.3 修正字段名）：直接父事件与源头事件 */
+  parentId?: string;
+  sourceId?: string;
+  origin?: "reasoner";
 }
 
 /** 世界命令（POST /v1/worlds/{id}/commands） */
@@ -118,6 +127,34 @@ export interface CommandResult {
   ok: boolean;
   events: string[];
   reason?: string;
+}
+
+/** 命令历史条目（GET /v1/worlds/{id}/commands；M1.4 起真实，Runtime 侧环形缓冲） */
+export interface CommandHistoryEntry {
+  seq: number;
+  /** ISO 8601 */
+  at: string;
+  tick: number;
+  day: number;
+  command: WorldCommand;
+  ok: boolean;
+  reason?: string;
+  events: string[];
+  tookMs: number;
+}
+
+/** 调度观测（GET /v1/worlds/{id}/scheduler；M1.2 起真实，bus 只读面） */
+export interface SchedulerView {
+  stats: {
+    subscribers: number;
+    scheduled: number;
+    deadLetters: number;
+    tickEmitted: number;
+    deferred: number;
+  };
+  scheduled: { dueDay: number; event: WorldEvent }[];
+  deferred: WorldEvent[];
+  deadLetters: WorldEvent[];
 }
 
 /** 引擎管理面暂缺：暂停/恢复/关闭（见 ADMIN-API-GAP.md），列表页用该状态做占位 */

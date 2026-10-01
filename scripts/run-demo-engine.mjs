@@ -55,17 +55,41 @@ function seed(worldId, playerName, startLoc) {
       payload: { id: "borin", name: "波林", kind: "npc", loc: "plaza" }
     })
   );
-  r.push(
-    world.executeCommand({
-      type: "talk",
-      actorId: "player",
-      targetId: "lita",
-      text: "晚上有什么好吃的？"
-    })
-  );
+  const talkResult = world.executeCommand({
+    type: "talk",
+    actorId: "player",
+    targetId: "lita",
+    text: "晚上有什么好吃的？"
+  });
+  r.push(talkResult);
   r.push(world.executeCommand({ type: "set_attitude", targetId: "lita", amount: 5 }));
   r.push(world.executeCommand({ type: "advance_time", amount: 24 }));
   r.push(world.executeCommand({ type: "change_weather", text: "cloudy" }));
+
+  // M4.3 · 事件因果链真实数据：以「交谈」产生的事实为父事件，用公开 API
+  // emitEvent 串联派生事实（parentId/sourceId/cause），供管理后台因果链 UI 验证
+  // CommandResult.events 是事件 ID 串（时序），talk 的首个事实即 talk_started
+  const talkEventId = talkResult.ok ? talkResult.events[0] : undefined;
+  if (talkEventId) {
+    const mood = world.emitEvent({
+      type: "social_mood_shift",
+      actor: "lita",
+      target: "player",
+      cause: "talk_started",
+      parentId: talkEventId,
+      sourceId: talkEventId,
+      data: { moodDelta: 5, note: "交谈后态度转好" }
+    });
+    world.emitEvent({
+      type: "narrative_hook_opened",
+      actor: "lita",
+      cause: "social_mood_shift",
+      parentId: mood.id,
+      sourceId: talkEventId,
+      data: { hook: "莉安似乎愿意多聊几句" }
+    });
+  }
+
   const failed = r.filter(x => !x.ok);
   if (failed.length) {
     console.warn(`[demo-engine] ${worldId} 有 ${failed.length} 条种子命令被拒绝:`, failed);
@@ -76,7 +100,9 @@ function seed(worldId, playerName, startLoc) {
 seed("w-main", "云生", "plaza");
 seed("w-test", "测试员", "tavern");
 
-const server = await startWorldServer({ registry, port: 8787 });
+/* 端口可经 PORT 环境变量覆盖（缺省 8787；e2e 冒烟用 18787 避让开发栈） */
+const port = Number(process.env.PORT ?? 8787);
+const server = await startWorldServer({ registry, port });
 console.log(`[demo-engine] World Engine listening at ${server.url}`);
 
 process.on("SIGINT", async () => {

@@ -26,7 +26,8 @@ export const PLATFORM_PERMISSIONS: readonly PlatformPermission[] = [
   'worlds:write',
 ];
 
-/** 密钥记录：明文只在创建时返回一次；落盘只存 SHA-256 哈希与展示前缀 */
+/** 密钥记录：明文只在创建时返回一次；落盘只存 SHA-256 哈希与展示前缀。
+ *  生命周期只有两层：过期时间（可设可清）与删除（硬删，记录移除）。 */
 export interface ApiKeyRecord {
   id: string;
   name: string;
@@ -37,7 +38,6 @@ export interface ApiKeyRecord {
   /** 展示用前缀（如 sk-world-ab12），不可反推明文 */
   prefix: string;
   permissions: PlatformPermission[];
-  status: 'active' | 'revoked';
   createdAt: string;
   expiresAt: string | null;
   lastUsedAt: string | null;
@@ -92,6 +92,8 @@ export interface PlatformRequest {
   query?: Record<string, string>;
   body?: unknown;
   headers?: Record<string, string | string[] | undefined>;
+  /** 传输层生成的请求 ID（用量记录与访问日志凭它对账，M2.2） */
+  requestId?: string;
 }
 
 /** JSON 响应 */
@@ -107,6 +109,8 @@ export interface StreamResponse {
   status: number;
   headers: Record<string, string>;
   body: ReadableStream<Uint8Array>;
+  /** 计量元数据（M2.2）：流在传输层泵完才产生时延，由 server.ts 代记 */
+  usageMeta?: { keyId: string; tenantId: string; model: string };
 }
 
 export type PlatformResponse = JsonResponse | StreamResponse;
@@ -135,6 +139,8 @@ export interface GatewayChatFail {
   ok: false;
   status: number;
   error: string;
+  /** 网关结构化错误码（如 upstream_credential_rejected）；用于区分配置错误与瞬时故障 */
+  code?: string;
 }
 
 export interface GatewayClient {
@@ -152,4 +158,5 @@ export type PlatformErrorCode =
   | 'not_found_error'
   | 'no_model_configured'
   | 'upstream_error'
+  | 'upstream_credential_rejected'
   | 'not_implemented';

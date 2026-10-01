@@ -10,7 +10,7 @@ import type {
   PureHttpRequestConfig
 } from "./types.d";
 import { stringify } from "qs";
-import { getToken, formatToken } from "@/utils/auth";
+import { getToken, formatToken, removeToken } from "@/utils/auth";
 import { useUserStoreHook } from "@/store/modules/user";
 
 // 相关配置请参考：www.axios-js.com/zh-cn/docs/#axios-request-config-1
@@ -51,6 +51,8 @@ class PureHttp {
     return new Promise(resolve => {
       PureHttp.requests.push((token: string) => {
         config.headers["Authorization"] = formatToken(token);
+        // M3.1：管理面凭会话令牌鉴权（x-admin-session；管理监听忽略 Authorization）
+        config.headers["x-admin-session"] = token;
         resolve(config);
       });
     });
@@ -87,6 +89,7 @@ class PureHttp {
                       .then(res => {
                         const token = res.data.accessToken;
                         config.headers["Authorization"] = formatToken(token);
+                        config.headers["x-admin-session"] = token;
                         PureHttp.requests.forEach(cb => cb(token));
                         PureHttp.requests = [];
                       })
@@ -99,6 +102,8 @@ class PureHttp {
                   config.headers["Authorization"] = formatToken(
                     data.accessToken
                   );
+                  // M3.1：管理面凭会话令牌鉴权（管理监听忽略 Authorization 头）
+                  config.headers["x-admin-session"] = data.accessToken;
                   resolve(config);
                 }
               } else {
@@ -132,10 +137,38 @@ class PureHttp {
       (error: PureHttpError) => {
         const $error = error;
         $error.isCancelRequest = Axios.isCancel($error);
+        /* M3.1 兜底：管理会话失效（401）→ 清本地会话并回登录页。
+           登录/刷新端点自身的 401 不在此列（防循环）；主令牌注入路径
+           由代理在服务端处理，不经浏览器。 */
+        const status = error.response?.status;
+        const url = (error.config?.url ?? "") as string;
+        if (
+          status === 401 &&
+          url.startsWith("/control-api") &&
+          !url.endsWith("/session/login") &&
+          !url.endsWith("/session/refresh-token")
+        ) {
+          PureHttp.handSessionExpired();
+        }
         // 所有的响应异常 区分来源为取消请求/非取消请求
         return Promise.reject($error);
       }
     );
+  }
+
+  /** 会话失效处理：只清一次（防并发 401 重复跳转） */
+  private static sessionExpiredHandled = false;
+
+  private static handSessionExpired(): void {
+    if (PureHttp.sessionExpiredHandled) return;
+    PureHttp.sessionExpiredHandled = true;
+    try {
+      removeToken();
+      useUserStoreHook().logOut();
+    } catch {
+      /* 跳转登录页即达目的；清理过程中的次要失败忽略 */
+    }
+    setTimeout(() => (PureHttp.sessionExpiredHandled = false), 3000);
   }
 
   /** 通用请求工具函数 */

@@ -166,14 +166,68 @@
         </el-card>
       </template>
     </div>
+
+    <!-- 命令历史（M1.4 起真实：Runtime 侧环形缓冲，新 → 旧） -->
+    <el-card shadow="never" class="w-[300px]">
+      <template #header>
+        <div class="flex items-center justify-between">
+          <BiText zh="历史记录" en="History" />
+          <el-button
+            size="small"
+            text
+            type="primary"
+            :loading="historyLoading"
+            @click="loadHistory"
+          >
+            刷新
+          </el-button>
+        </div>
+      </template>
+      <div v-loading="historyLoading" class="space-y-2 max-h-[520px] overflow-auto">
+        <div
+          v-for="h in history"
+          :key="h.seq"
+          class="rounded px-2 py-1.5 cursor-pointer transition-colors hover:bg-[--el-fill-color-light]"
+          :class="h.ok ? '' : 'bg-[--el-color-danger-light-9]'"
+          @click="showHistoryEntry(h)"
+        >
+          <div class="flex items-center gap-2">
+            <el-tag :type="h.ok ? 'success' : 'danger'" size="small">
+              {{ h.ok ? "ok" : "rejected" }}
+            </el-tag>
+            <span class="font-mono text-xs truncate">{{ h.command.type }}</span>
+            <span class="text-xs text-[--el-text-color-secondary] ml-auto">
+              D{{ h.day }}·{{ h.tick }}
+            </span>
+          </div>
+          <div
+            v-if="h.reason"
+            class="text-xs text-[--el-color-danger] truncate mt-0.5"
+            :title="h.reason"
+          >
+            {{ h.reason }}
+          </div>
+        </div>
+        <el-empty
+          v-if="!history.length && !historyLoading"
+          description="本世界还没有命令留痕"
+          :image-size="56"
+        />
+      </div>
+    </el-card>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from "vue";
 import { ElMessageBox } from "element-plus";
-import { COMMAND_SPECS, executeCommand, type CommandSpec } from "@/api/command";
-import type { WorldCommand } from "@/api/types";
+import {
+  COMMAND_SPECS,
+  executeCommand,
+  getCommandHistory,
+  type CommandSpec
+} from "@/api/command";
+import type { CommandHistoryEntry, WorldCommand } from "@/api/types";
 import { hasPerms } from "@/utils/auth";
 import { message } from "@/utils/message";
 import { useAsyncData } from "@/composables/useAsyncData";
@@ -303,13 +357,42 @@ async function doExecute() {
       }
     );
     emit("executed");
+    loadHistory();
   }
+}
+
+/* ---------- 命令历史（真实环形缓冲） ---------- */
+const history = ref<CommandHistoryEntry[]>([]);
+const { loading: historyLoading, run: runHistory } = useAsyncData();
+
+async function loadHistory() {
+  if (!props.worldId) return;
+  const res = await runHistory(() => getCommandHistory(props.worldId, 20));
+  if (res) history.value = res.commands;
+}
+
+function showHistoryEntry(h: CommandHistoryEntry) {
+  selected.value =
+    COMMAND_SPECS.find(s => s.type === h.command.type) ?? null;
+  if (selected.value) {
+    form.actorId = h.command.actorId ?? "";
+    form.targetId = h.command.targetId ?? "";
+    form.amount = h.command.amount;
+    form.text = h.command.text ?? "";
+    payloadText.value = h.command.payload
+      ? JSON.stringify(h.command.payload, null, 2)
+      : "{}";
+  }
+  result.value = { ok: h.ok, events: h.events, reason: h.reason };
 }
 
 watch(
   () => props.worldId,
   () => {
     result.value = null;
-  }
+    history.value = [];
+    loadHistory();
+  },
+  { immediate: true }
 );
 </script>

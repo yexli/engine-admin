@@ -1,6 +1,9 @@
-/** Location 管理客户端（从世界状态派生；独立端点缺口见 docs/ADMIN-API-GAP.md） */
+/** Location 管理客户端
+ *  M1.3 起接真实独立端点（服务端派生驻留统计与完整性告警，
+ *  替代前端全量派生）。端点契约：world-engine/src/http/protocol.ts
+ */
 import { http } from "@/utils/http";
-import type { EngineWorldState, LocationRecord } from "./types";
+import type { LocationRecord } from "./types";
 
 export interface LocationView extends LocationRecord {
   entityCount: number;
@@ -8,40 +11,28 @@ export interface LocationView extends LocationRecord {
   occupants: string[];
 }
 
-export async function listLocations(worldId: string): Promise<{
+export interface LocationListResult {
+  total: number;
+  page: number;
+  pageSize: number;
   locations: LocationView[];
+  /** 出现在实体档案但不在地点表中的位置 id（数据完整性观察） */
   unknown: string[];
-}> {
-  const state = await http.request<EngineWorldState>(
+}
+
+export async function listLocations(
+  worldId: string,
+  params?: { q?: string; page?: number; pageSize?: number }
+): Promise<LocationListResult> {
+  return http.request<LocationListResult>(
     "get",
-    `/world-api/v1/worlds/${encodeURIComponent(worldId)}/state`
+    `/world-api/v1/worlds/${encodeURIComponent(worldId)}/locations`,
+    {
+      params: {
+        ...(params?.q ? { q: params.q } : {}),
+        ...(params?.page ? { page: params.page } : {}),
+        ...(params?.pageSize ? { pageSize: params.pageSize } : {})
+      }
+    }
   );
-  const occupants = new Map<string, string[]>();
-  const push = (loc: string | null | undefined, who: string) => {
-    if (!loc) return;
-    const arr = occupants.get(loc) ?? [];
-    arr.push(who);
-    occupants.set(loc, arr);
-  };
-  push(state.player?.loc, `player:${state.player?.name ?? "player"}`);
-  for (const [id, n] of Object.entries(state.npcs ?? {})) {
-    push(
-      (typeof n.attributes?.["location"] === "string"
-        ? (n.attributes["location"] as string)
-        : state.player?.loc) as string,
-      id
-    );
-  }
-  const locations: LocationView[] = Object.entries(state.locations ?? {}).map(
-    ([id, rec]) => ({
-      ...rec,
-      id,
-      entityCount: occupants.get(id)?.length ?? 0,
-      occupants: occupants.get(id) ?? []
-    })
-  );
-  // 出现在实体档案但不在地点表中的位置 id（数据完整性观察用）
-  const known = new Set(locations.map(l => l.id));
-  const unknown = [...occupants.keys()].filter(k => !known.has(k));
-  return { locations, unknown };
 }

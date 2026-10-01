@@ -40,6 +40,8 @@ export interface MemoryEntry {
   entities: string[];
   recallCount: number;
   lastRecalledDay?: number;
+  /** 摄取时刻（ISO 8601；V0.8.1 起新条目携带，旧快照缺省） */
+  createdAt?: string;
   /** 被遗忘的条目保留在快照里供审计，检索不再返回 */
   forgotten?: boolean;
 }

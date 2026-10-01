@@ -58,6 +58,8 @@ export interface WorldEventBus {
   beginTick(): { emitted: number; deferred: number; retried: number };
   deadLetters(): WorldEvent[];
   deferredEvents(): WorldEvent[];
+  /** 定时未到期事件（只读观测；V1.0.1，HTTP 观测面用） */
+  scheduledEvents(): { dueDay: number; event: WorldEvent }[];
   clearDeadLetters(): void;
   onDeadLetter(fn: ((e: WorldEvent, why: string) => void) | null): void;
   deadLetterHookOf(): ((e: WorldEvent, why: string) => void) | null;
@@ -221,6 +223,10 @@ export function createWorldEventBus(): WorldEventBusScope {
 
     deferredEvents(): WorldEvent[] {
       return deferredQueue.map((d) => d.event);
+    },
+
+    scheduledEvents(): { dueDay: number; event: WorldEvent }[] {
+      return scheduled.map((s) => ({ dueDay: s.dueDay, event: s.event }));
     },
 
     clearDeadLetters(): void {

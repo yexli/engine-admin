@@ -107,6 +107,7 @@ export class MemoryEngine {
       importance: Math.max(0, Math.min(1, spec.importance ?? 0.3)),
       entities: spec.entities ?? [],
       recallCount: 0,
+      createdAt: new Date().toISOString(),
     };
     this.entries.push(entry);
     this.enforceCap(spec.ownerId);
@@ -145,11 +146,20 @@ export class MemoryEngine {
   /* ---------------- 检索（W8.3） ---------------- */
 
   /**
-   * 召回：词面分（查询词命中）+ 新近度 + 重要度 + 置信度加权；
+   * 热替换向量钩子（0.8.2）：管理面配置嵌入模型后无需重建引擎——
+   * null = 回纯词面检索。已存条目无持久化向量，语义分在检索时现场计算。
+   */
+  setEmbed(hook: EmbedHook | null): void {
+    this.embed = hook;
+  }
+
+  /**
+   * 召回（带评分）：词面分（查询词命中）+ 新近度 + 重要度 + 置信度加权；
    * 注入了向量钩子且可用时，语义相似度并入总分（失败静默回词面——渐进增强）。
    * 召回会强化记忆（recallCount++ / lastRecalledDay，衰减的对价）。
+   * 调试/观测面用：返回条目与真实评分；recall = 本方法的条目投影。
    */
-  async recall(ownerId: string, query: string, options: RecallOptions = {}): Promise<MemoryEntry[]> {
+  async recallScored(ownerId: string, query: string, options: RecallOptions = {}): Promise<{ entry: MemoryEntry; score: number }[]> {
     const limit = options.limit ?? this.cfg.defaultLimit;
     const day = options.day ?? 0;
     const includeForgotten = options.includeForgotten === true;
@@ -177,21 +187,26 @@ export class MemoryEngine {
         const ev = vectors[1 + i];
         if (ev?.length) score += cosine(qv, ev) * 0.2;
       }
-      return { e, score };
+      return { entry: e, score };
     });
 
     const hits = scored
       .filter((s) => s.score > 0)
-      .sort((a, b) => b.score - a.score || a.e.id.localeCompare(b.e.id))
-      .slice(0, limit)
-      .map((s) => s.e);
+      .sort((a, b) => b.score - a.score || a.entry.id.localeCompare(b.entry.id))
+      .slice(0, limit);
 
     for (const h of hits) {
-      h.recallCount++;
-      if (day > 0) h.lastRecalledDay = day;
+      h.entry.recallCount++;
+      if (day > 0) h.entry.lastRecalledDay = day;
     }
     this.persist();
     return hits;
+  }
+
+  /** 召回：recallScored 的条目投影（既有公开 API，形状不变） */
+  async recall(ownerId: string, query: string, options: RecallOptions = {}): Promise<MemoryEntry[]> {
+    const hits = await this.recallScored(ownerId, query, options);
+    return hits.map((h) => h.entry);
   }
 
   /* ---------------- 观测与持久化（W8.4） ---------------- */

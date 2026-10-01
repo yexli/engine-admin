@@ -44,6 +44,14 @@ export class ProviderRegistry {
     this.providers.push(p);
   }
 
+  /**
+   * 整体替换提供方快照（Model Control Plane 热更新用）：
+   * 一次性换掉全部注册，已解析进进行中请求的旧提供方对象不受影响。
+   */
+  replaceAll(providers: readonly GatewayProvider[]): void {
+    this.providers = [...providers];
+  }
+
   clear(): void {
     this.providers = [];
   }

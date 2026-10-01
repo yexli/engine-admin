@@ -113,7 +113,6 @@ export class KeyStore {
       keyHash: hashKey(plaintext),
       prefix: plaintext.slice(0, 12),
       permissions: normalizePermissions(opts.permissions),
-      status: 'active',
       createdAt: new Date().toISOString(),
       expiresAt: opts.expiresAt ?? null,
       lastUsedAt: null,
@@ -123,7 +122,7 @@ export class KeyStore {
     return { record, plaintext };
   }
 
-  /** 验证明文密钥 → 记录 | null（失效/撤销/过期一律 null，错误码由调用层细分） */
+  /** 验证明文密钥 → 记录 | null（失效/过期/不存在一律 null，错误码由调用层细分） */
   verify(plaintext: string): ApiKeyRecord | null {
     const h = hashKey(plaintext);
     if (this.bootstrapKeyHash && h === this.bootstrapKeyHash) {
@@ -134,7 +133,6 @@ export class KeyStore {
         keyHash: '',
         prefix: plaintext.slice(0, 12),
         permissions: [...PLATFORM_PERMISSIONS],
-        status: 'active',
         createdAt: new Date(0).toISOString(),
         expiresAt: null,
         lastUsedAt: null,
@@ -142,18 +140,29 @@ export class KeyStore {
     }
     const rec = this.keys.find((k) => k.keyHash === h);
     if (!rec) return null;
-    if (rec.status !== 'active') return null;
     if (rec.expiresAt && new Date(rec.expiresAt).getTime() <= this.now()) return null;
     rec.lastUsedAt = new Date().toISOString();
     this.scheduleFlush();
     return rec;
   }
 
-  /** 撤销（幂等） */
-  revoke(id: string): boolean {
+  /**
+   * 删除（硬删，0.5.1 起：记录从存储移除，该 Key 的出站请求即 401；
+   * 历史用量记录中的 keyId 字符串保留原样）。未知 id → false。
+   */
+  remove(id: string): boolean {
+    const idx = this.keys.findIndex((k) => k.id === id);
+    if (idx === -1) return false;
+    this.keys.splice(idx, 1);
+    this.scheduleFlush();
+    return true;
+  }
+
+  /** 设置/清除过期时间（管理面用）；ISO 字符串合法性由调用方校验 */
+  setExpiresAt(id: string, expiresAt: string | null): boolean {
     const rec = this.keys.find((k) => k.id === id);
     if (!rec) return false;
-    rec.status = 'revoked';
+    rec.expiresAt = expiresAt;
     this.scheduleFlush();
     return true;
   }

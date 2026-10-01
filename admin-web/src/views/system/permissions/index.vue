@@ -1,13 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from "vue";
-import {
-  getPermissions,
-  updateRolePermissions,
-  type PermissionItem,
-  type RoleRow
-} from "@/api/system";
-import { hasPerms } from "@/utils/auth";
-import { message } from "@/utils/message";
+import { getPermissions, type PermissionItem, type RoleRow } from "@/api/system";
 import { useAsyncData } from "@/composables/useAsyncData";
 
 defineOptions({ name: "SystemPermissions" });
@@ -15,11 +8,8 @@ defineOptions({ name: "SystemPermissions" });
 const catalog = ref<PermissionItem[]>([]);
 const roles = ref<RoleRow[]>([]);
 const { loading, error, run } = useAsyncData();
-const canManage = hasPerms("system:manage");
 
 const activeRole = ref<string>("");
-const editing = ref<string[]>([]);
-const saving = ref(false);
 
 const grouped = ref<Record<string, PermissionItem[]>>({});
 const openGroups = ref<string[]>([]);
@@ -38,32 +28,15 @@ function regroup() {
 
 function selectRole(role: RoleRow) {
   activeRole.value = role.name;
-  editing.value = [...role.permissions];
 }
 
 async function load() {
   const res = await run(() => getPermissions());
-  if (res?.data) {
-    catalog.value = res.data.catalog;
-    roles.value = res.data.roles;
+  if (res) {
+    catalog.value = res.catalog;
+    roles.value = res.roles;
     regroup();
     if (roles.value.length) selectRole(roles.value[0]);
-  }
-}
-
-async function save() {
-  saving.value = true;
-  try {
-    const res = await updateRolePermissions(activeRole.value, editing.value);
-    if (res?.success) {
-      const role = roles.value.find(r => r.name === activeRole.value);
-      if (role) role.permissions = [...editing.value];
-      message("权限已保存（重新登录后生效）", { type: "success" });
-    } else {
-      message(res?.msg ?? "保存失败", { type: "error" });
-    }
-  } finally {
-    saving.value = false;
   }
 }
 
@@ -72,11 +45,6 @@ onMounted(load);
 
 <template>
   <div class="p-4">
-    <div class="flex justify-end mb-1">
-      <MockTag
-        detail="角色权限为 Mock（内置角色第一版不可修改）；权限码与前端按钮级权限一一对应（见 docs/ADMIN-PERMISSION.md）"
-      />
-    </div>
     <div v-loading="loading">
       <el-alert
         v-if="error"
@@ -96,7 +64,7 @@ onMounted(load);
       <el-row v-if="roles.length" :gutter="12">
         <!-- 角色列表 -->
         <el-col :md="7" class="mb-3">
-          <el-card shadow="never" header="角色">
+          <el-card shadow="never" header="角色（固定三档）">
             <div class="space-y-2">
               <div
                 v-for="role in roles"
@@ -132,33 +100,21 @@ onMounted(load);
           </el-card>
         </el-col>
 
-        <!-- 权限矩阵 -->
+        <!-- 权限矩阵（只读；服务端按同一目录强制） -->
         <el-col :md="17" class="mb-3">
           <el-card shadow="never">
             <template #header>
               <div class="flex items-center justify-between">
                 <span>权限矩阵 · {{ activeRole }}</span>
-                <Perms value="system:manage">
-                  <el-button
-                    type="primary"
-                    size="small"
-                    :loading="saving"
-                    :disabled="roles.find(r => r.name === activeRole)?.builtin"
-                    @click="save"
-                  >
-                    保存
-                  </el-button>
-                </Perms>
               </div>
             </template>
 
             <el-alert
-              v-if="roles.find(r => r.name === activeRole)?.builtin"
               type="info"
               :closable="false"
               show-icon
               class="mb-3"
-              title="内置角色不可修改（第一版）；admin 拥有 *:*:* 全量权限"
+              title="三档内置角色固定不可在线编辑（完整角色体系归平台 Phase 2）；管理监听按同一权限码目录做服务端强制——viewer 会话直访写端点 403。"
             />
 
             <el-collapse v-model="openGroups">
@@ -190,7 +146,8 @@ onMounted(load);
                     </div>
                     <el-checkbox
                       :model-value="
-                        editing.includes('*:*:*') || editing.includes(p.code)
+                        (roles.find(r => r.name === activeRole)?.permissions ?? []).includes('*:*:*') ||
+                        (roles.find(r => r.name === activeRole)?.permissions ?? []).includes(p.code)
                       "
                       disabled
                     />

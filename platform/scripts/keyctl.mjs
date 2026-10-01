@@ -4,7 +4,7 @@
    用法（在 platform/ 目录下，需先 pnpm build）：
      node scripts/keyctl.mjs create --name demo [--perms chat:completions,worlds:read]
      node scripts/keyctl.mjs list
-     node scripts/keyctl.mjs revoke <key-id>
+     node scripts/keyctl.mjs delete <key-id>
    ============================================================ */
 import { resolvePlatformConfig } from '../dist/config.js';
 import { KeyStore, PLATFORM_PERMISSIONS } from '../dist/index.js';
@@ -46,22 +46,22 @@ switch (command) {
     }
     for (const k of keys) {
       console.log(
-        `${k.id}  ${k.prefix}…  ${k.name}  [${k.permissions.join(',')}]  ${k.status}${k.lastUsedAt ? `  lastUsed=${k.lastUsedAt}` : ''}`,
+        `${k.id}  ${k.prefix}…  ${k.name}  [${k.permissions.join(',')}]${k.expiresAt ? `  过期=${k.expiresAt}` : ''}${k.lastUsedAt ? `  lastUsed=${k.lastUsedAt}` : ''}`,
       );
     }
     break;
   }
-  case 'revoke': {
+  case 'delete': {
     const id = rest[0];
-    if (!id) die('revoke 需要 <key-id>（从 list 获取）');
-    if (store.revoke(id)) {
+    if (!id) die('delete 需要 <key-id>（从 list 获取）');
+    if (store.remove(id)) {
       store.flush();
-      console.log(`[keyctl] 已撤销 ${id}`);
+      console.log(`[keyctl] 已删除 ${id}（该 Key 立即失效，记录已移除）`);
     } else {
       die(`未找到密钥 ${id}`);
     }
     break;
   }
   default:
-    die('用法：keyctl.mjs create --name <名称> [--perms a,b] | list | revoke <id>');
+    die('用法：keyctl.mjs create --name <名称> [--perms a,b] | list | delete <id>');
 }

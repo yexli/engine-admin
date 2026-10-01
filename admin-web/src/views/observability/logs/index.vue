@@ -9,37 +9,32 @@ const list = ref<LogRow[]>([]);
 const total = ref(0);
 const page = ref(1);
 const pageSize = ref(20);
-const filters = ref({ level: "", service: "", worldId: "", keyword: "" });
+const filters = ref({ level: "", worldId: "", keyword: "" });
 const { loading, error, run } = useAsyncData();
 
-const LEVELS = ["debug", "info", "warn", "error"];
-const SERVICES = ["world-engine", "ai-gateway", "memory", "admin-api"];
+const LEVELS = ["info", "warn", "error"];
 
 async function load() {
   const res = await run(() =>
     listLogs({
       page: page.value,
-      pageSize: pageSize.value,
+      page_size: pageSize.value,
       level: filters.value.level || undefined,
-      service: filters.value.service || undefined,
-      worldId: filters.value.worldId || undefined,
-      keyword: filters.value.keyword || undefined
+      world: filters.value.worldId || undefined,
+      q: filters.value.keyword || undefined
     })
   );
-  if (res?.data) {
-    list.value = res.data.list;
-    total.value = res.data.total;
-  }
+  list.value = res?.list ?? [];
+  total.value = res?.total ?? 0;
 }
 
 function levelTag(level: string) {
-  return ({ debug: "info", info: "primary", warn: "warning", error: "danger" }[
-    level
-  ] ?? "info") as "info" | "primary" | "warning" | "danger";
+  return ({ info: "primary", warn: "warning", error: "danger" }[level] ??
+    "info") as "info" | "primary" | "warning" | "danger";
 }
 
 function reset() {
-  filters.value = { level: "", service: "", worldId: "", keyword: "" };
+  filters.value = { level: "", worldId: "", keyword: "" };
   page.value = 1;
   load();
 }
@@ -49,11 +44,13 @@ onMounted(load);
 
 <template>
   <div class="p-4">
-    <div class="flex justify-end mb-1">
-      <MockTag
-        detail="平台日志为 Mock（聚合日志查询 API 待建，见 ADMIN-API-GAP.md）"
-      />
-    </div>
+    <el-alert
+      type="info"
+      :closable="false"
+      show-icon
+      class="mb-3"
+      title="平台请求日志（M4.1 起真实）：公共 API 面的全部已鉴权请求，源于 M2.2 用量数据面（requestId 与访问日志可对账）；不含引擎/记忆的进程内日志。"
+    />
     <el-card shadow="never">
       <div class="flex flex-wrap items-center gap-2 mb-3">
         <el-select
@@ -70,20 +67,6 @@ onMounted(load);
         >
           <el-option v-for="l in LEVELS" :key="l" :label="l" :value="l" />
         </el-select>
-        <el-select
-          v-model="filters.service"
-          placeholder="Service"
-          clearable
-          class="!w-44"
-          @change="
-            () => {
-              page = 1;
-              load();
-            }
-          "
-        >
-          <el-option v-for="s in SERVICES" :key="s" :label="s" :value="s" />
-        </el-select>
         <el-input
           v-model="filters.worldId"
           placeholder="World ID"
@@ -98,9 +81,9 @@ onMounted(load);
         />
         <el-input
           v-model="filters.keyword"
-          placeholder="消息关键词"
+          placeholder="路径 / requestId"
           clearable
-          class="!w-48"
+          class="!w-52"
           @change="
             () => {
               page = 1;
@@ -142,24 +125,30 @@ onMounted(load);
             }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="service" width="130"
-          ><template #header><BiText zh="服务" en="Service" /></template
-        ></el-table-column>
+        <el-table-column width="80" align="center"
+          ><template #header><BiText zh="类型" en="Kind" /></template>
+          <template #default="{ row }">
+            <el-tag size="small" effect="plain">{{ row.kind }}</el-tag>
+          </template>
+        </el-table-column>
         <el-table-column width="100"
           ><template #header><BiText zh="世界" en="World" /></template>
           <template #default="{ row }">{{ row.worldId ?? "—" }}</template>
         </el-table-column>
-        <el-table-column prop="requestId" min-width="130"
-          ><template #header><BiText zh="请求" en="ID Request ID" /></template>
+        <el-table-column min-width="130"
+          ><template #header><BiText zh="请求" en="Request ID" /></template>
           <template #default="{ row }">
             <span class="font-mono text-xs">{{ row.requestId }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="message" min-width="240" show-overflow-tooltip
+        <el-table-column prop="message" min-width="260" show-overflow-tooltip
           ><template #header><BiText zh="消息" en="Message" /></template
         ></el-table-column>
         <template #empty>
-          <el-empty description="暂无日志" :image-size="64" />
+          <el-empty
+            description="暂无日志（平台收到首个请求后开始累积）"
+            :image-size="64"
+          />
         </template>
       </el-table>
 

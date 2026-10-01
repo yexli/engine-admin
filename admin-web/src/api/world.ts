@@ -3,6 +3,7 @@
  */
 import { http } from "@/utils/http";
 import type {
+  CommandHistoryEntry,
   CommandResult,
   EngineWorldState,
   WorldCommand,
@@ -30,6 +31,9 @@ export const createWorld = (data: CreateWorldPayload) => {
 
 export interface CreateWorldPayload {
   worldId: string;
+  /** 世界元数据（M1.5：经 definition.metadata 挂载，随存档持久化） */
+  name?: string;
+  description?: string;
   playerName?: string;
   startLoc?: string;
   weather?: string;
@@ -41,6 +45,15 @@ export interface CreateWorldPayload {
     daysPerMonth?: number;
   };
 }
+
+/** 最近命令历史（新 → 旧；Runtime 侧环形缓冲） */
+export const getCommandHistory = (worldId: string, n = 50) => {
+  return http.request<{ total: number; commands: CommandHistoryEntry[] }>(
+    "get",
+    `/world-api/v1/worlds/${encodeURIComponent(worldId)}/commands`,
+    { params: { n } }
+  );
+};
 
 /** 完整世界状态 */
 export const getWorldState = (worldId: string) => {
@@ -76,3 +89,30 @@ export const advanceWorldTime = (worldId: string, ticks: number) => {
     { data: { ticks } }
   );
 };
+
+/* ---------- 生命周期（引擎 1.0.3 · G1 软暂停；语义见 docs/G1-PAUSE-DESIGN-REVIEW.md） ---------- */
+
+/** 暂停：拒绝命令/时间推进，读操作不受影响；重复暂停 409 */
+export const pauseWorld = (worldId: string) => {
+  return http.request<WorldInfo>(
+    "post",
+    `/world-api/v1/worlds/${encodeURIComponent(worldId)}/pause`
+  );
+};
+
+/** 恢复；未暂停时 409 */
+export const resumeWorld = (worldId: string) => {
+  return http.request<WorldInfo>(
+    "post",
+    `/world-api/v1/worlds/${encodeURIComponent(worldId)}/resume`
+  );
+};
+
+/** 关闭：注册表摘除（不可逆；关闭后的世界一切访问 404） */
+export const closeWorld = (worldId: string) => {
+  return http.request<{ closed: boolean; worldId: string }>(
+    "delete",
+    `/world-api/v1/worlds/${encodeURIComponent(worldId)}`
+  );
+};
+

@@ -1,4 +1,7 @@
-/** Event 查询客户端：世界事实来自引擎真实 API；平台级事件流为 Mock */
+/** Event 查询客户端（M4.1 起全部真实）：世界事实来自引擎；平台级事件流 = 管理监听
+ *  /v1/obs/events 跨世界只读聚合。诚实边界：世界事件只有世界历时间（day/tick），
+ *  没有墙钟时间——事件流按「第 N 天 · 场景时刻」排序展示，不编造时刻。
+ */
 import { http } from "@/utils/http";
 import type { WorldEvent } from "./types";
 
@@ -11,29 +14,28 @@ export const listWorldEvents = (worldId: string, n = 100) => {
     `/world-api/v1/worlds/${encodeURIComponent(worldId)}/events`,
     { params: { n } }
   );
-};
+}
 
-/** 平台级事件流（Mock；真实化见 ADMIN-API-GAP.md） */
+/** 平台级事件流（M4.1：跨世界聚合，worldId 标注，day/tick 降序） */
+export interface EventStreamRow extends WorldEvent {
+  worldId: string;
+}
+
+export interface EventStreamResult {
+  worlds: string[];
+  total: number;
+  events: EventStreamRow[];
+}
+
 export const listPlatformEvents = (params?: Record<string, unknown>) => {
-  return http.request<{ success: boolean; data: PageResult<EventStreamRow> }>(
+  return http.request<EventStreamResult>(
     "get",
-    "/admin-api/observability/events",
+    "/control-api/v1/obs/events",
     { params }
   );
 };
 
-export interface EventStreamRow {
-  id: string;
-  time: string;
-  type: string;
-  worldId: string;
-  actor: string | null;
-  target: string | null;
-  level: number;
-  status: string;
-}
-
-/** 引擎因果链向上追溯（前端遍历：事件含 parent/rootCause 字段） */
+/** 引擎因果链向上追溯（前端遍历：事件含 parentId/sourceId/cause 字段，M4.3 修正字段名） */
 export function buildCausalChain(
   events: WorldEvent[],
   eventId: string
@@ -45,7 +47,7 @@ export function buildCausalChain(
   while (cur && !guard.has(cur.id)) {
     guard.add(cur.id);
     chain.push(cur);
-    cur = cur.parent ? byId.get(cur.parent) : undefined;
+    cur = cur.parentId ? byId.get(cur.parentId) : undefined;
   }
   return chain;
 }

@@ -3,8 +3,9 @@ import { onMounted, reactive, ref } from "vue";
 import {
   listApiKeys,
   createApiKey,
-  setApiKeyStatus,
-  regenerateApiKey,
+  updateApiKey,
+  deleteApiKey,
+  API_KEY_PERMISSIONS,
   type ApiKeyRow
 } from "@/api/apiKey";
 import { hasPerms } from "@/utils/auth";
@@ -18,7 +19,6 @@ const list = ref<ApiKeyRow[]>([]);
 const total = ref(0);
 const page = ref(1);
 const pageSize = ref(20);
-const statusFilter = ref("");
 const { loading, error, run } = useAsyncData();
 const canManage = hasPerms("gateway:manage");
 
@@ -30,14 +30,11 @@ async function load() {
   const res = await run(() =>
     listApiKeys({
       page: page.value,
-      pageSize: pageSize.value,
-      status: statusFilter.value || undefined
+      page_size: pageSize.value
     })
   );
-  if (res?.data) {
-    list.value = res.data.list;
-    total.value = res.data.total;
-  }
+  list.value = res?.list ?? [];
+  total.value = res?.total ?? 0;
 }
 
 /* 创建 */
@@ -45,14 +42,14 @@ const createDialog = ref(false);
 const creating = ref(false);
 const createForm = reactive({
   name: "",
-  owner: "admin",
-  permissions: ["chat:completions"] as string[]
+  permissions: [...API_KEY_PERMISSIONS] as string[],
+  expiresAt: ""
 });
 
 function openCreate() {
   createForm.name = "";
-  createForm.owner = "admin";
-  createForm.permissions = ["chat:completions"];
+  createForm.permissions = [...API_KEY_PERMISSIONS];
+  createForm.expiresAt = "";
   createDialog.value = true;
 }
 
@@ -65,15 +62,15 @@ async function doCreate() {
   try {
     const res = await createApiKey({
       name: createForm.name.trim(),
-      owner: createForm.owner,
-      permissions: createForm.permissions
+      permissions: createForm.permissions,
+      ...(createForm.expiresAt
+        ? { expiresAt: new Date(createForm.expiresAt).toISOString() }
+        : {})
     });
-    if (res?.data) {
-      createDialog.value = false;
-      plainKey.value = res.data.plainKey;
-      plainKeyVisible.value = true;
-      load();
-    }
+    createDialog.value = false;
+    plainKey.value = res.plaintext;
+    plainKeyVisible.value = true;
+    load();
   } finally {
     creating.value = false;
   }
@@ -84,34 +81,44 @@ async function copyPlain() {
   message("已复制到剪贴板", { type: "success" });
 }
 
-/* 状态 */
-async function setStatus(row: ApiKeyRow, status: string) {
-  const res = await run(() => setApiKeyStatus(row.id, status));
+/* 过期 */
+const expireDialog = ref(false);
+const expireTarget = ref<ApiKeyRow | null>(null);
+const expireValue = ref("");
+
+function openExpire(row: ApiKeyRow) {
+  expireTarget.value = row;
+  expireValue.value = row.expiresAt ?? "";
+  expireDialog.value = true;
+}
+
+async function doExpire(clear: boolean) {
+  const row = expireTarget.value;
+  if (!row) return;
+  const res = await run(() =>
+    updateApiKey(row.id, {
+      expiresAt: clear
+        ? null
+        : new Date(expireValue.value).toISOString()
+    })
+  );
   if (res) {
-    row.status = status as ApiKeyRow["status"];
-    message("已更新", { type: "success" });
+    row.expiresAt = res.key.expiresAt;
+    expireDialog.value = false;
+    message(clear ? "已清除过期时间" : "已设置过期时间", { type: "success" });
   }
 }
 
-async function revoke(row: ApiKeyRow) {
+/* 删除（硬删） */
+async function del(row: ApiKeyRow) {
   await ElMessageBox.confirm(
-    `撤销 Key「${row.name}」？撤销后不可恢复（历史明文不再显示）。`,
-    "撤销确认",
-    { type: "warning", confirmButtonText: "撤销", cancelButtonText: "取消" }
+    `删除 Key「${row.name}」？删除后立即失效且记录彻底移除，不可恢复。`,
+    "删除确认",
+    { type: "warning", confirmButtonText: "删除", cancelButtonText: "取消" }
   );
-  await setStatus(row, "revoked");
-}
-
-async function regenerate(row: ApiKeyRow) {
-  await ElMessageBox.confirm(
-    `重新生成 Key「${row.name}」？旧 Key 立即失效。`,
-    "重新生成确认",
-    { type: "warning" }
-  );
-  const res = await run(() => regenerateApiKey(row.id));
-  if (res?.data) {
-    plainKey.value = res.data.plainKey;
-    plainKeyVisible.value = true;
+  const res = await run(() => deleteApiKey(row.id));
+  if (res) {
+    message("已删除（该 Key 出站请求即 401）", { type: "success" });
     load();
   }
 }
@@ -121,24 +128,8 @@ onMounted(load);
 
 <template>
   <div class="p-4">
-    <div class="flex justify-end mb-1">
-      <MockTag
-        detail="Key 全程脱敏展示（sk-****xxxx），明文仅在创建/重新生成时出现一次；历史明文不可查看（Mock 数据）"
-      />
-    </div>
     <el-card shadow="never">
       <div class="flex flex-wrap items-center gap-2 mb-3">
-        <el-select
-          v-model="statusFilter"
-          placeholder="状态"
-          clearable
-          class="!w-36"
-          @change="load"
-        >
-          <el-option label="active" value="active" />
-          <el-option label="disabled" value="disabled" />
-          <el-option label="revoked" value="revoked" />
-        </el-select>
         <el-button :loading="loading" @click="load">
           <IconifyIconOffline icon="ep/refresh" class="mr-1" />刷新
         </el-button>
@@ -172,19 +163,13 @@ onMounted(load);
             <span class="font-medium">{{ row.name }}</span>
           </template>
         </el-table-column>
-        <el-table-column
-          prop="maskedKey"
-          label="密钥 Key（脱敏）"
-          min-width="200"
-        >
+        <el-table-column min-width="160"
+          ><template #header><BiText zh="密钥 Key（脱敏）" en="Key" /></template>
           <template #default="{ row }">
-            <span class="font-mono text-xs">{{ row.maskedKey }}</span>
+            <span class="font-mono text-xs">{{ row.prefix }}…</span>
           </template>
         </el-table-column>
-        <el-table-column prop="owner" width="100"
-          ><template #header><BiText zh="所有者" en="Owner" /></template
-        ></el-table-column>
-        <el-table-column min-width="150"
+        <el-table-column min-width="170"
           ><template #header><BiText zh="权限" en="Permissions" /></template>
           <template #default="{ row }">
             <el-tag
@@ -209,59 +194,36 @@ onMounted(load);
             fmtTime(row.createdAt).slice(0, 10)
           }}</template>
         </el-table-column>
+        <el-table-column width="150"
+          ><template #header><BiText zh="过期时间" en="Expires" /></template>
+          <template #default="{ row }">
+            <span v-if="row.expiresAt">{{ fmtTime(row.expiresAt) }}</span>
+            <span v-else class="text-xs text-[--el-text-color-secondary]"
+              >永不过期</span
+            >
+          </template>
+        </el-table-column>
         <el-table-column width="110"
           ><template #header><BiText zh="最近使用" en="Last Used" /></template>
           <template #default="{ row }">{{ timeAgo(row.lastUsedAt) }}</template>
         </el-table-column>
-        <el-table-column width="100" align="center"
-          ><template #header><BiText zh="状态" en="Status" /></template>
-          <template #default="{ row }">
-            <el-tag
-              :type="
-                row.status === 'active'
-                  ? 'success'
-                  : row.status === 'disabled'
-                    ? 'info'
-                    : 'danger'
-              "
-              size="small"
-            >
-              {{ row.status }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column label="操作" width="210" fixed="right">
+        <el-table-column label="操作" width="160" fixed="right">
           <template #default="{ row }">
             <template v-if="canManage">
               <el-button
-                v-if="row.status === 'active'"
                 text
                 size="small"
-                type="warning"
-                @click="setStatus(row as ApiKeyRow, 'disabled')"
+                @click="openExpire(row as ApiKeyRow)"
               >
-                禁用
+                过期
               </el-button>
               <el-button
-                v-if="row.status === 'disabled'"
-                text
-                size="small"
-                type="success"
-                @click="setStatus(row as ApiKeyRow, 'active')"
-              >
-                启用
-              </el-button>
-              <el-button text size="small" @click="regenerate(row as ApiKeyRow)"
-                >重新生成</el-button
-              >
-              <el-button
-                v-if="row.status !== 'revoked'"
                 text
                 size="small"
                 type="danger"
-                @click="revoke(row as ApiKeyRow)"
+                @click="del(row as ApiKeyRow)"
               >
-                撤销
+                删除
               </el-button>
             </template>
             <span v-else class="text-xs text-[--el-text-color-secondary]"
@@ -287,27 +249,37 @@ onMounted(load);
     </el-card>
 
     <!-- 创建 Key -->
-    <el-dialog v-model="createDialog" title="创建 API Key" width="480px">
-      <el-form label-width="100px">
-        <el-form-item label="密钥名称 Key Name" required>
+    <el-dialog v-model="createDialog" title="创建 API Key" width="520px">
+      <el-form label-width="110px">
+        <el-form-item label="密钥名称" required>
           <el-input
             v-model="createForm.name"
             placeholder="如 world-runner"
             maxlength="64"
           />
         </el-form-item>
-        <el-form-item label="所有者 Owner">
-          <el-select v-model="createForm.owner">
-            <el-option label="admin" value="admin" />
-            <el-option label="operator" value="operator" />
-            <el-option label="service" value="service" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="权限 Permissions">
+        <el-form-item label="权限">
           <el-checkbox-group v-model="createForm.permissions">
-            <el-checkbox value="chat:completions">chat:completions</el-checkbox>
-            <el-checkbox value="embedding">embedding</el-checkbox>
+            <el-checkbox
+              v-for="p in API_KEY_PERMISSIONS"
+              :key="p"
+              :value="p"
+            >
+              {{ p }}
+            </el-checkbox>
           </el-checkbox-group>
+          <div class="text-xs text-[--el-text-color-secondary] w-full">
+            全不勾选会被后端拒绝；省略选择即缺省全量权限
+          </div>
+        </el-form-item>
+        <el-form-item label="过期时间">
+          <el-date-picker
+            v-model="createForm.expiresAt"
+            type="datetime"
+            placeholder="留空 = 永不过期"
+            value-format="x"
+            class="!w-56"
+          />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -330,7 +302,7 @@ onMounted(load);
         :closable="false"
         show-icon
         class="mb-3"
-        title="关闭后系统只保存脱敏形式，无法再次查看明文。"
+        title="关闭后系统只保存脱敏前缀与哈希，无法再次查看明文。"
       />
       <div class="flex items-center gap-2">
         <el-input :model-value="plainKey" readonly class="font-mono" />
@@ -339,6 +311,39 @@ onMounted(load);
       <template #footer>
         <el-button type="primary" @click="plainKeyVisible = false"
           >我已保存</el-button
+        >
+      </template>
+    </el-dialog>
+
+    <!-- 设置过期 -->
+    <el-dialog
+      v-model="expireDialog"
+      :title="`设置过期时间 · ${expireTarget?.name ?? ''}`"
+      width="440px"
+    >
+      <el-form label-width="90px">
+        <el-form-item label="过期时间">
+          <el-date-picker
+            v-model="expireValue"
+            type="datetime"
+            placeholder="选择过期时刻"
+            value-format="x"
+            class="!w-56"
+          />
+        </el-form-item>
+        <div class="text-xs text-[--el-text-color-secondary] px-4">
+          过期后该 Key 出站即 401；清除过期时间可恢复使用
+        </div>
+      </el-form>
+      <template #footer>
+        <el-button
+          v-if="expireTarget?.expiresAt"
+          @click="doExpire(true)"
+          >清除过期</el-button
+        >
+        <el-button @click="expireDialog = false">取消</el-button>
+        <el-button type="primary" :disabled="!expireValue" @click="doExpire(false)"
+          >保存</el-button
         >
       </template>
     </el-dialog>

@@ -22,10 +22,14 @@ export function useAsyncData() {
       loaded.value = true;
       return res;
     } catch (e) {
-      const msg =
-        (e as { response?: { data?: { error?: string } } })?.response?.data
-          ?.error ?? (e instanceof Error ? e.message : String(e));
-      error.value = msg || "请求失败";
+      const err = e as {
+        response?: { data?: { error?: { message?: string } | string } };
+      };
+      const raw = err?.response?.data?.error;
+      /* 兼容两种真实错误契约：引擎 {error: string} 与管理监听 {error:{message}} */
+      const msg = typeof raw === "string" ? raw : raw?.message;
+      error.value =
+        msg || (e instanceof Error ? e.message : String(e)) || "请求失败";
       if (!opts?.silent) message(error.value, { type: "error" });
       return undefined;
     } finally {

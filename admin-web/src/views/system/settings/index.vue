@@ -24,8 +24,8 @@ const savingKey = ref("");
 
 async function load() {
   const res = await run(() => listSettings());
-  if (res?.data) {
-    list.value = res.data.list;
+  if (res) {
+    list.value = res.list;
     drafts.value = Object.fromEntries(list.value.map(s => [s.key, s.value]));
   }
 }
@@ -36,12 +36,10 @@ async function save(row: SettingRow) {
     let value = drafts.value[row.key];
     if (row.type === "number") value = Number(value);
     const res = await updateSetting(row.key, value);
-    if (res?.success) {
-      row.value = value;
-      message(`已保存：${row.name}`, { type: "success" });
-    } else {
-      message(res?.msg ?? "保存失败", { type: "error" });
-    }
+    row.value = res.row.value;
+    message(`已保存：${row.name}`, { type: "success" });
+  } catch (e) {
+    message(e instanceof Error ? e.message : "保存失败", { type: "error" });
   } finally {
     savingKey.value = "";
   }
@@ -52,11 +50,13 @@ onMounted(load);
 
 <template>
   <div class="p-4">
-    <div class="flex justify-end mb-1">
-      <MockTag
-        detail="系统设置为 Mock（设置持久化 API 待建，见 ADMIN-API-GAP.md）；修改需要 system:manage 权限"
-      />
-    </div>
+    <el-alert
+      type="info"
+      :closable="false"
+      show-icon
+      class="mb-3"
+      title="设置持久化于 data/settings.json（白名单目录 + 类型/范围校验）；各项说明注明其生效口径——运行时行为项待部署层接线（见说明列）。"
+    />
     <div v-loading="loading">
       <el-alert
         v-if="error"
@@ -110,7 +110,7 @@ onMounted(load);
                 />
               </template>
             </el-table-column>
-            <el-table-column prop="description" label="说明" min-width="220" />
+            <el-table-column prop="description" label="说明" min-width="260" />
             <el-table-column label="操作" width="90" fixed="right">
               <template #default="{ row }">
                 <Perms value="system:manage">

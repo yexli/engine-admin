@@ -9,7 +9,7 @@ const list = ref<AiCallRow[]>([]);
 const total = ref(0);
 const page = ref(1);
 const pageSize = ref(20);
-const filters = ref({ model: "", provider: "", worldId: "", status: "" });
+const filters = ref({ model: "", worldId: "", status: "" });
 const { loading, error, run } = useAsyncData();
 
 const drawer = ref(false);
@@ -19,17 +19,14 @@ async function load() {
   const res = await run(() =>
     listAiCalls({
       page: page.value,
-      pageSize: pageSize.value,
+      page_size: pageSize.value,
       model: filters.value.model || undefined,
-      provider: filters.value.provider || undefined,
-      worldId: filters.value.worldId || undefined,
+      world_id: filters.value.worldId || undefined,
       status: filters.value.status || undefined
     })
   );
-  if (res?.data) {
-    list.value = res.data.list;
-    total.value = res.data.total;
-  }
+  list.value = res?.list ?? [];
+  total.value = res?.total ?? 0;
 }
 
 function openDetail(row: AiCallRow) {
@@ -38,7 +35,7 @@ function openDetail(row: AiCallRow) {
 }
 
 function reset() {
-  filters.value = { model: "", provider: "", worldId: "", status: "" };
+  filters.value = { model: "", worldId: "", status: "" };
   page.value = 1;
   load();
 }
@@ -48,11 +45,6 @@ onMounted(load);
 
 <template>
   <div class="p-4">
-    <div class="flex justify-end mb-1">
-      <MockTag
-        detail="AI 调用记录为 Mock；列表默认不显示完整 Prompt，点击行进详情查看（真实化见 ADMIN-API-GAP.md）"
-      />
-    </div>
     <el-card shadow="never">
       <div class="flex flex-wrap items-center gap-2 mb-3">
         <el-input
@@ -60,18 +52,6 @@ onMounted(load);
           placeholder="Model"
           clearable
           class="!w-44"
-          @change="
-            () => {
-              page = 1;
-              load();
-            }
-          "
-        />
-        <el-input
-          v-model="filters.provider"
-          placeholder="Provider"
-          clearable
-          class="!w-40"
           @change="
             () => {
               page = 1;
@@ -138,18 +118,31 @@ onMounted(load);
           ><template #header><BiText zh="时间" en="Time" /></template>
           <template #default="{ row }">{{ fmtTime(row.time) }}</template>
         </el-table-column>
-        <el-table-column min-width="160"
-          ><template #header><BiText zh="模型" en="Model" /></template>
+        <el-table-column min-width="150"
+          ><template #header><BiText zh="请求模型" en="Model" /></template>
           <template #default="{ row }">
-            <span class="font-mono text-xs">{{ row.model }}</span>
+            <span class="font-mono text-xs">{{ row.model ?? "—" }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="provider" width="100"
-          ><template #header><BiText zh="提供方" en="Provider" /></template
-        ></el-table-column>
-        <el-table-column prop="worldId" width="100"
-          ><template #header><BiText zh="世界" en="World" /></template
-        ></el-table-column>
+        <el-table-column min-width="120"
+          ><template #header
+            ><BiText zh="实际模型" en="Model Used" /></template>
+          <template #default="{ row }">
+            <span class="font-mono text-xs">{{ row.modelUsed ?? "—" }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column min-width="100"
+          ><template #header><BiText zh="提供方" en="Provider" /></template>
+          <template #default="{ row }">{{ row.provider ?? "—" }}</template>
+        </el-table-column>
+        <el-table-column width="100"
+          ><template #header><BiText zh="世界" en="World" /></template>
+          <template #default="{ row }">{{ row.worldId ?? "—" }}</template>
+        </el-table-column>
+        <el-table-column width="100"
+          ><template #header><BiText zh="能力" en="Capability" /></template>
+          <template #default="{ row }">{{ row.capability ?? "—" }}</template>
+        </el-table-column>
         <el-table-column width="90" align="right"
           ><template #header><BiText zh="延迟" en="Latency" /></template>
           <template #default="{ row }">
@@ -160,9 +153,9 @@ onMounted(load);
             </span>
           </template>
         </el-table-column>
-        <el-table-column label="Tokens（P/C）" width="130" align="right">
+        <el-table-column label="Tokens（P/C）" width="120" align="right">
           <template #default="{ row }"
-            >{{ row.promptTokens }} / {{ row.completionTokens }}</template
+            >{{ row.promptTokens ?? "—" }} / {{ row.completionTokens ?? "—" }}</template
           >
         </el-table-column>
         <el-table-column width="90" align="center"
@@ -177,7 +170,10 @@ onMounted(load);
           </template>
         </el-table-column>
         <template #empty>
-          <el-empty description="暂无 AI 调用记录" :image-size="64" />
+          <el-empty
+            description="暂无 AI 调用记录（平台收到首个调用后开始累积）"
+            :image-size="64"
+          />
         </template>
       </el-table>
 
@@ -193,25 +189,31 @@ onMounted(load);
       />
     </el-card>
 
-    <!-- 调用详情 -->
+    <!-- 调用详情（路由留痕；不落 Prompt/响应原文） -->
     <el-drawer
       v-model="drawer"
       :title="`AI Call · ${current?.id ?? ''}`"
-      size="560px"
+      size="480px"
     >
       <template v-if="current">
         <el-descriptions :column="2" border size="small" class="mb-3">
-          <el-descriptions-item label="模型 Model">{{
-            current.model
+          <el-descriptions-item label="请求模型">{{
+            current.model ?? "—"
+          }}</el-descriptions-item>
+          <el-descriptions-item label="调用路径">{{
+            current.route ?? "—"
+          }}</el-descriptions-item>
+          <el-descriptions-item label="实际模型">{{
+            current.modelUsed ?? "—"
           }}</el-descriptions-item>
           <el-descriptions-item label="提供方 Provider">{{
-            current.provider
+            current.provider ?? "—"
           }}</el-descriptions-item>
           <el-descriptions-item label="世界 World">{{
-            current.worldId
+            current.worldId ?? "—"
           }}</el-descriptions-item>
           <el-descriptions-item label="能力 Capability">{{
-            current.capability
+            current.capability ?? "—"
           }}</el-descriptions-item>
           <el-descriptions-item label="延迟 Latency"
             >{{ current.latencyMs }}ms</el-descriptions-item
@@ -224,11 +226,17 @@ onMounted(load);
               {{ current.status }}
             </el-tag>
           </el-descriptions-item>
-          <el-descriptions-item label="输入 Tokens Prompt">{{
-            current.promptTokens
+          <el-descriptions-item label="输入 Tokens">{{
+            current.promptTokens ?? "—"
           }}</el-descriptions-item>
-          <el-descriptions-item label="输出 Tokens Completion">{{
-            current.completionTokens
+          <el-descriptions-item label="输出 Tokens">{{
+            current.completionTokens ?? "—"
+          }}</el-descriptions-item>
+          <el-descriptions-item label="调用 Key">{{
+            current.keyId
+          }}</el-descriptions-item>
+          <el-descriptions-item label="Token 口径">{{
+            current.tokensEstimated ? "平台粗估" : current.promptTokens === null ? "透传路径无 usage" : "上游口径"
           }}</el-descriptions-item>
         </el-descriptions>
 
@@ -241,24 +249,12 @@ onMounted(load);
           :title="current.error"
         />
 
-        <el-collapse>
-          <el-collapse-item title="Prompt">
-            <pre
-              class="whitespace-pre-wrap rounded bg-[--el-fill-color-lighter] p-3 text-xs leading-relaxed"
-              >{{ current.prompt }}</pre>
-          </el-collapse-item>
-          <el-collapse-item title="Response">
-            <pre
-              v-if="current.response"
-              class="whitespace-pre-wrap rounded bg-[--el-fill-color-lighter] p-3 text-xs leading-relaxed"
-              >{{ current.response }}</pre>
-            <el-empty
-              v-else
-              description="无响应（调用失败）"
-              :image-size="48"
-            />
-          </el-collapse-item>
-        </el-collapse>
+        <el-alert
+          type="info"
+          :closable="false"
+          show-icon
+          title="平台只留路由留痕（key / 模型 / 能力 / 时延 / 状态），不落 Prompt 与响应原文"
+        />
       </template>
     </el-drawer>
   </div>

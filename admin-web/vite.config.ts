@@ -23,7 +23,8 @@ export default ({ mode }: ConfigEnv): UserConfigExport => {
     server: {
       // 端口号
       port: VITE_PORT,
-      host: "0.0.0.0",
+      // 仅回环：Model Control Plane 工作流要求管理面不做局域网暴露
+      host: process.env.VITE_DEV_HOST ?? "127.0.0.1",
       // 本地跨域代理 https://cn.vitejs.dev/config/server-options.html#server-proxy
       proxy: {
         // World Engine HTTP API（规则见 world-engine/src/http/protocol.ts）
@@ -32,11 +33,40 @@ export default ({ mode }: ConfigEnv): UserConfigExport => {
           changeOrigin: true,
           rewrite: p => p.replace(/^\/world-api/, "")
         },
+        // World Memory HTTP API（M1.1：适配层见 world-engine/memory/src/http/protocol.ts）
+        "/memory-api": {
+          target: env.VITE_MEMORY_API_URL ?? "http://127.0.0.1:8789",
+          changeOrigin: true,
+          rewrite: p => p.replace(/^\/memory-api/, "")
+        },
         // AI Gateway HTTP API
         "/gateway-api": {
           target: env.VITE_GATEWAY_API_URL ?? "http://127.0.0.1:8788",
           changeOrigin: true,
           rewrite: p => p.replace(/^\/gateway-api/, "")
+        },
+        // Model Control Plane 私有管理面（真实 API，见 src/api/modelControl.ts）：
+        // 改写到受管 Platform 的 loopback 管理监听，并在【服务端】注入管理令牌。
+        // 令牌只从本进程环境变量读取（PLATFORM_ADMIN_TOKEN），绝不使用 VITE_* 前缀、
+        // 不进前端产物、不下发浏览器。
+        // M3 起会话感知：浏览器带 x-admin-session（登录会话）时不再注入主令牌，
+        // 服务端按会话角色做权限强制；无会话的运维请求（curl/脚本）仍走主令牌。
+        "/control-api": {
+          target: process.env.PLATFORM_ADMIN_TARGET ?? "http://127.0.0.1:8791",
+          changeOrigin: true,
+          rewrite: p => p.replace(/^\/control-api/, ""),
+          configure: proxy => {
+            proxy.on("proxyReq", (proxyReq, req) => {
+              if (req.headers["x-admin-session"]) {
+                proxyReq.removeHeader("x-admin-token");
+              } else if (process.env.PLATFORM_ADMIN_TOKEN) {
+                proxyReq.setHeader(
+                  "x-admin-token",
+                  process.env.PLATFORM_ADMIN_TOKEN
+                );
+              }
+            });
+          }
         }
       },
       // 预热文件以提前转换和缓存结果，降低启动期间的初始页面加载时长并防止转换瀑布

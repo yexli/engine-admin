@@ -2,6 +2,7 @@
 import { onBeforeUnmount, onMounted, ref } from "vue";
 import * as echarts from "echarts";
 import { getDashboardOverview, type DashboardOverview } from "@/api/dashboard";
+import { listMemoryStores } from "@/api/memory";
 import { useWorldStore } from "@/store/modules/world";
 import { useAsyncData, fmtTime } from "@/composables/useAsyncData";
 import { usePolling } from "@/composables/usePolling";
@@ -14,25 +15,34 @@ const overview = ref<DashboardOverview | null>(null);
 const chartRef = ref<HTMLElement | null>(null);
 let chart: echarts.ECharts | null = null;
 
-/** 引擎直读数据（真实）与平台聚合（Mock）分开展示，界面标注口径 */
-const engineWorlds = ref<{ id: string; entities: number; time: string }[]>([]);
+/** 引擎直读数据（真实）；status 来自引擎 1.0.3 G1 软暂停 */
+const engineWorlds = ref<
+  { id: string; entities: number; time: string; status: string }[]
+>([]);
+/** 记忆条目（真实：前端直读 /memory-api，独立服务不进平台聚合） */
+const memoryRecords = ref<number | null>(null);
 
 async function loadAll(silent = false) {
   await run(
     async () => {
-      const [res] = await Promise.all([
+      const [res, memory, worlds] = await Promise.all([
         getDashboardOverview(),
+        listMemoryStores()
+          .then(r => r.stores ?? [])
+          .catch(() => null),
         worldStore.fetchWorlds(true).then(() => {
           engineWorlds.value = worldStore.worlds.map(w => ({
             id: w.worldId,
             entities: w.entities,
             time: w.time
               ? `第${w.time.day}天 ${String(w.time.hour).padStart(2, "0")}:00`
-              : "—"
+              : "—",
+            status: w.status ?? "running"
           }));
         })
       ]);
-      overview.value = res.data;
+      overview.value = res;
+      memoryRecords.value = memory === null ? null : memory.reduce((s, st) => s + (st.stats?.total ?? 0), 0);
       renderChart();
     },
     { silent }
@@ -44,11 +54,11 @@ function renderChart() {
   if (!chart) {
     chart = echarts.init(chartRef.value);
   }
-  const { hours, events, aiCalls } = overview.value.activity;
+  const { hourly } = overview.value.ai;
   chart.setOption({
     tooltip: { trigger: "axis" },
     legend: {
-      data: ["世界事件", "AI 调用"],
+      data: ["AI 调用"],
       top: 0,
       right: 0,
       itemWidth: 16,
@@ -56,24 +66,15 @@ function renderChart() {
       icon: "roundRect"
     },
     grid: { left: 40, right: 16, top: 36, bottom: 28 },
-    xAxis: { type: "category", data: hours, boundaryGap: false },
+    xAxis: { type: "category", data: hourly.map(h => h.hour), boundaryGap: false },
     yAxis: { type: "value", minInterval: 1 },
     series: [
-      {
-        name: "世界事件",
-        type: "line",
-        smooth: true,
-        showSymbol: false,
-        data: events,
-        areaStyle: { opacity: 0.08 },
-        itemStyle: { color: "#409eff" }
-      },
       {
         name: "AI 调用",
         type: "line",
         smooth: true,
         showSymbol: false,
-        data: aiCalls,
+        data: hourly.map(h => h.calls),
         areaStyle: { opacity: 0.08 },
         itemStyle: { color: "#67c23a" }
       }
@@ -102,17 +103,16 @@ const statCards = () => [
   {
     zh: "世界数",
     en: "Worlds",
-    /** 引擎直读标注（tooltip） */
     tip: "来自 World Engine 直读",
     value: String(engineWorlds.value.length),
     icon: "ep/compass",
     color: "#409eff"
   },
   {
-    zh: "活跃世界",
-    en: "Active Worlds",
-    tip: "运行中的世界数（Mock 聚合）",
-    value: String(overview.value?.stats.activeWorlds ?? "—"),
+    zh: "运行中世界",
+    en: "Running",
+    tip: "running 状态世界数（M4.2 软暂停起真实；暂停中的不计入）",
+    value: String(overview.value?.worlds.running ?? "—"),
     icon: "ep/video-play",
     color: "#67c23a"
   },
@@ -125,26 +125,29 @@ const statCards = () => [
     color: "#e6a23c"
   },
   {
-    zh: "每分钟事件",
-    en: "Events / min",
-    tip: "平台事件速率（Mock 聚合）",
-    value: String(overview.value?.stats.eventsPerMin ?? "—"),
+    zh: "AI 调用 · 近 1 小时",
+    en: "Calls · 1h",
+    tip: "平台用量数据面（真实）",
+    value: String(
+      overview.value?.ai.hourly.at(-1)?.calls ?? "—"
+    ),
     icon: "ep/bell",
     color: "#f56c6c"
   },
   {
     zh: "AI 请求",
     en: "Requests · 24h",
-    tip: "近 24 小时模型调用次数（Mock 聚合）",
-    value: String(overview.value?.stats.aiRequests24h ?? "—"),
+    tip: "近 24 小时模型调用次数（平台用量数据面，M2.2 起真实）",
+    value:
+      overview.value === null ? "—" : String(overview.value.ai.requests24h),
     icon: "ep/coin",
     color: "#9a66e4"
   },
   {
     zh: "记忆条目",
     en: "Memory Records",
-    tip: "全部记忆库文档数（Mock 聚合）",
-    value: String(overview.value?.stats.memoryRecords ?? "—"),
+    tip: "全部记忆库文档数（前端直读 /memory-api，M4.1 起真实）",
+    value: memoryRecords.value === null ? "—" : String(memoryRecords.value),
     icon: "ep/collection",
     color: "#00b2a9"
   }
@@ -212,14 +215,14 @@ const statCards = () => [
     </el-row>
 
     <el-row :gutter="12">
-      <!-- 事件活动 -->
+      <!-- AI 调用活动（真实；世界事件无墙钟时间，不做事件时间线） -->
       <el-col :md="16" class="mb-3">
         <el-card shadow="never">
           <template #header>
             <div class="flex items-center justify-between">
               <BiText
-                zh="事件活动 / AI 调用（近 12 小时）"
-                en="Activity / AI Calls"
+                zh="AI 调用（近 12 小时 · UTC 整点）"
+                en="AI Calls · 12h"
               />
               <el-button
                 size="small"
@@ -238,27 +241,23 @@ const statCards = () => [
         </el-card>
       </el-col>
 
-      <!-- AI 用量 + 系统 -->
+      <!-- AI 用量 + 最近错误 -->
       <el-col :md="8" class="mb-3">
         <el-card shadow="never" class="mb-3">
           <template #header>
-            <BiText zh="AI 用量（24h · Mock）" en="AI Usage" />
+            <BiText zh="AI 用量（24h · 真实）" en="AI Usage" />
           </template>
           <template v-if="overview">
             <div class="flex justify-between mb-2 text-sm">
-              <span class="text-[--el-text-color-secondary]">成本</span>
-              <span>${{ overview.aiUsage24h.costUsd.toFixed(2) }}</span>
-            </div>
-            <div class="flex justify-between mb-2 text-sm">
               <span class="text-[--el-text-color-secondary]">Tokens</span>
-              <span>{{ overview.aiUsage24h.tokens.toLocaleString() }}</span>
+              <span>{{ overview.ai.tokens24h.toLocaleString() }}</span>
             </div>
             <div class="flex justify-between mb-3 text-sm">
               <span class="text-[--el-text-color-secondary]">成功率</span>
-              <span>{{ overview.aiUsage24h.successRate }}%</span>
+              <span>{{ overview.ai.successRate }}%</span>
             </div>
             <div
-              v-for="p in overview.aiUsage24h.byProvider"
+              v-for="p in overview.ai.byProvider"
               :key="p.provider"
               class="mb-2"
             >
@@ -272,13 +271,19 @@ const statCards = () => [
                 :percentage="
                   Math.round(
                     (p.requests /
-                      Math.max(1, overview.aiUsage24h.byProvider[0].requests)) *
+                      Math.max(1, overview.ai.byProvider[0].requests)) *
                       100
                   )
                 "
                 :show-text="false"
                 :stroke-width="6"
               />
+            </div>
+            <div
+              v-if="!overview.ai.byProvider.length"
+              class="text-xs text-[--el-text-color-secondary]"
+            >
+              近 24 小时无 AI 调用
             </div>
           </template>
         </el-card>
@@ -332,6 +337,16 @@ const statCards = () => [
       <el-table v-loading="loading" :data="engineWorlds" size="small">
         <el-table-column prop="id" min-width="160">
           <template #header><BiText zh="世界 ID" en="World ID" /></template>
+        </el-table-column>
+        <el-table-column label="状态" width="100" align="center">
+          <template #default="{ row }">
+            <el-tag
+              :type="row.status === 'paused' ? 'warning' : 'success'"
+              size="small"
+            >
+              {{ row.status }}
+            </el-tag>
+          </template>
         </el-table-column>
         <el-table-column prop="entities" label="实体数" width="100" />
         <el-table-column prop="time" label="世界时间" min-width="140" />

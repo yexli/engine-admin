@@ -1,8 +1,16 @@
 /** Runtime 观察客户端：从引擎真实 API 派生运行时视图
- *  Scheduler 事件队列、暂停/恢复等控制面暂无引擎 API（见 docs/ADMIN-API-GAP.md）
+ *  M1.2 起调度观测接真（GET /v1/worlds/{id}/scheduler）；
+ *  暂停/恢复等控制面仍无引擎 API（见 docs/ADMIN-API-GAP.md G1，M4 评审）
  */
 import { http } from "@/utils/http";
-import type { CommandResult, EngineWorldState, WorldEvent } from "./types";
+import type {
+  CommandResult,
+  EngineWorldState,
+  SchedulerView,
+  WorldEvent
+} from "./types";
+
+export type { SchedulerView };
 
 /** 运行时总览（从 state + events 派生） */
 export interface RuntimeSummary {
@@ -58,5 +66,14 @@ export const advanceTime = (worldId: string, ticks: number) => {
     "post",
     `/world-api/v1/worlds/${encodeURIComponent(worldId)}/time`,
     { data: { ticks } }
+  );
+};
+
+/** 调度观测：bus 统计 + 定时 / 延后 / 死信事件（真实只读面） */
+export const getSchedulerView = (worldId: string, n = 50) => {
+  return http.request<SchedulerView>(
+    "get",
+    `/world-api/v1/worlds/${encodeURIComponent(worldId)}/scheduler`,
+    { params: { n } }
   );
 };

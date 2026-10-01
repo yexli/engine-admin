@@ -10,7 +10,7 @@ const { loading, error, run } = useAsyncData();
 
 async function load() {
   const res = await run(() => listMemoryStores());
-  if (res?.data) list.value = res.data.list;
+  if (res) list.value = res.stores ?? [];
 }
 
 onMounted(load);
@@ -18,11 +18,6 @@ onMounted(load);
 
 <template>
   <div class="p-4">
-    <div class="flex justify-end mb-1">
-      <MockTag
-        detail="Memory Store 清单为 Mock（memory/ 为纯库，HTTP API 待建，见 ADMIN-API-GAP.md）"
-      />
-    </div>
     <el-row :gutter="12">
       <el-col v-for="s in list" :key="s.id" :md="8" :xs="24" class="mb-3">
         <el-card shadow="never">
@@ -47,13 +42,31 @@ onMounted(load);
             <el-descriptions-item label="Provider">{{
               s.provider
             }}</el-descriptions-item>
-            <el-descriptions-item label="Dimension">{{
-              s.dimension
-            }}</el-descriptions-item>
             <el-descriptions-item label="Document Count">
               {{ s.documentCount.toLocaleString() }}
+              <span
+                v-if="s.stats.forgotten"
+                class="text-xs text-[--el-text-color-secondary]"
+              >
+                （另有 {{ s.stats.forgotten }} 条已遗忘可审计）
+              </span>
             </el-descriptions-item>
-            <el-descriptions-item label="说明">{{
+            <el-descriptions-item label="记忆主人 Owners">{{
+              s.stats.owners
+            }}</el-descriptions-item>
+            <el-descriptions-item label="向量通道 Embed">
+              <el-tag
+                :type="s.embed.attached ? 'success' : 'info'"
+                size="small"
+              >
+                {{
+                  s.embed.attached
+                    ? `${s.embed.name ?? "attached"} · ${s.embed.dimension ?? "?"}d`
+                    : "未接入（纯词面检索）"
+                }}
+              </el-tag>
+            </el-descriptions-item>
+            <el-descriptions-item v-if="s.description" label="说明">{{
               s.description
             }}</el-descriptions-item>
           </el-descriptions>
@@ -62,7 +75,7 @@ onMounted(load);
     </el-row>
 
     <el-card v-if="!list.length" shadow="never">
-      <el-empty v-if="!error && !loading" description="暂无 Memory Store" />
+      <el-empty v-if="!error && !loading" description="暂无 Memory Store（启动 run-demo-memory.mjs 后出现）" />
       <el-alert v-else-if="error" type="error" :closable="false" show-icon>
         <template #title>
           加载失败：{{ error }}

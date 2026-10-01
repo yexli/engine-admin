@@ -1,4 +1,4 @@
-<!-- Locations 面板：地点表 + 实体驻留（真实引擎数据，从 state 派生） -->
+<!-- Locations 面板：M1.3 起走真实独立端点（服务端派生驻留统计与完整性告警） -->
 <template>
   <div>
     <div class="flex flex-wrap items-center gap-2 mb-3">
@@ -7,12 +7,14 @@
         placeholder="搜索地点 ID"
         clearable
         class="!w-56"
+        @keyup.enter="load"
+        @clear="load"
       />
       <el-button :loading="loading" @click="load">
         <IconifyIconOffline icon="ep/refresh" class="mr-1" />刷新
       </el-button>
       <span class="text-xs text-[--el-text-color-secondary]">
-        地点表（id/type/attributes）由 World State 派生
+        服务端端点（GET /locations）；驻留统计与完整性告警由引擎侧派生
       </span>
     </div>
 
@@ -43,7 +45,7 @@
       </template>
     </el-alert>
 
-    <el-table v-loading="loading" :data="filtered" stripe>
+    <el-table v-loading="loading" :data="locations" stripe>
       <el-table-column prop="id" min-width="140" show-overflow-tooltip>
         <template #header><BiText zh="地点 ID" en="Location ID" /></template>
       </el-table-column>
@@ -98,11 +100,22 @@
         />
       </template>
     </el-table>
+
+    <el-pagination
+      v-model:current-page="page"
+      v-model:page-size="pageSize"
+      :total="total"
+      layout="total, sizes, prev, pager, next"
+      :page-sizes="[20, 50, 100]"
+      class="mt-3 justify-end"
+      @current-change="load"
+      @size-change="load"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
+import { ref, watch } from "vue";
 import { listLocations, type LocationView } from "@/api/location";
 import { useAsyncData } from "@/composables/useAsyncData";
 
@@ -111,23 +124,36 @@ defineOptions({ name: "LocationsPanel" });
 const props = defineProps<{ worldId: string }>();
 
 const keyword = ref("");
+const page = ref(1);
+const pageSize = ref(20);
+const total = ref(0);
 const locations = ref<LocationView[]>([]);
 const unknown = ref<string[]>([]);
 const { loading, error, run } = useAsyncData();
 
-const filtered = computed(() =>
-  locations.value.filter(l => !keyword.value || l.id.includes(keyword.value))
-);
-
 async function load() {
   if (!props.worldId) return;
-  const res = await run(() => listLocations(props.worldId));
+  const res = await run(() =>
+    listLocations(props.worldId, {
+      q: keyword.value || undefined,
+      page: page.value,
+      pageSize: pageSize.value
+    })
+  );
   if (res) {
     locations.value = res.locations;
+    total.value = res.total;
     unknown.value = res.unknown;
   }
 }
 
-watch(() => props.worldId, load, { immediate: true });
+watch(
+  () => props.worldId,
+  () => {
+    page.value = 1;
+    load();
+  },
+  { immediate: true }
+);
 defineExpose({ reload: load });
 </script>

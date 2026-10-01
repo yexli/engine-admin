@@ -1,5 +1,20 @@
 # Changelog · world-memory
 
+## [0.8.1] - 2026-09-30 · M1.1 HTTP 适配层（G7，只读 + 检索面）
+
+- **`world-memory/http` 子路径导出**：`createMemoryHttp`（纯路由协议，模式同
+  world-engine/http）+ `startMemoryServer`（node 薄壳，默认 127.0.0.1:8789，
+  请求体上限 256 KiB）。路由：`GET /v1/memory/stores`、
+  `GET /v1/memory/records`（store/entity/kind/q 分页筛选）、
+  `POST /v1/memory/retrieval`（真实评分；无 entity 时聚合 store 内全部 owner）、
+  `GET /v1/memory/embedding`（向量通道声明 + 经本服务的检索统计，诚实口径）。
+  store = 一个 MemoryEngine 实例（worldId 维度归宿主）；**只读 + 检索面，
+  无任何写世界/删记录的口子**（§16 纪律不变）。
+- **`recallScored(owner, query, options)`**：召回的带评分版（返回
+  `{entry, score}[]`）；`recall` 改为其条目投影，公开形状不变。
+- **`MemoryEntry.createdAt?`**：新条目摄取时刻（ISO 8601）；旧快照缺省，
+  HTTP 层投影为 null 不编造。
+
 ## [0.8.0] - 2026-09-29 · 独立角色记忆引擎（V0.8，方案 §16）
 
 - **事实摄取（W8.2）**：`ingestFact` 按感知边界（witnesses）建目击者记忆（置信 1）；

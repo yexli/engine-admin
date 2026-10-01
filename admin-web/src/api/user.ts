@@ -2,6 +2,7 @@ import { http } from "@/utils/http";
 
 export type UserResult = {
   success: boolean;
+  msg?: string;
   data: {
     /** 头像 */
     avatar: string;
@@ -13,11 +14,11 @@ export type UserResult = {
     roles: Array<string>;
     /** 按钮级别权限 */
     permissions: Array<string>;
-    /** `token` */
+    /** `token`（M3.1 起为管理会话令牌，经 x-admin-session 头使用） */
     accessToken: string;
-    /** 用于调用刷新`accessToken`的接口时所需的`token` */
+    /** 用于刷新会话的 token（7 天内可轮换） */
     refreshToken: string;
-    /** `accessToken`的过期时间（格式'xxxx/xx/xx xx:xx:xx'） */
+    /** `accessToken` 的过期时间（ISO） */
     expires: Date;
   };
 };
@@ -27,19 +28,33 @@ export type RefreshTokenResult = {
   data: {
     /** `token` */
     accessToken: string;
-    /** 用于调用刷新`accessToken`的接口时所需的`token` */
+    /** 用于刷新会话的 token */
     refreshToken: string;
-    /** `accessToken`的过期时间（格式'xxxx/xx/xx xx:xx:xx'） */
+    /** `accessToken` 的过期时间（ISO） */
     expires: Date;
   };
 };
 
-/** 登录 */
+/** 登录（M3.1 起真实：管理监听签发会话；响应形状与原 Mock 一致，前端零改动） */
 export const getLogin = (data?: object) => {
-  return http.request<UserResult>("post", "/login", { data });
+  return http.request<UserResult>("post", "/control-api/v1/admin/session/login", {
+    data
+  });
 };
 
-/** 刷新`token` */
+/** 刷新会话（轮换出全新 token 对） */
 export const refreshTokenApi = (data?: object) => {
-  return http.request<RefreshTokenResult>("post", "/refresh-token", { data });
+  return http.request<RefreshTokenResult>(
+    "post",
+    "/control-api/v1/admin/session/refresh-token",
+    { data }
+  );
+};
+
+/** 登出（吊销当前会话；失败静默——本地清理照常进行） */
+export const logoutSession = () => {
+  return http.request<{ success: boolean }>(
+    "post",
+    "/control-api/v1/admin/session/logout"
+  );
 };

@@ -1,4 +1,4 @@
-<!-- Relations 面板：state 关系表 + 实体关系边（不做“好感度”语义假设） -->
+<!-- Relations 面板：M1.3 起走真实独立端点（状态关系表 + 实体关系边双视图，服务端筛选） -->
 <template>
   <div>
     <div class="flex flex-wrap items-center gap-2 mb-3">
@@ -7,6 +7,8 @@
         placeholder="搜索 Source / Target / 类型"
         clearable
         class="!w-64"
+        @keyup.enter="load"
+        @clear="load"
       />
       <el-button :loading="loading" @click="load">
         <IconifyIconOffline icon="ep/refresh" class="mr-1" />刷新
@@ -33,10 +35,10 @@
 
     <el-tabs v-model="tab">
       <el-tab-pane
-        :label="`状态关系表（${stateRelations.length}）`"
+        :label="`状态关系表（${totals.state}）`"
         name="state"
       >
-        <el-table v-loading="loading" :data="filteredState" stripe>
+        <el-table v-loading="loading" :data="stateRelations" stripe>
           <el-table-column prop="source" min-width="130" show-overflow-tooltip>
             <template #header><BiText zh="发起方" en="Source" /></template>
           </el-table-column>
@@ -71,10 +73,10 @@
       </el-tab-pane>
 
       <el-tab-pane
-        :label="`实体关系边（${edgeRelations.length}）`"
+        :label="`实体关系边（${totals.edges}）`"
         name="edges"
       >
-        <el-table v-loading="loading" :data="filteredEdges" stripe>
+        <el-table v-loading="loading" :data="edgeRelations" stripe>
           <el-table-column prop="source" min-width="130" show-overflow-tooltip>
             <template #header><BiText zh="发起方" en="Source" /></template>
           </el-table-column>
@@ -114,7 +116,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
+import { ref, watch } from "vue";
 import { listRelations, type RelationRecord } from "@/api/relation";
 import { useAsyncData } from "@/composables/useAsyncData";
 
@@ -126,30 +128,25 @@ const keyword = ref("");
 const tab = ref("state");
 const stateRelations = ref<RelationRecord[]>([]);
 const edgeRelations = ref<RelationRecord[]>([]);
+const totals = ref({ state: 0, edges: 0 });
 const { loading, error, run } = useAsyncData();
-
-function matches(r: RelationRecord) {
-  if (!keyword.value) return true;
-  const k = keyword.value.toLowerCase();
-  return (
-    r.source.toLowerCase().includes(k) ||
-    r.target.toLowerCase().includes(k) ||
-    r.type.toLowerCase().includes(k)
-  );
-}
-
-const filteredState = computed(() => stateRelations.value.filter(matches));
-const filteredEdges = computed(() => edgeRelations.value.filter(matches));
 
 async function load() {
   if (!props.worldId) return;
-  const res = await run(() => listRelations(props.worldId));
+  const res = await run(() =>
+    listRelations(props.worldId, { q: keyword.value || undefined })
+  );
   if (res) {
     stateRelations.value = res.stateRelations;
     edgeRelations.value = res.edgeRelations;
+    totals.value = res.totals;
   }
 }
 
-watch(() => props.worldId, load, { immediate: true });
+watch(
+  () => props.worldId,
+  load,
+  { immediate: true }
+);
 defineExpose({ reload: load });
 </script>

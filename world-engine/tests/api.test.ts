@@ -83,4 +83,11 @@ describe('createWorld（§63 最小 API）', () => {
     expect(e.tick).toBe(16);
     expect(world.getEvents()[0].type).toBe('world_opened');
   });
+
+  it('emitEvent：事件环单次记账（总线订阅已入环，门面不直推——M4.3 缺陷回归）', () => {
+    const world = createWorld({ worldId: 'demo' });
+    const e = world.emitEvent({ type: 'world_opened' });
+    const count = world.getEvents().filter((x) => x.id === e.id).length;
+    expect(count).toBe(1);
+  });
 });

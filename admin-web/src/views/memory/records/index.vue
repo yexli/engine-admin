@@ -2,13 +2,10 @@
 import { onMounted, ref } from "vue";
 import {
   listMemoryRecords,
-  deleteMemoryRecord,
+  listMemoryStores,
   type MemoryRecordRow
 } from "@/api/memory";
-import { hasPerms } from "@/utils/auth";
-import { message } from "@/utils/message";
 import { useAsyncData, fmtTime, truncate } from "@/composables/useAsyncData";
-import { ElMessageBox } from "element-plus";
 
 defineOptions({ name: "MemoryRecords" });
 
@@ -17,11 +14,8 @@ const total = ref(0);
 const page = ref(1);
 const pageSize = ref(20);
 const filters = ref({ entity: "", type: "", store: "", keyword: "" });
+const storeOptions = ref<string[]>([]);
 const { loading, error, run } = useAsyncData();
-const canWrite = hasPerms("memory:write");
-
-const TYPES = ["observation", "conversation", "event", "preference"];
-const STORES = ["main", "world-events", "npc-personas"];
 
 const drawer = ref(false);
 const current = ref<MemoryRecordRow | null>(null);
@@ -34,26 +28,18 @@ async function load() {
       entity: filters.value.entity || undefined,
       type: filters.value.type || undefined,
       store: filters.value.store || undefined,
-      keyword: filters.value.keyword || undefined
+      q: filters.value.keyword || undefined
     })
   );
-  if (res?.data) {
-    list.value = res.data.list;
-    total.value = res.data.total;
+  if (res) {
+    list.value = res.list;
+    total.value = res.total;
   }
 }
 
-async function remove(row: MemoryRecordRow) {
-  await ElMessageBox.confirm(
-    `删除记忆 ${row.id}？删除后不可恢复。`,
-    "删除确认",
-    { type: "warning" }
-  );
-  const res = await run(() => deleteMemoryRecord(row.id));
-  if (res) {
-    message("已删除", { type: "success" });
-    load();
-  }
+async function loadStores() {
+  const res = await run(() => listMemoryStores());
+  if (res) storeOptions.value = (res.stores ?? []).map(s => s.name);
 }
 
 function reset() {
@@ -62,16 +48,14 @@ function reset() {
   load();
 }
 
-onMounted(load);
+onMounted(() => {
+  load();
+  loadStores();
+});
 </script>
 
 <template>
   <div class="p-4">
-    <div class="flex justify-end mb-1">
-      <MockTag
-        detail="记忆记录为 Mock（Memory HTTP API 待建）；删除按钮需要 memory:write 权限"
-      />
-    </div>
     <el-card shadow="never">
       <div class="flex flex-wrap items-center gap-2 mb-3">
         <el-input
@@ -88,7 +72,7 @@ onMounted(load);
         />
         <el-input
           v-model="filters.entity"
-          placeholder="实体（如 npc-blacksmith）"
+          placeholder="记忆主人（ownerId）"
           clearable
           class="!w-52"
           @change="
@@ -98,20 +82,18 @@ onMounted(load);
             }
           "
         />
-        <el-select
+        <el-input
           v-model="filters.type"
-          placeholder="类型"
+          placeholder="类别 kind（如 observation）"
           clearable
-          class="!w-40"
+          class="!w-52"
           @change="
             () => {
               page = 1;
               load();
             }
           "
-        >
-          <el-option v-for="t in TYPES" :key="t" :label="t" :value="t" />
-        </el-select>
+        />
         <el-select
           v-model="filters.store"
           placeholder="Store"
@@ -124,7 +106,12 @@ onMounted(load);
             }
           "
         >
-          <el-option v-for="s in STORES" :key="s" :label="s" :value="s" />
+          <el-option
+            v-for="s in storeOptions"
+            :key="s"
+            :label="s"
+            :value="s"
+          />
         </el-select>
         <el-button :loading="loading" @click="load">
           <IconifyIconOffline icon="ep/refresh" class="mr-1" />刷新
@@ -149,7 +136,7 @@ onMounted(load);
 
       <el-table v-loading="loading" :data="list" stripe>
         <el-table-column prop="id" min-width="100"
-          ><template #header><BiText zh="记忆" en="ID Memory ID" /></template>
+          ><template #header><BiText zh="记忆" en="Memory ID" /></template>
           <template #default="{ row }">
             <el-button
               text
@@ -165,55 +152,55 @@ onMounted(load);
             </el-button>
           </template>
         </el-table-column>
-        <el-table-column prop="entity" min-width="130" show-overflow-tooltip
-          ><template #header><BiText zh="实体" en="Entity" /></template
+        <el-table-column prop="store" width="110" show-overflow-tooltip
+          ><template #header><BiText zh="Store" en="Store" /></template
+        ></el-table-column>
+        <el-table-column prop="entity" min-width="120" show-overflow-tooltip
+          ><template #header><BiText zh="主人" en="Owner" /></template
         ></el-table-column>
         <el-table-column width="110"
-          ><template #header><BiText zh="类型" en="Type" /></template>
+          ><template #header><BiText zh="类别" en="Kind" /></template>
           <template #default="{ row }">
             <el-tag size="small" effect="plain">{{ row.type }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column min-width="260"
+        <el-table-column min-width="240"
           ><template #header><BiText zh="内容" en="Content" /></template>
           <template #default="{ row }">{{
             truncate(row.content, 46)
           }}</template>
         </el-table-column>
-        <el-table-column width="110" align="center"
-          ><template #header><BiText zh="重要度" en="Importance" /></template>
+        <el-table-column width="90" align="center"
+          ><template #header><BiText zh="路径" en="Via" /></template>
           <template #default="{ row }">
-            <el-rate
-              :model-value="row.importance * 2.5"
-              disabled
+            <el-tag
               size="small"
-            />
-          </template>
-        </el-table-column>
-        <el-table-column width="150"
-          ><template #header><BiText zh="创建时间" en="Created" /></template>
-          <template #default="{ row }">{{ fmtTime(row.createdAt) }}</template>
-        </el-table-column>
-        <el-table-column label="操作" width="90" fixed="right">
-          <template #default="{ row }">
-            <Perms value="memory:write">
-              <el-button
-                text
-                size="small"
-                type="danger"
-                @click="remove(row as MemoryRecordRow)"
-                >删除</el-button
-              >
-            </Perms>
-            <span
-              v-if="!canWrite"
-              class="text-xs text-[--el-text-color-secondary]"
-              >只读</span
+              :type="
+                row.via === 'witness'
+                  ? 'success'
+                  : row.via === 'rumor'
+                    ? 'warning'
+                    : 'info'
+              "
+              >{{ row.via }}</el-tag
             >
           </template>
         </el-table-column>
+        <el-table-column width="100" align="center"
+          ><template #header><BiText zh="世界日" en="Day" /></template>
+          <template #default="{ row }">D{{ row.day }}</template>
+        </el-table-column>
+        <el-table-column width="150"
+          ><template #header><BiText zh="摄取时间" en="Created" /></template>
+          <template #default="{ row }">{{
+            row.createdAt ? fmtTime(row.createdAt) : "—"
+          }}</template>
+        </el-table-column>
         <template #empty>
-          <el-empty description="暂无记忆记录" :image-size="64" />
+          <el-empty
+            description="暂无记忆记录（世界事件被摄取后出现）"
+            :image-size="64"
+          />
         </template>
       </el-table>
 
@@ -240,20 +227,35 @@ onMounted(load);
         <el-descriptions-item label="所属库 Store">{{
           current.store
         }}</el-descriptions-item>
-        <el-descriptions-item label="实体 Entity">{{
+        <el-descriptions-item label="主人 Owner">{{
           current.entity
         }}</el-descriptions-item>
-        <el-descriptions-item label="类型 Type">{{
+        <el-descriptions-item label="类别 Kind">{{
           current.type
+        }}</el-descriptions-item>
+        <el-descriptions-item label="摄取路径 Via">{{
+          current.via
         }}</el-descriptions-item>
         <el-descriptions-item label="重要度 Importance">{{
           current.importance
         }}</el-descriptions-item>
-        <el-descriptions-item label="创建时间 Created">{{
-          fmtTime(current.createdAt)
+        <el-descriptions-item label="置信度 Confidence">{{
+          current.confidence
         }}</el-descriptions-item>
-        <el-descriptions-item label="更新时间 Updated">{{
-          fmtTime(current.updatedAt)
+        <el-descriptions-item label="世界日 Day">{{
+          current.day
+        }}</el-descriptions-item>
+        <el-descriptions-item label="关联实体 Entities">{{
+          current.entities.join("、") || "—"
+        }}</el-descriptions-item>
+        <el-descriptions-item label="召回次数 Recall">{{
+          current.recallCount
+        }}</el-descriptions-item>
+        <el-descriptions-item label="最近召回日 Last Recall">{{
+          current.lastRecalledDay ?? "—"
+        }}</el-descriptions-item>
+        <el-descriptions-item label="摄取时间 Created">{{
+          current.createdAt ? fmtTime(current.createdAt) : "—（旧快照条目无时间戳）"
         }}</el-descriptions-item>
         <el-descriptions-item label="内容 Content">{{
           current.content

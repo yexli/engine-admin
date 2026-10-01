@@ -64,7 +64,10 @@ const onLogin = async (formEl: FormInstance | undefined) => {
                 .finally(() => (disabled.value = false));
             });
           } else {
-            message("登录失败", { type: "error" });
+            message(
+              (res as { msg?: string })?.msg ?? "登录失败：账号或密码错误",
+              { type: "error" }
+            );
           }
         })
         .finally(() => (loading.value = false));
