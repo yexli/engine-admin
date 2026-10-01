@@ -16,7 +16,7 @@
 | 包 | 版本 | 职责 | 测试 |
 |---|---|---|---|
 | `world-engine/` | **1.2.0** | 纯库内核：多世界注册表、规则/命令/查询原语、HTTP+WebSocket 面 | 107 |
-| `world-engine/platform/` | **0.8.0** | 平台面：API Key、会话权限、用量计量、管线、设置、AI 世界演化运行时 | 146 |
+| `world-engine/platform/` | **0.9.0** | 平台面：API Key、会话权限、用量计量、管线、设置、AI 世界演化运行时 V2（策略围栏/幂等/因果追溯） | 174 |
 | `world-engine/gateway/` | 0.7.1 | AI 网关：多厂商模型调用、思考强度适配、任务路由 | 30 |
 | `world-engine/memory/` | 0.8.2 | 世界记忆：4 因子召回 + 向量嵌入（bge-m3 实测） | 20 |
 | `admin-web/` | 6.x | 管理后台（Vue3 + Element Plus，数据 Mock 清零） | e2e 冒烟 |
@@ -34,7 +34,7 @@
 - **可观测**：事件/实体/关系/调度器全端点，因果链追溯，跨世界事件聚合。
 - **计量**：结构化用量面（JSONL），Key / 模型 / 世界 / **游戏方**多维度过滤分组。
 - **AI 世界演化（Evolution Runtime）**：观察世界 → 上下文 → AI 提案 → 白名单 → Rules 终审 → 落地。
-  AI 只能建议不能改世界（进程边界 + 动作白名单 + Rules 两级拒绝），OOC/叙事永不成为世界事实，
+  AI 只能建议不能改世界（进程边界 + 策略围栏 + 动作白名单 + Rules 三层拒绝），NPC 不因玩家行动被强制触发（空提案合法），OOC/叙事永不成为世界事实，
   每次演化留完整因果链账本；管理台「AI 演化」页可触发与反向追溯。见 [docs/EVOLUTION-ARCHITECTURE.md](docs/EVOLUTION-ARCHITECTURE.md)。
 
 ## 快速开始

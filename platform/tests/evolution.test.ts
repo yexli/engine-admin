@@ -194,9 +194,11 @@ describe('确定性边界：Rules 与白名单拒绝 AI 的非法建议', () => 
       journal,
     );
     const run = await evo.tick('w-min', 'admin');
-    expect(run.status).toBe('completed');
+    /* V2 状态机：全部被拒 = rejected（每条有原因可查），不再是 completed */
+    expect(run.status).toBe('rejected');
     expect(run.acceptedCount).toBe(0);
     expect(run.outcomes?.[0]?.accepted).toBe(false);
+    expect(run.outcomes?.[0]?.status).toBe('rejected');
     expect(run.outcomes?.[0]?.rejectedBy).toBe('rules');
     expect(run.outcomes?.[0]?.reason).toContain('RemoveEntityRule');
     const after = await stateOf();
@@ -244,8 +246,11 @@ describe('确定性边界：Rules 与白名单拒绝 AI 的非法建议', () => 
       journal,
     );
     const run = await evo.tick('w-min', 'admin');
-    expect(run.outcomes).toHaveLength(2);
+    /* V2：超限变化不再静默丢弃——逐条落成 policy 拒绝（失败必须可见） */
+    expect(run.outcomes).toHaveLength(5);
     expect(run.acceptedCount).toBe(2);
+    const excess = run.outcomes?.slice(2) ?? [];
+    expect(excess.every((o) => o.rejectedBy === 'policy' && o.reason?.includes('变化数上限'))).toBe(true);
   });
 });
 

@@ -19,6 +19,7 @@ export interface EvolutionObservation {
 }
 
 export interface ProposedChange {
+  changeId?: string;
   targetId: string;
   action: string;
   payload?: Record<string, unknown>;
@@ -37,6 +38,11 @@ export interface EvolutionProposal {
 
 export interface ChangeOutcome {
   change: ProposedChange;
+  changeId: string;
+  /** V2 状态机：独立执行状态（duplicate = 幂等跳过，不算失败） */
+  status: "accepted" | "rejected" | "duplicate";
+  /** 兼容字段 = status === "accepted" */
+  accepted: boolean;
   command?: {
     type: string;
     actorId?: string;
@@ -45,8 +51,8 @@ export interface ChangeOutcome {
     text?: string;
     payload?: Record<string, unknown>;
   };
-  accepted: boolean;
-  rejectedBy?: "translate" | "rules";
+  commandId?: string;
+  rejectedBy?: "translate" | "policy" | "rules" | "duplicate";
   reason?: string;
   eventIds: string[];
 }
@@ -57,7 +63,13 @@ export interface EvolutionContext {
   tick: number;
   day: number;
   weather: string;
-  player: { name: string; loc: string; bagSize: number };
+  player: {
+    name: string;
+    loc: string;
+    bagSize: number;
+    attributes?: Record<string, unknown>;
+  };
+  location?: { id: string; desc?: string };
   entities: Record<
     string,
     {
@@ -68,6 +80,8 @@ export interface EvolutionContext {
       attributes?: Record<string, unknown>;
     }
   >;
+  /** 世界其余实体（轻量名册：id/type/location） */
+  otherEntities: { id: string; type?: string; location?: string }[];
   relations: { source: string; target: string; type: string; value?: number }[];
   events: {
     id: string;
@@ -85,8 +99,9 @@ export interface EvolutionRun {
   worldId: string;
   startedAt: string;
   finishedAt?: string;
-  status: "running" | "completed" | "failed";
+  status: "running" | "completed" | "partially_applied" | "rejected" | "failed";
   trigger: "admin" | "auto" | "api";
+  triggerGrade?: "high" | "medium" | "low";
   observationWindow: { eventCount: number; latestEventId?: string };
   context?: EvolutionContext;
   modelUsed?: string | null;
@@ -94,7 +109,10 @@ export interface EvolutionRun {
   outcomes?: ChangeOutcome[];
   acceptedCount?: number;
   rejectedCount?: number;
+  entitiesAffected?: string[];
   eventIds: string[];
+  /** 幂等重放：同提案/同幂等键命中既有 run */
+  deduplicated?: boolean;
   error?: string;
   tookMs?: number;
 }
@@ -170,5 +188,29 @@ export async function dispatchEvolutionIntent(
     "post",
     `/control-api/v1/evolution/worlds/${encodeURIComponent(worldId)}/intent`,
     { data: intent }
+  );
+}
+
+/** 事件反向追溯（V2 §九）：Event → Run → Proposal → Change → Command */
+export interface EvolutionTrace {
+  run: EvolutionRun;
+  changeId: string;
+  causation: {
+    source: "evolution";
+    evolutionRunId: string;
+    proposalId: string;
+    changeId: string;
+  };
+}
+
+export async function traceEvolutionEvent(
+  worldId: string,
+  eventId: string
+): Promise<EvolutionTrace> {
+  return http.request<EvolutionTrace>(
+    "get",
+    `/control-api/v1/evolution/worlds/${encodeURIComponent(
+      worldId
+    )}/events/${encodeURIComponent(eventId)}/trace`
   );
 }

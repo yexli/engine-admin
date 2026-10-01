@@ -148,3 +148,60 @@ await evolution.tick("w-main", "admin");
 - 演示/测试用脚本化驱动（确定性）；真模型走 gatewayDriver，未配模型诚实失败。
 - 周期自动演化（auto trigger / scheduler 挂钩）与记忆库接入（演化上下文带 NPC 记忆）
   留待闭环验证后；本阶段只做手动触发 + 因果链（方案 §十七：先解决核心命题）。
+
+---
+
+# V2.0 收口（方案 V2：从 Demo Runtime 到真实驱动天穹世界）
+
+## 一、架构收口（方案 §二）
+
+1. **因果关联以 Journal 为权威**：引擎 Event 不携带 Evolution 专属字段（Core 纪律不动）；
+   反向追溯走管理面 `GET /v1/evolution/worlds/:id/events/:eventId/trace`，从账本还原
+   `Event → EvolutionRun → Proposal → Change → Command → Rules Result`（`causation` 凭据）。
+2. **Change/Command 全程带 ID**：每条变化有 `changeId`（chg_*）、派发凭据 `commandId`（cmd_*），
+   裁决独立记录 `status / rejectedBy(translate|policy|rules|duplicate) / reason / eventIds`。
+3. **状态机**（禁止「失败不知道原因」「部分成功显示全部成功」）：
+   `completed`（全放行，含零变化提案）/ `partially_applied` / `rejected`（全拒但逐条有因）/ `failed`。
+   `duplicate` 是幂等跳过，不计入失败面。
+4. **幂等保护**：提案指纹（reason+changes 哈希）与幂等键双重去重——重复提案/重复 tick 返回
+   既有 run（`deduplicated: true`），绝不重复 Mutation；run 内重复 change → `duplicate` 跳过。
+   游戏侧事件消费经 `createEventConsumer`（seen 集 + 分级），断线重放不重复消费。
+
+## 二、NPC 演化围栏（方案 §四：修复「自由行动强制米露回复」）
+
+- **空提案合法化**：`changes: []` 是合法结论（「米露没有注意」），落账 completed 而非失败。
+- **第一阶段策略** `NPC_EVOLUTION_POLICY`：
+  - 允许动作仅 `update_attribute / set_relation / move_entity`（attention/mood/relationship/location/schedule）；
+  - **AI 完全不可触碰玩家**（位置/属性/关系都归游戏与玩家本人）；
+  - `maxChangesPerProposal = 3`、`maxEntitiesAffected = 3`（超限逐条 policy 拒绝，不静默丢弃）；
+  - 冷却 30s（auto/api 受限，admin 手动不受限）。
+- 三层围栏：策略（policy）→ 内核白名单（translate）→ 引擎规则（rules）。
+
+## 三、Context 收敛与触发分级（方案 §五）
+
+- **Context 不是 SELECT \***：Global（时间/天气/玩家）+ 当前地点 + 在场实体（完整字段）
+  + 其余实体轻量名册 + 相关关系边（涉及玩家/在场实体）+ 最近事实窗口。
+- **触发分级**（`policy.ts`）：High（玩家进入 NPC 所在地/主动交互/重大关系变化，且玩家在场）
+  立即触发；Medium（时间/天气）延迟或批量；Low 后台。**只有玩家发起的 High 事件才自动触发演化**；
+  演化产物（actor=NPC）绝不反向触发——结构性断开无限循环。
+
+## 四、天穹最小真实接入（方案 §三，`scripts/run-tianqiong-host.mjs`）
+
+```text
+玩家输入「我想去酒馆找米露。」
+  → Tianqiong Intent（宿主确定性解析）→ move 命令 → 引擎 Rules → 玩家进入酒馆 → Event
+  → 宿主消费 Event（幂等）→ 判定 High → 自动触发演化（幂等键 = auto:{world}:{eventId}）
+  → Context（酒馆作用域：米露/老板）→ AI 判断（可以不行动）→ Proposal → 三层围栏
+  → Mutation → Event → 天穹消费 → 玩家看到符合因果链的世界变化
+```
+
+宿主端口 8795：`POST /tianqiong/input`（玩家输入）、`GET /tianqiong/view`（玩家视图）、
+`GET /tianqiong/events`（已消费事实）。买酒等确定性经济归宿主（价格归游戏），
+但每步状态变化仍经引擎命令链。dev-stack 已自动拉起（8795）。
+
+## 五、验证（方案 §七/§八）
+
+- `platform/tests/evolution-v2.test.ts`：§七 异常与安全矩阵 11 项（含模型故障、重复提案/事件、
+  OOC 变强、越权触碰玩家）+ 状态机 + 冷却 + 因果链 + 触发分级 + 上下文收敛。
+- `platform/tests/carpet.test.ts`：真人式地毯流程 11 步（进村→酒馆→找米露→聊天→离开→商店→
+  购买→时间推进→次日返回→再找米露→终检），脚本化驱动恰好 6 步——出现无限触发第 7 次即抛错暴露。

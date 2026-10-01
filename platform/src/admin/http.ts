@@ -941,18 +941,36 @@ export function startAdminServer(opts: AdminServerOptions): Promise<AdminServer>
     const evoRunMatch = path.match(/^\/v1\/evolution\/worlds\/([^/]+)\/runs\/([^/]+)$/);
     const evoTickMatch = path.match(/^\/v1\/evolution\/worlds\/([^/]+)\/tick$/);
     const evoIntentMatch = path.match(/^\/v1\/evolution\/worlds\/([^/]+)\/intent$/);
+    const evoTraceMatch = path.match(/^\/v1\/evolution\/worlds\/([^/]+)\/events\/([^/]+)\/trace$/);
 
-    if (evoWorldMatch || evoRunsMatch || evoRunMatch || evoTickMatch || evoIntentMatch) {
+    if (evoWorldMatch || evoRunsMatch || evoRunMatch || evoTickMatch || evoIntentMatch || evoTraceMatch) {
       if (!opts.evolution) httpErr(404, 'not_configured', '本管理面未装配演化运行时');
       const evo = opts.evolution;
-      const worldId = decodeURIComponent((evoWorldMatch ?? evoRunsMatch ?? evoRunMatch ?? evoTickMatch ?? evoIntentMatch)![1]!);
+      const worldId = decodeURIComponent((evoWorldMatch ?? evoRunsMatch ?? evoRunMatch ?? evoTickMatch ?? evoIntentMatch ?? evoTraceMatch)![1]!);
+
+      /* ---------- GET .../events/:eventId/trace：Event 反向追溯因果链（V2 §九） ---------- */
+      if (evoTraceMatch && method === 'GET') {
+        const eventId = decodeURIComponent(evoTraceMatch[2]!);
+        const hit = evo.traceEvent(worldId, eventId);
+        if (!hit) httpErr(404, 'trace_not_found', `事件 '${eventId}' 不在演化账本中（可能不是演化产生的，或账本窗口外）`);
+        return { status: 200, body: hit };
+      }
+
 
       if (evoTickMatch && method === 'POST') {
         requirePerm('gateway:manage');
-        const trigger = parseJson(raw ?? Buffer.from('{}')) as { trigger?: unknown };
+        const trigger = parseJson(raw ?? Buffer.from('{}')) as { trigger?: unknown; idempotencyKey?: unknown };
         const t = trigger?.trigger === 'api' || trigger?.trigger === 'auto' ? trigger.trigger : 'admin';
-        const run = await evo.tick(worldId, t);
-        return { status: 200, body: run };
+        const idempotencyKey = typeof trigger?.idempotencyKey === 'string' && trigger.idempotencyKey.length <= 128 ? trigger.idempotencyKey : undefined;
+        try {
+          const run = await evo.tick(worldId, t, idempotencyKey ? { idempotencyKey } : undefined);
+          return { status: 200, body: run };
+        } catch (e) {
+          if (e instanceof Error && e.message.includes('演化冷却中')) {
+            httpErr(429, 'evolution_cooldown', e.message);
+          }
+          throw e;
+        }
       }
       if (evoIntentMatch && method === 'POST') {
         requirePerm('gateway:manage');

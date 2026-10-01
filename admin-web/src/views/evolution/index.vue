@@ -6,8 +6,10 @@ import {
   listEvolutionRuns,
   listEvolutionWorlds,
   tickEvolution,
+  traceEvolutionEvent,
   type ChangeOutcome,
   type EvolutionRun,
+  type EvolutionTrace,
   type EvolutionWorldRow
 } from "@/api/evolution";
 import { useAsyncData } from "@/composables/useAsyncData";
@@ -119,18 +121,46 @@ onMounted(async () => {
 
 /* ---------- 展示辅助 ---------- */
 const statusTag = (s: EvolutionRun["status"]) =>
-  s === "completed" ? "success" : s === "failed" ? "danger" : "warning";
-const verdictOf = (o: ChangeOutcome) =>
-  o.accepted
-    ? { text: "Rules 放行", tag: "success" as const }
-    : o.rejectedBy === "translate"
-      ? { text: "白名单拒绝", tag: "warning" as const }
-      : { text: "Rules 拒绝", tag: "danger" as const };
+  s === "completed"
+    ? "success"
+    : s === "partially_applied"
+      ? "warning"
+      : s === "failed" || s === "rejected"
+        ? "danger"
+        : "info";
+const verdictOf = (o: ChangeOutcome) => {
+  if (o.status === "accepted") return { text: "Rules 放行", tag: "success" as const };
+  if (o.status === "duplicate") return { text: "幂等跳过", tag: "info" as const };
+  if (o.rejectedBy === "policy") return { text: "策略拒绝", tag: "warning" as const };
+  if (o.rejectedBy === "translate") return { text: "白名单拒绝", tag: "warning" as const };
+  return { text: "Rules 拒绝", tag: "danger" as const };
+};
 const ctxSummary = computed(() => {
   const c = detail.value?.context;
   if (!c) return "";
-  return `第 ${c.day} 天 · ${c.tick} 刻 · ${c.weather || "未知天气"} · 玩家 ${c.player.name}@${c.player.loc} · ${Object.keys(c.entities).length} 实体 · ${c.relations.length} 关系`;
+  return `第 ${c.day} 天 · ${c.tick} 刻 · ${c.weather || "未知天气"} · 玩家 ${c.player.name}@${c.player.loc} · 在场 ${Object.keys(c.entities).length} · 名册 ${c.otherEntities.length} · 相关关系 ${c.relations.length}`;
 });
+
+/* ---------- 事件反向追溯（V2 §九） ---------- */
+const traceEventId = ref("");
+const traceResult = ref<EvolutionTrace | null>(null);
+const traceMissing = ref(false);
+const traceLoading = ref(false);
+async function onTrace() {
+  if (!worldId.value || !traceEventId.value.trim()) return;
+  traceLoading.value = true;
+  traceMissing.value = false;
+  traceResult.value = null;
+  try {
+    traceResult.value = await traceEvolutionEvent(worldId.value, traceEventId.value.trim());
+    detail.value = traceResult.value.run;
+    detailVisible.value = true;
+  } catch {
+    traceMissing.value = true;
+  } finally {
+    traceLoading.value = false;
+  }
+}
 </script>
 
 <template>
@@ -171,6 +201,24 @@ const ctxSummary = computed(() => {
         <el-button :loading="loading" @click="loadRuns">
           <IconifyIconOffline icon="ep/refresh" class="mr-1" />刷新留痕
         </el-button>
+        <el-divider direction="vertical" />
+        <el-input
+          v-model="traceEventId"
+          placeholder="事件 id 反向追溯（evt_...）"
+          class="!w-56 font-mono"
+          @keyup.enter="onTrace"
+        />
+        <el-button :loading="traceLoading" :disabled="!traceEventId.trim()" @click="onTrace">
+          <IconifyIconOffline icon="ep/search" class="mr-1" />查因果
+        </el-button>
+        <el-alert
+          v-if="traceMissing"
+          type="warning"
+          :closable="false"
+          show-icon
+          title="该事件不在演化账本中（可能不是演化产生的，或窗口外）"
+          class="!py-1"
+        />
         <span v-if="error" class="text-xs" style="color: var(--el-color-danger)">
           {{ error }}
         </span>
@@ -234,7 +282,9 @@ const ctxSummary = computed(() => {
         <el-table-column width="100" align="center">
           <template #header><span>状态</span></template>
           <template #default="{ row }">
-            <el-tag :type="statusTag(row.status)" size="small">{{ row.status }}</el-tag>
+            <el-tag :type="statusTag(row.status)" size="small">
+              {{ row.status }}<template v-if="row.deduplicated">·幂等</template>
+            </el-tag>
           </template>
         </el-table-column>
         <el-table-column width="90" align="center">
@@ -266,6 +316,14 @@ const ctxSummary = computed(() => {
           <template #header><span>产生事实</span></template>
           <template #default="{ row }">
             <span class="font-mono text-xs">{{ row.eventIds.length }} 条</span>
+          </template>
+        </el-table-column>
+        <el-table-column min-width="120">
+          <template #header><span>影响实体</span></template>
+          <template #default="{ row }">
+            <span class="font-mono text-xs">
+              {{ (row.entitiesAffected ?? []).join("、") || "—" }}
+            </span>
           </template>
         </el-table-column>
         <el-table-column width="90" align="center">
@@ -329,7 +387,7 @@ const ctxSummary = computed(() => {
               v-for="(o, i) in detail.outcomes ?? []"
               :key="i"
               :type="verdictOf(o).tag"
-              :timestamp="verdictOf(o).text"
+              :timestamp="`${verdictOf(o).text} · ${o.changeId}`"
             >
               <p class="text-sm">
                 <span class="font-mono text-xs">{{ o.change.action }}</span>
@@ -337,10 +395,13 @@ const ctxSummary = computed(() => {
                 <span class="text-xs text-[--el-text-color-secondary]">（{{ o.change.reason }}）</span>
               </p>
               <p v-if="o.command" class="font-mono text-xs text-[--el-text-color-secondary]">
-                command: {{ JSON.stringify(o.command) }}
+                {{ o.commandId }}: {{ JSON.stringify(o.command) }}
               </p>
-              <p v-if="o.reason && !o.accepted" class="text-xs" style="color: var(--el-color-danger)">
+              <p v-if="o.reason && o.status === 'rejected'" class="text-xs" style="color: var(--el-color-danger)">
                 拒绝原因：{{ o.reason }}
+              </p>
+              <p v-if="o.status === 'duplicate'" class="text-xs text-[--el-text-color-secondary]">
+                同一提案内的重复变化，幂等跳过（未重复 Mutation）
               </p>
               <p v-if="o.eventIds.length" class="font-mono text-xs" style="color: var(--el-color-success)">
                 产生事实：{{ o.eventIds.join("、") }}

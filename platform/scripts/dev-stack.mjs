@@ -100,14 +100,20 @@ spawnChild('managed-platform', node, [join(platformDir, 'scripts', 'run-managed.
   PLATFORM_BOOTSTRAP_KEY: env.bootstrapKey,
   PLATFORM_UPSTREAM_ALLOW_LOOPBACK: '1',
 });
+spawnChild('tianqiong-host', node, [join(repoRoot, 'scripts', 'run-tianqiong-host.mjs')], repoRoot, {
+  ENGINE_BASE_URL: 'http://127.0.0.1:8787',
+  PLATFORM_ADMIN_URL: 'http://127.0.0.1:8791',
+  PLATFORM_ADMIN_TOKEN: env.adminToken,
+});
 spawnChild('admin-web', npx, ['vite', '--port', vitePort], adminWebDir, {
   PLATFORM_ADMIN_TOKEN: env.adminToken,
   PLATFORM_ADMIN_TARGET: 'http://127.0.0.1:8791',
 }, true);
 
 console.log('[dev-stack] 启动中…');
-console.log(`[dev-stack]   World Engine: http://127.0.0.1:8787  （演示世界 w-main / w-test）`);
+console.log(`[dev-stack]   World Engine: http://127.0.0.1:8787  （演示世界 w-main / w-test / tianqiong-main）`);
 console.log(`[dev-stack]   Memory API  : http://127.0.0.1:8789  （每世界一个 store，事件轮询摄取）`);
 console.log(`[dev-stack]   公开 API : http://127.0.0.1:8790  （bootstrapKey 见 data/dev-env.json）`);
 console.log(`[dev-stack]   管理监听 : http://127.0.0.1:8791  （仅回环；令牌由 Vite 注入）`);
+console.log(`[dev-stack]   天穹宿主 : http://127.0.0.1:8795  （最小真实接入：玩家输入→命令→事件→演化）`);
 console.log(`[dev-stack]   Admin Web: http://127.0.0.1:${vitePort}  （/world-api /memory-api /control-api 自动改写）`);

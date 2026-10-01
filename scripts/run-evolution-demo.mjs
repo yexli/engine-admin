@@ -16,6 +16,7 @@
 import { startWorldServer } from "../world-engine/dist/http/server.js";
 import { createWorldRegistry, InMemoryWorldStorage } from "../world-engine/dist/index.js";
 import {
+  NPC_EVOLUTION_POLICY,
   createEngineClient,
   createEvolutionJournal,
   createEvolutionRuntime,
@@ -51,7 +52,7 @@ for (const cmd of [
 
 const server = await startWorldServer({ registry, port: 0 });
 const engine = createEngineClient({ baseUrl: server.url });
-const evoOf = (driver) => createEvolutionRuntime({ engine, driver }, createEvolutionJournal());
+const evoOf = (driver) => createEvolutionRuntime({ engine, driver, policy: NPC_EVOLUTION_POLICY }, createEvolutionJournal());
 
 function showRun(run, title) {
   line();
@@ -65,7 +66,13 @@ function showRun(run, title) {
     for (const c of run.proposal.changes) console.log(`    · 建议 ${c.action} → ${c.targetId}（${c.reason}）`);
   }
   for (const o of run.outcomes ?? []) {
-    const verdict = o.accepted ? "✓ Rules 放行" : `✗ ${o.rejectedBy === "translate" ? "白名单拒绝" : "Rules 拒绝"}`;
+    const verdict = o.accepted
+      ? "✓ Rules 放行"
+      : o.rejectedBy === "translate"
+        ? "✗ 白名单拒绝"
+        : o.rejectedBy === "policy"
+          ? "✗ 策略拒绝"
+          : "✗ Rules 拒绝";
     console.log(`  裁决      : ${verdict} ${o.command ? `[${o.command.type}]` : ""}${o.reason ? `（${o.reason}）` : ""}`);
     for (const id of o.eventIds) console.log(`      └─ 事实 ${id}`);
   }
@@ -121,22 +128,23 @@ console.log(
     `关系 supply_tension=${(s2.relations ?? []).find((r) => r.type === "supply_tension")?.value}`,
 );
 
-/* ---------- 第三幕：非法建议 → 白名单 / Rules 拒绝 ---------- */
+/* ---------- 第三幕：越权建议 → 策略 / 白名单 / Rules 三层围栏 ---------- */
 const act3 = await evoOf(
   createScriptedDriver([
     {
-      reason: "米露希望忘掉一段不存在的记忆（越权建议）",
+      reason: "米露希望改写一切（一连串越权建议）",
       observations: [{ ref: "state", kind: "state", summary: "状态快照" }],
       changes: [
-        { targetId: "ghost", action: "remove_entity", reason: "试图移除不存在的幽灵" },
-        { targetId: "milu", action: "grant_god_mode", reason: "试图越权（不在白名单，翻译层就会拦下）" },
+        { targetId: "player", action: "update_attribute", payload: { key: "money", value: 999999 }, reason: "试图给玩家加钱（策略禁止 AI 触碰玩家）" },
+        { targetId: "ghost", action: "move_entity", payload: { location: "tavern" }, reason: "试图移动不存在的幽灵（引擎规则会拒）" },
+        { targetId: "milu", action: "grant_god_mode", reason: "试图越权（内核白名单没有这个动作）" },
       ],
     },
   ]),
 ).tick("w-evolution-demo", "admin");
-showRun(act3, "第三幕：AI 越权建议 → 白名单 / Rules 当场拒绝");
+showRun(act3, "第三幕：AI 越权建议 → 策略 / 白名单 / Rules 三层围栏");
 const s3 = world.getState();
-console.log(`\n[世界] 实体表仍是 ${Object.keys(s3.npcs).join("、")}——AI 拿世界毫无办法，除非 Rules 放行`);
+console.log(`\n[世界] 实体表仍是 ${Object.keys(s3.npcs).join("、")}，玩家钱分文未动——AI 拿世界毫无办法，除非围栏与 Rules 放行`);
 
 /* ---------- 因果链回溯 ---------- */
 line("═");
