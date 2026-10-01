@@ -74,6 +74,7 @@ export function createWorldPlatform(init: WorldPlatformInit): {
         kind: entry.kind,
         keyId: key.id,
         tenantId: key.tenantId,
+        gameId: key.gameId ?? null,
         method,
         path,
         status: entry.status,
@@ -254,7 +255,7 @@ export function createWorldPlatform(init: WorldPlatformInit): {
       return json(proxied.status, errorBody('upstream_error', proxied.error));
     }
     /* 流的时延只有传输层知道：挂上计量元数据，泵完由 server.ts 代记 */
-    return { kind: 'stream', status: proxied.status, headers: proxied.headers, body: proxied.stream, usageMeta: { keyId: key.id, tenantId: key.tenantId, model } };
+    return { kind: 'stream', status: proxied.status, headers: proxied.headers, body: proxied.stream, usageMeta: { keyId: key.id, tenantId: key.tenantId, model, gameId: key.gameId ?? null } };
   }
 
   return { handle };

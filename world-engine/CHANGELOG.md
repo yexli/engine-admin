@@ -3,6 +3,77 @@
 本文件记录 AI World Engine 的版本演进。格式参考 Keep a Changelog；版本线见 `docs/WORLD-ROADMAP.md`（方案 §69）。
 版本策略（semver）：0.x 期间允许带 CHANGELOG 注明的 API 调整；**1.0 起冻结公开 API**。
 
+## [1.2.0] - 2026-10-01 · G3 · 产品化：实时事件流 + 文件持久化（公开 API 只增不改）
+
+游戏接入平台规划（docs/GAME-PLATFORM-PLAN.md）G3 的引擎侧落地：世界事实从轮询
+变推送，世界状态从内存变可落盘。零依赖纪律不变——WebSocket 为 RFC6455 最小
+自实现，文件介质只用 node:fs；PostgreSQL 等网络介质属部署层适配（实现同一
+SavePort 接口），不进引擎。
+
+### Added
+- **WebSocket 事件流**（`src/http/ws.ts`，缺省开，`stream: false` 关闭）：
+  - `GET（Upgrade） /v1/worlds/{id}/events/stream`：单世界事实流；
+  - `GET（Upgrade） /v1/stream`：全部可见世界事实流（后建世界 5s 自动补挂）；
+  - 信封：`{type:'hello', worlds:[...]}` → `{type:'event', worldId, event}`；
+    `?replay=N` 断线重连衔接最近 N 条历史（客户端按 event.id 幂等去重）；
+  - 鉴权与 HTTP 面同一张钥匙表（`x-api-key` / Bearer 头，浏览器兼容 `?key=`）；
+    游戏方钥匙只见 ownerGame 匹配的世界，越权握手 404；
+  - 心跳 30s ping / 90s 判死；`WorldServer.close()` 先拆流再排空
+    （活跃流不拆会导致优雅退出挂死——本次一并修复的语义）；
+- **FileSavePort**（`src/state/fileStorage.ts`）：文件介质 SavePort——
+  写后置（防抖 500ms，`debounceMs` 可调）+ `flush()` 强制落盘 + 进程 exit
+  兜底；原子写（tmp+rename）；损坏档备份 `*.corrupt-<ts>` 报 onError，
+  绝不静默覆盖；世界史随 `.log.json` 边车落盘；`dispose()` 摘退出钩子；
+- 测试：`tests/ws-stream.test.ts`（3：握手/鉴权、单世界流+越权、全局流+隔离+replay）、
+  `tests/file-storage.test.ts`（4：落盘接续、createWorld 装配、损坏备份、clear/dispose）。
+
+### 语义
+- 载入编排放置确认：SavePort 是端口，`load()` 由宿主调用后经
+  `world.container.core.S = saved` 注入（正典模式见 tests/file-storage.test.ts）；
+  `createWorld` 始终新建最小合法状态，不隐式读档。
+
+## [1.1.0] - 2026-10-01 · G2 · 多游戏托管：世界归属 + HTTP 鉴权中间件（公开 API 只增不改）
+
+游戏接入平台规划（docs/GAME-PLATFORM-PLAN.md）G2 的引擎侧落地：一个引擎进程托管
+多个游戏方的世界，每游戏一把钥匙，游戏方之间世界互不可见。钥匙事实由接入方持有
+（平台 KeyStore 语义），引擎只认传入的声明式映射——不存钥匙、不联网校验、零依赖。
+
+### Added
+- **世界归属**：`WorldInfo.ownerGame`（metadata.ownerGame 通道，随存档持久化）；
+  `GET /v1/worlds` 支持 `?game=` 过滤；`GameWorldSeed.ownerGame`（适配器契约同步）；
+- **HTTP 鉴权中间件（可选，缺省关）**：`startWorldServer` / `createWorldHttp` 新增
+  `auth: { keys: Record<string, WorldAuthKey> }`——
+  - 401：全路由需有效钥匙（`x-api-key` 头或 `Authorization: Bearer`）；
+  - 403：写入类路由（建世界/commands/time/pause/resume/close）需 `worlds:write`；
+  - 可见域隔离：游戏方钥匙（带 gameId）只见 `ownerGame` 匹配的世界，越权访问 404
+    不泄露存在性；管理钥匙（无 gameId）全可见；无主世界只归管理钥匙；
+  - 归属盖章：游戏方钥匙建世界强制打自己 gameId，冒名不生效；
+  - scopes 缺省按钥匙类型分级：游戏方钥匙只读、管理钥匙读写全量；
+- 传输层 `HttpRequest.headers`（键统一小写）；
+- 测试：`tests/auth.test.ts`（5 用例：鉴权关闭兼容 / 401 / 403 / 可见域隔离 / 归属盖章）。
+
+### 语义
+- `auth` 缺省不传 = 1.0 行为完全不变（本机无鉴权）；云部署显式开启。
+
+## [1.0.4] - 2026-10-01 · G1 · 游戏适配器契约（公开 API 只增不改）
+
+游戏接入平台规划（docs/GAME-PLATFORM-PLAN.md）G1 的引擎侧落地：把"其他游戏方如何
+接入"产品化为一个**薄契约**——接入方实现 GameAdapter（世界书/设定 → 引擎世界种子），
+宿主辅助装配成注册表常驻世界。规则仍由接入方经 registerRule 挂载，引擎不含玩法语义。
+
+### Added
+- **`world-engine/adapter` 子路径**（`src/adapter.ts`）：
+  - `GameAdapter` / `GameWorldSeed` 契约：locations（地点）/npcs（含 loc 落位）/
+    relations（关系网）/facts（种子事实）；
+  - `definitionFromSeed`：种子 → World Definition 纯映射；
+  - `hostGameWorld(registry, adapter)`：装配进注册表——NPC 经核心 `create_entity`
+    落位（attributes.location 正确落位并发出 entity_created），关系网经 set_relation
+    落状态表，种子事实上总线；
+- 测试：`tests/adapter.test.ts`（5 用例：定义映射 / 装配 / 命令通道 / 坏种子 / 生命周期闸门）。
+
+### 验收
+- 引擎 95 用例全绿（90 + 5）；typecheck/build 通过。公开 API 冻结纪律不变（只增）。
+
 ## [1.0.3] - 2026-09-30 · M4 · G1 世界软暂停 / 恢复 / 关闭（公开 API 只增不改）
 
 管理后台 M4.2 的引擎侧落地。**先评审后动手**：语义裁定记录见

@@ -26,18 +26,22 @@
    · 注册表模式（init.registry）：POST /v1/worlds 可多次（每世界
      独立作用域），{id} 为真实路由键。路由形状两种模式完全一致。
 
-   鉴权 / 多租户不做（方案 §3）——服务器默认只绑 127.0.0.1（见 server.ts）。
+   鉴权（G2，1.1.0）：可选中间件（init.auth 声明式钥匙表，缺省关）——
+   开启后全路由 401 闸门 + 写入类 worlds:write（403）+ 游戏方世界
+   可见域隔离。缺省仍只绑 127.0.0.1（见 server.ts）。
    ============================================================ */
 import { createWorld, type CreateWorldOptions, type WorldHandle, type WorldTimeView } from '../api/WorldAPI.ts';
 import { WorldRegistryError, type WorldRegistry } from '../api/WorldRegistry.ts';
 import type { CommandHistoryEntry } from '../runtime/WorldRuntime.ts';
 import type { EngineWorldState, EntityDynamic, LocationRecord, RelationRecord } from '../types.ts';
 
-/** 已解析的 HTTP 请求（传输层负责解析 URL / query / JSON body） */
+/** 已解析的 HTTP 请求（传输层负责解析 URL / query / JSON body / headers） */
 export interface HttpRequest {
   method: string;
   path: string;
   query?: Record<string, string>;
+  /** 键为小写 header 名（传输层统一小写）；鉴权面只读 x-api-key / authorization */
+  headers?: Record<string, string>;
   /** 已 JSON.parse 的请求体（GET 无 body；解析失败由传输层直接回 400） */
   body?: unknown;
 }
@@ -62,6 +66,44 @@ export interface WorldInfo {
   updatedAt?: string;
   /** 服务面状态（G1 软暂停，1.0.3）：paused = HTTP 层拒绝 commands/time 推进；关闭态不出现于任何响应 */
   status?: 'running' | 'paused';
+  /** 归属游戏方（G2）：metadata.ownerGame 通道；按游戏方隔离与聚合的依据 */
+  ownerGame?: string;
+}
+
+/* ---------------- G2 鉴权（1.1.0 · 可选中间件，缺省关） ----------------
+   复用平台 KeyStore 语义的**声明式**钥匙表：接入方（平台/宿主进程）
+   持有钥匙事实，引擎只认传入的 keys 映射——引擎不存钥匙、不联网
+   校验，保持零依赖。缺省不传 auth = 维持 1.0 行为（本机无鉴权）。 */
+
+export const WORLD_SCOPES = ['worlds:read', 'worlds:write'] as const;
+
+/** 一把钥匙的身份：gameId 决定世界可见域（缺省 = 管理钥匙，可见全部）；scopes 决定读写 */
+export interface WorldAuthKey {
+  /** 归属游戏方；缺省视为管理钥匙（跨游戏方可见，可指定任意 ownerGame） */
+  gameId?: string;
+  /** 缺省按钥匙类型分级：游戏方钥匙（带 gameId，第三方不可信）= ['worlds:read']
+      只读；管理钥匙（无 gameId，平台自签）= 读写全量。显式声明 always wins */
+  scopes?: string[];
+  /** 人类可读名（仅诊断回显） */
+  name?: string;
+}
+
+export interface WorldAuthInit {
+  /** 钥匙 → 身份；请求经 x-api-key 头（或 Authorization: Bearer）匹配 */
+  keys: Record<string, WorldAuthKey>;
+}
+
+/** 从请求头提取 API Key（x-api-key 优先，兼容 Bearer） */
+export function apiKeyOf(req: HttpRequest): string | undefined {
+  const h = req.headers ?? {};
+  const x = h['x-api-key'];
+  if (typeof x === 'string' && x.length > 0) return x;
+  const auth = h['authorization'];
+  if (typeof auth === 'string' && auth.toLowerCase().startsWith('bearer ')) {
+    const bearer = auth.slice(7).trim();
+    if (bearer) return bearer;
+  }
+  return undefined;
 }
 
 export interface WorldHttpInit<W extends EngineWorldState = EngineWorldState> {
@@ -71,6 +113,8 @@ export interface WorldHttpInit<W extends EngineWorldState = EngineWorldState> {
   createOptions?: CreateWorldOptions<W>;
   /** V0.9 注册表模式：多世界共存（每世界独立作用域）；给了它则单世界 world 被忽略 */
   registry?: WorldRegistry<W>;
+  /** G2：API Key 鉴权（缺省关）。开启后全部路由需有效钥匙；写入类需 worlds:write */
+  auth?: WorldAuthInit;
 }
 
 /* ---------------- 载荷净化（纵深防御，0.4.1 起） ----------------
@@ -137,11 +181,13 @@ function sanitizeCreateOptions(body: unknown): Record<string, unknown> {
   const weather = MAX_STR(32)(b['weather']);
   const name = MAX_STR(128)(b['name']);
   const description = MAX_STR(512)(b['description']);
+  const ownerGame = MAX_STR(64)(b['ownerGame']);
   if (worldId) out['worldId'] = worldId;
   if (playerName) out['playerName'] = playerName;
   if (startLoc) out['startLoc'] = startLoc;
   if (weather) out['weather'] = weather;
   if (name || description) out['meta'] = { ...(name ? { name } : {}), ...(description ? { description } : {}) };
+  if (ownerGame) out['ownerGame'] = ownerGame;
   if (b['labels'] && typeof b['labels'] === 'object' && !Array.isArray(b['labels'])) {
     const l = b['labels'] as Record<string, unknown>;
     const labels: Record<string, unknown> = {};
@@ -223,6 +269,7 @@ export function createWorldHttp<W extends EngineWorldState = EngineWorldState>(
       status: pausedWorlds.has(h.worldId) ? 'paused' : 'running',
       ...(metaStr(m, 'name') ? { name: metaStr(m, 'name') } : {}),
       ...(metaStr(m, 'description') ? { description: metaStr(m, 'description') } : {}),
+      ...(metaStr(m, 'ownerGame') ? { ownerGame: metaStr(m, 'ownerGame') } : {}),
       ...(metaStr(m, 'createdAt') ? { createdAt: metaStr(m, 'createdAt') } : {}),
       ...(metaStr(m, 'updatedAt') ? { updatedAt: metaStr(m, 'updatedAt') } : {}),
     };
@@ -401,15 +448,49 @@ export function createWorldHttp<W extends EngineWorldState = EngineWorldState>(
     const method = req.method.toUpperCase();
     const segments = req.path.replace(/\/+$/, '').split('/').filter(Boolean);
 
+    /* ---------- G2 鉴权闸门（1.1.0）：auth 缺省关 = 1.0 行为不变；
+       开启后全路由需有效钥匙（401），写入类还需 worlds:write（403）。
+       游戏方钥匙（带 gameId）只见 ownerGame 匹配的世界——越权访问
+       回 404 不泄露存在性。钥匙事实在接入方（平台 KeyStore 语义），
+       引擎只认传入映射：不存钥匙、不联网校验、零依赖。 ---------- */
+    let identity: WorldAuthKey | null = null;
+    let canWrite = true;
+    if (init.auth) {
+      const key = apiKeyOf(req);
+      const rec = key !== undefined ? init.auth.keys[key] : undefined;
+      if (!rec) {
+        return { status: 401, body: { error: 'unauthorized', hint: '需要有效的 x-api-key（或 Authorization: Bearer）' } };
+      }
+      identity = rec;
+      canWrite = (rec.scopes ?? (rec.gameId ? ['worlds:read'] : ['worlds:read', 'worlds:write'])).includes(
+        'worlds:write',
+      );
+    }
+    const gameId = identity?.gameId;
+    /** 世界可见域：管理钥匙（无 gameId）全可见；游戏方钥匙只认 ownerGame 匹配 */
+    const owns = (w: WorldHandle<W>): boolean => !gameId || metaStr(metaOf(w), 'ownerGame') === gameId;
+    const forbidden = (): HttpResponse => ({ status: 403, body: { error: 'forbidden', need: 'worlds:write' } });
+
     /* ---------- /v1/worlds ---------- */
     if (segments[0] === 'v1' && segments[1] === 'worlds' && segments.length === 2) {
       if (method === 'POST') {
+        if (!canWrite) return forbidden();
         const jsonOpts = sanitizeCreateOptions(req.body);
         const now = new Date().toISOString();
         const meta = (jsonOpts['meta'] as Record<string, string> | undefined) ?? {};
         delete jsonOpts['meta'];
+        /* ownerGame（G2）：游戏方钥匙强制打自己的 gameId；管理钥匙可指定 */
+        const bodyOwner = typeof jsonOpts['ownerGame'] === 'string' ? (jsonOpts['ownerGame'] as string) : undefined;
+        delete jsonOpts['ownerGame'];
+        const owner = gameId ?? bodyOwner;
         /* name/description 走 World Definition 的 metadata 通道（零 Core；随存档持久化） */
-        const defMeta = { ...(init.createOptions?.definition?.metadata ?? {}), ...meta, createdAt: now, updatedAt: now };
+        const defMeta = {
+          ...(init.createOptions?.definition?.metadata ?? {}),
+          ...meta,
+          ...(owner ? { ownerGame: owner } : {}),
+          createdAt: now,
+          updatedAt: now,
+        };
         const definition = { ...(init.createOptions?.definition ?? {}), metadata: defMeta };
         if (registry) {
           /* 注册表模式：多世界共存（DR-003 兑现；id 必填，重复 409） */
@@ -440,10 +521,12 @@ export function createWorldHttp<W extends EngineWorldState = EngineWorldState>(
         return { status: 201, body: info(world) };
       }
       if (method === 'GET') {
-        if (registry) {
-          return { status: 200, body: { worlds: registry.list().map(info) } };
-        }
-        return { status: 200, body: { worlds: world ? [info(world)] : [] } };
+        /* 可见域（G2）：游戏方钥匙只见自己游戏的世界；?game= 供管理台按方过滤（取交集） */
+        const gameFilter = queryStr(req.query?.['game'], 64);
+        const all = (registry ? registry.list() : world ? [world] : []).filter(
+          (w) => owns(w) && (!gameFilter || metaStr(metaOf(w), 'ownerGame') === gameFilter),
+        );
+        return { status: 200, body: { worlds: all.map(info) } };
       }
       return { status: 405, body: { error: 'method not allowed' } };
     }
@@ -452,7 +535,7 @@ export function createWorldHttp<W extends EngineWorldState = EngineWorldState>(
     if (segments[0] === 'v1' && segments[1] === 'worlds' && segments.length >= 3) {
       const id = decodeURIComponent(segments[2]);
       const w = resolveWorld(id);
-      if (!w) {
+      if (!w || !owns(w)) {
         return { status: 404, body: { error: 'world not found', worldId: id } };
       }
       const leaf = segments[3];
@@ -461,6 +544,7 @@ export function createWorldHttp<W extends EngineWorldState = EngineWorldState>(
         if (method === 'GET') return { status: 200, body: info(w) };
         if (method === 'DELETE') {
           /* G1 关闭：注册表摘除（V0.9 既有能力）；单世界模式不支持（单世界即进程本体） */
+          if (!canWrite) return forbidden();
           if (!registry) {
             return { status: 409, body: { error: 'close requires registry mode', worldId: id } };
           }
@@ -474,6 +558,7 @@ export function createWorldHttp<W extends EngineWorldState = EngineWorldState>(
       /* ---------- G1 软暂停 / 恢复 ---------- */
       if (segments.length === 4 && leaf === 'pause') {
         if (method !== 'POST') return { status: 405, body: { error: 'method not allowed' } };
+        if (!canWrite) return forbidden();
         if (pausedWorlds.has(id)) {
           return { status: 409, body: { error: 'world already paused', worldId: id } };
         }
@@ -482,6 +567,7 @@ export function createWorldHttp<W extends EngineWorldState = EngineWorldState>(
       }
       if (segments.length === 4 && leaf === 'resume') {
         if (method !== 'POST') return { status: 405, body: { error: 'method not allowed' } };
+        if (!canWrite) return forbidden();
         if (!pausedWorlds.has(id)) {
           return { status: 409, body: { error: 'world not paused', worldId: id } };
         }
@@ -504,6 +590,7 @@ export function createWorldHttp<W extends EngineWorldState = EngineWorldState>(
 
       if (segments.length === 4 && leaf === 'commands') {
         if (method === 'POST') {
+          if (!canWrite) return forbidden();
           if (pausedWorlds.has(id)) {
             return { status: 409, body: { error: 'world paused：暂停中的世界不接受命令推进（G1 软暂停；读操作不受影响）', worldId: id, code: 'world_paused' } };
           }
@@ -552,6 +639,7 @@ export function createWorldHttp<W extends EngineWorldState = EngineWorldState>(
 
       if (segments.length === 4 && leaf === 'time') {
         if (method === 'POST') {
+          if (!canWrite) return forbidden();
           if (pausedWorlds.has(id)) {
             return { status: 409, body: { error: 'world paused：暂停中的世界不接受时间推进（G1 软暂停；读操作不受影响）', worldId: id, code: 'world_paused' } };
           }

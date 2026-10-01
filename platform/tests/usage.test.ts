@@ -103,6 +103,21 @@ describe('用量查询（纯函数）', () => {
     expect(queryUsage(entries, { capability: 'roleplay' }).total).toBe(1);
   });
 
+  it('G3 · 游戏方维度：gameId 过滤（含平台钥匙）与 game 分组', () => {
+    const gameEntries: UsageEntry[] = [
+      entry({ requestId: 'g1', gameId: 'tianqiong', worldId: 'w-tq', totalTokens: 100 }),
+      entry({ requestId: 'g2', gameId: 'tianqiong', worldId: 'w-tq', totalTokens: 50 }),
+      entry({ requestId: 'g3', gameId: 'nova', worldId: 'w-nv', totalTokens: 70 }),
+      entry({ requestId: 'g4' }), /* 平台钥匙：无 gameId */
+    ];
+    expect(queryUsage(gameEntries, { gameId: 'tianqiong' }).total).toBe(2);
+    expect(queryUsage(gameEntries, { gameId: 'nova' }).summary.totalTokens).toBe(70);
+    expect(queryUsage(gameEntries, { gameId: '' }).total).toBe(1); /* '' = 平台钥匙 */
+    const byGame = queryUsage(gameEntries, { groupBy: 'game' });
+    expect(byGame.groups!.map((g) => g.key)).toEqual(['tianqiong', 'nova', '(平台)']); /* 请求数降序，同数按键降序 */
+    expect(byGame.groups!.find((g) => g.key === 'tianqiong')!.totalTokens).toBe(150);
+  });
+
   it('汇总与分组：summary 覆盖全量过滤结果；group_by day/model', () => {
     const all = queryUsage(entries, { kind: 'chat' });
     expect(all.summary.requests).toBe(3);

@@ -497,6 +497,37 @@ describe('私有管理 API · API Key 生命周期（M2.1）', () => {
     expect((ok.body.key.permissions as string[]).sort()).toEqual(['chat:completions', 'worlds:read', 'worlds:write']);
   });
 
+  it('G2 · 游戏方钥匙：gameId 创建/清单回显；缺省 null = 管理钥匙；坏 gameId → 400', async () => {
+    const { admin } = await harness();
+
+    const game = await adminFetch(admin, '/v1/admin/keys', withToken({
+      method: 'POST',
+      body: JSON.stringify({ name: 'tq-world-key', gameId: 'tianqiong' }),
+    }));
+    expect(game.status).toBe(201);
+    expect(game.body.key.gameId).toBe('tianqiong');
+
+    /* 清单回显 gameId */
+    const list = await adminFetch(admin, '/v1/admin/keys', withToken());
+    const rows = list.body.list as { name: string; gameId: string | null }[];
+    expect(rows.find((r) => r.name === 'tq-world-key')?.gameId).toBe('tianqiong');
+
+    const plain = await adminFetch(admin, '/v1/admin/keys', withToken({
+      method: 'POST',
+      body: JSON.stringify({ name: 'admin-key' }),
+    }));
+    expect(plain.status).toBe(201);
+    expect(plain.body.key.gameId).toBeNull();
+
+    for (const bad of [123, '', '   ', 'x'.repeat(65)]) {
+      const r = await adminFetch(admin, '/v1/admin/keys', withToken({
+        method: 'POST',
+        body: JSON.stringify({ name: 'x', gameId: bad }),
+      }));
+      expect(r.status).toBe(400);
+    }
+  });
+
   it('删除：硬删（记录移除、verify 失效、清单消失）；未知 Key → 404；status 字段已废弃 → 400', async () => {
     const { admin, keys } = await harness();
     const created = await adminFetch(admin, '/v1/admin/keys', withToken({

@@ -28,9 +28,11 @@ export default ({ mode }: ConfigEnv): UserConfigExport => {
       // 本地跨域代理 https://cn.vitejs.dev/config/server-options.html#server-proxy
       proxy: {
         // World Engine HTTP API（规则见 world-engine/src/http/protocol.ts）
+        // ws: true —— G3 实时事件流（/world-api/v1/stream 等 Upgrade 请求同源代理）
         "/world-api": {
           target: env.VITE_WORLD_API_URL ?? "http://127.0.0.1:8787",
           changeOrigin: true,
+          ws: true,
           rewrite: p => p.replace(/^\/world-api/, "")
         },
         // World Memory HTTP API（M1.1：适配层见 world-engine/memory/src/http/protocol.ts）

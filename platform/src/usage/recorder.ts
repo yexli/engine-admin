@@ -26,6 +26,8 @@ export interface UsageEntry {
   kind: 'chat' | 'worlds';
   keyId: string;
   tenantId: string;
+  /** 归属游戏方（G3 计量维度）：钥匙带 gameId 时盖章；null/缺省 = 平台钥匙 */
+  gameId?: string | null;
   method: string;
   path: string;
   status: number;

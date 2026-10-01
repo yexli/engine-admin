@@ -38,6 +38,9 @@ export interface ApiKeyRecord {
   /** 展示用前缀（如 sk-world-ab12），不可反推明文 */
   prefix: string;
   permissions: PlatformPermission[];
+  /** 归属游戏方（G2 多游戏托管）：非空 = 该 Key 是这把游戏方的世界 API 钥匙；
+   *  与引擎 auth 中间件的 WorldAuthKey.gameId 对齐。null = 平台管理钥匙 */
+  gameId: string | null;
   createdAt: string;
   expiresAt: string | null;
   lastUsedAt: string | null;
@@ -110,7 +113,7 @@ export interface StreamResponse {
   headers: Record<string, string>;
   body: ReadableStream<Uint8Array>;
   /** 计量元数据（M2.2）：流在传输层泵完才产生时延，由 server.ts 代记 */
-  usageMeta?: { keyId: string; tenantId: string; model: string };
+  usageMeta?: { keyId: string; tenantId: string; model: string; gameId?: string | null };
 }
 
 export type PlatformResponse = JsonResponse | StreamResponse;

@@ -67,6 +67,8 @@ export { splitShards, mergeShards, isShardedMain } from './state/Shards.ts';
 export type { ShardFieldSpec, ShardSnapshot } from './state/Shards.ts';
 export { InMemoryWorldStorage } from './state/storage.ts';
 export type { SavePort } from './state/storage.ts';
+export { FileSavePort } from './state/fileStorage.ts';
+export type { FileSavePortOptions } from './state/fileStorage.ts';
 export type { LocationRecord, RelationRecord } from './types.ts';
 
 /* 受控写入 */
@@ -104,3 +106,14 @@ export { createQuery } from './api/WorldQuery.ts';
 export type { WorldQuery, QuerySource } from './api/WorldQuery.ts';
 export { createWorldRegistry, WorldRegistryError } from './api/WorldRegistry.ts';
 export type { WorldRegistry } from './api/WorldRegistry.ts';
+/* 游戏适配器契约（GAME-PLATFORM-PLAN G1）：世界书/设定 → 引擎常驻世界 */
+export { definitionFromSeed, hostGameWorld } from './adapter.ts';
+export type {
+  GameAdapter,
+  GameWorldSeed,
+  GameLocationSeed,
+  GameNpcSeed,
+  GameRelationSeed,
+  GameFactSeed,
+  HostedGame,
+} from './adapter.ts';

@@ -76,6 +76,7 @@ export function startPlatformServer(opts: PlatformServerOptions): Promise<Platfo
       kind: 'chat',
       keyId: out.usageMeta.keyId,
       tenantId: out.usageMeta.tenantId,
+      gameId: out.usageMeta.gameId ?? null,
       method: method ?? 'GET',
       path: pathname,
       status: out.status,

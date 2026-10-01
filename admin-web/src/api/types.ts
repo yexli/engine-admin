@@ -26,6 +26,8 @@ export interface WorldInfo {
   updatedAt?: string;
   /** 服务面状态（引擎 1.0.3 G1 软暂停）：paused = 拒绝命令/推进；关闭后的世界不出现在清单 */
   status?: "running" | "paused";
+  /** 归属游戏方（引擎 1.1.0 G2 多游戏托管）：按方聚合/隔离的依据；缺省 = 平台托管 */
+  ownerGame?: string;
 }
 
 /** 引擎实体关系边 */

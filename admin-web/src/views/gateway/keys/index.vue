@@ -43,12 +43,14 @@ const creating = ref(false);
 const createForm = reactive({
   name: "",
   permissions: [...API_KEY_PERMISSIONS] as string[],
+  gameId: "",
   expiresAt: ""
 });
 
 function openCreate() {
   createForm.name = "";
   createForm.permissions = [...API_KEY_PERMISSIONS];
+  createForm.gameId = "";
   createForm.expiresAt = "";
   createDialog.value = true;
 }
@@ -63,6 +65,8 @@ async function doCreate() {
     const res = await createApiKey({
       name: createForm.name.trim(),
       permissions: createForm.permissions,
+      /* 非空 = 游戏方钥匙（G2：引擎鉴权中间件按 gameId 划世界可见域） */
+      ...(createForm.gameId.trim() ? { gameId: createForm.gameId.trim() } : {}),
       ...(createForm.expiresAt
         ? { expiresAt: new Date(createForm.expiresAt).toISOString() }
         : {})
@@ -169,6 +173,17 @@ onMounted(load);
             <span class="font-mono text-xs">{{ row.prefix }}…</span>
           </template>
         </el-table-column>
+        <el-table-column width="120"
+          ><template #header><BiText zh="归属" en="Owner" /></template>
+          <template #default="{ row }">
+            <el-tag v-if="row.gameId" size="small" type="success">{{
+              row.gameId
+            }}</el-tag>
+            <span v-else class="text-xs text-[--el-text-color-secondary]"
+              >平台</span
+            >
+          </template>
+        </el-table-column>
         <el-table-column min-width="170"
           ><template #header><BiText zh="权限" en="Permissions" /></template>
           <template #default="{ row }">
@@ -270,6 +285,16 @@ onMounted(load);
           </el-checkbox-group>
           <div class="text-xs text-[--el-text-color-secondary] w-full">
             全不勾选会被后端拒绝；省略选择即缺省全量权限
+          </div>
+        </el-form-item>
+        <el-form-item label="游戏方 ID">
+          <el-input
+            v-model="createForm.gameId"
+            placeholder="留空 = 平台管理钥匙；填 gameId = 游戏方钥匙"
+            maxlength="64"
+          />
+          <div class="text-xs text-[--el-text-color-secondary] w-full">
+            游戏方钥匙配引擎鉴权中间件后只见本方世界（见「游戏方」页）
           </div>
         </el-form-item>
         <el-form-item label="过期时间">

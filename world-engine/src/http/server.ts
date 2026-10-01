@@ -16,7 +16,8 @@ import { createServer, type Server } from 'node:http';
 import type { CreateWorldOptions, WorldHandle } from '../api/WorldAPI.ts';
 import type { WorldRegistry } from '../api/WorldRegistry.ts';
 import type { EngineWorldState } from '../types.ts';
-import { createWorldHttp } from './protocol.ts';
+import { createWorldHttp, type WorldAuthInit } from './protocol.ts';
+import { attachEventStream } from './ws.ts';
 
 /** 请求体上限（字节）。超过即 413——引擎的存档/命令都是小载荷，1 MiB 富余 */
 const MAX_BODY_BYTES = 1024 * 1024;
@@ -28,6 +29,10 @@ export interface WorldServerOptions<W extends EngineWorldState = EngineWorldStat
   createOptions?: CreateWorldOptions<W>;
   /** V0.9 注册表模式：多世界共存（POST /v1/worlds 不再 409；每世界独立作用域，DR-003 兑现） */
   registry?: WorldRegistry<W>;
+  /** G2：API Key 鉴权（缺省关）。钥匙事实由接入方持有（平台 KeyStore 语义） */
+  auth?: WorldAuthInit;
+  /** G3：WebSocket 事件流（缺省开）。/v1/worlds/{id}/events/stream 与 /v1/stream */
+  stream?: boolean;
   /** 监听端口；缺省 8787，测试传 0 取临时端口 */
   port?: number;
   /** 监听地址；**缺省 127.0.0.1（仅本机）**——无鉴权端口不默认外露 */
@@ -46,7 +51,7 @@ export interface WorldServer {
 export function startWorldServer<W extends EngineWorldState = EngineWorldState>(
   opts: WorldServerOptions<W> = {},
 ): Promise<WorldServer> {
-  const http = createWorldHttp<W>({ world: opts.world, createOptions: opts.createOptions, registry: opts.registry });
+  const http = createWorldHttp<W>({ world: opts.world, createOptions: opts.createOptions, registry: opts.registry, auth: opts.auth });
   const host = opts.host ?? '127.0.0.1';
 
   const server: Server = createServer((req, res) => {
@@ -83,9 +88,14 @@ export function startWorldServer<W extends EngineWorldState = EngineWorldState>(
       url.searchParams.forEach((v, k) => {
         query[k] = v;
       });
+      /* 头名统一小写（G2 鉴权面只读 x-api-key / authorization） */
+      const headers: Record<string, string> = {};
+      for (const [k, v] of Object.entries(req.headers)) {
+        if (typeof v === 'string') headers[k.toLowerCase()] = v;
+      }
       let out;
       try {
-        out = await http.handle({ method: req.method ?? 'GET', path: url.pathname, query, body });
+        out = await http.handle({ method: req.method ?? 'GET', path: url.pathname, query, headers, body });
       } catch (err) {
         /* 协议层之上的意外异常不裸奔：500 + 可读原因 */
         out = { status: 500, body: { error: err instanceof Error ? err.message : String(err) } };
@@ -94,6 +104,11 @@ export function startWorldServer<W extends EngineWorldState = EngineWorldState>(
       res.end(JSON.stringify(out.body));
     });
   });
+
+  /* G3：WebSocket 事件流（缺省开；stream: false 显式关闭） */
+  const streams = opts.stream !== false
+    ? attachEventStream<W>(server, { registry: opts.registry ?? null, world: opts.world ?? null, auth: opts.auth })
+    : null;
 
   return new Promise((resolve, reject) => {
     server.once('error', reject);
@@ -105,6 +120,8 @@ export function startWorldServer<W extends EngineWorldState = EngineWorldState>(
         url: `http://${host}:${port}`,
         close: () =>
           new Promise<void>((resolveClose) => {
+            /* 先拆流连接（close 只等排空不主动断，活跃流会让关闭挂死） */
+            streams?.destroy();
             server.close(() => resolveClose());
           }),
       });

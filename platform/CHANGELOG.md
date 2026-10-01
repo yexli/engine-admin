@@ -3,6 +3,28 @@
 本文件记录 World Platform 的版本演进。格式参考 Keep a Changelog。
 版本策略（semver）：0.x 期间允许带 CHANGELOG 注明的 API 调整。
 
+## [0.7.0] - 2026-10-01 · G3 · 用量的游戏方维度
+
+### Added
+- **`UsageEntry.gameId`**：用量记录盖章归属游戏方——公共面 meter 与流式
+  代记从钥匙记录带出 `gameId`（null = 平台钥匙）；
+- `GET /v1/admin/usage` 新增 `game_id` 过滤（`__platform__` 约定为平台钥匙）
+  与 `group_by=game` 分组（平台记录聚合为 `(平台)` 键）；
+- 测试：usage 查询增 1 用例（过滤/汇总/分组）。
+
+## [0.6.0] - 2026-10-01 · G2 · 游戏方钥匙（gameId）
+
+### Added
+- **`ApiKeyRecord.gameId`**：非空 = 游戏方钥匙（对齐 world-engine 1.1.0 鉴权
+  中间件的 `WorldAuthKey.gameId`）；`POST /v1/admin/keys` 接受 `gameId`
+  （1-64 字符，非法 400），GET 清单回显（存量记录归一为 null = 平台管理钥匙）；
+- 管理台「游戏方」聚合页（admin-web /gateway/games）：世界按 `ownerGame`、
+  钥匙按 `gameId` 前端归组——健康（运行/暂停）、实体量、最近活动、接入钥匙；
+- 测试：admin-http 增 1 用例（gameId 创建/回显/缺省 null/非法 400）。
+
+### 语义
+- 钥匙落盘文件版本不变（`version: 1`）——新字段可选，旧文件直接可读。
+
 ## [0.5.1] - 2026-10-01 · API Key：撤销语义移除，改为硬删除（破坏性 API 变更）
 
 ### Changed

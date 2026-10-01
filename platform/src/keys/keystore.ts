@@ -26,6 +26,8 @@ export interface CreateKeyOptions {
   name: string;
   tenantId?: string;
   permissions?: PlatformPermission[];
+  /** 归属游戏方（G2）：非空 = 游戏方钥匙；缺省 null = 平台管理钥匙 */
+  gameId?: string;
   /** ISO 日期；缺省不过期 */
   expiresAt?: string;
 }
@@ -113,6 +115,7 @@ export class KeyStore {
       keyHash: hashKey(plaintext),
       prefix: plaintext.slice(0, 12),
       permissions: normalizePermissions(opts.permissions),
+      gameId: opts.gameId ?? null,
       createdAt: new Date().toISOString(),
       expiresAt: opts.expiresAt ?? null,
       lastUsedAt: null,
@@ -133,6 +136,7 @@ export class KeyStore {
         keyHash: '',
         prefix: plaintext.slice(0, 12),
         permissions: [...PLATFORM_PERMISSIONS],
+        gameId: null,
         createdAt: new Date(0).toISOString(),
         expiresAt: null,
         lastUsedAt: null,

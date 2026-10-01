@@ -11,6 +11,8 @@ export interface ApiKeyRow {
   tenantId: string;
   prefix: string;
   permissions: string[];
+  /** 归属游戏方（G2）：非空 = 游戏方钥匙；null = 平台管理钥匙 */
+  gameId: string | null;
   createdAt: string;
   expiresAt: string | null;
   lastUsedAt: string | null;
@@ -57,6 +59,8 @@ export async function listApiKeys(
 export async function createApiKey(data: {
   name: string;
   permissions?: string[];
+  /** 归属游戏方（G2）：非空 = 游戏方钥匙 */
+  gameId?: string;
   expiresAt?: string;
 }): Promise<{ key: ApiKeyRow; plaintext: string }> {
   try {

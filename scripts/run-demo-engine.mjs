@@ -12,6 +12,7 @@ import {
   createWorldRegistry,
   InMemoryWorldStorage
 } from "../world-engine/dist/index.js";
+import { readFileSync } from "node:fs";
 
 const registry = createWorldRegistry();
 
@@ -99,6 +100,80 @@ function seed(worldId, playerName, startLoc) {
 
 seed("w-main", "云生", "plaza");
 seed("w-test", "测试员", "tavern");
+
+/* ============================================================
+   天穹纪元 · 圣辉城（M5 后特性：世界书数据 → 引擎世界）
+   ------------------------------------------------------------
+   数据源：tianqiong2/src/data/world/{geo,people}.json（世界书 JSON
+   事实源）。63 地点全量建模；15 个 NPC 按其 loc 字段落位，关系网
+   经 set_relation 命令落进状态表；每位 NPC 的一条身份设定经
+   emitEvent 成为世界事实（可在后台「事件」页与 Runtime 事件页查看）。
+   证明：天穹的世界书数据无需改动，即可在剥离引擎上建模并托管。
+   ============================================================ */
+function seedTianqiong() {
+  const geo = JSON.parse(
+    readFileSync(new URL("../tianqiong2/src/data/world/geo.json", import.meta.url), "utf8")
+  );
+  const people = JSON.parse(
+    readFileSync(new URL("../tianqiong2/src/data/world/people.json", import.meta.url), "utf8")
+  );
+  const locs = Object.entries(geo.locations);
+  const world = registry.create({
+    worldId: "tianqiong-main",
+    playerName: "远道而来的旅人",
+    startLoc: locs[0]?.[0] ?? "plaza",
+    weather: "clear",
+    savePort: new InMemoryWorldStorage(),
+    definition: {
+      locations: locs.map(([id, l]) => ({
+        id,
+        type: /野|林|原/.test(l.name ?? "") ? "wilderness" : "urban",
+        attributes: { desc: l.name ?? id }
+      })),
+      metadata: {
+        name: "天穹纪元 · 圣辉城",
+        description:
+          "天穹 2.0 世界书数据在剥离引擎上的建模示例（数据源 tianqiong2/src/data/world/*.json，零改动）"
+      }
+    }
+  });
+
+  /* NPC 落位 + 关系网：关系数据原样进状态表（数值含义由天穹定义） */
+  const spawned = [];
+  for (const [id, n] of Object.entries(people.npcs)) {
+    const r = world.executeCommand({
+      type: "spawn_entity",
+      payload: { id, name: n.name ?? id, kind: "npc", loc: n.loc ?? locs[0]?.[0] ?? "plaza" }
+    });
+    if (r.ok) spawned.push(id);
+    for (const [target, rel] of Object.entries(n.rels ?? {})) {
+      world.executeCommand({
+        type: "set_relation",
+        actorId: id,
+        targetId: target,
+        payload: { type: rel.type, value: rel.val }
+      });
+    }
+  }
+
+  /* 身份设定 → 世界事实（ causality 起点，供后台因果链/事件页展示） */
+  for (const [id, n] of Object.entries(people.npcs)) {
+    const identity = n.lore?.identity;
+    if (identity) {
+      world.emitEvent({
+        type: "npc_identity",
+        actor: id,
+        data: { identity: String(identity).slice(0, 200) }
+      });
+    }
+  }
+
+  console.log(
+    `[demo-engine] tianqiong-main 就绪：${locs.length} 地点 / ${spawned.length} NPC（世界书数据接入示例）`
+  );
+}
+
+seedTianqiong();
 
 /* 端口可经 PORT 环境变量覆盖（缺省 8787；e2e 冒烟用 18787 避让开发栈） */
 const port = Number(process.env.PORT ?? 8787);

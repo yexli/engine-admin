@@ -14,6 +14,17 @@ export default {
   },
   children: [
     {
+      path: "/gateway/games",
+      name: "GatewayGames",
+      component: () => import("@/views/gateway/games/index.vue"),
+      meta: {
+        title: "游戏方",
+        titleEn: "Game Studios",
+        icon: "ep/avatar",
+        roles: ["admin"]
+      }
+    },
+    {
       path: "/gateway/providers",
       name: "GatewayProviders",
       component: () => import("@/views/gateway/providers/index.vue"),

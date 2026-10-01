@@ -303,6 +303,14 @@ export function startAdminServer(opts: AdminServerOptions): Promise<AdminServer>
         httpErr(400, 'malformed', 'name 必须是 1-64 字符的字符串');
       }
       const permissions = validateKeyPermissions(body['permissions']);
+      /* gameId（G2）：非空 = 游戏方钥匙（对齐引擎 auth 中间件的 WorldAuthKey.gameId） */
+      let gameId: string | undefined;
+      if (body['gameId'] !== undefined && body['gameId'] !== null) {
+        if (typeof body['gameId'] !== 'string' || body['gameId'].trim().length === 0 || body['gameId'].length > 64) {
+          httpErr(400, 'malformed', 'gameId 必须是 1-64 字符的字符串');
+        }
+        gameId = (body['gameId'] as string).trim();
+      }
       let expiresAt: string | null = null;
       if (body['expiresAt'] !== undefined && body['expiresAt'] !== null) {
         if (typeof body['expiresAt'] !== 'string' || body['expiresAt'].length > 64 || Number.isNaN(Date.parse(body['expiresAt']))) {
@@ -310,7 +318,7 @@ export function startAdminServer(opts: AdminServerOptions): Promise<AdminServer>
         }
         expiresAt = body['expiresAt'] as string;
       }
-      const created = opts.keys.create({ name: name.trim(), permissions, expiresAt: expiresAt ?? undefined });
+      const created = opts.keys.create({ name: name.trim(), permissions, gameId, expiresAt: expiresAt ?? undefined });
       return { status: 201, body: { key: maskedKeyRow(created.record), plaintext: created.plaintext } };
     }
 
@@ -358,8 +366,8 @@ export function startAdminServer(opts: AdminServerOptions): Promise<AdminServer>
       const route = sp.get('route');
       if (route && route !== 'world-agent' && route !== 'proxy') httpErr(400, 'malformed', `route 只接受 world-agent|proxy，收到 '${route.slice(0, 32)}'`);
       const groupBy = sp.get('group_by');
-      if (groupBy !== null && !['day', 'key', 'model', 'capability', 'world'].includes(groupBy)) {
-        httpErr(400, 'malformed', `group_by 只接受 day|key|model|capability|world，收到 '${groupBy.slice(0, 32)}'`);
+      if (groupBy !== null && !['day', 'key', 'model', 'capability', 'world', 'game'].includes(groupBy)) {
+        httpErr(400, 'malformed', `group_by 只接受 day|key|model|capability|world|game，收到 '${groupBy.slice(0, 32)}'`);
       }
       for (const bound of ['from', 'to']) {
         const v = sp.get(bound);
@@ -371,12 +379,14 @@ export function startAdminServer(opts: AdminServerOptions): Promise<AdminServer>
         to: sp.get('to') ?? undefined,
         keyId: sp.get('key_id') ?? undefined,
         worldId: sp.get('world_id') ?? undefined,
+        /* G3：游戏方维度。game_id=__platform__ 约定为平台钥匙（无 gameId） */
+        gameId: sp.get('game_id') === '__platform__' ? '' : (sp.get('game_id') ?? undefined),
         model: sp.get('model') ?? undefined,
         capability: sp.get('capability') ?? undefined,
         kind: (kind as 'chat' | 'worlds') ?? undefined,
         status: (status as 'success' | 'error') ?? undefined,
         route: (route as 'world-agent' | 'proxy') ?? undefined,
-        groupBy: (groupBy as undefined | 'day' | 'key' | 'model' | 'capability' | 'world') ?? undefined,
+        groupBy: (groupBy as undefined | 'day' | 'key' | 'model' | 'capability' | 'world' | 'game') ?? undefined,
         page,
         pageSize,
       });
@@ -990,6 +1000,8 @@ function maskedKeyRow(rec: ApiKeyRecord): Record<string, unknown> {
     tenantId: rec.tenantId,
     prefix: rec.prefix,
     permissions: rec.permissions,
+    /* 存量记录（G2 之前）缺 gameId → 归一为 null（平台管理钥匙） */
+    gameId: rec.gameId ?? null,
     createdAt: rec.createdAt,
     expiresAt: rec.expiresAt,
     lastUsedAt: rec.lastUsedAt,

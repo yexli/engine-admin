@@ -13,6 +13,8 @@ export interface UsageQuery {
   to?: string;
   keyId?: string;
   worldId?: string;
+  /** 归属游戏方过滤（G3）：'' = 平台钥匙（无 gameId）；其余精确匹配 */
+  gameId?: string;
   /** 匹配请求模型或 world-agent 实际模型 */
   model?: string;
   capability?: string;
@@ -21,7 +23,7 @@ export interface UsageQuery {
   route?: 'world-agent' | 'proxy';
   page?: number;
   pageSize?: number;
-  groupBy?: 'day' | 'key' | 'model' | 'capability' | 'world';
+  groupBy?: 'day' | 'key' | 'model' | 'capability' | 'world' | 'game';
 }
 
 export interface UsageSummary {
@@ -63,6 +65,7 @@ export function queryUsage(entries: readonly UsageEntry[], q: UsageQuery): Usage
     if (to !== undefined && !(Number.isNaN(t) === false && t <= to)) return false;
     if (q.keyId !== undefined && e.keyId !== q.keyId) return false;
     if (q.worldId !== undefined && (e.worldId ?? '') !== q.worldId) return false;
+    if (q.gameId !== undefined && (e.gameId ?? '') !== q.gameId) return false;
     if (q.model !== undefined && e.model !== q.model && e.modelUsed !== q.model) return false;
     if (q.capability !== undefined && (e.capability ?? '') !== q.capability) return false;
     if (q.kind !== undefined && e.kind !== q.kind) return false;
@@ -136,5 +139,7 @@ function groupKeyOf(e: UsageEntry, groupBy: NonNullable<UsageQuery['groupBy']>):
       return e.capability ?? '—';
     case 'world':
       return e.worldId ?? '—';
+    case 'game':
+      return e.gameId ?? '(平台)';
   }
 }

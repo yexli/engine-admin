@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from "vue";
+import { onBeforeUnmount, onMounted, ref, watch } from "vue";
 import {
   listPlatformEvents,
   type EventStreamRow
 } from "@/api/event";
 import { useAsyncData } from "@/composables/useAsyncData";
 import { usePolling } from "@/composables/usePolling";
+import { message } from "@/utils/message";
 
 defineOptions({ name: "ObsEvents" });
 
@@ -28,7 +29,60 @@ async function load() {
   total.value = res?.total ?? 0;
 }
 
-const { polling, toggle, start } = usePolling(load, 10_000);
+const { polling, toggle, start, stop } = usePolling(load, 10_000);
+
+/* ---------- G3 实时模式：WebSocket 直连引擎 /v1/stream（替代轮询） ---------- */
+const LIVE_CAP = 200;
+const live = ref(false);
+const liveCount = ref(0);
+let ws: WebSocket | null = null;
+
+function toggleLive() {
+  if (live.value) {
+    ws?.close();
+    return;
+  }
+  const proto = location.protocol === "https:" ? "wss" : "ws";
+  ws = new WebSocket(`${proto}://${location.host}/world-api/v1/stream?replay=0`);
+  ws.onopen = () => {
+    live.value = true;
+    liveCount.value = 0;
+    if (polling.value) toggle(); /* 实时开着就别轮询了 */
+  };
+  ws.onmessage = ev => {
+    try {
+      const msg = JSON.parse(String(ev.data)) as {
+        type: string;
+        worldId?: string;
+        event?: Omit<EventStreamRow, "worldId">;
+      };
+      if (msg.type !== "event" || !msg.event || !msg.worldId) return;
+      if (msg.event.id && list.value.some(r => r.id === msg.event!.id)) return; /* 幂等去重 */
+      const typeFilter = filters.value.type.trim();
+      if (typeFilter && !msg.event.type.includes(typeFilter)) return;
+      total.value++;
+      liveCount.value++;
+      list.value = [
+        { ...msg.event, worldId: msg.worldId } as EventStreamRow,
+        ...list.value
+      ].slice(0, LIVE_CAP);
+    } catch {
+      /* 非 JSON 帧忽略 */
+    }
+  };
+  ws.onclose = () => {
+    const wasLive = live.value;
+    live.value = false;
+    ws = null;
+    if (wasLive && !polling.value) start(); /* 断线回落轮询 */
+  };
+  ws.onerror = () => {
+    /* onclose 会跟着来；这里只提示 */
+    message("实时连接不可用（引擎未启动？），已回落 10s 轮询", { type: "warning" });
+  };
+}
+
+onBeforeUnmount(() => ws?.close());
 
 onMounted(start);
 
@@ -83,9 +137,17 @@ function worldDay(row: EventStreamRow): string {
         </el-button>
         <el-button
           :type="polling ? 'primary' : 'default'"
+          :disabled="live"
           @click="toggle"
         >
           {{ polling ? "10s 轮询中" : "已暂停" }}
+        </el-button>
+        <el-button :type="live ? 'success' : 'default'" @click="toggleLive">
+          <IconifyIconOffline
+            :icon="live ? 'ep/connection' : 'ep/video-play'"
+            class="mr-1"
+          />
+          {{ live ? `实时推送中 · +${liveCount}` : "实时" }}
         </el-button>
         <el-button @click="reset">重置</el-button>
       </div>
