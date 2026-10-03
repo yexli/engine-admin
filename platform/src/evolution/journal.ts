@@ -1,12 +1,15 @@
 /* ============================================================
    Evolution Journal（方案 §九/§十三：因果链的落地账本）
    ------------------------------------------------------------
-   每次 EvolutionRun 一条 JSON 记录：内存环形窗口 + 可选 JSONL 落盘。
+   每个 EvolutionRun 在账本里只有一行真相：append 是 upsert——
+   tick 开始落 'running' 中间态（进程崩溃也有迹可查），finish 落
+   终态原位覆盖；load 时同一 run 的后一行覆盖前一行。
+   内存环形窗口 + 可选 JSONL 落盘。
    它回答的是「世界为什么发生了这个变化」——观测面只读，任何系统
    （Admin / 游戏方 / 未来审计）都从这里反向追溯。
 
    纪律：写失败不炸运行时（演化账本损坏不能反过来伤害世界进程），
-   但 load 时损坏行要如实跳过并计数——不静默假装没发生过。
+   但失败要计数可查——不静默假装没发生过。
    ============================================================ */
 import { appendFileSync, existsSync, mkdirSync, readdirSync, readFileSync } from 'node:fs';
 import type { EvolutionRun } from './types.ts';
@@ -29,16 +32,25 @@ export function createEvolutionJournal(opts: FileEvolutionJournalOptions = {}): 
   knownWorlds(): string[];
   /** 从磁盘装载历史（有 dir 时）；返回 { loaded, skippedCorrupt } */
   load(): { loaded: number; skippedCorrupt: number };
+  /** JSONL 落盘失败累计次数（写失败不炸运行时，但必须可查） */
+  writeFailures(): number;
 } {
   const cap = Math.max(10, Math.floor(opts.ringCap ?? RING_CAP));
   const rings = new Map<string, EvolutionRun[]>();
   const dir = opts.dir;
+  let failures = 0;
 
   function push(run: EvolutionRun): void {
     let ring = rings.get(run.worldId);
     if (!ring) {
       ring = [];
       rings.set(run.worldId, ring);
+    }
+    /* upsert：同一 run 的中间态（running）被终态原位覆盖 */
+    const idx = ring.findIndex((r) => r.id === run.id);
+    if (idx >= 0) {
+      ring[idx] = run;
+      return;
     }
     ring.push(run);
     if (ring.length > cap) ring.shift();
@@ -52,7 +64,8 @@ export function createEvolutionJournal(opts: FileEvolutionJournalOptions = {}): 
         mkdirSync(dir, { recursive: true });
         appendFileSync(`${dir}/${sanitize(run.worldId)}.jsonl`, `${JSON.stringify(run)}\n`, 'utf8');
       } catch {
-        /* 账本写失败不伤害世界进程（纪律见文件头）；run 仍在内存窗口可查 */
+        /* 账本写失败不伤害世界进程（纪律见文件头）；run 仍在内存窗口可查，失败计数可查 */
+        failures++;
       }
     },
 
@@ -67,6 +80,10 @@ export function createEvolutionJournal(opts: FileEvolutionJournalOptions = {}): 
 
     knownWorlds() {
       return [...rings.keys()];
+    },
+
+    writeFailures() {
+      return failures;
     },
 
     load() {
@@ -88,7 +105,8 @@ export function createEvolutionJournal(opts: FileEvolutionJournalOptions = {}): 
           if (!t) continue;
           try {
             const run = JSON.parse(t) as EvolutionRun;
-            /* 行归属校验：run.worldId 必须与文件名一致（防串档） */
+            /* 行归属校验：run.worldId 必须与文件名一致（防串档）；
+               同一 run 的多行（running 中间态 + 终态）按 push 的 upsert 语义后行覆盖前行 */
             if (run && typeof run.id === 'string' && run.worldId === worldId) {
               push(run);
               loaded++;

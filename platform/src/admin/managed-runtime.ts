@@ -21,7 +21,7 @@ import type {
   PipelineSpec,
   ProviderMessage,
 } from 'world-gateway';
-import { createModelRouter, createPipeline, remoteChat, remoteChatStream, RemoteModelError, startGatewayServer } from 'world-gateway';
+import { createModelRouter, createPipeline, remoteChat, remoteChatStream, remoteEmbeddings, RemoteModelError, startGatewayServer } from 'world-gateway';
 import type { Capability } from '../types.ts';
 import type { EngineClient } from '../types.ts';
 import type { KeyStore } from '../keys/keystore.ts';
@@ -191,7 +191,18 @@ export function buildManagedProvider(config: ModelConfig, opts: ManagedProviderO
         throw toManagedError(e);
       }
     },
-    /* embed 缺省：首期只做 chat（规格明确 embeddings 出界）→ 网关回 501 */
+    /* embed（P8 · 方案 §十一：embedding 能力通道）：与 chat 同纪律——
+       解析模型目标 → 出站校验 → 调上游。模型未配置/禁用 → 抛错（网关归一 503）。 */
+    async embed(model: string, input: string[]): Promise<number[][]> {
+      const t = resolveModelTarget(config, opts.secrets, model, { requireEnabled: true });
+      if (!t) throw new ManagedUpstreamError(`模型 '${model}' 不在当前启用的模型配置中`, 'upstream_failure');
+      await opts.outboundValidator(t.endpoint);
+      try {
+        return await remoteEmbeddings(toModelRef(model, t), t.apiKey, input);
+      } catch (e) {
+        throw toManagedError(e);
+      }
+    },
   };
 }
 

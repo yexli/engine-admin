@@ -77,6 +77,7 @@ import { PLATFORM_PERMISSIONS } from '../types.ts';
 import type { UsageReader } from '../usage/recorder.ts';
 import { queryUsage, PAGE_SIZE_CAP } from '../usage/query.ts';
 import type { EvolutionRuntime } from '../evolution/runtime.ts';
+import { sanitizeScheduleTable, type ScheduleStore } from '../npc/scheduleStore.ts';
 
 const MAX_BODY_BYTES = 1024 * 1024;
 
@@ -104,6 +105,15 @@ export interface AdminServerOptions {
   settings?: SettingsStore;
   /** AI World Evolution Runtime（Phase C；缺省未装配 → evolution 路由 404 not_configured） */
   evolution?: EvolutionRuntime;
+  /** NPC 日程表存储（P6 · 方案 §九；缺省未装配 → schedules 路由 404 not_configured） */
+  scheduleStore?: ScheduleStore;
+  /** Trigger Runtime（P3；缺省未装配 → runtime 观测面无 trigger 段） */
+  triggerRuntime?: import('../evolution/triggerRuntime.ts').TriggerRuntime;
+  /** Schedule Runtime（P6；缺省未装配 → runtime 观测面无 schedule 段） */
+  scheduleRuntime?: import('../npc/scheduler.ts').ScheduleRuntime;
+  /** Memory Runtime + 记忆服务（P7；缺省未装配 → runtime 观测面无 memory 段） */
+  memoryRuntime?: import('../memory/runtime.ts').MemoryRuntime;
+  memoryService?: import('../memory/service.ts').WorldMemoryService;
   /** 记忆库服务地址（M5 后特性：嵌入配置鉴权代理目标；缺省 8789） */
   memoryBaseUrl?: string;
 }
@@ -906,6 +916,96 @@ export function startAdminServer(opts: AdminServerOptions): Promise<AdminServer>
       };
     }
 
+    /* ---------- Runtime 统一观测面（P9 · 方案 §十二：Admin 的数据面，不是 CRUD） ----------
+       GET /v1/admin/runtime：World Runtime / Evolution / Events / NPC Runtime /
+       AI Calls / Causal Trace 的单点入口——各子系统的运行真相聚合在这里，
+       管理台/运维/审计从这一个端点看「世界现在是什么状态、为什么」。 */
+    if (path === '/v1/admin/runtime' && method === 'GET') {
+      const worldsRes = await opts.runtime.engine.proxy('GET', '/v1/worlds');
+      const worlds = (worldsRes.body as { worlds?: Record<string, unknown>[] })?.worlds ?? [];
+      const evo = opts.evolution;
+      const evolution = evo
+        ? {
+            worlds: [...new Set([...evo.knownWorlds(), ...worlds.map((w) => w['worldId']).filter((v): v is string => typeof v === 'string')])].map((id) => {
+              const latest = evo.runs(id, 1)[0] ?? null;
+              return {
+                worldId: id,
+                runsTotal: evo.runs(id, 200).length,
+                latestRun: latest
+                  ? {
+                      id: latest.id,
+                      status: latest.status,
+                      trigger: latest.trigger,
+                      triggerGrade: latest.triggerGrade ?? null,
+                      modelUsed: latest.modelUsed ?? null,
+                      finishedAt: latest.finishedAt ?? null,
+                      accepted: latest.acceptedCount ?? 0,
+                      rejected: latest.rejectedCount ?? 0,
+                    }
+                  : null,
+              };
+            }),
+          }
+        : null;
+      return {
+        status: 200,
+        body: {
+          generatedAt: new Date().toISOString(),
+          worlds,
+          evolution,
+          ...(opts.triggerRuntime ? { trigger: opts.triggerRuntime.status() } : {}),
+          ...(opts.scheduleRuntime ? { schedule: opts.scheduleRuntime.status() } : {}),
+          ...(opts.memoryRuntime || opts.memoryService
+            ? {
+                memory: {
+                  ...(opts.memoryRuntime ? { runtime: opts.memoryRuntime.status() } : {}),
+                  ...(opts.memoryService
+                    ? {
+                        stats: opts.memoryService.worlds().map((worldId) => opts.memoryService!.stats(worldId)),
+                        writeFailures: opts.memoryService.writeFailures(),
+                      }
+                    : {}),
+                },
+              }
+            : {}),
+          pointers: {
+            aiCalls: '/v1/admin/overview（AI 汇总/小时桶/最近错误）',
+            causalTrace: '/v1/evolution/worlds/:id/events/:eventId/trace（因果链）',
+            evolutionRuns: '/v1/evolution/worlds/:id/runs',
+          },
+        },
+      };
+    }
+
+    /* ---------- NPC 日程注册（P6 · 方案 §九：作息数据归宿主，确定性执行归平台） ----------
+       GET    /v1/npc/worlds/:id/schedules  当前日程表
+       PUT    /v1/npc/worlds/:id/schedules  整表注册/覆盖（游戏方是日程的唯一作者）[gateway:manage]
+       DELETE /v1/npc/worlds/:id/schedules  清除
+       未装配 scheduleStore → 404 not_configured（与 keys/usage 同姿态）。 */
+    const npcSchedMatch = path.match(/^\/v1\/npc\/worlds\/([^/]+)\/schedules$/);
+    if (npcSchedMatch) {
+      if (!opts.scheduleStore) httpErr(404, 'not_configured', '本管理面未装配 NPC 日程存储');
+      const worldId = decodeURIComponent(npcSchedMatch[1]!);
+      const store = opts.scheduleStore;
+      if (method === 'GET') {
+        const table = store.get(worldId);
+        return { status: 200, body: { worldId, ...(table ? { schedules: table } : { schedules: null }) } };
+      }
+      if (method === 'PUT') {
+        requirePerm('gateway:manage');
+        const clean = sanitizeScheduleTable(parseJson(raw ?? Buffer.from('{}')));
+        if (!clean) httpErr(400, 'bad_schedule', '日程表形状非法（需 {npcId: [{from,to,location}...]}，0<=from<to<=48）');
+        store.set(worldId, clean);
+        return { status: 200, body: { worldId, schedules: clean } };
+      }
+      if (method === 'DELETE') {
+        requirePerm('gateway:manage');
+        const removed = store.delete(worldId);
+        return { status: 200, body: { worldId, removed } };
+      }
+      httpErr(405, 'method_not_allowed', '仅 GET / PUT / DELETE');
+    }
+
     /* ---------- AI World Evolution Runtime（Phase C：演化控制台数据面） ----------
        GET  /v1/evolution/worlds                 有演化账本的世界清单
        POST /v1/evolution/worlds/:id/tick        触发一次演化闭环 [gateway:manage]
@@ -953,7 +1053,38 @@ export function startAdminServer(opts: AdminServerOptions): Promise<AdminServer>
         const eventId = decodeURIComponent(evoTraceMatch[2]!);
         const hit = evo.traceEvent(worldId, eventId);
         if (!hit) httpErr(404, 'trace_not_found', `事件 '${eventId}' 不在演化账本中（可能不是演化产生的，或账本窗口外）`);
-        return { status: 200, body: hit };
+        /* P9 · 方案 §十二：因果链完整呈现——World Event → Trigger → Context →
+           Model → Proposal → Validation → Command → Mutation → New Event。
+           全部来自 run 留痕，不补叙事。 */
+        const run = hit.run;
+        const outcomes = run.outcomes ?? [];
+        const chain = [
+          { step: 'trigger', detail: `${run.trigger}${run.triggerGrade ? `（分级 ${run.triggerGrade}）` : ''}${run.wakePlan ? `；唤醒 ${(run.wakePlan.wakes ?? []).filter((w) => w.grade === 'high').map((w) => w.entityId).join('/') || '无'}` : ''}` },
+          ...(run.context
+            ? [{
+                step: 'context',
+                detail: `D${run.context.day} 刻${run.context.tick} @ ${run.context.location?.id ?? '-'}；在场 ${Object.keys(run.context.entities).length}；事实 ${run.context.events.length} 条${
+                  run.context.memory?.length ? `；记忆 ${run.context.memory.length} 条` : ''
+                }${run.context.budgetReport ? `；预算估算 ${run.context.budgetReport.estimatedTokens} tokens` : ''}`,
+              }]
+            : []),
+          ...(run.modelUsed ? [{ step: 'model', detail: run.modelUsed }] : []),
+          ...(run.proposal ? [{ step: 'proposal', detail: `${run.proposal.id}：${run.proposal.reason}（${run.proposal.changes.length} 条变化）` }] : []),
+          ...(outcomes.length
+            ? [{
+                step: 'validation',
+                detail: outcomes
+                  .map((o) => `${o.change.targetId}.${o.change.action} → ${o.status}${o.rejectedBy ? `（${o.rejectedBy}）` : ''}`)
+                  .join('；'),
+              }]
+            : []),
+          ...(outcomes.some((o) => o.commandId)
+            ? [{ step: 'command', detail: outcomes.filter((o) => o.commandId).map((o) => `${o.commandId}=${o.change.action}`).join('；') }]
+            : []),
+          ...(run.entitiesAffected?.length ? [{ step: 'mutation', detail: run.entitiesAffected.join('/') }] : []),
+          ...(run.eventIds.length ? [{ step: 'new_events', detail: run.eventIds.join(',') }] : []),
+        ];
+        return { status: 200, body: { ...hit, chain } };
       }
 
 

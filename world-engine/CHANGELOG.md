@@ -3,6 +3,20 @@
 本文件记录 AI World Engine 的版本演进。格式参考 Keep a Changelog；版本线见 `docs/WORLD-ROADMAP.md`（方案 §69）。
 版本策略（semver）：0.x 期间允许带 CHANGELOG 注明的 API 调整；**1.0 起冻结公开 API**。
 
+## [1.2.1] - 2026-10-03 · P2：HTTP 建世界支持地点表（公开 API 只增不改）
+
+P0 审计 + P2 天穹接入发现的缺口：`POST /v1/worlds` 白名单不收 locations，
+HTTP 建的世界引擎侧地点表为空（GET locations 查不到、AI 上下文无地点描述）——
+此前只有 G1 种子路径能声明地点。
+
+### Added
+- **`POST /v1/worlds` 支持 `locations`**（`src/http/protocol.ts`）：请求体可带
+  `locations: [{ id, name?, type? }]`（≤512 条；坏条目净化截下）——与 G1 种子
+  同约定（name → `attributes.desc` 截 128、type 缺省 `urban`），经 World
+  Definition 既有通道随 `createWorld` 物化：随档持久化、可经
+  `GET /v1/worlds/{id}/locations` 查询、驻留统计照常派生。
+- 测试：`tests/http.test.ts`（locations 物化/查询/坏条目净化，+1）。
+
 ## [1.2.0] - 2026-10-01 · G3 · 产品化：实时事件流 + 文件持久化（公开 API 只增不改）
 
 游戏接入平台规划（docs/GAME-PLATFORM-PLAN.md）G3 的引擎侧落地：世界事实从轮询

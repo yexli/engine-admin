@@ -48,14 +48,23 @@ export interface ApiKeyRecord {
 
 /* ---------------- 模型路由（方案 §13-14 的最小可行子集） ---------------- */
 
-/** 平台能力标签（§12 集合的 Phase 1 子集；Phase 4 产品化） */
+/** 平台能力标签（P8 · 方案 §十一：Router 按 11 项能力路由；roleplay 为平台自有项）。
+ *  业务代码只出现能力名——换 Provider/模型全部经路由配置（Admin 热替换），零代码改动。 */
 export type Capability =
-  | 'roleplay'
-  | 'narrative'
-  | 'reasoning'
-  | 'fast'
-  | 'cheap'
-  | 'memory';
+  | 'roleplay' // 平台自有：NPC 扮演（世界陪聊）
+  // —— 方案 §十一 清单 ——
+  | 'intent' // 意图解析（玩家输入 → 结构化意图）
+  | 'world_reasoning' // 世界推演
+  | 'evolution' // AI 世界演化提案（evolution driver）
+  | 'npc_behavior' // NPC 个体行为决策
+  | 'reasoning' // 通用推理
+  | 'narrative' // 叙事
+  | 'memory' // 记忆整理
+  | 'embedding' // 向量嵌入（记忆语义召回）
+  | 'fast' // 快速
+  | 'cheap' // 低价
+  | 'long_context' // 长上下文
+  | 'structured_output'; // 结构化输出（JSON 提案）
 
 export interface CapabilityRoute {
   /** 主模型（= Gateway 能力通道名）；null = 未配置（→ 503 可诊断） */

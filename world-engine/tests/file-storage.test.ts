@@ -39,7 +39,7 @@ describe('G3 · FileSavePort', () => {
     const path = tempFile('world.json');
     const port = new FileSavePort(path, { debounceMs: 50_000 });
     const first = createWorld({ worldId: 'w-disk', savePort: port });
-    const before = first.query.get_time().tick;
+    const before = first.query.get_time()!.tick;
     first.advanceTime(7);
     (first.getState() as { metadata?: unknown }).metadata = { name: '盘上世界' };
     first.container.flushSave(); /* 引擎侧：绕过节流窗口立即打包存档 */
@@ -50,7 +50,7 @@ describe('G3 · FileSavePort', () => {
     expect(saved).not.toBeNull();
     const reborn = createWorld({ worldId: 'w-disk', savePort: port });
     reborn.container.core.S = saved!;
-    expect(reborn.query.get_time().tick).toBe(before + 7); /* 推进不丢 */
+    expect(reborn.query.get_time()!.tick).toBe(before + 7); /* 推进不丢 */
     expect((reborn.getState() as { metadata?: { name?: string } }).metadata?.name).toBe('盘上世界');
   });
 

@@ -15,8 +15,8 @@
 
 | 包 | 版本 | 职责 | 测试 |
 |---|---|---|---|
-| `world-engine/` | **1.2.0** | 纯库内核：多世界注册表、规则/命令/查询原语、HTTP+WebSocket 面 | 107 |
-| `world-engine/platform/` | **0.9.0** | 平台面：API Key、会话权限、用量计量、管线、设置、AI 世界演化运行时 V2（策略围栏/幂等/因果追溯） | 174 |
+| `world-engine/` | **1.2.1** | 纯库内核：多世界注册表、规则/命令/查询原语、HTTP+WebSocket 面、建世界地点表 | 108 |
+| `world-engine/platform/` | **0.18.0** | 平台面：API Key、会话权限、用量计量、管线、设置、AI 世界演化运行时 V2（策略围栏/幂等/因果追溯）+ Trigger Engine（逐实体唤醒）+ Context 预算 + NPC 个体决策/金币禁令 + NPC 日程调度循环 + 角色记忆联动（感知边界摄取/个体召回）+ 模型能力路由对齐方案 §十一（embedding 通道/记忆语义召回）+ Admin Runtime 统一观测面/因果链/多代世界语义 | 251 |
 | `world-engine/gateway/` | 0.7.1 | AI 网关：多厂商模型调用、思考强度适配、任务路由 | 30 |
 | `world-engine/memory/` | 0.8.2 | 世界记忆：4 因子召回 + 向量嵌入（bge-m3 实测） | 20 |
 | `admin-web/` | 6.x | 管理后台（Vue3 + Element Plus，数据 Mock 清零） | e2e 冒烟 |
@@ -33,9 +33,14 @@
 - **持久化**：`FileSavePort` 写后置 + 原子写 + 损坏档备份不静默覆盖；SavePort 是端口，PG 等介质由部署层适配。
 - **可观测**：事件/实体/关系/调度器全端点，因果链追溯，跨世界事件聚合。
 - **计量**：结构化用量面（JSONL），Key / 模型 / 世界 / **游戏方**多维度过滤分组。
-- **AI 世界演化（Evolution Runtime）**：观察世界 → 上下文 → AI 提案 → 白名单 → Rules 终审 → 落地。
-  AI 只能建议不能改世界（进程边界 + 策略围栏 + 动作白名单 + Rules 三层拒绝），NPC 不因玩家行动被强制触发（空提案合法），OOC/叙事永不成为世界事实，
-  每次演化留完整因果链账本；管理台「AI 演化」页可触发与反向追溯。见 [docs/EVOLUTION-ARCHITECTURE.md](docs/EVOLUTION-ARCHITECTURE.md)。
+- **AI 世界演化（Evolution Runtime V2）**：观察世界 → 上下文（预算裁剪+记忆召回+目标）→ AI 提案 → 三层围栏 → Rules 终审 → 落地。
+  AI 只能建议不能改世界（进程边界 + 策略围栏 + 动作白名单 + Rules 三层拒绝 + 金币禁令），NPC 不因玩家行动被强制触发（空提案合法，
+  触发器逐实体唤醒评估——无人值得唤醒就零 AI 调用），OOC/叙事永不成为世界事实，每次演化留完整因果链账本（八环可查）。
+- **NPC Runtime**：个体决策（按唤醒实体的聚焦 tick，冷却/指纹按世界代际分域）+ 日程调度循环（确定性对齐，零 AI）+ 角色记忆
+  （感知边界摄取 / 4 因子召回注入决策 / 衰减遗忘持久化）。
+- **Admin Runtime**：`GET /v1/admin/runtime` 统一观测面（World Runtime / Evolution / Events / NPC Runtime / AI Calls / Causal Trace）；
+  引擎世界重建自动检测并自愈（多代世界语义）。
+  见 [docs/EVOLUTION-ARCHITECTURE.md](docs/EVOLUTION-ARCHITECTURE.md) 与 [docs/RELEASE-V2.3.md](docs/RELEASE-V2.3.md)。
 
 ## 快速开始
 
@@ -95,6 +100,10 @@ docs/                  规划与指南（GAME-PLATFORM-PLAN / SDK-GUIDE / DEPLOY
 | [docs/EVOLUTION-ARCHITECTURE.md](docs/EVOLUTION-ARCHITECTURE.md) | AI 世界演化运行时：概念边界（Intent/Proposal/Mutation/Event）、闭环、AI/引擎边界、因果链 |
 | [docs/GAME-PLATFORM-PLAN.md](docs/GAME-PLATFORM-PLAN.md) | 平台化路线：G1–G3 已兑现；P 系列托管平台路线（托管运行服务/自助接入中心/配额/客户端 SDK/云端硬化） |
 | [docs/DEPLOY.md](docs/DEPLOY.md) | compose 云端部署 |
+| [docs/RELEASE-V2.3.md](docs/RELEASE-V2.3.md) | V2.3 发布说明（P0–P12：里程碑/能力/验收/边界，含 P11 压测 / P12 第二游戏附录） |
+| [docs/WORLD-SCHEMA.md](docs/WORLD-SCHEMA.md) | 通用 World Schema v1.0（双游戏实践提炼：规范属性键/事实面/符合性检查） |
+| [docs/EXTENSIONS.md](docs/EXTENSIONS.md) | Extension 层（P14：按世界差异化围栏 + NPC/Item/Relationship/Quest 检讨表） |
+| [docs/P10-ACCEPTANCE.md](docs/P10-ACCEPTANCE.md) | 天穹完整真实验收记录（30/30 PASS） |
 | world-engine/CHANGELOG.md | 引擎版本演进（1.0 起公开 API 冻结，只增不改） |
 
 ## 安全须知

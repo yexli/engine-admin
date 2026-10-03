@@ -15,19 +15,21 @@ import type { TriggerEventView, TriggerGrade } from './types.ts';
 
 /** 缺省分级表：按事件类型（snake_case 前缀匹配，* 兜底） */
 export const DEFAULT_TRIGGER_GRADES: Record<string, TriggerGrade> = {
-  // High：玩家与 NPC 的直接相遇 / 交互 / 关系变化（方案 §五 High 清单）
+  // High：玩家与 NPC 的直接相遇 / 交互 / 关系变化（方案 §五 High 清单）。
+  // P13 同源修正：键必须匹配引擎真实事实类型——态度变化实际发 npc_attitude_shift
+  // （原 attitude_changed 永不匹配，态度事实被漏判为 low）；战斗事实为 attack_*。
   player_moved: 'high',
   entity_moved: 'high',
   talk_started: 'high',
   talk: 'high',
   relation_set: 'high',
-  attitude_changed: 'high',
+  npc_attitude_shift: 'high',
   quest: 'high',
-  combat: 'high',
+  attack_: 'high',
   // Medium：世界节拍变化，延迟/批量处理
   time_advanced: 'medium',
   weather_changed: 'medium',
-  schedule_changed: 'medium',
+  schedule_changed: 'medium', // 前瞻键：日程变更事件（P6 机制已备，事件未定义）
   // Low：环境噪音，后台处理（未列出的类型兜底也是 low）
   '*': 'low',
 };

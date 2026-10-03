@@ -52,9 +52,24 @@ docker compose logs -f platform   # 首次启动会播种内置用户并大声�
 2. **立即修改内置账号口令**（系统管理 → 用户）：三个内置账号的默认口令是公开
    文档值，任何非本机部署都必须改；
 3. AI 网关 → 提供方：建档真实上游供应商 → 上传凭证（AES-256-GCM 加密落盘）→
-   启用并指派六能力路由 → 用「测试」按钮做有界实测；
+   启用并指派能力路由（P8 起支持方案 §十一 全部 13 项能力；未配置的能力如实 503）→
+   用「测试」按钮做有界实测；
 4. 世界列表 → 创建（或使用演示世界）；
 5. 按需在「AI 网关 → API 密钥」为调用方签发公共 API Key（明文仅显示一次）。
+
+## 4.5 平台运行时能力开关（P3–P7，按需配置到 platform 容器）
+
+| 环境变量 | 作用 | 缺省 |
+|---|---|---|
+| `PLATFORM_TRIGGER_WORLDS` | 平台内触发引擎守护的世界（逗号分隔）——High 事实 + 逐实体唤醒评估，无人值得唤醒零 AI 调用 | 空=关闭 |
+| `PLATFORM_MEMORY_WORLDS` | 记忆摄取与个体决策召回的世界 | 空=关闭 |
+| `PLATFORM_SCHEDULES_FILE` | NPC 日程存储文件（游戏方经 `PUT /v1/npc/worlds/:id/schedules` 注册，平台确定性对齐，零 AI） | data/schedules.json |
+| `PLATFORM_TRIGGER_INTERVAL_MS` / `PLATFORM_MEMORY_INTERVAL_MS` / `PLATFORM_SCHEDULE_INTERVAL_MS` | 三循环轮询间隔 | 3000 |
+| `PLATFORM_EVOLUTION_CAPABILITY` | 演化提案走的能力通道 | reasoning |
+
+观测：`GET :8791/v1/admin/runtime`（World Runtime / Evolution / Trigger / Schedule / Memory 单点数据面）；
+因果链：`GET :8791/v1/evolution/worlds/:id/events/:eventId/trace`（八环）。
+引擎重启后世界重建，平台自动检测（seed 指纹）并重置消费集，无需重启平台。
 
 ## 5. 数据与升级
 
@@ -78,8 +93,12 @@ Admin Web 必须经 TLS 暴露。二选一：
 
 - UI 冒烟（生产构建，本机开发环境跑）：`cd admin-web && pnpm test:e2e`
   ——登录 → 世界详情 → 执行命令 → 修改路由 → 回滚 全流程自动断言；
+- 全链冒烟（本机 dev-stack）：`node platform/scripts/dev-stack.mjs` 起栈后
+  `node scripts/run-v21-walkthrough.mjs`（35 项）；
+- **全链验收**：`PLATFORM_ADMIN_TOKEN=… node scripts/run-p10-acceptance.mjs`
+  ——真人全流程 30 项（世界一致性 / AI 稳定性 / 因果性八问），自动重置世界，产出 docs/P10-ACCEPTANCE.md；
 - 部署后手测：登录 → 任意页轮询有数据 → 世界列表「暂停/恢复」生效 →
-  AI 网关「测试」通过。
+  AI 网关「测试」通过 → `GET :8791/v1/admin/runtime` 各分区有数据。
 
 ## 8. 可选：记忆库接入向量通道
 

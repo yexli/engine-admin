@@ -99,6 +99,9 @@ spawnChild('managed-platform', node, [join(platformDir, 'scripts', 'run-managed.
   PLATFORM_ADMIN_TOKEN: env.adminToken,
   PLATFORM_BOOTSTRAP_KEY: env.bootstrapKey,
   PLATFORM_UPSTREAM_ALLOW_LOOPBACK: '1',
+  PLATFORM_TRIGGER_WORLDS: 'tianqiong-village', // P3：平台内 Trigger Engine 守护天穹最小世界
+  PLATFORM_MEMORY_WORLDS: 'tianqiong-village', // P7：记忆摄取与个体决策召回
+  PLATFORM_TRIGGER_INTERVAL_MS: '1000',
 });
 spawnChild('tianqiong-host', node, [join(repoRoot, 'scripts', 'run-tianqiong-host.mjs')], repoRoot, {
   ENGINE_BASE_URL: 'http://127.0.0.1:8787',

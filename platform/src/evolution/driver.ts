@@ -56,6 +56,8 @@ export function gatewayDriver(deps: GatewayDriverDeps): EvolutionDriver {
         );
       }
       const facts = renderContextFacts(context);
+      /* P5 个体决策：wakePlan 恰有一个 HIGH 唤醒时，模型以该实体的视角做判断 */
+      const focus = context.trigger?.woken?.length === 1 ? context.trigger.woken[0]! : null;
       const system = [
         '你是世界演化驱动器（AI World Driver）。你观察一个世界的权威事实，判断「接下来世界可能发生什么」。'
         ,
@@ -64,10 +66,22 @@ export function gatewayDriver(deps: GatewayDriverDeps): EvolutionDriver {
         + '玩家与别人交谈时，NPC 可以继续自己的事情。不要为了让世界"热闹"而编造反应。',
         '2. 你只能建议，不能命令。你的每条建议都会被世界引擎的规则与策略校验，非法建议会被拒绝。',
         '3. 如果结论是「此刻什么都不该发生」，返回空的 changes 数组——这是完全合法、且常常正确的答案。',
-        '4. 建议必须基于给出的事实，不得编造不存在的人/物/事件；observations 里只能引用给出的事实 id 或 "state"。',
+        '4. 建议必须基于给出的事实，不得编造不存在的人/物/事件；observations 里只能引用给出的事实 id、「相关记忆」里的记忆 ref 或 "state"。',
         '5. 你只能影响"在场实体"的细节；名册里的实体只用于理解世界，不要对它们提建议。',
-        `6. 允许的动作只有：${policy.allowedActions.join(' / ')}。`
+        ...(context.memory?.length
+          ? ['5.5 「相关记忆」是聚焦实体自己的主观回忆（可能过时、带偏差），可以作为行为动机与态度依据，'
+              + '但不是当前的权威世界状态——与「在场实体/最近事实」冲突时以后者为准。']
+          : []),
+        ...(focus
+          ? [`6. 本次是个体决策（NPC Runtime）：聚焦实体「${focus}」——以它的视角判断它此刻是否行动/变化`
+              + `${typeof context.goal === 'string' && context.goal ? `（它的当前目标：${context.goal}）` : ''}，不要替其它实体做决定。`]
+          : []),
+        `7. 允许的动作只有：${policy.allowedActions.join(' / ')}。`
         + (policy.forbiddenActionsOnPlayer.length ? ` 禁止对玩家（targetId='player'）执行：${policy.forbiddenActionsOnPlayer.join(' / ')}——玩家属性归游戏管，不归你管。` : ''),
+        '8. 每种动作的 payload 形状必须严格遵守（形状不对会被原样拒绝，不会猜测）：',
+        '   - update_attribute → {"key": "<属性名>", "value": <字符串|数字|布尔>}（例：{"key":"attention","value":"player"}）',
+        '   - set_relation → {"type": "<关系名>", "otherId": "<对方实体id>", "value": <数值>}（例：{"type":"noticed","otherId":"player","value":10}）',
+        '   - move_entity → {"location": "<地点id>"}（例：{"location":"tavern"}）',
         '输出一个 JSON 对象（不要输出 JSON 之外的任何文字），形状：',
         '{"reason": "整体判断（为什么发生/为什么不发生）", "observations": [{"ref": "<事实id或state>", "kind": "event|state", "summary": "一句话"}],',
         ` "changes": [{"targetId": "<在场实体id>", "action": "<允许的动作>", "payload": {}, "reason": "为什么"}],`,
@@ -103,7 +117,10 @@ export function gatewayDriver(deps: GatewayDriverDeps): EvolutionDriver {
         model: selected.model,
         role: capability,
         maxChanges,
-        knownEventIds: new Set(context.events.map((e) => e.id)),
+        knownEventIds: new Set([
+          ...context.events.map((e) => e.id),
+          ...(context.memory?.map((m) => m.ref) ?? []), /* P7：记忆 ref 是合法观察引用（聚焦实体自己的回忆） */
+        ]),
       });
     },
   };

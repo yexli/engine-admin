@@ -108,7 +108,7 @@ onMounted(load);
               <div class="font-medium mb-2">
                 <BiText zh="旗下世界" en="Worlds" />
               </div>
-              <el-table :data="activeWorlds(row)" size="small" border>
+              <el-table :data="activeWorlds(row as GameRow)" size="small" border>
                 <el-table-column prop="worldId" min-width="140">
                   <template #header><BiText zh="世界 ID" en="World" /></template>
                 </el-table-column>
@@ -199,7 +199,7 @@ onMounted(load);
         <el-table-column min-width="160">
           <template #header><BiText zh="游戏方" en="Game" /></template>
           <template #default="{ row }">
-            <span class="font-medium font-mono">{{ gameLabel(row) }}</span>
+            <span class="font-medium font-mono">{{ gameLabel(row as GameRow) }}</span>
           </template>
         </el-table-column>
         <el-table-column width="100" align="center">

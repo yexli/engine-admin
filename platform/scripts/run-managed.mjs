@@ -29,7 +29,12 @@ import { createUsageRecorder } from '../dist/usage/recorder.js';
 import { SessionStore } from '../dist/admin/sessions.js';
 import { UserStore } from '../dist/admin/users.js';
 import { SettingsStore } from '../dist/admin/settings.js';
-import { createEvolutionJournal, createEvolutionRuntime, gatewayDriver } from '../dist/evolution/index.js';
+import { NPC_EVOLUTION_POLICY, createEvolutionJournal, createEvolutionRuntime, createTriggerRuntime, gatewayDriver } from '../dist/evolution/index.js';
+import { createScheduleRuntime, createScheduleStore } from '../dist/index.js';
+import { createMemoryRuntime, createWorldMemoryService } from '../dist/index.js';
+import { createEmbeddingsClient } from '../dist/upstream/embeddings.js';
+import { join } from 'node:path';
+import { existsSync, readFileSync } from 'node:fs';
 
 const config = resolvePlatformConfig(process.env, process.cwd());
 
@@ -101,24 +106,153 @@ console.log('[managed]   签发公共 API Key：node scripts/keyctl.mjs create -
 /* ---------- AI World Evolution Runtime（Phase B/C） ----------
    驱动 = 受管网关（世界推演默认走 reasoning 通道；未配模型时 tick
    诚实地 failed[driver/model_unavailable]，不影响世界）。
+   围栏 = NPC_EVOLUTION_POLICY（方案 V2.1 §五/§八 第一阶段）：动作白名单
+   （update_attribute / set_relation / move_entity）、禁止触碰玩家、
+   单次 3 变化 / 3 实体上限、auto/api 触发 30s 冷却（admin 手动不受限）。
+   缺省策略 FULL_CORE_POLICY 冷却为 0 且不设防，绝不能直接上生产装配。
    账本 = platform/data/evolution/{worldId}.jsonl（Phase C 因果链数据面）。 */
 const evolutionJournal = createEvolutionJournal({ dir: config.evolutionDir });
 const evolutionLoaded = evolutionJournal.load();
 if (evolutionLoaded.skippedCorrupt > 0) {
   console.warn(`[managed] ⚠ 演化账本装载：${evolutionLoaded.loaded} 条成功，${evolutionLoaded.skippedCorrupt} 行损坏被跳过（platform/data/evolution）`);
 }
+
+/* ---------- World Memory Service（P7 · 方案 §十）----------
+   记忆世界显式声明（PLATFORM_MEMORY_WORLDS，逗号分隔；空 = 记忆关闭）。
+   写侧：Memory Runtime 轮询事实 → 感知边界派生 → 摄取（幂等、持久化）。
+   读侧：个体决策时为焦点实体召回，注入 context.memory（maxMemoryItems 预算内）。
+   纪律：Memory ≠ 第二世界状态——摄取零命令、只读世界；记忆内容只能经
+   AI 提案 → Rules 影响世界。 */
+const memoryWorlds = (process.env.PLATFORM_MEMORY_WORLDS ?? '')
+  .split(',')
+  .map((w) => w.trim())
+  .filter(Boolean);
+const memoryService = createWorldMemoryService({
+  dir: memoryWorlds.length ? join(process.env.PLATFORM_DATA_DIR ?? 'data', 'memory') : undefined,
+});
+const memoryLoaded = memoryService.loadAll();
+if (memoryLoaded.skippedCorrupt > 0) {
+  console.warn(`[managed] ⚠ 记忆存储装载：${memoryLoaded.worlds} 个世界成功，${memoryLoaded.skippedCorrupt} 个损坏被跳过`);
+}
+/* 语义召回钩子（P8 · 方案 §十一 embedding 能力）：路由到 embedding 能力通道 →
+   受管网关 /v1/embeddings。通道未配置/调用失败 → null = 回纯词面（渐进增强，非硬依赖）。 */
+if (memoryWorlds.length) {
+  const embeddings = createEmbeddingsClient({ baseUrl: runtime.gatewayUrl });
+  const embedHook = {
+    embed: async (texts) => {
+      try {
+        const selected = runtime.router.select('embedding');
+        if (!selected) return null;
+        return await embeddings.embed(selected.model, texts);
+      } catch {
+        return null;
+      }
+    },
+  };
+  for (const worldId of memoryWorlds) memoryService.setEmbed(worldId, embedHook);
+}
+
+/* P14 Extension 层：按世界差异化围栏（PLATFORM_POLICIES_FILE，data/policies.json：
+   { "worldId": { "allowedActions": [...], "forbiddenAttributeKeys": [...], ... } }，
+   键合并到 NPC_EVOLUTION_POLICY 之上；改文件重启平台生效）。 */
+const policiesFile = process.env.PLATFORM_POLICIES_FILE ?? join(process.env.PLATFORM_DATA_DIR ?? 'data', 'policies.json');
+const worldPolicies = new Map();
+try {
+  if (existsSync(policiesFile)) {
+    const raw = JSON.parse(readFileSync(policiesFile, 'utf8'));
+    for (const [worldId, patch] of Object.entries(raw)) {
+      worldPolicies.set(worldId, { ...NPC_EVOLUTION_POLICY, ...patch });
+    }
+    console.log(`[managed]   policies : ${policiesFile}（${worldPolicies.size} 个世界的差异化围栏，P14 Extension 层）`);
+  }
+} catch (e) {
+  console.warn(`[managed] ⚠ 围栏策略文件装载失败（按无差异化运行）：${e instanceof Error ? e.message : String(e)}`);
+}
+
 const evolution = createEvolutionRuntime(
   {
     engine,
+    policy: NPC_EVOLUTION_POLICY,
+    ...(worldPolicies.size ? { policyFor: (worldId) => worldPolicies.get(worldId) } : {}),
+    contextBudget: { maxTokens: 6000, maxEntities: 12, maxRelations: 16, maxMemoryItems: 8 }, // P4 缺省预算（方案 §七）
     driver: gatewayDriver({
       gateway: createGatewayClient({ baseUrl: runtime.gatewayUrl }),
       router: runtime.router,
       capability: config.evolutionCapability,
     }),
+    ...(memoryWorlds.length
+      ? {
+          memoryRetriever: (worldId, entityId, query) =>
+            memoryService.recallFor(worldId, entityId, query).catch(() => []),
+        }
+      : {}),
   },
   evolutionJournal,
 );
-console.log(`[managed]   evolution: ${config.evolutionDir}（账本；提案能力 '${config.evolutionCapability}'）`);
+console.log(`[managed]   evolution: ${config.evolutionDir}（账本；提案能力 '${config.evolutionCapability}'；围栏 NPC_EVOLUTION_POLICY：禁触玩家 / 3变化 / 30s 自动冷却）`);
+
+/* ---------- Trigger Runtime（P3 · 方案 §六）----------
+   平台内的自动触发循环：轮询事实 → 只认玩家发起 → High 分级 →
+   逐实体唤醒评估 → 无人值得唤醒就零 AI 调用。世界显式声明
+   （PLATFORM_TRIGGER_WORLDS，逗号分隔）——多世界托管面不为
+   未声明的世界默默烧 AI。与游戏方宿主的同键触发（auto:{world}:{eventId}）
+   由演化幂等层保证只执行一次。 */
+const triggerWorlds = (process.env.PLATFORM_TRIGGER_WORLDS ?? '')
+  .split(',')
+  .map((w) => w.trim())
+  .filter(Boolean);
+const triggerIntervalMs = Number(process.env.PLATFORM_TRIGGER_INTERVAL_MS ?? 3000);
+const trigger = createTriggerRuntime({
+  engine,
+  evolution,
+  worlds: triggerWorlds,
+  ...(Number.isFinite(triggerIntervalMs) ? { intervalMs: triggerIntervalMs } : {}),
+  log: (line) => console.log(`  ${line}`),
+});
+if (triggerWorlds.length) {
+  trigger.start();
+  console.log(`[managed]   trigger  : 守护 ${triggerWorlds.join(', ')}（${triggerIntervalMs}ms 轮询；High + 有人值得唤醒才调 AI）`);
+} else {
+  console.log('[managed]   trigger  : 未配置 PLATFORM_TRIGGER_WORLDS —— 平台内自动触发关闭（游戏方可自行触发 tick）');
+}
+
+/* ---------- Schedule Runtime（P6 · 方案 §九：确定性行为归 Time + Schedule + Rules）----------
+   日程表由游戏方经管理面注册（PUT /v1/npc/worlds/:id/schedules，游戏数据），
+   平台负责确定性执行：时间事实（new_day / hour_advanced / time_advanced）→
+   applyNpcSchedule 对齐（幂等，已对齐零命令）。**零 AI 调用**——方案 §九
+   「禁止每分钟调用一次 AI；Scheduler → 真正需要判断 → Trigger → AI」。 */
+const scheduleStore = createScheduleStore({
+  filePath: process.env.PLATFORM_SCHEDULES_FILE ?? join(process.env.PLATFORM_DATA_DIR ?? 'data', 'schedules.json'),
+});
+const scheduleLoaded = scheduleStore.load();
+if (scheduleLoaded.skippedCorrupt > 0) {
+  console.warn(`[managed] ⚠ 日程存储装载：${scheduleLoaded.loaded} 个世界成功，${scheduleLoaded.skippedCorrupt} 个损坏被跳过`);
+}
+const scheduleIntervalMs = Number(process.env.PLATFORM_SCHEDULE_INTERVAL_MS ?? 3000);
+const scheduler = createScheduleRuntime({
+  engine,
+  store: scheduleStore,
+  ...(Number.isFinite(scheduleIntervalMs) ? { intervalMs: scheduleIntervalMs } : {}),
+  log: (line) => console.log(`  ${line}`),
+});
+scheduler.start();
+console.log(`[managed]   schedule : 守护 ${scheduleStore.worlds().join(', ') || '（暂无注册日程的世界）'}（${scheduleIntervalMs}ms 轮询；确定性对齐，零 AI 调用）`);
+
+/* ---------- Memory Runtime（P7 · 方案 §十）---------- */
+const memoryIntervalMs = Number(process.env.PLATFORM_MEMORY_INTERVAL_MS ?? 3000);
+const memoryRuntime = createMemoryRuntime({
+  engine,
+  service: memoryService,
+  worlds: memoryWorlds,
+  ...(Number.isFinite(memoryIntervalMs) ? { intervalMs: memoryIntervalMs } : {}),
+  log: (line) => console.log(`  ${line}`),
+});
+if (memoryWorlds.length) {
+  memoryRuntime.start();
+  console.log(`[managed]   memory   : 守护 ${memoryWorlds.join(', ')}（${memoryIntervalMs}ms 轮询；确定性摄取，零 AI 调用）`);
+} else {
+  console.log('[managed]   memory   : 未配置 PLATFORM_MEMORY_WORLDS —— 记忆摄取关闭（个体决策无记忆段）');
+}
 
 const admin = await startAdminServer({
   runtime,
@@ -132,6 +266,11 @@ const admin = await startAdminServer({
   users,
   settings,
   evolution,
+  scheduleStore,
+  triggerRuntime: trigger,
+  scheduleRuntime: scheduler,
+  memoryRuntime,
+  memoryService,
   memoryBaseUrl: config.memoryBaseUrl,
 });
 console.log(`[managed]   admin   : ${admin.url}  （仅回环；Admin Web 必须经服务端反代注入 x-admin-token 访问，令牌绝不下发浏览器）`);
@@ -148,6 +287,8 @@ let exiting = false;
 async function shutdown() {
   if (exiting) return;
   exiting = true;
+  trigger.stop();
+  scheduler.stop();
   keys.flush();
   await usage.flush();
   await admin.close();

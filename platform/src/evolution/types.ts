@@ -94,6 +94,13 @@ export interface EvolutionContext {
   otherEntities: { id: string; type?: string; location?: string }[];
   /** 关系边（只保留涉及玩家或在场实体的） */
   relations: { source: string; target: string; type: string; value?: number }[];
+  /** 触发事件段（P4 · 方案 §七「当前事件」：本 run 由哪个事件唤醒、谁被唤醒。
+   *  预算优先级最高，永不裁剪；无 wakePlan 的 tick 没有此段） */
+  trigger?: { primaryEventId?: string; woken?: string[] };
+  /** 当前目标（方案 §七组成项；引擎暂无目标事实，P5 Goals 接入位——缺事实不编造） */
+  goal?: string;
+  /** 相关记忆（方案 §七组成项；记忆源 P7 接入，本阶段只通预算与渲染通路） */
+  memory?: { ref: string; summary: string; day?: number }[];
   /** 观察窗口内的世界事实（新 → 旧） */
   events: {
     id: string;
@@ -104,6 +111,36 @@ export interface EvolutionContext {
     location?: string;
     data?: Record<string, unknown>;
   }[];
+  /** P4 预算执行报告（传入 budget 时携带；裁了什么、剩多少，失败必须可见） */
+  budgetReport?: ContextBudgetReport;
+}
+
+/* ---------------- Context Budget（P4 · 方案 §七：被唤醒后看到什么，有预算） ---------------- */
+
+/** 上下文预算：五项旋钮（方案 §七「至少支持」）。全部可选；未给的字段不设限。
+ *  裁剪优先级（方案 §七）：当前事件 > 当前位置 > 相关实体 > 直接关系 >
+ *  近期事件 > 长期记忆 > 全局信息。 */
+export interface ContextBudget {
+  /** 渲染后事实文本的 token 估算上限（超限按优先级从低到高逐段裁剪） */
+  maxTokens?: number;
+  /** 带完整细节的实体数上限（超出者降级为名册，不丢名字） */
+  maxEntities?: number;
+  /** 上下文携带的事件条数上限（触发事件永远保留，其余新→旧截断） */
+  maxEvents?: number;
+  /** 关系边条数上限（玩家/被唤醒实体相关的边优先保留） */
+  maxRelations?: number;
+  /** 记忆条目数上限（P7 接入记忆源后生效） */
+  maxMemoryItems?: number;
+}
+
+/** 预算执行报告：管理台/审计从 run.context.budgetReport 能看到 AI 实际看到了什么、被裁了什么 */
+export interface ContextBudgetReport {
+  maxTokens: number;
+  estimatedTokens: number;
+  /** 各段最终携带量 */
+  carried: { entities: number; events: number; relations: number; memory: number };
+  /** 因预算被降级/裁剪的数量 */
+  dropped: { entitiesToRoster: number; events: number; relations: number; memory: number; rosterByTokens: number };
 }
 
 /* ---------------- Evolution Proposal（方案 §八：AI 的建议，不是事实） ---------------- */
@@ -156,6 +193,9 @@ export interface EvolutionPolicy {
   allowedActions: readonly string[];
   /** 禁止 AI 触碰的目标：targetId === 'player' 的动作在 forbiddenActionsOnPlayer 内时拒 */
   forbiddenActionsOnPlayer: readonly string[];
+  /** 禁止 AI 直接修改的属性键（P5 · 方案 §八「不得直接修改金币」：
+   *  经济/系统属性归游戏规则，AI 提案对任何目标都改不了这些键） */
+  forbiddenAttributeKeys?: readonly string[];
   /** 单次提案变化数上限 */
   maxChangesPerProposal: number;
   /** 单次提案可影响的实体数上限（去重后 targetId 计数） */
@@ -165,10 +205,12 @@ export interface EvolutionPolicy {
 }
 
 /** 第一阶段缺省策略（方案 §四：最小围栏，宁窄勿宽）。
- *  AI 完全不可触碰玩家：位置/属性/关系都归游戏与玩家本人管。 */
+ *  AI 完全不可触碰玩家：位置/属性/关系都归游戏与玩家本人管。
+ *  金币（money/gold）归经济规则——方案 §八「禁止 AI 直接修改金币」。 */
 export const NPC_EVOLUTION_POLICY: EvolutionPolicy = {
   allowedActions: ['update_attribute', 'set_relation', 'move_entity'],
   forbiddenActionsOnPlayer: ['update_attribute', 'set_relation', 'move_entity'],
+  forbiddenAttributeKeys: ['money', 'gold'],
   maxChangesPerProposal: 3,
   maxEntitiesAffected: 3,
   cooldownMs: 30_000,
@@ -178,6 +220,31 @@ export const NPC_EVOLUTION_POLICY: EvolutionPolicy = {
 
 /** 事件对演化的触发级别 */
 export type TriggerGrade = 'high' | 'medium' | 'low';
+
+/** 事件对某个实体的唤醒级别（P3 · 方案 §六：Trigger 只决定「是否值得考虑」，
+ *  绝不决定 NPC 做什么——被唤醒 ≠ 必须反应，反应与否仍由 AI 提案 + Rules 裁决）。
+ *  none = 感知不到也不相关：同一个 Event 不该让所有实体都去打扰 AI。 */
+export type WakeGrade = TriggerGrade | 'none';
+
+/** 单个实体的唤醒裁决（可解释：reasons 列出命中了哪些因素） */
+export interface WakeAssessment {
+  entityId: string;
+  grade: WakeGrade;
+  /** 判定依据（如 'same_location' / 'involved' / 'witnessed' / 'relationship' / 'not_perceived'） */
+  reasons: string[];
+}
+
+/** 一次触发评估的完整结论：世界级分级 + 逐实体唤醒 + 是否值得调用 AI */
+export interface WakePlan {
+  /** 世界级分级（gradeEvents 的结论） */
+  worldGrade: TriggerGrade;
+  /** 主事件（唤醒评估的锚点，通常是窗口内最高级的玩家发起事实） */
+  primaryEventId?: string;
+  /** 逐实体唤醒裁决（世界内全部实体，含 none——「谁没被唤醒」也要可查） */
+  wakes: WakeAssessment[];
+  /** 是否值得调用 AI：存在 high 唤醒。false = 本批事实零 AI 调用（成本闸门） */
+  worthWaking: boolean;
+}
 
 /** 分级输入的世界事实最小面（引擎 WorldEvent 结构化满足） */
 export interface TriggerEventView {
@@ -243,6 +310,8 @@ export interface EvolutionRun {
   trigger: 'admin' | 'auto' | 'api';
   /** 触发分级依据（auto 触发时记录命中的事件） */
   triggerGrade?: TriggerGrade;
+  /** 唤醒计划（P3 Trigger Engine：本 run 由哪个触发评估产出、谁被唤醒、谁没被唤醒） */
+  wakePlan?: WakePlan;
   /** 观察窗口（本次演化读了哪些事实） */
   observationWindow: { eventCount: number; latestEventId?: string };
   /** 组装出的上下文（完整留存——「AI 当时看到了什么」） */
@@ -261,6 +330,8 @@ export interface EvolutionRun {
   eventIds: string[];
   /** 幂等重放：同一提案/幂等键命中既有 run，未重复执行（方案 §二.3） */
   deduplicated?: boolean;
+  /** 触发时携带的幂等键（落账留痕：进程重启后运行时据此从 Journal 重建幂等账） */
+  idempotencyKey?: string;
   /** 驱动/翻译/执行异常（failed 时必有，completed 时通常为空） */
   error?: string;
   tookMs?: number;

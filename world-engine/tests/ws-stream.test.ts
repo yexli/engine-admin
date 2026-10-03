@@ -43,9 +43,11 @@ const upgradeProbe = (port: number, path: string, key?: string): Promise<number>
     req.end();
   });
 
+type WsMessage = { type: string; worldId?: string; event?: { id: string; type: string }; worlds?: string[] };
+
 interface WsClient {
-  messages: { type: string; worldId?: string; event?: { id: string; type: string }; worlds?: string[] }[];
-  waitFor(pred: (m: (typeof messages)[number]) => boolean, ms?: number): Promise<(typeof messages)[number]>;
+  messages: WsMessage[];
+  waitFor(pred: (m: WsMessage) => boolean, ms?: number): Promise<WsMessage>;
   close(): Promise<void>;
 }
 

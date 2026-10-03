@@ -21,6 +21,14 @@ export const DEFAULT_ROUTES: Record<Capability, CapabilityRoute> = {
   fast: { primary: 'npc', fallback: 'narrative' },
   cheap: { primary: 'npc', fallback: 'narrative' },
   memory: { primary: 'memory', fallback: 'narrative' },
+  /* —— P8 · 方案 §十一 新增能力（缺省路由对齐网关标准角色；未配置 → 如实 503/404）—— */
+  intent: { primary: 'fast', fallback: 'narrative' },
+  world_reasoning: { primary: 'reasoning', fallback: 'narrative' },
+  evolution: { primary: 'reasoning', fallback: 'narrative' },
+  npc_behavior: { primary: 'npc', fallback: 'narrative' },
+  embedding: { primary: 'embedding', fallback: null },
+  long_context: { primary: 'reasoning', fallback: 'narrative' },
+  structured_output: { primary: 'reasoning', fallback: 'narrative' },
 };
 
 export class ModelRouter {

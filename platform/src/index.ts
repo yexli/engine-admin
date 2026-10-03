@@ -15,6 +15,17 @@ export type { ChatMessage } from './upstream/gateway.ts';
 export { buildWorldContext } from './worldagent/context.ts';
 export { runWorldAgent, worldAgentResponse, extractWorldId } from './worldagent/pipeline.ts';
 export * from './evolution/index.ts';
+export {
+  applyNpcSchedule,
+  type ApplyNpcScheduleOptions,
+  type NpcScheduleTable,
+  type ScheduleApplyResult,
+  type ScheduleSlot,
+} from './npc/schedule.ts';
+export { buildNpcProfile, type NpcProfile, type NpcProfileOptions, type ProfileScheduleSlot } from './npc/profile.ts';
+export { CHEN_PER_DAY, tickOfDay, dayOfTick } from './npc/calendar.ts';
+export { createScheduleStore, sanitizeScheduleTable, type ScheduleStore, type ScheduleStoreOptions } from './npc/scheduleStore.ts';
+export { createScheduleRuntime, type ScheduleRuntime, type ScheduleRuntimeOptions, type ScheduleWorldStatus } from './npc/scheduler.ts';
 export { WORLD_AGENT_MODEL } from './http/protocol.ts';
 export { createWorldPlatform } from './http/protocol.ts';
 export { startPlatformServer } from './http/server.ts';
@@ -42,3 +53,7 @@ export {
 export type { AdminRole } from './admin/permissions.ts';
 export { resolvePlatformConfig } from './config.ts';
 export type { PlatformConfig } from './config.ts';
+export { createWorldMemoryService, deriveWitnesses, type WorldMemoryService, type WorldMemoryServiceOptions, type MemoryServiceStats, type MemoryStateSnapshot } from './memory/service.ts';
+export { createMemoryRuntime, type MemoryRuntime, type MemoryRuntimeOptions, type MemoryWorldStatus } from './memory/runtime.ts';
+export { createEmbeddingsClient, type EmbeddingsClient } from './upstream/embeddings.ts';
+export { SCHEMA_VERSION, CANONICAL_ATTRIBUTES, GAME_KEY_PATTERN, CORE_EVENT_TYPES, EXTENSION_EVENT_GROUPS, ALL_EVENT_TYPES, inspectWorldSchema, type CanonicalAttribute, type WorldSchemaInput, type WorldSchemaReport } from './schema/worldSchema.ts';

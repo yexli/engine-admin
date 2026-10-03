@@ -135,6 +135,38 @@ describe('V0.9 · 注册表模式（多世界共存，DR-003 兑现）', () => {
     expect((list.body as { worlds: unknown[] }).worlds).toHaveLength(2);
     expect((await http.handle(get('/v1/worlds/gamma'))).status).toBe(404);
   });
+
+  it('POST /v1/worlds 支持 locations（P2 additive）：地点表物化、可查询、坏条目净化', async () => {
+    const registry = createWorldRegistry();
+    const http = createWorldHttp({ registry });
+
+    const created = await http.handle(
+      post('/v1/worlds', {
+        worldId: 'w-locs',
+        playerName: '旅人',
+        startLoc: 'village',
+        locations: [
+          { id: 'village', name: '村庄' },
+          { id: 'tavern', type: 'building', name: '米露的酒馆' },
+          { id: 'shop', name: '杂货商店' },
+          { id: '', name: '坏地点被截下' },
+          '不是对象也截下',
+        ],
+      }),
+    );
+    expect(created.status).toBe(201);
+
+    const body = (await http.handle(get('/v1/worlds/w-locs/locations'))).body as {
+      total: number;
+      locations: { id: string; type?: string; attributes?: Record<string, unknown>; occupants?: string[] }[];
+    };
+    expect(body.total).toBe(3); /* 坏条目被净化截下 */
+    const byId = new Map(body.locations.map((l) => [l.id, l]));
+    expect(byId.get('village')?.attributes?.['desc']).toBe('村庄'); /* 与 G1 种子同约定：name → desc */
+    expect(byId.get('tavern')?.type).toBe('building');
+    expect(byId.get('shop')?.type).toBe('urban'); /* 缺省类型 */
+    expect(byId.get('village')?.occupants).toContain('player:旅人'); /* 驻留统计照常派生 */
+  });
 });
 
 describe('真实服务器端到端（node:http + fetch）', () => {

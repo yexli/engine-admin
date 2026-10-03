@@ -25,13 +25,20 @@ export type {
   EvolutionCausation,
   TriggerGrade,
   TriggerEventView,
+  WakeGrade,
+  WakeAssessment,
+  WakePlan,
+  ContextBudget,
+  ContextBudgetReport,
   EvolutionDriver,
 } from './types.ts';
 export { EvolutionDriverError, EvolutionCooldownError, NPC_EVOLUTION_POLICY } from './types.ts';
-export { buildEvolutionContext, renderContextFacts } from './context.ts';
+export { buildEvolutionContext, renderContextFacts, estimateTokens, applyContextMemory, type BuildEvolutionContextOptions } from './context.ts';
 export { CORE_EVOLUTION_ACTIONS, FULL_CORE_POLICY, translateChange, type CoreEvolutionAction, type TranslatedChange } from './commands.ts';
 export { DEFAULT_TRIGGER_GRADES, gradeEvents, highEventsOf, shouldAutoTrigger, type TriggerPolicyOptions } from './policy.ts';
 export { gatewayDriver, createScriptedDriver, normalizeProposal, extractJson, proposalKey, type GatewayDriverDeps, type ScriptStep, type NormalizeOptions } from './driver.ts';
 export { createEventConsumer, type EventConsumerOptions, type WorldEventConsumer } from './consumer.ts';
 export { createEvolutionJournal, type FileEvolutionJournalOptions } from './journal.ts';
 export { createEvolutionRuntime, type EvolutionRuntime, type EvolutionRuntimeOptions, type TickOptions } from './runtime.ts';
+export { assessWake, wakeStateViewOf, wakeEventsOf, type WakeEntityView, type WakeStateView, type WakeEventView, type WakeOptions } from './wake.ts';
+export { createTriggerRuntime, type TriggerRuntime, type TriggerRuntimeOptions, type TriggerWorldStatus, type TriggerEvolutionFacade } from './triggerRuntime.ts';

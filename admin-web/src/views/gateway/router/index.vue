@@ -63,8 +63,8 @@ async function test(cap: ManagedCapability) {
       };
       message(
         r.ok
-          ? `能力「${CAPABILITY_META[cap].zh}」路由测试通过`
-          : `能力「${CAPABILITY_META[cap].zh}」路由测试失败`,
+          ? `能力「${CAPABILITY_META[cap]?.zh ?? cap}」路由测试通过`
+          : `能力「${CAPABILITY_META[cap]?.zh ?? cap}」路由测试失败`,
         {
           type: r.ok ? "success" : "error"
         }
@@ -156,12 +156,12 @@ onMounted(() => mc.ensureLoaded());
           ><template #header><BiText zh="能力" en="Capability" /></template>
           <template #default="{ row }">
             <el-tooltip
-              :content="CAPABILITY_META[(row as CapRow).cap].desc"
+              :content="CAPABILITY_META[(row as CapRow).cap]?.desc ?? (row as CapRow).cap"
               placement="top"
             >
               <div>
                 <el-tag size="small">{{
-                  CAPABILITY_META[(row as CapRow).cap].zh
+                  CAPABILITY_META[(row as CapRow).cap]?.zh ?? (row as CapRow).cap
                 }}</el-tag>
                 <span
                   class="text-xs text-[--el-text-color-secondary] font-mono ml-1"
@@ -235,7 +235,7 @@ onMounted(() => mc.ensureLoaded());
     <!-- 测试结果（真实上游调用，只打当前生效 primary 链路） -->
     <el-dialog
       :model-value="!!testResult"
-      :title="`路由测试 · ${testResult ? CAPABILITY_META[testResult.capability].zh : ''}（${testResult?.capability ?? ''}）`"
+      :title="`路由测试 · ${testResult ? CAPABILITY_META[testResult.capability]?.zh ?? testResult.capability : ''}（${testResult?.capability ?? ''}）`"
       width="520px"
       @update:model-value="v => !v && (testResult = null)"
       @closed="testResult = null"

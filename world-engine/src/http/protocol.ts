@@ -188,6 +188,20 @@ function sanitizeCreateOptions(body: unknown): Record<string, unknown> {
   if (weather) out['weather'] = weather;
   if (name || description) out['meta'] = { ...(name ? { name } : {}), ...(description ? { description } : {}) };
   if (ownerGame) out['ownerGame'] = ownerGame;
+  /* locations（P2 additive）：HTTP 建世界可直接声明地点表（id/type/name 精简面） */
+  if (Array.isArray(b['locations'])) {
+    const locs: Record<string, unknown>[] = [];
+    for (const raw of b['locations'].slice(0, 512)) {
+      if (!raw || typeof raw !== 'object' || Array.isArray(raw)) continue;
+      const l = raw as Record<string, unknown>;
+      const id = MAX_STR(64)(l['id']);
+      if (!id) continue;
+      const type = MAX_STR(32)(l['type']);
+      const locName = MAX_STR(128)(l['name']);
+      locs.push({ id, ...(type ? { type } : {}), ...(locName ? { name: locName } : {}) });
+    }
+    if (locs.length) out['locations'] = locs;
+  }
   if (b['labels'] && typeof b['labels'] === 'object' && !Array.isArray(b['labels'])) {
     const l = b['labels'] as Record<string, unknown>;
     const labels: Record<string, unknown> = {};
@@ -491,7 +505,26 @@ export function createWorldHttp<W extends EngineWorldState = EngineWorldState>(
           createdAt: now,
           updatedAt: now,
         };
-        const definition = { ...(init.createOptions?.definition ?? {}), metadata: defMeta };
+        /* locations（P2 additive）：body 声明的地点表转 World Definition——
+           与 G1 种子同约定（name → attributes.desc；type 缺省 urban），
+           随 createWorld 的 applyDefinition 物化、随档持久化、可经 GET locations 查询 */
+        const bodyLocations = Array.isArray(jsonOpts['locations'])
+          ? (jsonOpts['locations'] as { id: string; type?: string; name?: string }[])
+          : [];
+        delete jsonOpts['locations'];
+        const definition = {
+          ...(init.createOptions?.definition ?? {}),
+          ...(bodyLocations.length
+            ? {
+                locations: bodyLocations.map((l) => ({
+                  id: l.id,
+                  type: l.type ?? 'urban',
+                  attributes: { ...(l.name ? { desc: l.name } : {}) },
+                })),
+              }
+            : {}),
+          metadata: defMeta,
+        };
         if (registry) {
           /* 注册表模式：多世界共存（DR-003 兑现；id 必填，重复 409） */
           const worldId = typeof jsonOpts['worldId'] === 'string' ? (jsonOpts['worldId'] as string) : init.createOptions?.worldId;

@@ -75,6 +75,11 @@ export function translateChange(change: ProposedChange, policy: EvolutionPolicy 
       if (!key || !(typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean')) {
         return { ok: false, rejectedBy: 'translate', reason: 'update_attribute 需要 payload.key 与基本类型 payload.value' };
       }
+      /* 属性键级禁令（P5 · 方案 §八「禁止 AI 直接修改金币」）：对任何目标生效——
+         经济/系统属性归游戏规则，AI 提案改了也会被围栏原样拒回 */
+      if (policy.forbiddenAttributeKeys?.includes(key)) {
+        return { ok: false, rejectedBy: 'policy', reason: `属性 '${key}' 归游戏经济/系统规则管，AI 不得直接修改（方案 §八）` };
+      }
       return { ok: true, command: { type: 'update_attribute', targetId: change.targetId, payload: { key, value } } };
     }
     case 'set_relation': {

@@ -19,16 +19,27 @@ import { THINKING_LEVELS, detectVendor, isThinkingLevel, vendorSupportsLevel, th
 
 export { ConfigCorruptError, ConfigValidationError, RevisionConflictError } from './errors.ts';
 
-/** 托管路由的六个能力键（= Platform Capability 联合；与 docs 方案一致） */
+/** 托管路由能力键全集（P8 · 方案 §十一：11 项能力 + 平台自有 roleplay） */
 export const MANAGED_CAPABILITIES = [
   'roleplay',
   'narrative',
   'reasoning',
   'fast',
   'cheap',
+  'intent',
+  'world_reasoning',
+  'evolution',
+  'npc_behavior',
+  'embedding',
+  'long_context',
+  'structured_output',
   'memory',
 ] as const satisfies readonly Capability[];
 export type ManagedCapability = (typeof MANAGED_CAPABILITIES)[number];
+
+/** 磁盘必需能力键（P0-P6 时代的六能力；既有配置文档兼容性——缺失即校验失败）。
+ *  P8 新增的七项能力为可选键：未配置 = 诚实 503（受管模式语义），配置即生效。 */
+export const REQUIRED_MANAGED_CAPABILITIES = ['roleplay', 'narrative', 'reasoning', 'fast', 'cheap', 'memory'] as const;
 
 /** 模型标签词表 = world-gateway 既有 CAPABILITY_TAGS（防两处漂移） */
 export const ALLOWED_TAGS: readonly string[] = CAPABILITY_TAGS;
@@ -351,8 +362,8 @@ function assertShape(parsed: ModelConfig, filePath: string): void {
   ) {
     throw new ConfigCorruptError(`模型配置文件形状不识别：${filePath}`);
   }
-  for (const c of MANAGED_CAPABILITIES) {
-    const r = parsed.routes[c];
+  for (const c of REQUIRED_MANAGED_CAPABILITIES) {
+    const r = (parsed.routes as Record<string, unknown>)[c];
     if (!r || typeof r !== 'object' || !('primary' in r) || !('fallback' in r)) {
       throw new ConfigCorruptError(`模型配置缺少能力路由 '${c}'：${filePath}`);
     }
@@ -512,7 +523,9 @@ function parseCandidate(
     for (const cap of MANAGED_CAPABILITIES) {
       const entry = rb[cap];
       if (!entry || typeof entry !== 'object' || Array.isArray(entry)) {
-        issues.push(`routes.${cap} 缺失（必须提供全部六能力键）`);
+        /* P8：新增七能力可选；六能力键仍为磁盘必需（既有配置兼容） */
+        if (!(REQUIRED_MANAGED_CAPABILITIES as readonly string[]).includes(cap)) continue;
+        issues.push(`routes.${cap} 缺失（必须提供全部六能力键：${REQUIRED_MANAGED_CAPABILITIES.join('/')}）`);
         continue;
       }
       const eb = entry as Record<string, unknown>;

@@ -17,7 +17,14 @@ export const MANAGED_CAPABILITIES = [
   "reasoning",
   "fast",
   "cheap",
-  "memory"
+  "memory",
+  "intent",
+  "world_reasoning",
+  "evolution",
+  "npc_behavior",
+  "embedding",
+  "long_context",
+  "structured_output"
 ] as const;
 
 export type ManagedCapability = (typeof MANAGED_CAPABILITIES)[number];
@@ -50,6 +57,35 @@ export const CAPABILITY_META: Record<
   memory: {
     zh: "记忆总结",
     desc: "总结 / 摘要 / 记住 / 回忆类请求（任务分析按关键词命中）"
+  },
+  // —— P8 · 方案 §十一 新增能力（与 platform/src/types.ts 的 Capability 对齐）——
+  intent: {
+    zh: "意图解析",
+    desc: "玩家输入 → 结构化意图（任务分析显式指定或按关键词命中）"
+  },
+  world_reasoning: {
+    zh: "世界推演",
+    desc: "跨实体 / 跨系统因果推演类请求（世界级推理）"
+  },
+  evolution: {
+    zh: "世界演化",
+    desc: "AI 世界演化提案通道（evolution driver 缺省走此能力）"
+  },
+  npc_behavior: {
+    zh: "NPC 行为",
+    desc: "NPC 个体行为决策（个体演化 tick 聚焦单实体时走此能力）"
+  },
+  embedding: {
+    zh: "向量嵌入",
+    desc: "文本向量化（记忆语义召回 /v1/embeddings；无 chat 语义）"
+  },
+  long_context: {
+    zh: "长上下文",
+    desc: "超长上下文请求（大世界 / 长记忆窗口）"
+  },
+  structured_output: {
+    zh: "结构化输出",
+    desc: "JSON 提案 / 结构化返回（演化提案即此形态）"
   }
 };
 
