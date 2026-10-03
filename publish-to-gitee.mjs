@@ -147,3 +147,22 @@ if (msgFileArg) {
 }
 git(['push', 'origin', 'master']);
 console.log('[publish] done -> ' + REMOTE);
+
+// 同步 GitHub（main 分支；失败不影响 gitee 发布结果）
+const GH = 'https://github.com/yexli/engine-admin.git';
+if (process.env.PUBLISH_SKIP_GITHUB !== '1') {
+  try {
+    if (!gitRemotes().includes(GH)) {
+      git(['remote', 'add', 'github', GH]);
+    }
+    git(['push', 'github', 'master:main']);
+    console.log('[publish] synced -> ' + GH + ' (main)');
+  } catch (e) {
+    const msg = e instanceof Error ? e.message.split('\n')[0] : String(e);
+    console.warn('[publish] ⚠ GitHub 同步失败（不影响本次发布）：' + msg);
+  }
+}
+
+function gitRemotes() {
+  return execFileSync('git', ['remote'], { cwd: PUB, encoding: 'utf8' }).split('\n').filter(Boolean);
+}
