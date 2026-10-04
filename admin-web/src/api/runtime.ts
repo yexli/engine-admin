@@ -1,6 +1,6 @@
 /** Runtime 观察客户端：从引擎真实 API 派生运行时视图
  *  M1.2 起调度观测接真（GET /v1/worlds/{id}/scheduler）；
- *  暂停/恢复等控制面仍无引擎 API（见 docs/ADMIN-API-GAP.md G1，M4 评审）
+ *  暂停/恢复/关闭控制面已接引擎 API（api/world.ts pause/resume/closeWorld）
  */
 import { http } from "@/utils/http";
 import type {

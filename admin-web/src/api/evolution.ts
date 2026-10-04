@@ -175,7 +175,7 @@ export async function dispatchEvolutionIntent(
     kind: "ic_action" | "ooc" | "narrative";
     text: string;
     actorId?: string;
-    command?: { type: string; targetId?: string; text?: string; payload?: Record<string, unknown> };
+    command?: { type: string; targetId?: string; amount?: number; text?: string; payload?: Record<string, unknown> };
   }
 ): Promise<{
   kind: string;

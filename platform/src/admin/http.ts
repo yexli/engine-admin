@@ -426,11 +426,11 @@ export function startAdminServer(opts: AdminServerOptions): Promise<AdminServer>
       if (!opts.usage) httpErr(404, 'not_configured', '本管理面未装配用量数据面');
       const sp = url.searchParams;
       const kind = sp.get('kind');
-      if (kind && kind !== 'chat' && kind !== 'worlds') httpErr(400, 'malformed', `kind 只接受 chat|worlds，收到 '${kind.slice(0, 32)}'`);
+      if (kind && kind !== 'chat' && kind !== 'worlds' && kind !== 'embeddings') httpErr(400, 'malformed', `kind 只接受 chat|worlds|embeddings，收到 '${kind.slice(0, 32)}'`);
       const status = sp.get('status');
       if (status && status !== 'success' && status !== 'error') httpErr(400, 'malformed', `status 只接受 success|error，收到 '${status.slice(0, 32)}'`);
       const route = sp.get('route');
-      if (route && route !== 'world-agent' && route !== 'proxy') httpErr(400, 'malformed', `route 只接受 world-agent|proxy，收到 '${route.slice(0, 32)}'`);
+      if (route && route !== 'world-agent' && route !== 'proxy' && route !== 'embedding') httpErr(400, 'malformed', `route 只接受 world-agent|proxy|embedding，收到 '${route.slice(0, 32)}'`);
       const groupBy = sp.get('group_by');
       if (groupBy !== null && !['day', 'key', 'model', 'capability', 'world', 'game'].includes(groupBy)) {
         httpErr(400, 'malformed', `group_by 只接受 day|key|model|capability|world|game，收到 '${groupBy.slice(0, 32)}'`);
@@ -858,7 +858,7 @@ export function startAdminServer(opts: AdminServerOptions): Promise<AdminServer>
       const sp = url.searchParams;
       const world = sp.get('world') ?? undefined;
       const kind = sp.get('kind');
-      if (kind && kind !== 'chat' && kind !== 'worlds') httpErr(400, 'malformed', `kind 只接受 chat|worlds，收到 '${kind.slice(0, 32)}'`);
+      if (kind && kind !== 'chat' && kind !== 'worlds' && kind !== 'embeddings') httpErr(400, 'malformed', `kind 只接受 chat|worlds|embeddings，收到 '${kind.slice(0, 32)}'`);
       let entries = opts.usage.readAll().filter((e) => {
         if (e.status < 400) return false;
         if (world && (e.worldId ?? '') !== world) return false;
@@ -1017,7 +1017,7 @@ export function startAdminServer(opts: AdminServerOptions): Promise<AdminServer>
               }
             : {}),
           pointers: {
-            aiCalls: '/v1/admin/overview（AI 汇总/小时桶/最近错误）',
+            aiCalls: '/v1/obs/overview（AI 汇总/小时桶/最近错误）',
             causalTrace: '/v1/evolution/worlds/:id/events/:eventId/trace（因果链）',
             evolutionRuns: '/v1/evolution/worlds/:id/runs',
           },

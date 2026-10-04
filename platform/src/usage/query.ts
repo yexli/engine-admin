@@ -18,9 +18,9 @@ export interface UsageQuery {
   /** 匹配请求模型或 world-agent 实际模型 */
   model?: string;
   capability?: string;
-  kind?: 'chat' | 'worlds';
+  kind?: 'chat' | 'worlds' | 'embeddings';
   status?: 'success' | 'error';
-  route?: 'world-agent' | 'proxy';
+  route?: 'world-agent' | 'proxy' | 'embedding';
   page?: number;
   pageSize?: number;
   groupBy?: 'day' | 'key' | 'model' | 'capability' | 'world' | 'game';

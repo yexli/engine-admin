@@ -24,7 +24,7 @@ export interface LogRow {
   service: "platform";
   worldId: string | null;
   requestId: string;
-  kind: "chat" | "worlds";
+  kind: "chat" | "worlds" | "embeddings";
   keyId: string;
   status: number;
   message: string;
@@ -66,7 +66,7 @@ export interface ErrorRow {
   time: string;
   service: "platform";
   worldId: string | null;
-  kind: "chat" | "worlds";
+  kind: "chat" | "worlds" | "embeddings";
   keyId: string;
   method: string;
   path: string;

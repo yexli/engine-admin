@@ -46,38 +46,12 @@ export interface CreateWorldPayload {
   };
 }
 
-/** 最近命令历史（新 → 旧；Runtime 侧环形缓冲） */
-export const getCommandHistory = (worldId: string, n = 50) => {
-  return http.request<{ total: number; commands: CommandHistoryEntry[] }>(
-    "get",
-    `/world-api/v1/worlds/${encodeURIComponent(worldId)}/commands`,
-    { params: { n } }
-  );
-};
 
 /** 完整世界状态 */
 export const getWorldState = (worldId: string) => {
   return http.request<EngineWorldState>(
     "get",
     `/world-api/v1/worlds/${encodeURIComponent(worldId)}/state`
-  );
-};
-
-/** 最近世界事实（n 上限由引擎侧决定） */
-export const getWorldEvents = (worldId: string, n = 50) => {
-  return http.request<{ events: WorldEvent[] }>(
-    "get",
-    `/world-api/v1/worlds/${encodeURIComponent(worldId)}/events`,
-    { params: { n } }
-  );
-};
-
-/** 提交命令（命令载荷契约：一层基本类型） */
-export const executeWorldCommand = (worldId: string, cmd: WorldCommand) => {
-  return http.request<CommandResult>(
-    "post",
-    `/world-api/v1/worlds/${encodeURIComponent(worldId)}/commands`,
-    { data: cmd }
   );
 };
 

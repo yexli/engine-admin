@@ -111,6 +111,17 @@ export function createTriggerRuntime(opts: TriggerRuntimeOptions): TriggerRuntim
     return true;
   }
 
+  /** QA #15 修复（先看后吃）：只把「已处理完」的事实标记为已消费——
+     策略性不唤醒（非 High / 无人值得唤醒 / 无玩家发起）照常消费；
+     冷却跳过的批次不消费，冷却到期后下一轮自动重试，高优玩家事件
+     不再被 30s 冷却窗口永久吞掉。 */
+  function consume(st: WorldState, events: { id?: string }[]): void {
+    for (const e of events) {
+      if (e.id !== undefined) markSeen(st, e.id);
+    }
+    st.lastEventId = events[0]?.id ?? st.lastEventId;
+  }
+
   /** 玩家发起的事实才值得唤醒演化。AI 禁触玩家（NPC_EVOLUTION_POLICY）⇒
      玩家归因的事件不可能是演化产物；born 集合兜底非围栏装配。 */
   function playerAttributed(st: WorldState, e: TriggerEventView & { id?: string }): boolean {
@@ -145,19 +156,20 @@ export function createTriggerRuntime(opts: TriggerRuntimeOptions): TriggerRuntim
           const raw = (res.events ?? []) as (TriggerEventView & { id?: string; location?: string; target?: string; data?: Record<string, unknown> })[];
           const fresh = raw.filter((e) => {
             if (e.id === undefined) return true; /* 无 id 无法去重，按新事实处理 */
-            return markSeen(st, e.id); /* 幂等：replay/重叠窗口不重复消费 */
+            return !st.seen.has(e.id); /* 先看后吃：消费点在各处理终态（consume） */
           });
           if (!fresh.length) continue;
-          st.lastEventId = fresh[0]?.id ?? st.lastEventId;
 
           const playerFresh = fresh.filter((e) => playerAttributed(st, e));
           if (!playerFresh.length) {
             st.skippedNoPlayerEvent++;
+            consume(st, fresh); /* 策略性消费：NPC/系统事实不触发 */
             continue; /* 只有 NPC/系统事实：演化产物或日程效果，不触发 */
           }
           const grade = gradeEvents(wakeEventsOf(playerFresh), opts.wake);
           if (grade !== 'high') {
             st.skippedNotHigh++;
+            consume(st, fresh); /* 策略性消费：非 High 不打扰 AI */
             log(`[trigger] ${st.worldId}：新事实 ${fresh.length} 条（玩家发起 ${playerFresh.length}）分级 ${grade} —— 不打扰 AI`);
             continue;
           }
@@ -166,12 +178,13 @@ export function createTriggerRuntime(opts: TriggerRuntimeOptions): TriggerRuntim
           const stateRes = await opts.engine.getState(st.worldId);
           if (!stateRes.ok) {
             st.errors++;
-            continue;
+            continue; /* 不消费：下轮重试 */
           }
           const plan = assessWake(wakeStateViewOf(stateRes.state as Parameters<typeof wakeStateViewOf>[0]), wakeEventsOf(playerFresh), opts.wake);
           st.lastPlan = plan;
           if (!plan.worthWaking) {
             st.skippedNoWake++;
+            consume(st, fresh); /* 策略性消费：High 但无人值得唤醒 */
             const woken = plan.wakes.filter((w) => w.grade !== 'none').length;
             log(`[trigger] ${st.worldId}：High 事实（${plan.primaryEventId ?? '-'}）但无人值得唤醒（${plan.wakes.length} 实体中 ${woken} 个 low/medium）—— 零 AI 调用`);
             continue;
@@ -186,6 +199,7 @@ export function createTriggerRuntime(opts: TriggerRuntimeOptions): TriggerRuntim
           const eventId = plan.primaryEventId ?? fresh[0]!.id ?? 'batch';
           /* 幂等键含世界实例指纹（P9）：不同代世界的同 id 事件互不串挡 */
           const gen = fingerprints.known(st.worldId) ?? 0;
+          let cooldownHit = false;
           for (const npc of woken) {
             const npcPlan: typeof plan = {
               ...plan,
@@ -202,12 +216,18 @@ export function createTriggerRuntime(opts: TriggerRuntimeOptions): TriggerRuntim
               }
             } catch (e) {
               if (e instanceof EvolutionCooldownError) {
+                cooldownHit = true; /* 先看后吃：本批不消费，冷却到期后重试 */
                 st.cooldownSkips++;
-                log(`[trigger] ${st.worldId}：${npc} 的个体演化冷却中，本批跳过（${Math.ceil(e.retryInMs / 1000)}s）`);
+                log(`[trigger] ${st.worldId}：${npc} 的个体演化冷却中，本批事实保留待重试（${Math.ceil(e.retryInMs / 1000)}s 后）`);
               } else {
                 throw e;
               }
             }
+          }
+          if (cooldownHit) {
+            /* 保留 fresh 未消费：冷却结束后的下一轮 poll 会重新评估并执行 */
+          } else if (woken.length > 0) {
+            consume(st, fresh);
           }
           if (woken.length === 0) {
             /* 不可达（worthWaking=true 蕴含存在 high）；防御性兜底 */

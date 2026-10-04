@@ -148,7 +148,7 @@ onMounted(() => mc.ensureLoaded());
         :closable="false"
         class="mb-3"
         show-icon
-        title="六个能力固定：主模型失败自动降级到备模型；未指派的能力对 world-agent 诚实返回 503。保存成功即时生效，无需重启。鼠标悬停能力名可查看其触发语义（由平台任务分析决定）。"
+        title="13 项能力固定清单：主模型失败自动降级到备模型（冷却 30s）；未指派的能力诚实返回 503（embedding 未指派 = 记忆语义召回关闭、词面照常）。保存成功即时生效，无需重启。鼠标悬停能力名可查看其触发语义。"
       />
 
       <el-table v-loading="mc.loading.value" :data="capabilityRows" stripe>

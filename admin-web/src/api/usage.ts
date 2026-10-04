@@ -10,11 +10,11 @@ export interface UsageRow {
   /** requestId（与访问日志对账键） */
   id: string;
   time: string;
-  kind: "chat" | "worlds";
+  kind: "chat" | "worlds" | "embeddings";
   keyId: string;
   method: string;
   path: string;
-  route: "world-agent" | "proxy" | null;
+  route: "world-agent" | "proxy" | "embedding" | null;
   model: string | null;
   modelUsed: string | null;
   provider: string | null;

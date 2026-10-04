@@ -108,7 +108,12 @@ export interface EmbeddingInfo {
     store: string;
     attached: boolean;
     name?: string;
+    /** 宿主声明维度 */
     dimension?: number;
+    /** 引擎最近一次成功 embed 的实测维度（memory 0.9.0） */
+    engineDimension?: number;
+    /** 维度变化告警（模型切换检测，不静默） */
+    dimensionChanged?: { from: number; to: number };
   }>;
   /** 覆盖经本 HTTP 服务的检索调用；引擎内嵌向量调用细节不编造 */
   stats: {

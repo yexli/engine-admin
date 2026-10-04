@@ -1,6 +1,6 @@
 {
   "name": "world-platform",
-  "version": "0.25.1",
+  "version": "0.25.2",
   "type": "module",
   "description": "World Platform API（Phase 1 + M2/M3/M4 + AI World Evolution Runtime V2：策略围栏/幂等/状态机/因果追溯）——统一公共入口：鉴权（API Key）、Public/Admin/Internal 分层、world-agent 虚拟模型管线（任务分析 → 能力路由 → 世界上下文 → 网关模型调用 → 结果整合）、AI 世界演化运行时（观察 → 上下文 → 提案 → 白名单 → Rules 终审 → 落地 → 因果链账本）、结构化用量数据面、管线有界试跑、管理会话与本地用户/设置服务、可观测聚合（logs/events/errors/overview）。零运行时依赖。",
   "main": "dist/index.js",

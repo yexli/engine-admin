@@ -94,7 +94,16 @@ async function onSendIntent() {
     const res = await dispatchEvolutionIntent(worldId.value, {
       kind: intentKind.value,
       text: intentText.value.trim(),
-      ...(isIc ? { command: { type: intentCommandType.value, text: "rain" } } : {})
+      ...(isIc
+        ? {
+            command:
+              intentCommandType.value === "advance_time"
+                ? { type: "advance_time", amount: 1 }
+                : intentCommandType.value === "move"
+                  ? { type: "move", targetId: "tavern" }
+                  : { type: "change_weather", text: "rain" }
+          }
+        : {})
     });
     if (isIc) {
       const ok = res.commandResult?.ok;

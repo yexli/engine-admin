@@ -3,6 +3,34 @@
 本文件记录 World Platform 的版本演进。格式参考 Keep a Changelog。
 版本策略（semver）：0.x 期间允许带 CHANGELOG 注明的 API 调整。
 
+## [0.25.2] - 2026-10-04 · 全系统 QA（QA-1.0）：Trigger 冷却吞事件修复 + 观测面贯通
+
+全系统活栈验收（docs/QA-FINAL-REPORT.md：0 P0/P1，3 P2 全修复，判定 A 可进入真实运行验证）。
+
+### Fixed（P2）
+- **Trigger 冷却窗口吞高优玩家事件**：markSeen 先于冷却检查——admin/前次演化点燃 30s 冷却后，
+  冷却窗内的玩家 High 事件被标记已消费，冷却到期后**永不补跑**（静默丢响应）。改为「先看后吃」：
+  只有策略性不唤醒（非 High / 无人值得唤醒 / 无玩家发起）才消费事实；冷却跳过的批次保留，
+  到期后下一轮 poll 自动重试（triggerRuntime.ts consume()）。实测：冷却窗注入对话 → 到期后
+  auto run 补跑 completed。
+- **usage/obs 的 kind 枚举贯通 embeddings**：Embedding 统一治理后调用已记账（kind=embeddings），
+  但查询校验只认 chat|worlds——功能在跑、观测面看不见。查询/校验/前端类型/Usage 页筛选全部贯通；
+  route 枚举补 'embedding'。
+- **/v1/admin/runtime pointers.aiCalls 指向不存在端点** → 改 /v1/obs/overview。
+
+### Admin Web
+- 契约补全：memory.ts channels 补 engineDimension/dimensionChanged；evolution.ts intent command
+  补 amount；usage/logs kind 补 embeddings。vue-tsc 0 错误。
+- 清理：顶栏脚手架假通知清空、MockTag 死挂载与组件删除、world.ts 三个死导出删除、
+  过期注释修正（暂停/恢复 API 已存在）；演化控制台 IC 意图按命令类型构造载荷
+  （原硬编码 text:"rain"）；router 页「六个能力」文案改 13 项。
+
+### 测试
+- platform 315/315（先看后吃无回归）；admin-web vue-tsc 0 错误 + build 通过。
+- 活栈验收：鉴权 10 项 / 租户隔离 6 项 / World Runtime 强断言 / 并发幂等 / If-Match 并发 /
+  真实 Fallback 故障注入（primary 炼→fallback 接管→冷却直走备→双故障 502）/ OOC 隔离 /
+  因果链八环 / 进程 kill 重启恢复（revision/路由/账本/记忆/KeyStore/runtime 全保持）。
+
 ## [0.25.1] - 2026-10-04 · 模型页嵌入模型专属适配（治理收尾）
 
 ### Added

@@ -159,5 +159,3 @@ export interface SchedulerView {
   deadLetters: WorldEvent[];
 }
 
-/** 引擎管理面暂缺：暂停/恢复/关闭（见 ADMIN-API-GAP.md），列表页用该状态做占位 */
-export type WorldRuntimeStatus = "unknown" | "assumed-running";
