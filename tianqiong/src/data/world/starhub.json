@@ -1,0 +1,193 @@
+{
+  "_towersComment": "卡 C2 · 七塔分置（世界书 §9「七塔架构」）：一塔一城，loc 是各塔所在的 geo 地点，city/continent 只作展示。塔的功能门禁在 systems/starnet/StarNet.ts 的 towerGate——连名星符「通行七塔」，无名星符只在本塔有效（§11）。星枢六塔在深井城，星渊之门（dungeon.json 的 entry_abyss）即挂在此处。",
+  "towers": [
+    {
+      "id": "star1",
+      "name": "星枢一塔 · 星市",
+      "loc": "plaza",
+      "city": "圣辉城",
+      "continent": "中央大陆",
+      "func": "market",
+      "status": "open",
+      "desc": "主塔·星市最盛。寄售/拍卖/见闻买卖。财物只进不出。"
+    },
+    {
+      "id": "star2",
+      "name": "星枢二塔 · 星海",
+      "loc": "windport",
+      "city": "翠风港",
+      "continent": "东方群岛",
+      "func": "insight",
+      "status": "open",
+      "desc": "意境参悟·心魔之考。网中历时不耗寿，参悟仍按现实时辰计。"
+    },
+    {
+      "id": "star3",
+      "name": "星枢三塔 · 星塔",
+      "loc": "goldveil",
+      "city": "金砂城",
+      "continent": "南方沙漠",
+      "func": "trial",
+      "status": "open",
+      "desc": "登塔试炼 1–100 层，镜像地下城与古代英灵，网中无伤。"
+    },
+    {
+      "id": "star4",
+      "name": "星枢四塔 · 星演场",
+      "loc": "frosthold",
+      "city": "霜锚堡",
+      "continent": "北方冻土",
+      "func": "duel",
+      "status": "open",
+      "desc": "意识投影比斗，网中胜负不伤真身。"
+    },
+    {
+      "id": "star5",
+      "name": "星枢五塔 · 星斗台",
+      "loc": "bloodhold",
+      "city": "血吼城",
+      "continent": "西方荒野",
+      "func": "arena",
+      "status": "open",
+      "desc": "公开竞技·众生观战，注彩输赢皆在网内。"
+    },
+    {
+      "id": "star6",
+      "name": "星枢六塔 · 星渊",
+      "loc": "deepwell",
+      "city": "深井城",
+      "continent": "地下深渊",
+      "func": "abyss",
+      "status": "locked",
+      "desc": "星渊入口·魔气警戒——暗线，待深渊异动方可开启。"
+    },
+    {
+      "id": "star7",
+      "name": "星枢七塔 · 星殿",
+      "loc": "skycap",
+      "city": "天穹之城",
+      "continent": "天空浮岛",
+      "func": "council",
+      "status": "open",
+      "desc": "议事传讯·发布星谕，古研会与公会共同执掌。「连名星符」方可入殿（§11）。"
+    }
+  ],
+  "net_rules": {
+    "exitLockDays": 3,
+    "banWantedMin": 2,
+    "banFlags": [],
+    "buyNoCashOut": true,
+    "onlineNoLifespanDrain": true
+  },
+  "rates": {
+    "crystalToCoin": 30,
+    "consignPerCopper": 100,
+    "note": "网内只进不出：网中不可兑现实铜（§10）。地面例外通道见 data/world/exchange.json（卡 N1：七大陆各一家星枢兑换所，1 星币 = 1 银币 = 100 铜，买卖同价）。1 星晶=30 星币（§11 星晶可兑星币）"
+  },
+  "duel": {
+    "dc": 12,
+    "winStarcrystal": 1,
+    "costTicks": 2
+  },
+  "insight": {
+    "costTicks": 4,
+    "nightmareChance": 0.15,
+    "breakthroughAt": 100,
+    "breakthroughExp": 30
+  },
+  "trial": {
+    "maxFloor": 100,
+    "baseDc": 10,
+    "dcPerFloor": 1,
+    "starcrystalEvery": 5,
+    "fallTicks": 12,
+    "climbTicks": 2
+  },
+  "arena": {
+    "stakes": [
+      20,
+      50,
+      100
+    ],
+    "baseDc": 12,
+    "dcPerStake": 2
+  },
+  "council": {
+    "decreeCost": 30,
+    "talkTicks": 4
+  },
+  "starRanks": [
+    {
+      "tier": 1,
+      "name": "信徒",
+      "minRealLevel": 1,
+      "note": "刚可入网，网中几无战力"
+    },
+    {
+      "tier": 2,
+      "name": "见习",
+      "minRealLevel": 2,
+      "note": "能在星市走动"
+    },
+    {
+      "tier": 3,
+      "name": "正式",
+      "minRealLevel": 3,
+      "note": "可下场星演场"
+    },
+    {
+      "tier": 4,
+      "name": "主教",
+      "minRealLevel": 4,
+      "note": "可登星塔中层"
+    },
+    {
+      "tier": 5,
+      "name": "圣徒",
+      "minRealLevel": 5,
+      "note": "星斗台常客"
+    },
+    {
+      "tier": 6,
+      "name": "神官级",
+      "minRealLevel": 6,
+      "note": "星殿有座次"
+    },
+    {
+      "tier": 7,
+      "name": "神将级",
+      "minRealLevel": 7,
+      "note": "可发星谕（现实境界极限之上）"
+    },
+    {
+      "tier": 8,
+      "name": "神王级",
+      "minRealLevel": 8,
+      "note": "七塔执钥之上的存在"
+    }
+  ],
+  "starSeals": [
+    {
+      "id": "anonymous",
+      "name": "无名星符",
+      "grant": "公会/学院发放",
+      "effect": "匿名入网，真身不显",
+      "limit": "不可入星殿，不可发星谕"
+    },
+    {
+      "id": "named",
+      "name": "连名星符",
+      "grant": "神殿/公会鉴印",
+      "effect": "通行七塔，可入星殿",
+      "limit": null
+    },
+    {
+      "id": "ancient",
+      "name": "星纹古符",
+      "grant": "神阶或塔主举荐",
+      "effect": "可携「一息真觉」——比斗更近真实",
+      "limit": null
+    }
+  ],
+  "_c1Comment": "卡 C1（世界书 §9–§13）：starRanks=星阶八档（随现实境界映射）；starSeals=星符三类；net_rules.banFlags 与 exitLockDays 是定神与禁入的判定数据。"
+}

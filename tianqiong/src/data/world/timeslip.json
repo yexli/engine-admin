@@ -1,0 +1,76 @@
+{
+  "_comment": "卡 N3（世界书 §7/§80/§89）：小世界四类型与时间流速；境界寿命表。裁决 D1=1:5（加速型 1:5、减速型 5:1），故 §89 的「外界 100 年」换算为狱内 20 年（旧版 1:7 对应 14 年，已随 D1 作废）。",
+  "types": [
+    {
+      "id": "fast",
+      "name": "时间加速型",
+      "ratio": "1:5",
+      "innerPerOuter": 5,
+      "relation": "神殿修炼地",
+      "note": "外 1 日 = 内 5 日"
+    },
+    {
+      "id": "slow",
+      "name": "时间减速型",
+      "ratio": "5:1",
+      "innerPerOuter": 0.2,
+      "relation": "罪犯流放地（刑期以外界时间计）",
+      "note": "外 5 日 = 内 1 日"
+    },
+    {
+      "id": "variant",
+      "name": "法则变异型",
+      "ratio": "不固定",
+      "innerPerOuter": 1,
+      "relation": "古代遗迹",
+      "note": "法则不按常理"
+    },
+    {
+      "id": "still",
+      "name": "静止型",
+      "ratio": "0",
+      "innerPerOuter": 0,
+      "relation": "封印之地",
+      "note": "内部时间不流动"
+    }
+  ],
+  "lifespan": [
+    {
+      "rank": "见习",
+      "min": 70,
+      "max": 100
+    },
+    {
+      "rank": "正式",
+      "min": 100,
+      "max": 150
+    },
+    {
+      "rank": "主教",
+      "min": 150,
+      "max": 300
+    },
+    {
+      "rank": "圣徒（圣阶）",
+      "min": 300,
+      "max": 500
+    },
+    {
+      "rank": "神阶",
+      "min": 500,
+      "max": 9999
+    }
+  ],
+  "timeMagic": {
+    "noRewind": "不可逆转自身已发生事件（神阶以下）",
+    "noTravel": "不可穿越到过去（神王级别例外）",
+    "soulFreeze": "死亡后时间冻结——但灵魂仍可被召唤"
+  },
+  "exile": {
+    "outerYearsPerInnerYear": 5,
+    "example": {
+      "outer": 100,
+      "inner": 20
+    }
+  }
+}

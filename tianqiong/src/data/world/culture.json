@@ -1,0 +1,176 @@
+{
+  "_comment": "卡 N4（世界书 §94–§98）：七大陆的饮食/服饰/婚丧/禁忌/娱乐。禁忌是判定类内容（触犯→好感/声望/罪名），其余供叙事与面板直读。",
+  "food": {
+    "中央大陆": {
+      "staple": "面包、肉类、奶酪",
+      "specialty": "烤羊排、炖牛肉",
+      "utensil": "金属刀叉"
+    },
+    "东方群岛": {
+      "staple": "米、鱼、果",
+      "specialty": "清蒸海鱼、花酿",
+      "utensil": "竹筷"
+    },
+    "南方沙漠": {
+      "staple": "面饼、椰枣",
+      "specialty": "香料烤肉、蜜渍果",
+      "utensil": "手抓配铜盘"
+    },
+    "北方冻土": {
+      "staple": "黑麦、腌肉",
+      "specialty": "炖鹿肉、麦酒",
+      "utensil": "木碗木勺"
+    },
+    "西方荒野": {
+      "staple": "烤肉、奶",
+      "specialty": "血肠、烈酒",
+      "utensil": "手抓短刀"
+    },
+    "地下深渊": {
+      "staple": "伞菌、苔饼",
+      "specialty": "菌汤、矿盐腌物",
+      "utensil": "石碗"
+    },
+    "天空浮岛": {
+      "staple": "果露、云麦",
+      "specialty": "风干肉、花蜜",
+      "utensil": "轻银餐具"
+    }
+  },
+  "attires": [
+    {
+      "id": "academy",
+      "name": "学院袍",
+      "tag": "学者与学徒",
+      "note": "袍色区分学院"
+    },
+    {
+      "id": "holy",
+      "name": "神徽",
+      "tag": "神殿人员",
+      "note": "五大神殿各有徽记"
+    },
+    {
+      "id": "rank",
+      "name": "军衔",
+      "tag": "帝国军人",
+      "note": "肩章与绶带"
+    },
+    {
+      "id": "noble",
+      "name": "贵族纹章",
+      "tag": "世家",
+      "note": "纹章可查血统"
+    },
+    {
+      "id": "guild",
+      "name": "公会徽章",
+      "tag": "冒险者",
+      "note": "认证等级刻在背面"
+    }
+  ],
+  "taboos": [
+    {
+      "id": "tb_cen",
+      "continent": "中央大陆",
+      "text": "神殿内喧哗与背对圣徽",
+      "penalty": {
+        "rep": {
+          "temple_life": -8
+        }
+      }
+    },
+    {
+      "id": "tb_elf",
+      "continent": "东方群岛",
+      "text": "砍伐月咏森林的古木",
+      "penalty": {
+        "rep": {
+          "verdant": -12
+        }
+      }
+    },
+    {
+      "id": "tb_sand",
+      "continent": "南方沙漠",
+      "text": "在绿洲水源中洗身",
+      "penalty": {
+        "rep": {
+          "sand": -10
+        }
+      }
+    },
+    {
+      "id": "tb_frost",
+      "continent": "北方冻土",
+      "text": "在冻原上直呼死者之名",
+      "penalty": {
+        "rep": {
+          "frost": -8
+        }
+      }
+    },
+    {
+      "id": "tb_wild",
+      "continent": "西方荒野",
+      "text": "在王帐前示弱求饶",
+      "penalty": {
+        "rep": {
+          "blood": -10
+        }
+      }
+    },
+    {
+      "id": "tb_deep",
+      "continent": "地下深渊",
+      "text": "在主井旁点亮明火",
+      "penalty": {
+        "rep": {
+          "deep": -12
+        }
+      }
+    },
+    {
+      "id": "tb_sky",
+      "continent": "天空浮岛",
+      "text": "私自下访地面而未报备",
+      "penalty": {
+        "rep": {
+          "study": -8
+        }
+      }
+    }
+  ],
+  "games": [
+    {
+      "id": "gm_arena",
+      "name": "竞技场武斗",
+      "impl": "starnet.arena",
+      "done": true
+    },
+    {
+      "id": "gm_theater",
+      "name": "戏剧",
+      "impl": "lore",
+      "done": false
+    },
+    {
+      "id": "gm_music",
+      "name": "音乐",
+      "impl": "lore",
+      "done": false
+    },
+    {
+      "id": "gm_gamble",
+      "name": "赌局",
+      "impl": "tavern",
+      "done": true
+    },
+    {
+      "id": "gm_tourney",
+      "name": "赛马与武斗大会",
+      "impl": "events",
+      "done": false
+    }
+  ]
+}

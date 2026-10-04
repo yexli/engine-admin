@@ -72,7 +72,7 @@ curl -X POST http://127.0.0.1:8800/v1/worlds/my-game-main/time \
 （dev 环境 `VITE_WORLD_API_URL=http://127.0.0.1:8800`），世界列表 / 运行时 /
 「游戏方」页即出现 `my-game`。
 
-> 完整参考实现见仓库内 `tianqiong2/scripts/http-host.mjs`（63 地点 / 15 NPC
+> 完整参考实现见仓库内 `tianqiong/scripts/http-host.mjs`（63 地点 / 15 NPC
 > 的真实世界书接入）。
 
 ## 3. 持久化（重启接续）

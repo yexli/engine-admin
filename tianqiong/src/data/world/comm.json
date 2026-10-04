@@ -1,0 +1,77 @@
+{
+  "_comment": "卡 N2（世界书 §84）：八大通讯方式。speedDays 为送达耗时（0=即时）；限制写在 limits 里。判定入口 systems/commnet/CommNet.ts。",
+  "ways": [
+    {
+      "id": "word",
+      "name": "口头/口信",
+      "speedDays": 0,
+      "maxKm": 0.1,
+      "cost": 0,
+      "note": "现场，100 米内"
+    },
+    {
+      "id": "letter",
+      "name": "信纸/书信",
+      "speedDays": 15,
+      "maxKm": -1,
+      "cost": 500,
+      "note": "跨大陆 1–30 日，1–50 银币"
+    },
+    {
+      "id": "pigeon",
+      "name": "信鸽",
+      "speedDays": 4,
+      "maxKm": -1,
+      "cost": 10000,
+      "note": "跨大陆 1–7 日，1 金币"
+    },
+    {
+      "id": "scroll",
+      "name": "魔法传讯（卷轴）",
+      "speedDays": 0,
+      "maxKm": 1000,
+      "cost": 500000,
+      "note": "需两端预置锚点"
+    },
+    {
+      "id": "stone",
+      "name": "传音石",
+      "speedDays": 0,
+      "maxKm": 10,
+      "cost": 250000,
+      "note": "需双方各持一枚"
+    },
+    {
+      "id": "tower",
+      "name": "远程通讯塔",
+      "speedDays": 0,
+      "maxKm": -1,
+      "cost": 10000,
+      "note": "仅中央帝国与五大神殿有；按分钟计"
+    },
+    {
+      "id": "oracle",
+      "name": "神谕术",
+      "speedDays": 0,
+      "maxKm": -1,
+      "cost": 0,
+      "note": "仅神官级以上，神殿免费"
+    },
+    {
+      "id": "starnet",
+      "name": "星枢传讯",
+      "speedDays": 0,
+      "maxKm": -1,
+      "cost": 0,
+      "note": "需星符入网，星币计费（廉价）"
+    }
+  ],
+  "limits": {
+    "scrollAnchor": "魔法传讯需预先在两端设置锚点",
+    "stonePair": "传音石需双方各持一枚",
+    "towerScope": "远程通讯塔仅中央帝国和五大神殿有",
+    "oracleRank": "神谕术仅神官级以上可使用",
+    "starnetNeedNet": "星枢传讯需星符入网"
+  },
+  "starnetCoin": 2
+}

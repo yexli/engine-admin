@@ -1,0 +1,162 @@
+/* ============================================================
+   对话浮层 · 双页（星穹剧场）
+   —— 「此刻」与「深谈」两页切换。新组件独立文件，不触碰冻结的
+      app.css 原型规则；全部沿用 app.css :root 令牌（深nのavy底 /
+      金 accent / 紫 chip / serif 叙事），零新增主色。
+   ============================================================ */
+
+/* ---------- 两页容器：叠放 + 上推切换 ----------
+   用 grid 让两页占据同一格：都参与布局（容器高度取高者），
+   否则绝对定位的两页都不撑高 → 浮层高度塌成 0（实测踩到）。 */
+/* 层叠必须显式声明：有 transform 的那一页会自成层叠上下文（绘制在 z-index:auto 的
+   普通流之上）——翻页后「此刻」页带了 transform、「深谈」页是 none，于是前者反而盖住后者
+   （实测：elementFromPoint 命中的仍是此刻页的按钮）。两页都给 z-index 才排得稳定。 */
+.dlg-views{display:grid;flex:1;min-height:0;overflow:hidden}
+/* 两页切换改用 **display**，不用 opacity 过渡：
+   ① 玩家明确要求"直接点击"，不需要过渡动画；
+   ② opacity 有"终态卡在 0"的风险（热更新、竞态、过渡被中断），一卡住整页就是空白——
+      display 没有中间态，切过去就一定画得出来。
+   深谈页必须不透明：它盖在「此刻」页上，半透明会让两页文字叠在一起（实测踩到）。 */
+.dlg-view{grid-area:1/1;position:relative;z-index:0;display:none;flex-direction:column;min-height:0}
+.dlg-views:not(.tl) .dlg-view.dlg-now{display:flex}
+.dlg-views.tl .dlg-view.dlg-tl{display:flex;z-index:1;background:var(--bg1)}
+
+/* ============================================================
+   边框 · 羽化无边（选定的方案一）
+   —— 满屏立绘之后浮层没有边界了：这一层用向内渐隐代替描边，
+      上下各留一条 26px 起收的金色细线当「幕绳」。
+      它是**唯一**的边界层，z-index 压在两页之上，且不接指针事件。
+   ============================================================ */
+.dlg-sheet{position:relative}
+/* 完整边框：border 天然四条边闭合、四角相连，圆角随浮层（手机直角 / 桌面 14px）。
+   three 层向内叠加：外圈金线 → 3px 深色间隔 → 内衬淡金线，再往内是羽化。
+   box-shadow 列表**后写在前**，所以顺序不能颠倒。 */
+.dlg-frame{position:absolute;inset:0;z-index:6;pointer-events:none;border-radius:inherit;
+  border:1px solid #d4b26a88;
+  box-shadow:
+    inset 0 0 0 3px #0b0f1dcc,
+    inset 0 0 0 4px #d4b26a3d,
+    inset 0 0 34px 6px #0b0f1dbb}
+
+/* ---------- 浮层尺寸：与方案对齐（方案是 390×844 的整屏立绘） ----------
+   手机：满屏，没有卡片边与圆角——立绘占满可见区域；
+   桌面：窄而高的竖幅（430 宽），而不是默认的 560 宽扁卡片。
+   不改 app.css 的 .sheet 规则，只用更高特异性的 .dlg-sheet 覆盖。 */
+@media (max-width: 899px) {
+  #ovl.dlg { align-items: stretch; }
+  .sheet.dlg-sheet {
+    width: 100%; max-width: 100%; height: 100dvh; max-height: 100dvh;
+    border-radius: 0; border: none; animation: none;
+  }
+}
+@media (min-width: 900px) {
+  .sheet.dlg-sheet { width: 430px; max-width: 430px; height: min(92dvh, 880px); max-height: 92dvh; }
+}
+
+/* ---------- 头部浮在立绘上：立绘从浮层最顶端铺满 ---------- */
+.dlg-h{position:absolute;top:0;left:0;right:0;z-index:5;
+  background:linear-gradient(180deg,#0b0f1ddb 0%,#0b0f1d99 62%,#0b0f1d00 100%);padding-bottom:14px}
+.dlg-h .sh-h{border-bottom:none;background:none}
+.dlg-views{padding-top:0}
+/* 深谈页不是满屏立绘，头部要占位（否则时间线第一行被压在头部底下） */
+.dlg-view.dlg-tl{padding-top:74px}
+
+/* ---------- 顶栏两态按钮：位置固定，两页都在同一处（手感不跳） ---------- */
+.dlg-switch{border:1px solid var(--line2);background:#0d132299;border-radius:999px;padding:5px 12px;
+  font-size:11px;color:var(--ink2);transition:.2s;white-space:nowrap;margin-left:auto}
+.dlg-switch:hover{border-color:var(--gold);color:var(--gold2)}
+.dlg-switch + .x{margin-left:8px}
+
+/* ---------- 页 1 · 底部的上滑坞 ---------- */
+.dlg-more{width:100%;margin-top:14px;border:1px dashed var(--line2);background:#0d132288;border-radius:8px;
+  padding:10px;font-size:11.5px;color:var(--ink3);letter-spacing:.16em;transition:.2s}
+.dlg-more:hover{border-color:var(--gold);color:var(--gold2)}
+
+/* ---------- 页 2 · 深谈：会话流 ---------- */
+.tl-b{flex:1;overflow-y:auto;padding:16px 16px 10px;display:flex;flex-direction:column;gap:10px;
+  overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:var(--line2) transparent}
+.tl-b::-webkit-scrollbar{width:4px}
+.tl-b::-webkit-scrollbar-thumb{background:var(--line2);border-radius:2px}
+.tl-day{text-align:center;font-size:10px;letter-spacing:.2em;color:var(--ink3);margin:2px 0}
+.tl-ct{max-width:84%;display:flex;flex-direction:column;align-items:flex-start}
+.tl-ct.p{align-self:flex-end;align-items:flex-end}
+.tl-who{font-size:10px;color:var(--ink3);margin-bottom:3px;letter-spacing:.06em}
+.tl-bub{padding:9px 13px;border-radius:14px;font-size:13px;line-height:1.85;overflow-wrap:anywhere}
+/* 星穹剧场：NPC 气泡带一条该人物的主题色内衬线（主角自己那一句更醒目） */
+.tl-ct.n .tl-bub{background:var(--bg3);border:1px solid var(--line2);border-top-left-radius:4px;
+  border-left:3px solid var(--gold);font-family:var(--serif)}
+.tl-ct.p .tl-bub{background:rgba(212,178,106,.12);border:1px solid rgba(212,178,106,.4);
+  border-top-right-radius:4px;color:var(--ink2)}
+@keyframes tlWait{0%,100%{opacity:.32}50%{opacity:.9}}
+/* 合成斜体已去（同 .nar-p.opening 处注）——等待感交给降色 + tlWait 呼吸 */
+.tl-wait .tl-bub{color:var(--ink3);border-left-color:var(--line2);
+  animation:tlWait 1.4s ease-in-out infinite}
+.tl-empty{text-align:center;font-size:12px;color:var(--ink3);padding:28px 10px;line-height:2}
+
+/* ---------- 页 2 · 底部：追问 + 回到此刻 ---------- */
+.tl-f{flex:none;border-top:1px solid var(--line);background:#131a30;padding:12px 16px 16px}
+.tl-hint{font-size:10.5px;color:var(--ink3);letter-spacing:.2em;margin-bottom:8px}
+.tl-chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:10px}
+.tl-chip{border:1px solid var(--line2);background:var(--bg2);border-radius:999px;padding:6px 12px;font-size:12px;
+  color:#b9a7e8;transition:.18s}
+.tl-chip:hover{border-color:var(--star);color:var(--ink)}
+/* 深谈页的输入行：与聊天窗口同款（同一套令牌与手感），但留在对话框内 */
+.tl-in{display:flex;gap:8px;margin-top:10px}
+.tl-in input{flex:1;min-width:0;padding:10px 14px;border:1px solid var(--line2);border-radius:30px;
+  background:var(--bg2);font-size:13px;color:var(--ink);font-family:inherit}
+.tl-in input::placeholder{color:var(--ink3)}
+.tl-in input:focus{outline:none;border-color:var(--star);box-shadow:0 0 0 3px #8ea1f51f}
+.tl-in input:disabled{opacity:.6}
+.tl-in button{flex:none;width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#d4b26a,#b3934e);
+  color:#1a1508;font-size:14px;transition:.2s}
+.tl-in button:hover:not(:disabled){filter:brightness(1.15)}
+.tl-in button:disabled{opacity:.4}
+.tl-back{width:100%;margin-top:10px;border:1px solid var(--line2);background:#0d132288;border-radius:8px;padding:9px;
+  font-size:11.5px;color:var(--ink3);letter-spacing:.16em;transition:.2s}
+.tl-back:hover{border-color:var(--gold);color:var(--gold2)}
+.tl-att{flex:1;height:4px;border-radius:2px;background:#ffffff12;overflow:hidden;max-width:120px}
+.tl-att i{display:block;height:100%;background:linear-gradient(90deg,#d4b26a,#f0d391)}
+.tl-head{flex:none;display:flex;align-items:center;gap:12px;padding:11px 16px 3px;font-size:10.5px;color:var(--ink3)}
+.tl-attnum{white-space:nowrap;color:var(--ink3)}
+/* 知情度（C 卡）：深谈页第一次把「谈到哪了」摆到玩家眼前——窄屏用省略号，不换行挤掉时间线 */
+.tl-know{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#8d97a8}
+
+/* ============================================================
+   页 1 · 星穹剧场：立绘满屏出血，文字浮在画面上
+   —— 一个字的正文 + 四五个全宽按钮换成「大名字 → 处境 → 这一句 → chips」。
+   ============================================================ */
+.dlg-now{overflow:hidden}
+/* 立绘铺满整页（原 .dlg-art 是 240px 高的框，这里覆盖为满屏层） */
+.dlg-now .dlg-art{position:absolute;inset:0;height:auto;margin:0;border:none;border-radius:0;background:var(--bg3)}
+.dlg-now .dlg-art img{width:100%;height:100%;object-fit:cover;object-position:top center}
+.dlg-now .dlg-art::after{content:"";position:absolute;inset:0;
+  background:linear-gradient(180deg,#0b0f1db8 0%,#0b0f1d00 24%,#0b0f1d00 38%,#0b0f1ddd 62%,#080b15 100%)}
+/* 无立绘的大多数 NPC（109 个档案人物都没图）：单字符印放大成水印，别让满屏层空着 */
+.dlg-now .dlg-art .fallback{font-size:26vmin;opacity:.13;letter-spacing:.1em}
+/* 浮在画面上的那一叠 */
+.dlg-cards{position:relative;z-index:2;margin-top:auto;padding:14px 18px 16px;
+  display:flex;flex-direction:column;max-height:100%;overflow-y:auto;scrollbar-width:none}
+.dlg-cards::-webkit-scrollbar{display:none}
+.dlg-extra{margin-bottom:12px}
+.dlg-extra .weigh{margin-bottom:0;background:#0e1424cc;backdrop-filter:blur(4px)}
+.dlg-name{font-family:var(--serif);font-size:25px;letter-spacing:.09em;text-shadow:0 2px 14px #000c}
+.dlg-name small{font-size:11px;color:var(--ink3);letter-spacing:.12em;margin-left:9px;text-shadow:none}
+.dlg-sub{font-size:10.5px;color:var(--ink3);letter-spacing:.04em;margin-top:4px}
+.dlg-sub i{font-style:normal;color:var(--gold2)}
+/* 这一句：大字衬线 + 首字下沉（说话者已在上面大字写过，正文不再重复「XX：」） */
+.dlg-line{font-family:var(--serif);font-size:16.5px;line-height:2.15;margin:14px 0 16px;
+  text-shadow:0 2px 14px #000c;min-height:3em}
+/* 下沉只在 core 判过「首字是汉字」时启用（.dc）：标点／引号开头不下沉，
+   否则会把「（」「……」「「」放大成一个巨物（实测踩到） */
+.dlg-line.dc::first-letter{font-size:2.2em;color:var(--gold2);float:left;line-height:1;margin:6px 8px 0 0}
+/* 句首舞台指示：动作提示不是台词，小字另起一行 */
+/* 舞台指示：动作提示不是台词——降色 + 缩进承担区分，不用合成斜体 */
+.dlg-stage{display:block;font-size:12.5px;line-height:1.9;color:var(--ink3);
+  letter-spacing:.04em;margin-bottom:7px;text-shadow:none}
+/* 一级动作收成 chips：一屏读完 */
+.dlg-chips{display:flex;flex-wrap:wrap;gap:7px}
+.dlg-chips .opt{display:inline-block;width:auto;border-radius:999px;padding:7px 13px;font-size:12.5px;margin:0}
+.dlg-chips .opt small{display:none}
+.dlg-chips .opt.q{border-color:#d4b26a88;background:#d4b26a1a}
+.dlg-chips .opt.dg{border-color:#d0685f66}
+.dlg-now .dlg-more{margin-top:14px}

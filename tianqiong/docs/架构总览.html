@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>天穹纪元 2.0 · 架构总览</title>
+<style>
+  :root{
+    --bg:#0a0e13; --panel:#101720; --panel2:#141d28; --line:rgba(255,255,255,.075);
+    --ink:#e7eef6; --ink2:#93a1b1; --ink3:#63707e;
+    --gold:#d9a84e; --cyan:#49c5d6; --violet:#a184dd; --green:#57c08a; --red:#e0605a; --amber:#dfa34a;
+    --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--ink);
+    font:14px/1.6 system-ui,-apple-system,"Segoe UI","Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif}
+  body{background-image:radial-gradient(900px 500px at 12% -10%,rgba(73,197,214,.07),transparent),
+    radial-gradient(700px 420px at 88% -6%,rgba(217,168,78,.06),transparent)}
+  a{color:inherit}
+  .wrap{max-width:1280px;margin:0 auto;padding:28px 22px 80px}
+  header.top{display:flex;flex-direction:column;gap:18px;padding-bottom:18px;border-bottom:1px solid var(--line)}
+  .brand{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+  .brand h1{margin:0;font-size:21px;letter-spacing:.02em;font-weight:650}
+  .brand .sub{color:var(--ink3);font-size:12.5px;font-family:var(--mono)}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:10px}
+  .kpi{background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--line);
+    border-radius:10px;padding:10px 12px}
+  .kpi .n{font-family:var(--mono);font-size:20px;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+  .kpi .l{color:var(--ink3);font-size:11.5px;margin-top:2px}
+  nav.tabs{display:flex;gap:2px;flex-wrap:wrap;border-bottom:1px solid var(--line);margin-top:6px}
+  nav.tabs button{appearance:none;background:none;border:0;color:var(--ink2);font:inherit;font-size:13.5px;
+    padding:9px 14px;cursor:pointer;position:relative;border-radius:8px 8px 0 0}
+  nav.tabs button:hover{color:var(--ink);background:rgba(255,255,255,.03)}
+  nav.tabs button[aria-selected="true"]{color:var(--ink)}
+  nav.tabs button[aria-selected="true"]::after{content:"";position:absolute;left:10px;right:10px;bottom:-1px;height:2px;
+    background:linear-gradient(90deg,var(--gold),var(--cyan));border-radius:2px;transform-origin:left;
+    animation:slide .22s ease}
+  @keyframes slide{from{transform:scaleX(.2);opacity:.4}to{transform:scaleX(1);opacity:1}}
+  main{padding-top:22px}
+  section[hidden]{display:none}
+  h2{font-size:15px;margin:0 0 4px;letter-spacing:.01em}
+  h2 .hint{color:var(--ink3);font-weight:400;font-size:12.5px;margin-left:8px}
+  .lead{color:var(--ink2);font-size:13px;margin:0 0 16px;max-width:88ch}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+  .card+.card{margin-top:14px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media (max-width:900px){.grid2{grid-template-columns:1fr}}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--ink3);font-weight:500;font-size:11.5px;letter-spacing:.04em;text-transform:uppercase}
+  td.mono,.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+  .tag{display:inline-block;padding:1px 7px;border-radius:999px;font-size:11px;border:1px solid var(--line);color:var(--ink2)}
+  .tag.eff{color:var(--green);border-color:rgba(87,192,138,.35)}
+  .tag.pend{color:var(--amber);border-color:rgba(223,163,74,.35)}
+  .tag.int{color:var(--ink3)}
+  .tag.l3{color:var(--red);border-color:rgba(224,96,90,.35)}
+  .tag.l2{color:var(--gold);border-color:rgba(217,168,78,.35)}
+  .tag.l1{color:var(--cyan);border-color:rgba(73,197,214,.3)}
+  .tag.l0{color:var(--ink3)}
+  .flow{display:flex;flex-direction:column;gap:8px}
+  .flow .step{display:flex;align-items:center;gap:12px;background:var(--panel2);border:1px solid var(--line);
+    border-radius:10px;padding:9px 13px}
+  .flow .step .idx{font-family:var(--mono);color:var(--ink3);font-size:11.5px;min-width:22px}
+  .flow .step .t{font-size:13.5px}
+  .flow .step .d{color:var(--ink3);font-size:12px;margin-left:auto;text-align:right;max-width:44ch}
+  .flow .step.hot{border-color:rgba(217,168,78,.4);background:linear-gradient(90deg,rgba(217,168,78,.07),var(--panel2))}
+  .flow .step.cool{border-color:rgba(73,197,214,.3);background:linear-gradient(90deg,rgba(73,197,214,.06),var(--panel2))}
+  .layerrow{display:grid;grid-template-columns:150px 1fr;gap:14px;align-items:start;
+    padding:10px 0;border-bottom:1px solid var(--line)}
+  .layerrow:last-child{border-bottom:0}
+  .layername{font-family:var(--mono);font-size:12.5px}
+  .layername .dep{display:block;color:var(--ink3);font-size:11px;margin-top:2px}
+  .files{display:flex;flex-wrap:wrap;gap:6px}
+  .file{font-family:var(--mono);font-size:11.5px;color:var(--ink2);background:rgba(255,255,255,.03);
+    border:1px solid var(--line);border-radius:6px;padding:2px 7px;cursor:default}
+  .file.big{color:var(--ink)}
+  .matrix{overflow:auto;max-width:100%}
+  .mx{border-collapse:separate;border-spacing:2px;font-size:11px}
+  .mx th{writing-mode:vertical-rl;text-orientation:mixed;height:96px;padding:0 2px 6px;color:var(--ink3);
+    font-weight:400;white-space:nowrap;text-transform:none;letter-spacing:0;font-family:var(--mono)}
+  .mx th.rowh{writing-mode:horizontal-tb;text-align:right;padding:0 8px 0 0;white-space:nowrap;
+    font-family:var(--mono);color:var(--ink2)}
+  .mx td{width:22px;height:22px;border-radius:4px;border:0;padding:0;background:rgba(255,255,255,.028);
+    cursor:pointer;transition:outline-color .12s}
+  .mx td[data-n="1"]{background:rgba(73,197,214,.22)}
+  .mx td[data-n="2"]{background:rgba(73,197,214,.42)}
+  .mx td[data-n="3"]{background:rgba(73,197,214,.62)}
+  .mx td[data-n="4"]{background:rgba(217,168,78,.62)}
+  .mx td.hl{outline:1.5px solid var(--gold);outline-offset:1px}
+  .mx td.dim{opacity:.22}
+  .sysgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(268px,1fr));gap:12px}
+  .sys{background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--line);
+    border-radius:11px;padding:12px 13px;cursor:pointer;transition:border-color .15s,transform .15s}
+  .sys:hover{border-color:rgba(217,168,78,.45);transform:translateY(-1px)}
+  .sys.sel{border-color:var(--gold);box-shadow:0 0 0 1px rgba(217,168,78,.25)}
+  .sys h3{margin:0 0 6px;font-size:13.5px;font-family:var(--mono);display:flex;align-items:center;gap:8px}
+  .sys h3 .v{color:var(--ink3);font-size:10.5px;font-weight:400}
+  .sys .meta{display:flex;gap:10px;flex-wrap:wrap;color:var(--ink3);font-size:11.5px;margin-bottom:8px}
+  .sys .meta b{color:var(--ink2);font-weight:500;font-variant-numeric:tabular-nums}
+  .sys .caps{display:flex;flex-wrap:wrap;gap:4px}
+  .chip{font-family:var(--mono);font-size:10.5px;padding:1px 6px;border-radius:5px;border:1px solid var(--line);color:var(--ink2)}
+  .chip.eff{color:var(--green);border-color:rgba(87,192,138,.3)}
+  .chip.pend{color:var(--amber);border-color:rgba(223,163,74,.3)}
+  .chip.int{color:var(--ink3);opacity:.85}
+  .chip.sub{color:var(--cyan);border-color:rgba(73,197,214,.3)}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;color:var(--ink3);font-size:12px;margin:10px 0 2px}
+  .legend i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:middle}
+  .rev{display:grid;gap:10px}
+  .revitem{border:1px solid var(--line);border-left-width:3px;border-radius:8px;background:var(--panel2);
+    padding:11px 14px}
+  .revitem.p0{border-left-color:var(--red)}
+  .revitem.p1{border-left-color:var(--amber)}
+  .revitem.p2{border-left-color:var(--gold)}
+  .revitem.p3{border-left-color:var(--ink3)}
+  .revitem.fixed{border-left-color:var(--green);background:linear-gradient(90deg,rgba(87,192,138,.06),var(--panel2))}
+  .revitem .st{font-size:11px;padding:1px 7px;border-radius:999px;border:1px solid var(--line);color:var(--ink3)}
+  .revitem.fixed .st{color:var(--green);border-color:rgba(87,192,138,.35)}
+  .revgroup{font-size:12px;color:var(--ink3);letter-spacing:.06em;text-transform:uppercase;
+    margin:18px 0 8px;padding-bottom:6px;border-bottom:1px solid var(--line)}
+  .revgroup:first-child{margin-top:0}
+  .revitem .hd{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+  .revitem .pri{font-family:var(--mono);font-size:11px;padding:1px 7px;border-radius:999px;border:1px solid var(--line)}
+  .revitem .ti{font-size:13.5px}
+  .revitem .loc{font-family:var(--mono);font-size:11px;color:var(--ink3)}
+  .revitem p{margin:6px 0 0;color:var(--ink2);font-size:12.5px}
+  .revitem .fix{color:var(--ink3);font-size:12px;margin-top:4px}
+  .revitem .fix b{color:var(--ink2);font-weight:500}
+  details{border:1px solid var(--line);border-radius:10px;padding:10px 14px;background:var(--panel)}
+  details+details{margin-top:10px}
+  summary{cursor:pointer;font-size:13px;color:var(--ink)}
+  details .body{color:var(--ink2);font-size:12.5px;padding-top:8px}
+  footer{color:var(--ink3);font-size:11.5px;margin-top:34px;padding-top:14px;border-top:1px solid var(--line);
+    display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-family:var(--mono)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <h1>天穹纪元 2.0 · 架构总览</h1>
+      <span class="sub">插件化世界模拟 · 认知三层 · 事件驱动</span>
+    </div>
+    <div class="kpis" id="kpis"></div>
+    <nav class="tabs" id="tabs"></nav>
+  </header>
+
+  <main>
+    <section id="v-flow">
+      <h2>一次世界动作的完整路径<span class="hint">§47 单向闭环：Action ≠ Event，AI 只提议、代码定生死</span></h2>
+      <p class="lead">下面这条链是项目的主动脉。左列是确定性规则（可复现、可测试），右列是概率与推演（可注入随机源、可降级为规则通道）。任何一环失败都返回 null，不做部分猜测。</p>
+      <div class="card"><div class="flow" id="flow"></div></div>
+      <div class="grid2" style="margin-top:14px">
+        <div class="card">
+          <h2>两条总线，分工不混<span class="hint">§5</span></h2>
+          <p class="lead" style="margin-bottom:10px"><b class="mono">bus</b> 是引擎给界面看的信号（渲染 / 浮层 / toast）；<b class="mono">worldBus</b> 是「世界已经发生了什么」的事实传播，可追溯、可推演、可防环。</p>
+          <table><tbody id="buses"></tbody></table>
+        </div>
+        <div class="card">
+          <h2>认知不是世界真相<span class="hint">§8 · 记忆方案 §4/§24</span></h2>
+          <p class="lead" style="margin-bottom:10px">四层严格分开：世界事实、某人感知到的事实、他记得的条目、他由记忆推导出的信念。AI 读后三层，永不读第一层。</p>
+          <table><tbody id="cognition"></tbody></table>
+        </div>
+      </div>
+      <div class="card" style="margin-top:14px">
+        <h2>世界事件分级<span class="hint">§12：分级是默认值，不是天花板</span></h2>
+        <p class="lead">L3 无条件进 AI 推演；L2 里「死/失踪的是有名有姓的人」也升格（ESCALATIONS）；L0 不进世界史，L1 由对应系统自行处理。</p>
+        <table><thead><tr><th>级别</th><th>语义</th><th>事件类型</th></tr></thead><tbody id="levels"></tbody></table>
+      </div>
+    </section>
+
+    <section id="v-layers" hidden>
+      <h2>分层与依赖<span class="hint">eslint 强制的方向：上层可依赖下层，反向立即报错</span></h2>
+      <p class="lead">依赖方向自上而下。<b class="mono">data</b> 是静态世界书与数值配置，<b class="mono">types</b> 是纯契约。中间九层彼此不得反向依赖；<b class="mono">ai</b> 与 <b class="mono">repo</b> 在业务层之上，<b class="mono">store</b>/<b class="mono">ui</b> 在最上层。</p>
+      <div class="card"><div id="layers"></div></div>
+      <div class="card" style="margin-top:14px">
+        <h2>业务系统之间的点对点依赖<span class="hint">§21 的反面教材：这张表越满，事件解耦就越名不副实</span></h2>
+        <p class="lead">行 = 调用方，列 = 被调用方，格子深浅 = import 条数。悬停高亮，点击锁定。</p>
+        <div class="matrix" id="matrix"></div>
+        <div class="legend"><span><i style="background:rgba(73,197,214,.42)"></i>1–3 条</span><span><i style="background:rgba(217,168,78,.62)"></i>4 条以上</span></div>
+      </div>
+      <div class="card" style="margin-top:14px">
+        <h2>跨层依赖热度<span class="hint">哪些单元在依赖谁</span></h2>
+        <table><thead><tr><th>来源</th><th>目标</th><th>条数</th></tr></thead><tbody id="edges"></tbody></table>
+      </div>
+    </section>
+
+    <section id="v-systems" hidden>
+      <h2>系统与能力<span class="hint">§20：声明「我能做什么」，能力分三类</span></h2>
+      <p class="lead">每个系统向世界登记能力。<b style="color:var(--green)">effects</b> 可被后果计划驱动（每条必有处理器）；<b style="color:var(--amber)">pending</b> 是世界后果但执行器尚未接入（Validator 与提示词都看不到它）；<b style="color:var(--ink3)">internal</b> 是玩家操作与战斗裁定，刻意不让 AI 直接驱动。</p>
+      <div class="sysgrid" id="systems"></div>
+      <div class="card" style="margin-top:14px">
+        <h2>事件订阅登记表<span class="hint">§21/§34：靠事件传播，而不是点对点调用</span></h2>
+        <table><thead><tr><th>订阅者</th><th>类型</th><th>事件</th><th>说明</th></tr></thead><tbody id="subs"></tbody></table>
+      </div>
+    </section>
+
+    <section id="v-review" hidden>
+      <h2>代码审查发现<span class="hint" id="revmeta"></span></h2>
+      <p class="lead">审查为只读、以提交态为准，逐条带证据。每条给「为什么是问题」与「最小修复方向」，不给修复代码。</p>
+      <div class="rev" id="review"></div>
+      <div id="revmore"></div>
+    </section>
+  </main>
+
+  <footer>
+    <span id="footleft"></span>
+    <span id="footright"></span>
+  </footer>
+</div>
+
+<script>
+const DATA = {"units":[{"unit":"ui","files":["ui/art/ArtImage.tsx","ui/CreateScreen.tsx","ui/ErrorBoundary.tsx","ui/GameShell.tsx","ui/Money.tsx","ui/overlays/CheckOverlay.tsx","ui/overlays/CombatOverlay.tsx","ui/overlays/DungeonOverlay.tsx","ui/overlays/RunLogPanel.tsx","ui/overlays/SheetHost.tsx","ui/overlays/ToastHost.tsx","ui/panels/AcademyPanel.tsx","ui/panels/CharPanel.tsx","ui/panels/CodexPanel.tsx","ui/panels/DeityPanel.tsx","ui/panels/MapPanel.tsx","ui/panels/NewsPanel.tsx","ui/panels/QuestPanel.tsx","ui/panels/SysPanel.tsx","ui/SceneView.tsx","ui/StarField.tsx","ui/TabBar.tsx","ui/TitleScreen.tsx","ui/TopBar.tsx","ui/useDesk.ts"],"lines":3801},{"unit":"ai","files":["ai/ConsequencePlanner.ts","ai/ContextBuilder.ts","ai/embeddingCompat.test.ts","ai/embeddingCompat.ts","ai/gateway.ts","ai/helpers.ts","ai/llmConfig.test.ts","ai/llmConfig.ts","ai/llmReasoner.ts","ai/openaiCompat.test.ts","ai/openaiCompat.ts","ai/persona.ts","ai/retriever.test.ts","ai/retriever.ts","ai/ruleReasoner.ts","ai/ruleSim.ts","ai/WorldReasoner.ts"],"lines":1994},{"unit":"memory","files":["memory/belief/BeliefSystem.ts","memory/context/MemoryContextBuilder.ts","memory/embedding/EmbeddingCache.ts","memory/embedding/EmbeddingProvider.ts","memory/index.ts","memory/LegacyMemory.ts","memory/lifecycle/MemoryLifecycle.ts","memory/MemoryEngine.ts","memory/MemoryStore.ts","memory/MemoryTypes.ts","memory/MemoryValidator.ts","memory/propagation/InformationPropagation.ts","memory/retrieval/HybridRetriever.ts","memory/retrieval/KeywordRetriever.ts","memory/retrieval/StructuredRetriever.ts","memory/vector/InMemoryVectorStore.ts","memory/vector/Similarity.ts","memory/vector/VectorStore.ts"],"lines":1785},{"unit":"world","files":["world/index.ts","world/Shards.ts","world/WorldAPI.ts","world/WorldClock.ts","world/WorldMutate.ts","world/WorldRuntime.ts","world/WorldState.ts"],"lines":1596},{"unit":"plugins","files":["plugins/bootstrap.ts","plugins/CapabilityRegistry.ts","plugins/daySettle.ts","plugins/handlers.ts","plugins/PluginInterface.ts","plugins/PluginRegistry.ts","plugins/runlog.ts","plugins/subscriptions.ts","plugins/systems.ts","plugins/witness.ts"],"lines":1564},{"unit":"events","files":["events/EventBus.ts","events/EventProcessor.ts","events/EventSchema.ts","events/EventStore.ts","events/Perception.ts","events/Sampling.ts"],"lines":1260},{"unit":"repo","files":["repo/index.ts","repo/shards.test.ts","repo/sqlite.test.ts","repo/sqlite.ts"],"lines":1217},{"unit":"actions","files":["actions/ActionExecutor.ts","actions/ActionParser.ts"],"lines":946},{"unit":"systems/religion","files":["systems/religion/Deity.ts","systems/religion/Theoselect.ts"],"lines":899},{"unit":"types","files":["types/uispec.ts","types/world.ts"],"lines":893},{"unit":"systems/dialogue","files":["systems/dialogue/Dialogue.ts"],"lines":673},{"unit":"systems/inventory","files":["systems/inventory/Craft.ts","systems/inventory/Equip.ts"],"lines":636},{"unit":"systems/academy","files":["systems/academy/Academy.ts"],"lines":627},{"unit":"systems/dungeon","files":["systems/dungeon/Abyss.ts","systems/dungeon/Dungeon.ts"],"lines":590},{"unit":"systems/combat","files":["systems/combat/Combat.ts"],"lines":546},{"unit":"systems/faction","files":["systems/faction/Diplomacy.ts","systems/faction/Factions.ts"],"lines":491},{"unit":"systems/npc","files":["systems/npc/Chat.ts","systems/npc/Lod.ts","systems/npc/Npcs.ts"],"lines":443},{"unit":"systems/starnet","files":["systems/starnet/StarNet.ts"],"lines":415},{"unit":"systems/relationship","files":["systems/relationship/Bond.ts","systems/relationship/Relations.ts"],"lines":391},{"unit":"systems/economy","files":["systems/economy/Economy.ts","systems/economy/Money.ts","systems/economy/Shop.ts"],"lines":339},{"unit":"devlog","files":["devlog/RunLog.ts","devlog/RunLogFilter.ts"],"lines":335},{"unit":"validation","files":["validation/PermissionValidator.ts","validation/RuleValidator.ts","validation/SchemaValidator.ts"],"lines":333},{"unit":"systems/character","files":["systems/character/Derived.ts","systems/character/Gains.ts","systems/character/Sheet.ts","systems/character/Status.ts"],"lines":323},{"unit":"systems/law","files":["systems/law/Investigation.ts","systems/law/Law.ts"],"lines":309},{"unit":"systems/naming","files":["systems/naming/Naming.ts"],"lines":290},{"unit":"systems/reputation","files":["systems/reputation/Title.ts"],"lines":256},{"unit":"data","files":["data/dungeon.ts","data/lore.ts","data/starhub.ts","data/worldBook.ts"],"lines":204},{"unit":"systems/codex","files":["systems/codex/Codex.ts"],"lines":195},{"unit":"execution","files":["execution/PlanSchema.ts","execution/WorldExecutor.ts"],"lines":157},{"unit":"dice","files":["dice/CheckResolver.ts","dice/DiceEngine.ts"],"lines":154},{"unit":"main.tsx","files":["main.tsx"],"lines":137},{"unit":"store","files":["store/useGame.ts"],"lines":136},{"unit":"systems/quest","files":["systems/quest/Quests.ts"],"lines":99},{"unit":"systems/travel","files":["systems/travel/Travel.ts"],"lines":94},{"unit":"App.tsx","files":["App.tsx"],"lines":45}],"edges":[{"from":"ui","to":"world","count":18},{"from":"ui","to":"store","count":16},{"from":"memory","to":"types","count":11},{"from":"ui","to":"data","count":9},{"from":"ai","to":"data","count":8},{"from":"plugins","to":"events","count":8},{"from":"ai","to":"world","count":7},{"from":"world","to":"types","count":7},{"from":"ai","to":"memory","count":6},{"from":"plugins","to":"world","count":6},{"from":"ai","to":"plugins","count":5},{"from":"ai","to":"events","count":5},{"from":"memory","to":"data","count":5},{"from":"world","to":"events","count":5},{"from":"world","to":"plugins","count":5},{"from":"repo","to":"types","count":4},{"from":"systems/character","to":"types","count":4},{"from":"ui","to":"systems/economy","count":4},{"from":"world","to":"data","count":4},{"from":"ai","to":"execution","count":3},{"from":"ai","to":"types","count":3},{"from":"events","to":"types","count":3},{"from":"events","to":"world","count":3},{"from":"memory","to":"events","count":3},{"from":"plugins","to":"systems/economy","count":3},{"from":"plugins","to":"systems/relationship","count":3},{"from":"plugins","to":"systems/law","count":3},{"from":"plugins","to":"types","count":3},{"from":"repo","to":"plugins","count":3},{"from":"repo","to":"world","count":3},{"from":"systems/character","to":"data","count":3},{"from":"systems/npc","to":"data","count":3},{"from":"ui","to":"types","count":3},{"from":"validation","to":"execution","count":3},{"from":"world","to":"systems/economy","count":3},{"from":"actions","to":"data","count":2},{"from":"actions","to":"events","count":2},{"from":"actions","to":"systems/character","count":2},{"from":"actions","to":"systems/economy","count":2},{"from":"actions","to":"systems/law","count":2},{"from":"actions","to":"systems/npc","count":2},{"from":"actions","to":"plugins","count":2},{"from":"actions","to":"world","count":2},{"from":"ai","to":"systems/npc","count":2},{"from":"data","to":"types","count":2},{"from":"dice","to":"events","count":2},{"from":"events","to":"data","count":2},{"from":"events","to":"systems/npc","count":2},{"from":"memory","to":"world","count":2},{"from":"plugins","to":"devlog","count":2},{"from":"plugins","to":"systems/character","count":2},{"from":"plugins","to":"memory","count":2},{"from":"plugins","to":"systems/reputation","count":2},{"from":"plugins","to":"data","count":2},{"from":"plugins","to":"systems/npc","count":2},{"from":"plugins","to":"systems/quest","count":2},{"from":"repo","to":"validation","count":2},{"from":"repo","to":"events","count":2},{"from":"systems/character","to":"world","count":2},{"from":"systems/character","to":"events","count":2},{"from":"systems/dungeon","to":"data","count":2},{"from":"systems/dungeon","to":"types","count":2},{"from":"systems/dungeon","to":"events","count":2},{"from":"systems/dungeon","to":"systems/combat","count":2},{"from":"systems/dungeon","to":"systems/character","count":2},{"from":"systems/dungeon","to":"world","count":2},{"from":"systems/economy","to":"data","count":2},{"from":"systems/economy","to":"types","count":2},{"from":"systems/economy","to":"events","count":2},{"from":"systems/economy","to":"world","count":2},{"from":"systems/faction","to":"data","count":2},{"from":"systems/faction","to":"types","count":2},{"from":"systems/faction","to":"events","count":2},{"from":"systems/faction","to":"world","count":2},{"from":"systems/inventory","to":"data","count":2},{"from":"systems/inventory","to":"types","count":2},{"from":"systems/inventory","to":"events","count":2},{"from":"systems/inventory","to":"world","count":2},{"from":"systems/law","to":"data","count":2},{"from":"systems/law","to":"events","count":2},{"from":"systems/law","to":"systems/character","count":2},{"from":"systems/law","to":"world","count":2},{"from":"systems/law","to":"types","count":2},{"from":"systems/npc","to":"memory","count":2},{"from":"systems/npc","to":"events","count":2},{"from":"systems/npc","to":"world","count":2},{"from":"systems/npc","to":"types","count":2},{"from":"systems/relationship","to":"data","count":2},{"from":"systems/relationship","to":"types","count":2},{"from":"systems/relationship","to":"events","count":2},{"from":"systems/relationship","to":"systems/npc","count":2},{"from":"systems/relationship","to":"world","count":2},{"from":"systems/religion","to":"data","count":2},{"from":"systems/religion","to":"types","count":2},{"from":"systems/religion","to":"events","count":2},{"from":"systems/religion","to":"systems/character","count":2},{"from":"systems/religion","to":"world","count":2},{"from":"ui","to":"ai","count":2},{"from":"validation","to":"data","count":2},{"from":"world","to":"systems/character","count":2},{"from":"world","to":"systems/npc","count":2},{"from":"world","to":"systems/relationship","count":2},{"from":"world","to":"systems/faction","count":2},{"from":"world","to":"systems/law","count":2},{"from":"world","to":"systems/travel","count":2},{"from":"world","to":"systems/inventory","count":2},{"from":"world","to":"systems/quest","count":2},{"from":"world","to":"systems/dungeon","count":2},{"from":"world","to":"systems/combat","count":2},{"from":"world","to":"systems/religion","count":2},{"from":"world","to":"systems/academy","count":2},{"from":"world","to":"systems/codex","count":2},{"from":"world","to":"systems/reputation","count":2},{"from":"world","to":"actions","count":2},{"from":"actions","to":"dice","count":1},{"from":"actions","to":"systems/codex","count":1},{"from":"actions","to":"systems/faction","count":1},{"from":"actions","to":"systems/combat","count":1},{"from":"actions","to":"systems/dialogue","count":1},{"from":"ai","to":"validation","count":1},{"from":"ai","to":"repo","count":1},{"from":"ai","to":"devlog","count":1},{"from":"App.tsx","to":"world","count":1},{"from":"App.tsx","to":"store","count":1},{"from":"dice","to":"systems/character","count":1},{"from":"dice","to":"world","count":1},{"from":"dice","to":"types","count":1},{"from":"events","to":"devlog","count":1},{"from":"events","to":"systems/faction","count":1},{"from":"events","to":"systems/character","count":1},{"from":"events","to":"systems/relationship","count":1},{"from":"events","to":"plugins","count":1},{"from":"execution","to":"events","count":1},{"from":"execution","to":"validation","count":1},{"from":"execution","to":"devlog","count":1},{"from":"main.tsx","to":"ai","count":1},{"from":"main.tsx","to":"world","count":1},{"from":"main.tsx","to":"types","count":1},{"from":"main.tsx","to":"plugins","count":1},{"from":"main.tsx","to":"repo","count":1},{"from":"main.tsx","to":"store","count":1},{"from":"main.tsx","to":"data","count":1},{"from":"main.tsx","to":"memory","count":1},{"from":"main.tsx","to":"devlog","count":1},{"from":"memory","to":"plugins","count":1},{"from":"memory","to":"systems/npc","count":1},{"from":"memory","to":"devlog","count":1},{"from":"plugins","to":"ai","count":1},{"from":"plugins","to":"systems/dungeon","count":1},{"from":"plugins","to":"systems/religion","count":1},{"from":"plugins","to":"execution","count":1},{"from":"plugins","to":"systems/faction","count":1},{"from":"plugins","to":"systems/codex","count":1},{"from":"store","to":"world","count":1},{"from":"store","to":"types","count":1},{"from":"systems/academy","to":"data","count":1},{"from":"systems/academy","to":"types","count":1},{"from":"systems/academy","to":"events","count":1},{"from":"systems/academy","to":"dice","count":1},{"from":"systems/academy","to":"systems/character","count":1},{"from":"systems/academy","to":"systems/economy","count":1},{"from":"systems/academy","to":"world","count":1},{"from":"systems/character","to":"systems/inventory","count":1},{"from":"systems/character","to":"systems/economy","count":1},{"from":"systems/character","to":"systems/npc","count":1},{"from":"systems/codex","to":"data","count":1},{"from":"systems/codex","to":"types","count":1},{"from":"systems/codex","to":"events","count":1},{"from":"systems/codex","to":"systems/character","count":1},{"from":"systems/codex","to":"world","count":1},{"from":"systems/combat","to":"data","count":1},{"from":"systems/combat","to":"events","count":1},{"from":"systems/combat","to":"systems/character","count":1},{"from":"systems/combat","to":"types","count":1},{"from":"systems/combat","to":"dice","count":1},{"from":"systems/combat","to":"systems/faction","count":1},{"from":"systems/combat","to":"systems/inventory","count":1},{"from":"systems/combat","to":"world","count":1},{"from":"systems/combat","to":"systems/economy","count":1},{"from":"systems/combat","to":"devlog","count":1},{"from":"systems/dialogue","to":"data","count":1},{"from":"systems/dialogue","to":"memory","count":1},{"from":"systems/dialogue","to":"types","count":1},{"from":"systems/dialogue","to":"events","count":1},{"from":"systems/dialogue","to":"dice","count":1},{"from":"systems/dialogue","to":"systems/character","count":1},{"from":"systems/dialogue","to":"systems/economy","count":1},{"from":"systems/dialogue","to":"actions","count":1},{"from":"systems/dialogue","to":"systems/law","count":1},{"from":"systems/dialogue","to":"systems/npc","count":1},{"from":"systems/dialogue","to":"systems/academy","count":1},{"from":"systems/dialogue","to":"plugins","count":1},{"from":"systems/dialogue","to":"systems/relationship","count":1},{"from":"systems/dialogue","to":"systems/quest","count":1},{"from":"systems/dialogue","to":"systems/inventory","count":1},{"from":"systems/dialogue","to":"systems/reputation","count":1},{"from":"systems/dialogue","to":"world","count":1},{"from":"systems/dungeon","to":"dice","count":1},{"from":"systems/dungeon","to":"systems/codex","count":1},{"from":"systems/dungeon","to":"systems/economy","count":1},{"from":"systems/dungeon","to":"systems/npc","count":1},{"from":"systems/economy","to":"systems/faction","count":1},{"from":"systems/economy","to":"systems/relationship","count":1},{"from":"systems/economy","to":"systems/character","count":1},{"from":"systems/economy","to":"systems/inventory","count":1},{"from":"systems/economy","to":"systems/reputation","count":1},{"from":"systems/faction","to":"systems/character","count":1},{"from":"systems/inventory","to":"systems/character","count":1},{"from":"systems/inventory","to":"systems/law","count":1},{"from":"systems/inventory","to":"systems/economy","count":1},{"from":"systems/inventory","to":"systems/naming","count":1},{"from":"systems/law","to":"systems/faction","count":1},{"from":"systems/law","to":"systems/economy","count":1},{"from":"systems/naming","to":"data","count":1},{"from":"systems/naming","to":"events","count":1},{"from":"systems/npc","to":"systems/relationship","count":1},{"from":"systems/npc","to":"systems/character","count":1},{"from":"systems/npc","to":"plugins","count":1},{"from":"systems/npc","to":"systems/faction","count":1},{"from":"systems/npc","to":"systems/naming","count":1},{"from":"systems/quest","to":"data","count":1},{"from":"systems/quest","to":"events","count":1},{"from":"systems/quest","to":"world","count":1},{"from":"systems/quest","to":"systems/faction","count":1},{"from":"systems/quest","to":"systems/character","count":1},{"from":"systems/quest","to":"systems/npc","count":1},{"from":"systems/relationship","to":"dice","count":1},{"from":"systems/relationship","to":"systems/character","count":1},{"from":"systems/religion","to":"systems/naming","count":1},{"from":"systems/reputation","to":"data","count":1},{"from":"systems/reputation","to":"events","count":1},{"from":"systems/reputation","to":"world","count":1},{"from":"systems/reputation","to":"systems/codex","count":1},{"from":"systems/reputation","to":"systems/inventory","count":1},{"from":"systems/reputation","to":"types","count":1},{"from":"systems/reputation","to":"systems/character","count":1},{"from":"systems/reputation","to":"systems/faction","count":1},{"from":"systems/starnet","to":"data","count":1},{"from":"systems/starnet","to":"types","count":1},{"from":"systems/starnet","to":"events","count":1},{"from":"systems/starnet","to":"systems/combat","count":1},{"from":"systems/starnet","to":"dice","count":1},{"from":"systems/starnet","to":"systems/character","count":1},{"from":"systems/starnet","to":"systems/economy","count":1},{"from":"systems/starnet","to":"systems/dungeon","count":1},{"from":"systems/starnet","to":"world","count":1},{"from":"systems/travel","to":"data","count":1},{"from":"systems/travel","to":"types","count":1},{"from":"systems/travel","to":"events","count":1},{"from":"systems/travel","to":"systems/combat","count":1},{"from":"systems/travel","to":"systems/character","count":1},{"from":"systems/travel","to":"world","count":1},{"from":"ui","to":"systems/character","count":1},{"from":"ui","to":"devlog","count":1},{"from":"ui","to":"memory","count":1},{"from":"validation","to":"world","count":1},{"from":"validation","to":"plugins","count":1},{"from":"validation","to":"systems/inventory","count":1},{"from":"validation","to":"devlog","count":1},{"from":"world","to":"systems/naming","count":1},{"from":"world","to":"execution","count":1},{"from":"world","to":"systems/dialogue","count":1},{"from":"world","to":"systems/starnet","count":1},{"from":"world","to":"validation","count":1},{"from":"world","to":"memory","count":1}],"systems":[{"id":"character","version":"1.0.0","effects":["gain_exp","heal_character","damage_character","add_status","remove_status"],"pending":[],"internal":[],"subscribes":[]},{"id":"npc","version":"1.0.0","effects":["change_goal","change_relationship"],"pending":[],"internal":["talk","move","observe","remember"],"subscribes":[]},{"id":"combat","version":"1.0.0","effects":[],"pending":[],"internal":["start_combat","attack","calculate_damage","apply_damage","kill_character"],"subscribes":[]},{"id":"quest","version":"1.0.0","effects":["start_quest","update_quest","complete_quest","fail_quest"],"pending":[],"internal":[],"subscribes":[]},{"id":"inventory","version":"1.0.0","effects":["add_item","remove_item","transfer_item"],"pending":[],"internal":["craft_item"],"subscribes":[]},{"id":"economy","version":"1.0.0","effects":["add_money","remove_money","transfer_money","change_price"],"pending":[],"internal":["buy_item","sell_item"],"subscribes":[]},{"id":"faction","version":"1.0.0","effects":["change_reputation","start_investigation","change_faction_relation"],"pending":[],"internal":["gather_intel"],"subscribes":[]},{"id":"relationship","version":"1.0.0","effects":["spread_rumor","form_grudge","befriend"],"pending":[],"internal":["chat_bond"],"subscribes":[]},{"id":"reputation","version":"1.0.0","effects":["grant_title","suppress_title"],"pending":[],"internal":[],"subscribes":[]},{"id":"law","version":"1.0.0","effects":["commit_crime","clear_crime"],"pending":[],"internal":[],"subscribes":[]},{"id":"travel","version":"1.0.0","effects":[],"pending":[],"internal":["travel_to"],"subscribes":[]},{"id":"religion","version":"1.0.0","effects":[],"pending":[],"internal":["pray","divine_intervene"],"subscribes":[]},{"id":"academy","version":"1.0.0","effects":[],"pending":[],"internal":["academy_enroll","academy_study"],"subscribes":[]},{"id":"dungeon","version":"1.0.0","effects":[],"pending":[],"internal":["enter_dungeon","descend"],"subscribes":[]},{"id":"starnet","version":"1.0.0","effects":[],"pending":[],"internal":["star_trade","star_duel","chat_free","net_access","star_market","star_tower","star_arena","star_council"],"subscribes":[]},{"id":"codex","version":"1.0.0","effects":[],"pending":[],"internal":["unlock_lore"],"subscribes":[]},{"id":"dialogue","version":"1.0.0","effects":[],"pending":[],"internal":["open_dialogue","deliver_request","give_gift"],"subscribes":[]},{"id":"naming","version":"1.0.0","effects":[],"pending":[],"internal":["generate_name","validate_name"],"subscribes":[]},{"id":"world","version":"1.0.0","effects":["create_event","schedule_event","trigger_event"],"pending":[],"internal":[],"subscribes":[]}],"levels":[{"level":0,"types":[],"d":"内部账目：不进世界史，无人感知"},{"level":1,"types":["hour_advanced","damage_applied","heal_applied","mp_spent","cooldown_ticked","item_consumed","xp_gained"],"d":"局部事件：由对应系统自行处理"},{"level":2,"types":[],"d":"跨系统事件：上总线，通知相关系统"},{"level":3,"types":[],"d":"复杂世界事件：进入 World Reasoner"}],"flow":[{"t":"玩家输入","d":"自由文本或行动坞按钮；原文入库，渲染出口才转义","kind":""},{"t":"Intent 解析","d":"LLM 通道优先，失败降级正则；两通道产出同构 IntentParse","kind":"cool"},{"t":"WorldRuntime.dispatch","d":"UI → 引擎的唯一入口；一条命令 = 一个 tick","kind":"hot"},{"t":"系统执行 + 检定","d":"DiceEngine.resolveCheck：d20 + 属性 + 天气修正，随机源可注入","kind":""},{"t":"改写 WorldState","d":"各系统写自己的数据；AI 层没有任何写通路（静态审计守护）","kind":""},{"t":"产生世界事件","d":"EventSchema：id / type / day / tick / level / actor / target / location / cause / witnesses / data / parentId","kind":"hot"},{"t":"Event Bus 派发","d":"通配订阅者（感知 → 世界史）先跑，再派发具体类型订阅者","kind":"cool"},{"t":"推演准入","d":"L3 无条件；L2 有名有姓者的死/失踪升格；推演产物带 origin=reasoner 不再回流","kind":"hot"},{"t":"Context Builder","d":"最小必要上下文：相关实体 + 认知边界 + 检索记忆 + 信念 + 可执行能力清单","kind":""},{"t":"World Reasoner","d":"LLM 端口或规则兜底；只产严格 JSON 计划，解析失败即 null","kind":"cool"},{"t":"Rule Validator","d":"形状 → 能力可执行 → 实体存在 → 数值范围 → 重复执行 → 依据齐备；任一不过整份拒绝","kind":"hot"},{"t":"World Executor","d":"因果挂父 → 逐条落地 → 收集执行期新事件","kind":"hot"},{"t":"新事件回流总线","d":"闭环完成：世界因这次动作而改变，且改变可向上追溯","kind":"cool"}],"buses":[{"n":"bus","d":"引擎 → 界面：changed / toast / check / screen / combat… 只影响呈现"},{"n":"worldBus","d":"系统 ↔ 系统：世界已发生的事实。可追溯（parentId）、可推演、防环（幂等 + 限流 + 死信）"}],"cognition":[{"n":"World Truth","d":"WorldState：谁活着、谁在哪、谁欠谁钱。AI 永远读不到原始事实"},{"n":"Perception","d":"knowledge：某人**看见了**哪条事实（亲历 / 传闻 + 保真度）。证据的唯一来源"},{"n":"Memory","d":"memories：角色级记忆条目，带置信度、重要度、情绪、衰减；容量 80/人"},{"n":"Belief","d":"beliefs：由记忆聚合出的信念（主体|谓词|客体）。行动动机来自这里，不是世界真相"}],"layers":[{"name":"ui","dep":"← store / world","match":["ui"]},{"name":"store","dep":"← 任意下层（只做订阅与转发）","match":["store"]},{"name":"repo","dep":"← types","match":["repo"]},{"name":"ai","dep":"← world / events / memory / plugins / execution / data","match":["ai"]},{"name":"systems/*","dep":"← types / data / world / events / dice / memory（同层尽量靠事件）","match":["systems"]},{"name":"memory","dep":"← types / data / events / world","match":["memory"]},{"name":"execution","dep":"← events / validation / types","match":["execution"]},{"name":"plugins","dep":"← 所有业务层（组合根：登记能力、装配订阅、注册处理器）","match":["plugins"]},{"name":"validation","dep":"← types / data / world / plugins / execution","match":["validation"]},{"name":"dice","dep":"← types / world","match":["dice"]},{"name":"actions","dep":"← types / data / world / dice / systems","match":["actions"]},{"name":"events","dep":"← types / data / world","match":["events"]},{"name":"world","dep":"← types / data（门面；WorldClock 仍直调各系统 tick）","match":["world"]},{"name":"data","dep":"← types（静态世界书与数值配置，数值一律配置化）","match":["data"]},{"name":"types","dep":"← 谁都不依赖","match":["types"]}],"subs":[{"who":"events/Perception","type":"*","events":"全部","why":"登记目击者（显眼度抽样，走可注入 rng）"},{"who":"events/EventStore","type":"*","events":"全部","why":"写入世界事件日志（环形 500，不入档）"},{"who":"memory/MemoryEngine","type":"*","events":"L1+","why":"事件 → 相关角色记忆（目击者取自感知表）"},{"who":"ai/WorldReasoner","type":"*","events":"L3 / 升格","why":"推演准入判定；推演产物不再回流"},{"who":"execution/WorldExecutor","type":"*","events":"执行期","why":"收集执行期间产生的世界事件（回合闭环）"},{"who":"plugins/witness","type":"具体","events":"crime_committed · character_died · npc_assassinated","why":"目击者好感下降 + 消息沿关系网扩散"},{"who":"quest（订阅）","type":"具体","events":"character_died","why":"击杀事实推进委托进度（取代原先的直接调用）"},{"who":"law（订阅）","type":"具体","events":"crime_committed","why":"有人目击的罪行自动立案"},{"who":"economy（订阅）","type":"具体","events":"large_trade","why":"大额买卖推动该品类价格指数"}],"stamp":"2026-09-22 07:53 · 生成自 arch-scan.cjs"};
+const REVIEW = {"meta":"只读代码审查 · 逐条带证据 · 覆盖全项目（架构一致性 / 契约漂移 / 静默失败 / 测试质量 / 规模隐患）","stats":{"tests":779},"items":[{"pri":"P1","state":"fixed","t":"生产装配静默抹掉 pending 声明（覆盖式注册缺字段）","loc":"src/plugins/subscriptions.ts:26-33","why":"registerSystemSubscriptions 用对象字面量覆盖注册 quest/law/economy，字面量里没有 pending —— 于是 systems.ts 里这几条待接入声明在生产装配后消失。守卫跑的是「registerCoreSystems + registerConsequenceHandlers」这条非生产路径，看不见这次覆盖。","fix":"subscribe() 里补 pending: spec.pending（已落地）。"},{"pri":"P1","state":"fixed","t":"死信观察者是单槽，dispose 会误伤后来者","loc":"src/events/EventBus.ts:294 · src/plugins/bootstrap.ts:36-40","why":"onDeadLetter 直接赋值单槽，而 attachDeadLetterWatch 的卸载函数无条件把它置空 —— 同进程二次装配时，先装配者的 dispose 会把后来者的留痕拆掉，被截流的世界事件重回静默。","fix":"暴露 deadLetterHookOf()，卸载前确认「拆的是不是我那条」（已落地）。"},{"pri":"P3","state":"fixed","t":"装配自检的生产分支只写 console（core.S 必为 null）","loc":"src/plugins/handlers.ts:218-220","why":"bootstrapWorld 发生在任何存档载入之前，core.S 一定是 null，所以「写世界日志」那条路走不通，生产恒走 console.error —— 玩家完全看不到装配契约出了错。","fix":"改走 bus 的 toast（此时 UI 桥已订阅，是全项目唯一可见通道）（已落地）。"},{"pri":"P3","state":"fixed","t":"新增扫描脚本让 npm run lint 恒红（scripts 块漏 .cjs）","loc":"eslint.config.js:48","why":"scripts-node 块只匹配 scripts/**/*.mjs，而本页面的三个生成脚本是 .cjs，产出 10 条 no-undef / no-require-imports 错误，真实违规会被噪音淹没。","fix":"files 补 .cjs，并放行 require / module / __dirname（已落地）。"},{"pri":"P1","t":"感知表容量上限被传播路径绕过（全项目唯一无上限容器）","loc":"src/events/Perception.ts:19 vs :138-148","why":"KNOWLEDGE_CAP=40 只在 perceive() 里执行，spreadPerception() 直接 push 不做检查，而它的生产调用点是目击者插件的消息扩散。对照记忆表已经修好同一个坑（写入只走 putMemory），感知表漏了 —— 存档体积随运行时间单调上涨。","fix":"把截断收进 bucket()，或抽出与 putMemory 同形的唯一写入口。"},{"pri":"P1","t":"监禁状态只写不裁：没有任何释放路径","loc":"src/systems/law/Law.ts:119 / :180 / :183","why":"trial() 会向玩家宣告「你被判监禁 N 日」并写入 jailedUntil，但 releaseIfNeeded 全仓只有定义、零调用，isJailed 只被测试使用 —— 刑满不会自动开释，也没有任何行动限制。","fix":"二选一：在 WorldClock 日边界接 releaseIfNeeded + 行动入口查 isJailed；或删掉这条分支与宣告。"},{"pri":"P1","t":"快速读档不带结构校验，与 importState 口径分裂","loc":"src/world/WorldRuntime.ts:59-64 vs :78","why":"RuleValidator 自述是「导入/载入的统一关口」，实际上 importState 走闸、continueSave 不走，校验被下推给每个 SavePort 各自实现。新增介质时漏掉校验不会有任何提示。","fix":"把 validateState 提到两个入口的共同调用点，repo 只负责反序列化。"},{"pri":"P1","t":"存档闸门漏掉 12 个容器（坏档推迟到运行期才炸）","loc":"src/validation/RuleValidator.ts:111-125","why":"legal / vendors / playerRep / factionRel / chats / dungeon / craft / codex / net / abyss / academy / favor 完全不在校验范围；hydrate 只做 truthiness 兜底。伪档 legal: 3 能过闸，随后 charges.push 抛 TypeError。","fix":"给这 12 个容器补「存在即校验」的形状检查，与 npcs/effects 同一风格。"},{"pri":"P2","t":"推演热路径两笔重复开销","loc":"src/ai/WorldReasoner.ts:114-115 · :83","why":"buildContext 每轮构建两次（第一次只取查询词，检索结果被丢弃），而检索是同步的；persistVectorIndex 每次推演全量导出向量并压缩成 900KB 级 JSON 同步写盘 —— 即使没有新增向量。","fix":"warmFor 入参收窄为 trigger 三元组；persistVectorIndex 加「本会话是否变脏」判断。"},{"pri":"P2","t":"存档故障提示会被时序丢掉","loc":"src/main.tsx:30-42 · src/repo/sqlite.ts:45-53","why":"SqliteRepository.open() 在 repo.onError 赋值之前执行：SQLite 打不开时玩家看到的是静默回落到浏览器存档，而 main.tsx 的注释恰好声称「订阅先于装配，提示不会丢」。","fix":"先注入 onError 再 open()，或把 open 移到订阅就绪之后。"},{"pri":"P2","t":"声望 attitude 轴有三个写入口，两处不发世界事件","loc":"src/systems/character/Gains.ts:83 · src/events/EventProcessor.ts:95 · src/systems/starnet/StarNet.ts:387","why":"Factions.ts 专门抛错捍卫「attitude 轴只走 addRep」，但另两处直接改 s.rep —— 感知层、记忆引擎与推演通道都看不到这次声望变动，跨系统响应链在无声处断掉。","fix":"统一走 addRep / adjRepAxis。"},{"pri":"P2","t":"通缉上限两套口径（3 与 5）","loc":"src/systems/law/Law.ts:148 vs src/systems/law/Investigation.ts:89","why":"同一字段两个上限，且罚金公式 300×wanted 在多处复用 —— 结案路径能把通缉推到 5，罚金上限随之变化。","fix":"定一个上限（数据侧 law.json 的最大 wantedAdd 是 3，可作依据），另一处改为引用同一常量。"},{"pri":"P2","t":"战斗内使用道具不消耗回合","loc":"src/systems/combat/Combat.ts:463-471","why":"combatUseItem 治疗、扣道具、刷新界面，但没有 endPhase()；playerAct 的每条出口都有。结果是 CB.round 不推进、敌方不还手，可以无限喝药。","fix":"若不是刻意的自由动作，补 endPhase()；若是，加注释说明。"},{"pri":"P2","t":"两个 SavePort 实现的 clear() 语义不一致","loc":"src/repo/index.ts:86 vs src/repo/sqlite.ts:183-184","why":"浏览器实现只删主存档键，不清独立键 tq2_vec_v1；桌面实现删两张表。而 WorldRuntime.resetWorld 的注释明说「向量索引要跟着世界一起清」，否则新档会靠指纹撞上旧向量。","fix":"localStorage 实现一并清掉向量键。"},{"pri":"P2","t":"日历换算仍有第二、第三处实现","loc":"src/world/WorldClock.ts:29 注释 · src/systems/codex/Codex.ts:102 · src/systems/religion/Deity.ts:106","why":"dayOfTick 的注释点名批评「各处自己写 Math.floor(t/48)+1 迟早漂移」，而这两处正是如此（当前取值一致，故不是活 bug）。注释与代码事实相悖。","fix":"两处改调 dayOfTick；seasonName 同理复用 sceneTime 的 monthIndex。"},{"pri":"P3","t":"导出但没有外部消费者的一批符号（公共面虚胖）","loc":"src/validation/PermissionValidator.ts:24 · src/systems/law/Investigation.ts:24/54/58 · src/memory/MemoryStore.ts:30/68/75 等","why":"entityExists / canFileCase / activeCases / caseById / allOwners / updateMemory / clearMemories 等只是「导出」而无人从外部使用。看着像公开 API，容易误导后来者依赖。","fix":"去掉 export 即可，不必删实现。"},{"pri":"P3","t":"EventBus 未传 owner 时的订阅 key 可能碰撞","loc":"src/events/EventBus.ts:220","why":"缺省 key 用 worldHandlers.size（事件类型数）而非该类型的订阅者数，同一 type 的第三个匿名订阅者会与第二个撞 key，被幂等记账静默跳过。当前 6 个生产订阅点都显式传了 owner，属潜在坑。","fix":"缺省 key 改用该类型的订阅计数。"},{"pri":"P3","t":"推演降级计数有写无读","loc":"src/ai/WorldReasoner.ts:36 · :94","why":"reasonerStats() 自述「拦了多少、跳了多少要能查到」，但全仓零消费者；排队溢出与推演失败还共用同一个静默出口。","fix":"接到系统面板，或在 reasonAbout 外层补 catch 并复用错误通道。"}],"notes":[{"t":"未发现问题的方向（查了、确认没问题）","body":["分层零违规：world / events / actions / dice / validation / execution / systems / memory / repo 全无反向依赖；唯一的 plugins → ai 命中在组合根 bootstrap，属文档明确的唯一装配点。","状态越权写：全仓 core.S 赋值只有 4 处生产写点，全部在 WorldRuntime 的生命周期函数里；src/ui 内零直写。","历史三处重复拥有者已真正收口：老记忆表（仅作迁移载体 + 静态扫描守卫）、老 World Director（退化为 events.json 的唯一扫描器）、时间换算（主实现集中在 WorldClock）。","静默失败面：src 内空 catch 0 处；关键失败路径都有通道（repo onError + 节流、embedding 冷却、推演溢出留痕）。","测试质量：能力同源守卫是有效双向断言（非恒真），Executor 覆盖合法 / 零执行 / 部分失败 / 重复执行四形态；未发现「实现被删仍不红」的假护栏。"]},{"t":"需要裁决的判断（不是缺陷）","body":["感知表是否本就不该有硬上限？若是环形近期窗口，40 就是硬契约，绕过路径必须修；若允许全量留档，则该改注释而不是改代码。","战斗内使用道具是否刻意不消耗回合（自由动作）？决定 P2 那条是漏调还是设计。","通缉上限取 3 还是 5？（law.json 的最大 wantedAdd 是 3，数据侧倾向 3。）","World API 是「给 AI 的隔离层」还是「全项目唯一访问口径」？现状是 AI 用 API、UI 走 @/world 桶。","P1-4（装配自检判据）经复核为误报：orphans 用 !capabilities.executable 恰好覆盖了「pending 动作被注册处理器」这一场景，无需改判据。"]}],"foot":"审查口径：只读、以提交态为准。已修项含回归护栏；待修项按严重度排列，未做任何猜测性修复。"};
+const $ = (s) => document.querySelector(s);
+const el = (tag, cls, html) => { const n = document.createElement(tag); if (cls) n.className = cls; if (html != null) n.innerHTML = html; return n; };
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
+
+const VIEWS = [
+  ['v-flow', '数据流与认知'],
+  ['v-layers', '分层与依赖'],
+  ['v-systems', '系统与能力'],
+  ['v-review', '审查发现'],
+];
+
+/* ---------- KPI ---------- */
+const kpi = (n, l) => '<div class="kpi"><div class="n">' + n + '</div><div class="l">' + l + '</div></div>';
+const totalLines = DATA.units.reduce((a, u) => a + u.lines, 0);
+const totalFiles = DATA.units.reduce((a, u) => a + u.files.length, 0);
+const sysUnit = DATA.units.filter((u) => u.unit.startsWith('systems/'));
+const caps = DATA.systems.reduce((a, s) => a + s.effects.length + s.pending.length + s.internal.length, 0);
+const effs = DATA.systems.reduce((a, s) => a + s.effects.length, 0);
+const pends = DATA.systems.reduce((a, s) => a + s.pending.length, 0);
+const sysEdges = DATA.edges.filter((e) => e.from.startsWith('systems/') && e.to.startsWith('systems/'));
+const sysEdgeSum = sysEdges.reduce((a, e) => a + e.count, 0);
+$('#kpis').innerHTML = [
+  kpi(totalFiles, '源文件（不含测试）'),
+  kpi(totalLines.toLocaleString(), '代码行'),
+  kpi(DATA.units.length, '架构单元'),
+  kpi(sysUnit.length, '业务系统'),
+  kpi(DATA.edges.length, '依赖边'),
+  kpi(caps, '登记能力'),
+  kpi(effs + ' / ' + pends, '可执行 / 待接入'),
+  kpi(sysEdgeSum, '系统↔系统依赖'),
+].join('');
+
+/* ---------- tabs ---------- */
+$('#tabs').innerHTML = VIEWS.map(([id, label], i) =>
+  '<button type="button" role="tab" data-v="' + id + '" aria-selected="' + (i === 0) + '">' + label + '</button>').join('');
+/** 视图切换带 hash：可以直接把某个视图的链接发给别人 */
+function pickView(id) {
+  if (!VIEWS.some(([v]) => v === id)) id = VIEWS[0][0];
+  for (const btn of $('#tabs').querySelectorAll('button')) btn.setAttribute('aria-selected', String(btn.dataset.v === id));
+  for (const [vid] of VIEWS) $('#' + vid).hidden = vid !== id;
+  if (location.hash !== '#' + id) history.replaceState(null, '', '#' + id);
+}
+$('#tabs').addEventListener('click', (ev) => {
+  const b = ev.target.closest('button[data-v]');
+  if (b) pickView(b.dataset.v);
+});
+addEventListener('hashchange', () => pickView(location.hash.slice(1)));
+pickView(location.hash.slice(1));
+
+/* ---------- flow ---------- */
+$('#flow').innerHTML = DATA.flow.map((s, i) =>
+  '<div class="step ' + (s.kind || '') + '"><span class="idx">' + String(i + 1).padStart(2, '0') + '</span>' +
+  '<span class="t">' + esc(s.t) + '</span><span class="d">' + esc(s.d) + '</span></div>').join('');
+$('#buses').innerHTML = DATA.buses.map((b) =>
+  '<tr><td class="mono">' + esc(b.n) + '</td><td>' + esc(b.d) + '</td></tr>').join('');
+$('#cognition').innerHTML = DATA.cognition.map((c) =>
+  '<tr><td class="mono" style="white-space:nowrap">' + esc(c.n) + '</td><td>' + esc(c.d) + '</td></tr>').join('');
+$('#levels').innerHTML = DATA.levels.map((l) =>
+  '<tr><td><span class="tag l' + l.level + '">L' + l.level + '</span></td><td>' + esc(l.d) + '</td>' +
+  '<td class="mono" style="color:var(--ink2)">' + l.types.map(esc).join(' · ') + '</td></tr>').join('');
+
+/* ---------- layers ---------- */
+const lay = DATA.layers;
+$('#layers').innerHTML = lay.map((L) => {
+  const us = DATA.units.filter((u) => L.match.some((m) => u.unit === m || u.unit.startsWith(m + '/')));
+  const files = us.flatMap((u) => u.files);
+  return '<div class="layerrow"><div class="layername">' + esc(L.name) +
+    '<span class="dep">' + esc(L.dep) + '</span></div><div>' +
+    '<div style="color:var(--ink3);font-size:11.5px;margin-bottom:6px" class="mono">' +
+    files.length + ' 文件 · ' + us.reduce((a, u) => a + u.lines, 0).toLocaleString() + ' 行</div>' +
+    '<div class="files">' + files.map((f) => '<span class="file">' + esc(f.split('/').pop()) + '</span>').join('') + '</div>' +
+    '</div></div>';
+}).join('');
+
+/* ---------- matrix ---------- */
+(function matrix() {
+  const units = DATA.units.filter((u) => u.unit.startsWith('systems/')).map((u) => u.unit);
+  const n = (a, b) => DATA.edges.find((e) => e.from === a && e.to === b);
+  const short = (u) => u.replace('systems/', '');
+  let html = '<table class="mx"><thead><tr><th class="rowh"></th>' +
+    units.map((u) => '<th>' + esc(short(u)) + '</th>').join('') + '</tr></thead><tbody>';
+  for (const from of units) {
+    html += '<tr><th class="rowh">' + esc(short(from)) + '</th>';
+    for (const to of units) {
+      if (from === to) { html += '<td style="background:transparent;cursor:default"></td>'; continue; }
+      const e = n(from, to);
+      html += '<td data-n="' + Math.min(4, e ? e.count : 0) + '" data-f="' + esc(from) + '" data-t="' + esc(to) +
+        '" title="' + esc(short(from) + ' → ' + short(to) + (e ? '：' + e.count + ' 条' : '：无')) + '"></td>';
+    }
+    html += '</tr>';
+  }
+  $('#matrix').innerHTML = html + '</tbody></table>';
+  const cells = $('#matrix').querySelectorAll('td[data-n]');
+  let locked = null;
+  const paint = (unit) => cells.forEach((c) => {
+    const on = !unit || c.dataset.f === unit || c.dataset.t === unit;
+    c.classList.toggle('hl', !!unit && on && c.dataset.n !== '0');
+    c.classList.toggle('dim', !!unit && !on);
+  });
+  cells.forEach((c) => {
+    c.addEventListener('mouseenter', () => { if (!locked) paint(c.dataset.f); });
+    c.addEventListener('mouseleave', () => { if (!locked) paint(null); });
+    c.addEventListener('click', () => {
+      locked = locked === c.dataset.f ? null : c.dataset.f;
+      paint(locked);
+      document.querySelectorAll('.sys').forEach((s) => s.classList.toggle('sel', locked && s.dataset.sys === locked));
+    });
+  });
+})();
+
+/* ---------- edges ---------- */
+$('#edges').innerHTML = DATA.edges.slice(0, 26).map((e) =>
+  '<tr><td class="mono">' + esc(e.from) + '</td><td class="mono">' + esc(e.to) + '</td><td class="mono">' + e.count + '</td></tr>').join('');
+
+/* ---------- systems ---------- */
+const depCount = (u, dir) => DATA.edges.filter((e) => (dir === 'out' ? e.from === u : e.to === u)).reduce((a, e) => a + e.count, 0);
+$('#systems').innerHTML = DATA.systems.map((s) => {
+  const u = 'systems/' + s.id;
+  const chip = (list, cls) => list.map((c) => '<span class="chip ' + cls + '">' + esc(c) + '</span>').join('');
+  const subs = (s.subscribes || []).map((t) => '<span class="chip sub">▸ ' + esc(t) + '</span>').join('');
+  const dep = depCount(u, 'out'), inc = depCount(u, 'in');
+  return '<div class="sys" data-sys="' + esc(u) + '"><h3>' + esc(s.id) + ' <span class="v">v' + esc(s.version) + '</span></h3>' +
+    '<div class="meta"><span>出度 <b>' + dep + '</b></span><span>入度 <b>' + inc + '</b></span>' +
+    '<span>订阅 <b>' + (s.subscribes || []).length + '</b></span></div>' +
+    '<div class="caps">' + chip(s.effects, 'eff') + chip(s.pending, 'pend') + chip(s.internal, 'int') + subs + '</div></div>';
+}).join('');
+document.querySelectorAll('.sys').forEach((card) => card.addEventListener('click', () => {
+  const unit = card.dataset.sys, on = !card.classList.contains('sel');
+  document.querySelectorAll('.sys').forEach((c) => c.classList.toggle('sel', on && c === card));
+  document.querySelectorAll('#matrix td[data-n]').forEach((c) => {
+    const hit = on && (c.dataset.f === unit || c.dataset.t === unit);
+    c.classList.toggle('hl', hit && c.dataset.n !== '0');
+    c.classList.toggle('dim', on && !hit);
+  });
+}));
+
+/* ---------- subs ---------- */
+$('#subs').innerHTML = DATA.subs.map((s) =>
+  '<tr><td class="mono">' + esc(s.who) + '</td><td>' + (s.type === '*' ? '<span class="tag">通配</span>' : esc(s.type)) +
+  '</td><td class="mono" style="color:var(--ink2)">' + esc(s.events) + '</td><td style="color:var(--ink3)">' + esc(s.why) + '</td></tr>').join('');
+
+/* ---------- review ---------- */
+$('#revmeta').textContent = REVIEW.meta;
+const card = (r) =>
+  '<div class="revitem ' + r.pri.toLowerCase() + ' ' + (r.state || 'open') + '"><div class="hd">' +
+  '<span class="pri">' + esc(r.pri) + '</span><span class="ti">' + esc(r.t) + '</span>' +
+  (r.state === 'fixed' ? '<span class="st">✓ 本轮已修</span>' : '') +
+  '<span class="loc">' + esc(r.loc) + '</span></div>' +
+  '<p>' + esc(r.why) + '</p>' + (r.fix ? '<div class="fix"><b>最小修复：</b>' + esc(r.fix) + '</div>' : '') + '</div>';
+const group = (label, list) => list.length
+  ? '<div class="revgroup">' + label + ' · ' + list.length + ' 条</div>' + list.map(card).join('')
+  : '';
+$('#review').innerHTML =
+  group('本轮审查已修', REVIEW.items.filter((r) => r.state === 'fixed')) +
+  group('待处理', REVIEW.items.filter((r) => r.state !== 'fixed'));
+$('#revmore').innerHTML = REVIEW.notes.map((n) =>
+  '<details><summary>' + esc(n.t) + '</summary><div class="body">' + n.body.map(esc).join('<br>') + '</div></details>').join('');
+
+$('#footleft').textContent = REVIEW.foot;
+$('#footright').textContent = DATA.stamp;
+</script>
+</body>
+</html>

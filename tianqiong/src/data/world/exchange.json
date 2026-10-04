@@ -1,0 +1,73 @@
+{
+  "version": 1,
+  "_comment": "卡 N1 · 星枢兑换所：地面唯一能把网内所得落地的窗口。一个大陆只有一家，落在该大陆的枢纽地点（大陆 = 机制实体，兑换所跟着它走）。世界书 §10「星币/星晶只进不出」管的是网内行为——网内仍然拒绝变现；这里是地面上的例外通道，汇率按 YG 裁决定为「1 星币 = 1 银币 = 100 铜」，买卖同价；网内所得的落地因此不缩水，代价是要跑到大陆枢纽。",
+  "loreRefs": [
+    "s10",
+    "s11",
+    "s58"
+  ],
+  "rates": {
+    "_comment": "1 星币 = 1 银币 = 100 铜（YG 裁决）：买卖同价，与 starhub.consignPerCopper 一致。",
+    "starcoinSell": 100,
+    "starcoinBuy": 100,
+    "crystalToStarcoin": 30
+  },
+  "houses": [
+    {
+      "id": "ex_gate",
+      "loc": "gate",
+      "continent": "中央大陆",
+      "name": "关文房 · 兑符处",
+      "keeper": "关文房的老账房",
+      "flavor": "办关文的窗口旁边另开了一扇小窗，窗口比你想象的高，也比你想象的窄。"
+    },
+    {
+      "id": "ex_frosthold",
+      "loc": "frosthold",
+      "continent": "北方冻土",
+      "name": "霜锚堡 · 换币棚",
+      "keeper": "守着炭盆的老兵",
+      "flavor": "棚子四面漏风，炭盆却一直没灭。老兵说：网里的钱也是钱，冻不死就还能花。"
+    },
+    {
+      "id": "ex_windport",
+      "loc": "windport",
+      "continent": "东方群岛",
+      "name": "翠风港 · 星栈",
+      "keeper": "港务司的书办",
+      "flavor": "海图上标着七个点，只有这一个是空心的——其余六处写着「另约」。"
+    },
+    {
+      "id": "ex_goldveil",
+      "loc": "goldveil",
+      "continent": "南方沙漠",
+      "name": "金砂城 · 十二商会兑所",
+      "keeper": "商会的独眼账房",
+      "flavor": "十二个商号共用一张柜台。他数星币的手法比数铜钱还熟。"
+    },
+    {
+      "id": "ex_bloodhold",
+      "loc": "bloodhold",
+      "continent": "西方荒野",
+      "name": "血堡 · 战利品兑房",
+      "keeper": "断了两根指头的老兵",
+      "flavor": "墙上钉着一排空钉。他说：星币换来的铜，最后都换成了酒与绷带。"
+    },
+    {
+      "id": "ex_deepwell",
+      "loc": "deepwell",
+      "continent": "地下深渊",
+      "name": "深井城 · 井口兑局",
+      "keeper": "井口管事的矮人",
+      "flavor": "越往下，星币越像真的。地底人不在乎它是从哪张网里挣的。"
+    },
+    {
+      "id": "ex_skycap",
+      "loc": "skycap",
+      "continent": "天空浮岛",
+      "name": "天穹之城 · 云上兑台",
+      "keeper": "守望者的记账官",
+      "flavor": "兑台悬在云边。他说这里的汇率不是他定的，是风定的。"
+    }
+  ]
+}

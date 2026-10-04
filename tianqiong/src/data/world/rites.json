@@ -1,0 +1,131 @@
+{
+  "note": "卡 L3 · §96 婚丧嫁娶（零逻辑 · 纯 canon 数据）。婚俗七条 / 丧俗七条 / 继承三制逐条取自 lore s96，未增减。男女两档婚龄都保留——判定时按**玩家自己的性别**取；NPC 的性别世界书没有给，故不臆断（缺省按该大陆较宽的那一档计），将来给 NPC 补 gender 即自动生效。",
+  "loreRef": [
+    "s96"
+  ],
+  "wedding": [
+    {
+      "continent": "中央大陆",
+      "form": "神殿证婚 + 宴会",
+      "ageMale": 18,
+      "ageFemale": 16,
+      "custom": "神父主持，交换誓言"
+    },
+    {
+      "continent": "东方群岛",
+      "form": "大贤者祝福",
+      "ageMale": 20,
+      "ageFemale": 18,
+      "custom": "月下盟誓，植树纪念"
+    },
+    {
+      "continent": "南方沙漠",
+      "form": "商会公证 + 宴会",
+      "ageMale": 16,
+      "ageFemale": 14,
+      "custom": "香料定情，签契约"
+    },
+    {
+      "continent": "北方冻土",
+      "form": "部族大会",
+      "ageMale": 16,
+      "ageFemale": 14,
+      "custom": "决斗定情，长老见证"
+    },
+    {
+      "continent": "西方荒野",
+      "form": "王帐见证",
+      "ageMale": 18,
+      "ageFemale": 16,
+      "custom": "战舞表演，饮血为盟"
+    },
+    {
+      "continent": "地下深渊",
+      "form": "评议会备案",
+      "ageMale": 20,
+      "ageFemale": 18,
+      "custom": "交换矿石，深井见证"
+    },
+    {
+      "continent": "天空浮岛",
+      "form": "观星台祈福",
+      "ageMale": 22,
+      "ageFemale": 20,
+      "custom": "星卜吉日，浮空仪式"
+    }
+  ],
+  "burial": [
+    {
+      "continent": "中央大陆",
+      "name": "土葬",
+      "note": "神父超度"
+    },
+    {
+      "continent": "东方群岛",
+      "name": "树葬",
+      "note": "葬于圣树"
+    },
+    {
+      "continent": "南方沙漠",
+      "name": "火葬",
+      "note": "撒香料"
+    },
+    {
+      "continent": "北方冻土",
+      "name": "冰葬",
+      "note": "冻于冰原"
+    },
+    {
+      "continent": "西方荒野",
+      "name": "战葬",
+      "note": "送至战场"
+    },
+    {
+      "continent": "地下深渊",
+      "name": "深葬",
+      "note": "投入深渊"
+    },
+    {
+      "continent": "天空浮岛",
+      "name": "空葬",
+      "note": "投放至云海"
+    }
+  ],
+  "inherit": [
+    {
+      "id": "primogeniture",
+      "name": "嫡长子继承制",
+      "continents": [
+        "中央大陆",
+        "东方群岛",
+        "南方沙漠"
+      ],
+      "who": "配偶优先；无配偶则由本国宗族收归",
+      "faction": "empire",
+      "note": "血统与名分优先——遗产随血脉走，不随交情走。"
+    },
+    {
+      "id": "might",
+      "name": "强者继承制",
+      "continents": [
+        "西方荒野",
+        "北方冻土"
+      ],
+      "who": "赠予你最强的同伴（好感最高者）",
+      "faction": "blood",
+      "note": "谁扛得动就是谁的——遗产按交情与实力走。"
+    },
+    {
+      "id": "sage",
+      "name": "贤者推举制",
+      "continents": [
+        "地下深渊",
+        "天空浮岛"
+      ],
+      "who": "归学院或古代技术研究会",
+      "faction": "study",
+      "note": "留给后来做学问的人——遗产变成别人的藏书与标本。"
+    }
+  ],
+  "ritesNote": "婚配的门槛不止年龄：好感须到 80、亲密度须到「结义」（卡 D2 的三档），并在同一个大陆才办得成——婚俗按**举办地**的大陆算，不按两个人的出身。寿终时按所在地的丧俗安葬，遗产按所在地的继承制度分配（卡 L1 的寿数接在这里）。"
+}

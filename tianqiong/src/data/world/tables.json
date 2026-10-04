@@ -1,0 +1,3489 @@
+{
+  "months": [
+    "新芽月",
+    "雨润月",
+    "花开月",
+    "风啸月",
+    "烈阳月",
+    "麦金月",
+    "雷鸣月",
+    "雾隐月",
+    "红叶月",
+    "收获月",
+    "寒霜月",
+    "永夜月"
+  ],
+  "shichen": [
+    "子",
+    "丑",
+    "寅",
+    "卯",
+    "辰",
+    "巳",
+    "午",
+    "未",
+    "申",
+    "酉",
+    "戌",
+    "亥"
+  ],
+  "periodOf": [
+    "深夜",
+    "深夜",
+    "破晓",
+    "拂晓",
+    "清晨",
+    "早晨",
+    "正午",
+    "午后",
+    "午后",
+    "黄昏",
+    "入夜",
+    "夜晚"
+  ],
+  "races": {
+    "human": {
+      "name": "人类",
+      "mods": {
+        "魅力": 1,
+        "智力": 1
+      },
+      "desc": "帝国主体民族，适应力极强，在圣辉城左右逢源。",
+      "continent": "中央大陆",
+      "social": "主体民族，各势力普遍中立偏友好。",
+      "naming": "名+父名，如「奥兰多·铁手」",
+      "bind": "soft",
+      "eff": {},
+      "affinityNote": "无专属，全职业可选",
+      "homeland": "中央大陆"
+    },
+    "elf": {
+      "name": "精灵",
+      "mods": {
+        "敏捷": 2,
+        "智力": 1
+      },
+      "desc": "翠冠议会之民，优雅长寿，被视为可敬的外邦客卿。",
+      "continent": "东方群岛",
+      "social": "外邦客卿，受敬重但被视作外来者。",
+      "naming": "多音节流音，如「艾露维·晨叶」",
+      "bind": "soft",
+      "eff": {
+        "法师": 1.2,
+        "辅助": 1.2
+      },
+      "exclusive": [
+        "au_divine"
+      ],
+      "affinityNote": "巫女路线专属；法系/辅助系 +20% 效率",
+      "homeland": "东方群岛·月咏森林"
+    },
+    "dwarf": {
+      "name": "矮人",
+      "mods": {
+        "体质": 2,
+        "力量": 1
+      },
+      "desc": "霜铁之民，坚韧务实，与铁匠行会天然投缘。",
+      "continent": "北方冻土",
+      "social": "工匠声望高，与帝国商贸往来密切。",
+      "naming": "坚辅音+氏族，如「布伦丹·铁砧」",
+      "bind": "strong",
+      "eff": {
+        "生产": 1.2
+      },
+      "exclusive": [
+        "pr_forge",
+        "pr_alchemy",
+        "pr_inscribe"
+      ],
+      "affinityNote": "生产系专属——其他种族无法学习矮人专属职业",
+      "homeland": "北方冻土、地下深渊"
+    },
+    "orc": {
+      "name": "兽人",
+      "mods": {
+        "力量": 3,
+        "体质": 1,
+        "魅力": -2
+      },
+      "desc": "血吼王帐之民，孔武有力；帝国律下常受额外盘查。",
+      "continent": "西方荒野",
+      "social": "帝国律下受额外盘查，深巷与公会更接纳。",
+      "naming": "喉音+战号，如「格罗姆·碎颅」",
+      "bind": "soft",
+      "eff": {
+        "物理": 1.15,
+        "敏捷": 1.15,
+        "法师": 0.7,
+        "召唤": 0.7,
+        "辅助": 0.7
+      },
+      "affinityNote": "物理系 +15%，法师系 -30%",
+      "homeland": "北方冰封山脉（发源）→ 西方荒野（南迁建盟）"
+    },
+    "halforc": {
+      "name": "半兽人",
+      "mods": {
+        "力量": 2,
+        "体质": 1,
+        "智力": -1
+      },
+      "desc": "两族之间的游魂，力气过人却难被任一方完全接纳。",
+      "continent": "西方荒野",
+      "social": "两头不讨好，佣兵与苦力是其常见出路。",
+      "naming": "多随兽人战号",
+      "bind": "soft",
+      "eff": {
+        "物理": 1.1,
+        "敏捷": 1.1
+      },
+      "affinityNote": "兽人/人类混血，物理系 +10%",
+      "homeland": "西方荒野（附于王帐）"
+    },
+    "gnome": {
+      "name": "地精",
+      "mods": {
+        "智力": 2,
+        "敏捷": 1,
+        "力量": -1
+      },
+      "desc": "精于算计的行商与工匠，砂海商邦的天然成员。",
+      "continent": "南方沙漠",
+      "social": "逐利之名在外，但契约精神受商会敬重。",
+      "naming": "短促商名，如「奥托·金秤」",
+      "bind": "soft",
+      "eff": {
+        "生产": 1.3
+      },
+      "affinityNote": "炼金系 +30% 效率；其他系无惩罚",
+      "homeland": "地下深渊浅中层"
+    },
+    "undead": {
+      "name": "不死族",
+      "mods": {
+        "体质": 2,
+        "感知": 1,
+        "魅力": -2
+      },
+      "desc": "徘徊于生死边缘的存在，畏惧圣光也蔑视死亡。",
+      "continent": "地下深渊",
+      "social": "在神殿辖区受歧视，深巷与暗影议会为其庇护所。",
+      "naming": "多已遗忘旧名，以代号行世",
+      "playable": true,
+      "bind": "strong",
+      "eff": {},
+      "affinityNote": "召唤系亡灵路线专属；可兼修部分物理系",
+      "homeland": "地下深渊深层"
+    },
+    "vampire": {
+      "name": "血族",
+      "mods": {
+        "魅力": 2,
+        "智力": 1,
+        "体质": -1
+      },
+      "desc": "苍白而迷人的夜之贵族，畏惧日光与圣徽。",
+      "continent": "地下深渊",
+      "social": "隐藏身份混居人间，暴露即遭神殿猎杀。",
+      "naming": "古贵族式名讳",
+      "bind": "strong",
+      "eff": {
+        "辅助": 1.15,
+        "法师": 0.9
+      },
+      "affinityNote": "辅助系诅咒路线专属；诅咒系天赋，生命系惩罚",
+      "homeland": "无国度，隐匿于各大陆暗巷与地下城中层"
+    },
+    "elemental": {
+      "name": "元素裔",
+      "mods": {
+        "智力": 2,
+        "感知": 1,
+        "体质": -1
+      },
+      "desc": "由元素之力凝聚的生灵，与天地共鸣。",
+      "continent": "天空浮岛",
+      "social": "被视为贤者或异象，其罕见令其备受瞩目。",
+      "naming": "以元素为名，如「焰心」「霜语」",
+      "bind": "soft",
+      "eff": {
+        "法师": 1.25
+      },
+      "affinityNote": "元素法师系 +25% 效率；与元素高度亲和",
+      "homeland": "熔岩山脉、元素龙渊"
+    },
+    "avariel": {
+      "name": "翼族",
+      "mods": {
+        "敏捷": 2,
+        "感知": 1,
+        "力量": -1
+      },
+      "desc": "背生双翼的天空之民，天穹守望者的子嗣。",
+      "continent": "天空浮岛",
+      "social": "居高临下，与地面族群疏离但受敬畏。",
+      "naming": "风与云之意象",
+      "bind": "soft",
+      "eff": {
+        "法师": 1.1,
+        "辅助": 1.1
+      },
+      "affinityNote": "风系魔法亲和；天生飞翼",
+      "homeland": "天空浮岛"
+    },
+    "giant": {
+      "name": "巨人",
+      "mods": {
+        "力量": 4,
+        "体质": 2,
+        "敏捷": -3,
+        "魅力": -1
+      },
+      "desc": "山岳般的古老种族，一步一震。",
+      "continent": "北方冻土",
+      "social": "数量稀少，多隐居高山，罕见入城。",
+      "naming": "单音如山名",
+      "playable": false,
+      "bind": "strong",
+      "eff": {
+        "物理": 1.25
+      },
+      "exclusive": [
+        "ph_tank",
+        "ph_special"
+      ],
+      "affinityNote": "物理系重装路线专属（泰坦血脉加成）；无法学习其他种族职业",
+      "homeland": "极北冰原边缘"
+    },
+    "dragon": {
+      "name": "龙族",
+      "mods": {
+        "力量": 3,
+        "体质": 3,
+        "魅力": 1,
+        "智力": -1
+      },
+      "desc": "龙神血脉的至高存在，凡人难及其项背。",
+      "continent": "天空浮岛",
+      "social": "近乎神话，现世者寥寥，受万族敬畏。",
+      "naming": "古语真名，不可轻呼",
+      "playable": false,
+      "bind": "strong",
+      "eff": {
+        "法师": 0.75
+      },
+      "affinityNote": "法师系元素/时空路线（龙语魔法加成）；初始强度极高、成长缓慢",
+      "homeland": "极东龙脊山脉"
+    },
+    "demon": {
+      "name": "魔族",
+      "mods": {
+        "力量": 2,
+        "智力": 2,
+        "魅力": -2
+      },
+      "desc": "魔界之民，或流亡、或入侵、或潜伏。",
+      "continent": "魔界",
+      "social": "被视为大敌，暴露魔气即遭通缉与猎杀。",
+      "naming": "深渊语名",
+      "playable": false,
+      "bind": "soft",
+      "eff": {
+        "召唤": 1.1,
+        "法师": 1.1
+      },
+      "affinityNote": "魔气亲和；受神殿敌视",
+      "homeland": "地下最深层与魔界"
+    }
+  },
+  "classes": {
+    "warrior": {
+      "name": "战士",
+      "main": "力量",
+      "stats": {
+        "力量": 2,
+        "体质": 2
+      },
+      "gear": [
+        "knife_hunt",
+        "cloth"
+      ],
+      "skill": "heavy_slash",
+      "desc": "以剑与胆气立身的近战之道。",
+      "lineage": "物理",
+      "axis": "肉体",
+      "path": [
+        "战士",
+        "剑士",
+        "剑师",
+        "剑圣",
+        "圣剑士",
+        "【剑神降临】"
+      ],
+      "skillPath": [
+        "heavy_slash",
+        "guard_break",
+        "warcry",
+        "cleave",
+        "soul_rend",
+        "ult_sword_god"
+      ]
+    },
+    "mage": {
+      "name": "法师",
+      "main": "智力",
+      "stats": {
+        "智力": 3,
+        "感知": 1
+      },
+      "gear": [
+        "staff_appr",
+        "cloth"
+      ],
+      "skill": "firebolt",
+      "desc": "操纵灵魂之力的奥术学徒。",
+      "lineage": "法师",
+      "axis": "灵魂",
+      "path": [
+        "法师",
+        "元素使",
+        "大元素使",
+        "元素领主",
+        "元素大君",
+        "【元素之神】"
+      ],
+      "skillPath": [
+        "firebolt",
+        "arcane_ward",
+        "frost_ring",
+        "thunder_judge",
+        "time_fold",
+        "ult_element_god"
+      ]
+    },
+    "ranger": {
+      "name": "游侠",
+      "main": "敏捷",
+      "stats": {
+        "敏捷": 3,
+        "感知": 1
+      },
+      "gear": [
+        "blade_short",
+        "cloth"
+      ],
+      "skill": "aimed_shot",
+      "desc": "行走荒野的猎手与斥候。",
+      "lineage": "物理",
+      "axis": "肉体",
+      "path": [
+        "游侠",
+        "射手",
+        "神射手",
+        "风行者",
+        "穿云手",
+        "【逐日之弓】"
+      ],
+      "skillPath": [
+        "aimed_shot",
+        "wind_flurry",
+        "poison_arrow",
+        "shadow_step",
+        "riposte",
+        "ult_dawn_bow"
+      ]
+    },
+    "priest": {
+      "name": "神官",
+      "main": "感知",
+      "stats": {
+        "感知": 3,
+        "魅力": 1
+      },
+      "gear": [
+        "staff_appr",
+        "cloth"
+      ],
+      "skill": "holy_light",
+      "desc": "侍奉神明、行走人间的祈祷者。",
+      "lineage": "辅助",
+      "axis": "灵魂",
+      "path": [
+        "侍僧",
+        "治愈师",
+        "圣愈师",
+        "大祭司",
+        "生命圣女",
+        "【生命神使】"
+      ],
+      "skillPath": [
+        "holy_light",
+        "blessing",
+        "purify",
+        "divine_shield",
+        "hymn",
+        "ult_life_envoy"
+      ]
+    },
+    "ph_tank": {
+      "lineage": "物理",
+      "axis": "肉体",
+      "name": "盾卫",
+      "main": "力量",
+      "stats": {
+        "力量": 2
+      },
+      "gear": [
+        "sword_iron",
+        "armor_chain"
+      ],
+      "skill": "shield_bash",
+      "desc": "盾卫之路（【神之盾壁】），暂未在圣辉城开放。",
+      "path": [
+        "战士",
+        "盾卫",
+        "铁壁卫士",
+        "不动要塞",
+        "圣骑士",
+        "【神之盾壁】"
+      ],
+      "skillPath": [
+        "shield_bash",
+        "guard_break",
+        "riposte",
+        "warcry",
+        "divine_shield",
+        "ult_god_shield"
+      ],
+      "locked": true
+    },
+    "ph_special": {
+      "lineage": "物理",
+      "axis": "肉体",
+      "name": "拳师",
+      "main": "体质",
+      "stats": {
+        "体质": 2
+      },
+      "gear": [
+        "axe_steel",
+        "armor_leather"
+      ],
+      "skill": "heavy_slash",
+      "desc": "拳师之路（【武神化身】），暂未在圣辉城开放。",
+      "path": [
+        "战士",
+        "拳师",
+        "斗师",
+        "霸者",
+        "武圣",
+        "【武神化身】"
+      ],
+      "skillPath": [
+        "heavy_slash",
+        "shield_bash",
+        "riposte",
+        "cleave",
+        "soul_rend",
+        "ult_war_god"
+      ],
+      "locked": true
+    },
+    "ph_assassin": {
+      "lineage": "物理",
+      "axis": "肉体",
+      "name": "刺客",
+      "main": "敏捷",
+      "stats": {
+        "敏捷": 2
+      },
+      "gear": [
+        "knife_hunt",
+        "cloth"
+      ],
+      "skill": "aimed_shot",
+      "desc": "刺客之路（【夜之终焉】），暂未在圣辉城开放。",
+      "path": [
+        "战士",
+        "刺客",
+        "影杀者",
+        "虚空行者",
+        "死神代行者",
+        "【夜之终焉】"
+      ],
+      "skillPath": [
+        "aimed_shot",
+        "shadow_step",
+        "poison_arrow",
+        "riposte",
+        "wind_flurry",
+        "ult_night_end"
+      ],
+      "locked": true
+    },
+    "fs_arcane": {
+      "lineage": "法师",
+      "axis": "灵魂",
+      "name": "术士",
+      "main": "智力",
+      "stats": {
+        "智力": 2
+      },
+      "gear": [
+        "staff_appr",
+        "cloth"
+      ],
+      "skill": "firebolt",
+      "desc": "术士之路（【万法之源】），暂未在圣辉城开放。",
+      "path": [
+        "法师",
+        "术士",
+        "大术士",
+        "贤者",
+        "大贤者",
+        "【万法之源】"
+      ],
+      "skillPath": [
+        "firebolt",
+        "arcane_ward",
+        "mana_burn",
+        "rune_burst",
+        "frost_ring",
+        "ult_all_law"
+      ],
+      "locked": true
+    },
+    "fs_rune": {
+      "lineage": "法师",
+      "axis": "灵魂",
+      "name": "符文学徒",
+      "main": "智力",
+      "stats": {
+        "智力": 2
+      },
+      "gear": [
+        "staff_appr",
+        "cloth"
+      ],
+      "skill": "inscribe_rune",
+      "desc": "符文学徒之路（【原初刻印者】），暂未在圣辉城开放。",
+      "path": [
+        "法师",
+        "符文学徒",
+        "符文师",
+        "符文大师",
+        "原初解读者",
+        "【原初刻印者】"
+      ],
+      "skillPath": [
+        "inscribe_rune",
+        "rune_burst",
+        "arcane_ward",
+        "temper",
+        "thunder_judge",
+        "ult_first_rune"
+      ],
+      "locked": true
+    },
+    "fs_time": {
+      "lineage": "法师",
+      "axis": "灵魂",
+      "name": "时间学徒",
+      "main": "智力",
+      "stats": {
+        "智力": 2
+      },
+      "gear": [
+        "staff_appr",
+        "cloth"
+      ],
+      "skill": "time_fold",
+      "desc": "时间学徒之路（【时间之主】），暂未在圣辉城开放。",
+      "path": [
+        "法师",
+        "时间学徒",
+        "时法师",
+        "时间支配者",
+        "时空旅者",
+        "【时间之主】"
+      ],
+      "skillPath": [
+        "time_fold",
+        "frost_ring",
+        "mana_burn",
+        "thunder_judge",
+        "arcane_ward",
+        "ult_time_lord"
+      ],
+      "locked": true
+    },
+    "sm_beast": {
+      "lineage": "召唤",
+      "axis": "灵魂",
+      "name": "召唤师",
+      "main": "智力",
+      "stats": {
+        "感知": 2
+      },
+      "gear": [
+        "staff_appr",
+        "cloth"
+      ],
+      "skill": "beast_call",
+      "desc": "召唤师之路（【创世生灵】），暂未在圣辉城开放。",
+      "path": [
+        "召唤师",
+        "契约者",
+        "兽主",
+        "万兽之王",
+        "生命编织者",
+        "【创世生灵】"
+      ],
+      "skillPath": [
+        "beast_call",
+        "swarm",
+        "wind_flurry",
+        "poison_arrow",
+        "soul_bind",
+        "ult_creation"
+      ],
+      "locked": true
+    },
+    "sm_construct": {
+      "lineage": "召唤",
+      "axis": "灵魂",
+      "name": "傀儡师",
+      "main": "智力",
+      "stats": {
+        "智力": 2
+      },
+      "gear": [
+        "staff_appr",
+        "cloth"
+      ],
+      "skill": "construct_guard",
+      "desc": "傀儡师之路（【永恒工坊】），暂未在圣辉城开放。",
+      "path": [
+        "召唤师",
+        "傀儡师",
+        "魔像使",
+        "军团长",
+        "机械主宰",
+        "【永恒工坊】"
+      ],
+      "skillPath": [
+        "construct_guard",
+        "rune_burst",
+        "shield_bash",
+        "beast_call",
+        "soul_bind",
+        "ult_eternal_forge"
+      ],
+      "locked": true
+    },
+    "sm_undead": {
+      "lineage": "召唤",
+      "axis": "灵魂",
+      "name": "亡灵学徒",
+      "main": "智力",
+      "stats": {
+        "智力": 2
+      },
+      "gear": [
+        "staff_appr",
+        "cloth"
+      ],
+      "skill": "soul_bind",
+      "desc": "亡灵学徒之路（【冥界之主】），暂未在圣辉城开放。",
+      "path": [
+        "召唤师",
+        "亡灵学徒",
+        "死灵法师",
+        "亡灵支配者",
+        "死亡君主",
+        "【冥界之主】"
+      ],
+      "skillPath": [
+        "soul_bind",
+        "undead_legion",
+        "curse_weak",
+        "poison_arrow",
+        "beast_call",
+        "ult_nether_lord"
+      ],
+      "locked": true
+    },
+    "sm_hero": {
+      "lineage": "召唤",
+      "axis": "灵魂",
+      "name": "英灵学徒",
+      "main": "感知",
+      "stats": {
+        "感知": 2
+      },
+      "gear": [
+        "staff_appr",
+        "cloth"
+      ],
+      "skill": "hero_echo",
+      "desc": "英灵学徒之路（【英灵殿之主】），暂未在圣辉城开放。",
+      "path": [
+        "召唤师",
+        "英灵学徒",
+        "英灵使",
+        "英雄召唤者",
+        "传说编织者",
+        "【英灵殿之主】"
+      ],
+      "skillPath": [
+        "hero_echo",
+        "warcry",
+        "cleave",
+        "blessing",
+        "soul_bind",
+        "ult_valhalla"
+      ],
+      "locked": true
+    },
+    "au_buff": {
+      "lineage": "辅助",
+      "axis": "灵魂",
+      "name": "颂唱者",
+      "main": "魅力",
+      "stats": {
+        "魅力": 2
+      },
+      "gear": [
+        "staff_appr",
+        "cloth"
+      ],
+      "skill": "blessing",
+      "desc": "颂唱者之路（【神之恩宠】），暂未在圣辉城开放。",
+      "path": [
+        "侍僧",
+        "颂唱者",
+        "祝福师",
+        "神启者",
+        "神恩使徒",
+        "【神之恩宠】"
+      ],
+      "skillPath": [
+        "blessing",
+        "hymn",
+        "divine_shield",
+        "purify",
+        "warcry",
+        "ult_grace"
+      ],
+      "locked": true
+    },
+    "au_divine": {
+      "lineage": "辅助",
+      "axis": "灵魂",
+      "name": "巫女",
+      "main": "感知",
+      "stats": {
+        "感知": 2
+      },
+      "gear": [
+        "staff_appr",
+        "cloth"
+      ],
+      "skill": "holy_light",
+      "desc": "巫女之路（【神之代行者】），暂未在圣辉城开放。",
+      "path": [
+        "侍僧",
+        "巫女",
+        "神姬",
+        "现人神",
+        "神之化身",
+        "【神之代行者】"
+      ],
+      "skillPath": [
+        "holy_light",
+        "purify",
+        "divine_shield",
+        "hymn",
+        "blessing",
+        "ult_god_agent"
+      ],
+      "locked": true
+    },
+    "au_curse": {
+      "lineage": "辅助",
+      "axis": "灵魂",
+      "name": "诅咒师",
+      "main": "智力",
+      "stats": {
+        "智力": 2
+      },
+      "gear": [
+        "staff_appr",
+        "cloth"
+      ],
+      "skill": "curse_weak",
+      "desc": "诅咒师之路（【灾厄之源】），暂未在圣辉城开放。",
+      "path": [
+        "侍僧",
+        "诅咒师",
+        "灾厄术士",
+        "诅咒大法师",
+        "命运编织者",
+        "【灾厄之源】"
+      ],
+      "skillPath": [
+        "curse_weak",
+        "poison_arrow",
+        "soul_bind",
+        "mana_burn",
+        "purify",
+        "ult_calamity"
+      ],
+      "locked": true
+    },
+    "pr_forge": {
+      "lineage": "生产",
+      "axis": "肉体",
+      "name": "铁匠",
+      "main": "力量",
+      "stats": {
+        "力量": 2
+      },
+      "gear": [
+        "axe_steel",
+        "armor_leather"
+      ],
+      "skill": "forge_strike",
+      "desc": "铁匠之路（【神匠】）。炉火、铁砧与耐心，把料变成器。",
+      "path": [
+        "工匠",
+        "铁匠",
+        "锻造师",
+        "锻神",
+        "造物主",
+        "【神匠】"
+      ],
+      "skillPath": [
+        "forge_strike",
+        "appraise",
+        "temper",
+        "heavy_slash",
+        "guard_break",
+        "ult_god_smith"
+      ],
+      "locked": false
+    },
+    "pr_alchemy": {
+      "lineage": "生产",
+      "axis": "灵魂",
+      "name": "炼金学徒",
+      "main": "智力",
+      "stats": {
+        "智力": 2
+      },
+      "gear": [
+        "knife_hunt",
+        "cloth"
+      ],
+      "skill": "alchemist_fire",
+      "desc": "炼金学徒之路（【真理探求者】）。铜器之间，草药与汞液低语。",
+      "path": [
+        "工匠",
+        "炼金学徒",
+        "炼金术师",
+        "大炼金术师",
+        "真理追寻者",
+        "【真理探求者】"
+      ],
+      "skillPath": [
+        "alchemist_fire",
+        "appraise",
+        "temper",
+        "firebolt",
+        "poison_arrow",
+        "ult_truth"
+      ],
+      "locked": false
+    },
+    "pr_inscribe": {
+      "lineage": "生产",
+      "axis": "肉体",
+      "name": "铭刻工匠",
+      "main": "感知",
+      "stats": {
+        "感知": 2
+      },
+      "gear": [
+        "knife_hunt",
+        "cloth"
+      ],
+      "skill": "inscribe_rune",
+      "desc": "铭刻工匠之路（【世界锻造者】）。星枢的纹路只服从懂它的人。",
+      "path": [
+        "工匠",
+        "铭刻工匠",
+        "古代工匠",
+        "遗迹修复者",
+        "文明继承者",
+        "【世界锻造者】"
+      ],
+      "skillPath": [
+        "inscribe_rune",
+        "appraise",
+        "rune_burst",
+        "frost_ring",
+        "arcane_ward",
+        "ult_world_forge"
+      ],
+      "locked": false
+    }
+  },
+  "skills": {
+    "heavy_slash": {
+      "name": "重斩",
+      "mp": 0,
+      "cd": 2,
+      "mult": 1.8,
+      "kind": "atk",
+      "elem": "物",
+      "lineage": "物理",
+      "lv": 1,
+      "desc": "抡起武器砸下的一记重击。",
+      "learn": [
+        "level",
+        "mentor"
+      ],
+      "mentorHint": "物理系导师或已入学学院的修业"
+    },
+    "guard_break": {
+      "name": "破甲猛击",
+      "mp": 4,
+      "cd": 3,
+      "mult": 1.4,
+      "kind": "atk",
+      "elem": "物",
+      "lineage": "物理",
+      "lv": 3,
+      "status": {
+        "id": "vuln",
+        "dur": 3,
+        "power": 3,
+        "chance": 0.6
+      },
+      "desc": "砸开护甲的一击，命中后目标防御下降。",
+      "learn": [
+        "level",
+        "mentor"
+      ],
+      "mentorHint": "物理系导师或已入学学院的修业"
+    },
+    "shield_bash": {
+      "name": "盾击",
+      "mp": 3,
+      "cd": 2,
+      "mult": 1.1,
+      "kind": "atk",
+      "elem": "物",
+      "lineage": "物理",
+      "lv": 2,
+      "status": {
+        "id": "stun",
+        "dur": 1,
+        "power": 0,
+        "chance": 0.2
+      },
+      "desc": "用盾沿撞向对手的下颌。",
+      "learn": [
+        "level",
+        "mentor"
+      ],
+      "mentorHint": "物理系导师或已入学学院的修业"
+    },
+    "riposte": {
+      "name": "反击",
+      "mp": 4,
+      "cd": 3,
+      "mult": 1.5,
+      "hit": 2,
+      "kind": "atk",
+      "elem": "物",
+      "lineage": "物理",
+      "lv": 3,
+      "desc": "拨开攻击的瞬间反手刺出。",
+      "learn": [
+        "level",
+        "mentor"
+      ],
+      "mentorHint": "物理系导师或已入学学院的修业"
+    },
+    "cleave": {
+      "name": "裂地斩",
+      "mp": 6,
+      "cd": 3,
+      "mult": 1.3,
+      "hits": 2,
+      "kind": "atk",
+      "elem": "物",
+      "lineage": "物理",
+      "lv": 4,
+      "desc": "一记横斩劈开地面，碎石随刃势飞散。",
+      "learn": [
+        "level",
+        "mentor"
+      ],
+      "mentorHint": "物理系导师或已入学学院的修业"
+    },
+    "warcry": {
+      "name": "狂战之怒",
+      "mp": 7,
+      "cd": 5,
+      "buff": 3,
+      "kind": "buff",
+      "lineage": "物理",
+      "lv": 4,
+      "desc": "怒吼撕开喉咙，力量在血里发烫。",
+      "learn": [
+        "level",
+        "mentor",
+        "tome"
+      ],
+      "mentorHint": "物理系导师或已入学学院的修业"
+    },
+    "soul_rend": {
+      "name": "裂魂斩",
+      "mp": 8,
+      "cd": 4,
+      "mult": 2.2,
+      "kind": "atk",
+      "elem": "物",
+      "lineage": "物理",
+      "lv": 5,
+      "status": {
+        "id": "bleed",
+        "dur": 3,
+        "power": 3,
+        "chance": 0.5
+      },
+      "desc": "斩开的不只是皮肉，伤口久久合不上。",
+      "learn": [
+        "level",
+        "insight"
+      ],
+      "insightHint": "需在实战中反复使用同系技能至临界（境界越高越易触发）"
+    },
+    "mountain_fall": {
+      "name": "【断岳】",
+      "mp": 12,
+      "cd": 5,
+      "mult": 3,
+      "kind": "atk",
+      "elem": "物",
+      "lineage": "物理",
+      "lv": 6,
+      "status": {
+        "id": "bleed",
+        "dur": 3,
+        "power": 5,
+        "chance": 0.7
+      },
+      "desc": "裂山断岳的一击，落地时四野皆静。",
+      "learn": [
+        "level",
+        "insight"
+      ],
+      "insightHint": "需在实战中反复使用同系技能至临界（境界越高越易触发）"
+    },
+    "firebolt": {
+      "name": "火焰箭",
+      "mp": 5,
+      "cd": 1,
+      "mult": 1.9,
+      "kind": "atk",
+      "elem": "火",
+      "lineage": "法师",
+      "lv": 1,
+      "status": {
+        "id": "burn",
+        "dur": 3,
+        "power": 4,
+        "chance": 0.5
+      },
+      "desc": "射出一支燃烧的箭矢。",
+      "learn": [
+        "level",
+        "mentor"
+      ],
+      "mentorHint": "法师系导师或已入学学院的修业"
+    },
+    "arcane_ward": {
+      "name": "奥术屏障",
+      "mp": 6,
+      "cd": 4,
+      "ward": 3,
+      "kind": "def",
+      "lineage": "法师",
+      "lv": 3,
+      "desc": "张开一层符文屏障。",
+      "learn": [
+        "level",
+        "mentor"
+      ],
+      "mentorHint": "法师系导师或已入学学院的修业"
+    },
+    "mana_burn": {
+      "name": "燃魔",
+      "mp": 5,
+      "cd": 2,
+      "mult": 1.4,
+      "kind": "atk",
+      "elem": "暗",
+      "lineage": "法师",
+      "lv": 3,
+      "status": {
+        "id": "burn",
+        "dur": 2,
+        "power": 3,
+        "chance": 0.4
+      },
+      "desc": "点燃对手体内的魔力，连骨架都在发热。",
+      "learn": [
+        "level",
+        "mentor"
+      ],
+      "mentorHint": "法师系导师或已入学学院的修业"
+    },
+    "frost_ring": {
+      "name": "霜环",
+      "mp": 6,
+      "cd": 3,
+      "mult": 1.2,
+      "kind": "atk",
+      "elem": "冰",
+      "lineage": "法师",
+      "lv": 3,
+      "status": {
+        "id": "freeze",
+        "dur": 2,
+        "power": 0,
+        "chance": 0.6
+      },
+      "desc": "一圈白霜自脚下扩散，把动作冻在半途。",
+      "learn": [
+        "level",
+        "mentor"
+      ],
+      "mentorHint": "法师系导师或已入学学院的修业"
+    },
+    "thunder_judge": {
+      "name": "雷殛",
+      "mp": 8,
+      "cd": 4,
+      "mult": 2,
+      "kind": "atk",
+      "elem": "雷",
+      "lineage": "法师",
+      "lv": 4,
+      "status": {
+        "id": "stun",
+        "dur": 1,
+        "power": 0,
+        "chance": 0.45
+      },
+      "desc": "一道落雷宣判，骨头先于耳朵听见。",
+      "learn": [
+        "level",
+        "mentor"
+      ],
+      "mentorHint": "法师系导师或已入学学院的修业"
+    },
+    "rune_burst": {
+      "name": "符文爆裂",
+      "mp": 7,
+      "cd": 3,
+      "mult": 1.8,
+      "kind": "atk",
+      "elem": "雷",
+      "lineage": "法师",
+      "lv": 4,
+      "desc": "写在空中的符文同时炸开。",
+      "learn": [
+        "level",
+        "mentor"
+      ],
+      "mentorHint": "法师系导师或已入学学院的修业"
+    },
+    "time_fold": {
+      "name": "时空褶皱",
+      "mp": 9,
+      "cd": 5,
+      "mult": 1.6,
+      "kind": "atk",
+      "elem": "雷",
+      "lineage": "法师",
+      "lv": 5,
+      "status": {
+        "id": "slow",
+        "dur": 3,
+        "power": 0,
+        "chance": 0.7
+      },
+      "desc": "把一小段时间叠起来，对手的动作被拉长。",
+      "learn": [
+        "level",
+        "insight",
+        "tome"
+      ],
+      "insightHint": "需在实战中反复使用同系技能至临界（境界越高越易触发）"
+    },
+    "genesis_word": {
+      "name": "【创世言】",
+      "mp": 15,
+      "cd": 6,
+      "mult": 3.2,
+      "kind": "atk",
+      "elem": "神圣",
+      "lineage": "法师",
+      "lv": 6,
+      "desc": "说出一个词，世界就照着这个词重排了一次。",
+      "learn": [
+        "level",
+        "insight"
+      ],
+      "insightHint": "需在实战中反复使用同系技能至临界（境界越高越易触发）"
+    },
+    "beast_call": {
+      "name": "唤兽",
+      "mp": 6,
+      "cd": 4,
+      "mult": 1.5,
+      "hits": 2,
+      "kind": "atk",
+      "elem": "物",
+      "lineage": "召唤",
+      "lv": 3,
+      "desc": "口哨划破空气，两头影子扑向敌手。",
+      "learn": [
+        "level",
+        "mentor"
+      ],
+      "mentorHint": "召唤系导师或已入学学院的修业"
+    },
+    "swarm": {
+      "name": "虫群",
+      "mp": 6,
+      "cd": 3,
+      "mult": 1.1,
+      "hits": 3,
+      "kind": "atk",
+      "elem": "物",
+      "lineage": "召唤",
+      "lv": 3,
+      "status": {
+        "id": "bleed",
+        "dur": 2,
+        "power": 2,
+        "chance": 0.35
+      },
+      "desc": "黑压压的一片找不到源头。",
+      "learn": [
+        "level",
+        "mentor"
+      ],
+      "mentorHint": "召唤系导师或已入学学院的修业"
+    },
+    "construct_guard": {
+      "name": "构装护卫",
+      "mp": 8,
+      "cd": 5,
+      "ward": 4,
+      "kind": "def",
+      "lineage": "召唤",
+      "lv": 4,
+      "desc": "一具沉默的构装体挡在你身前。",
+      "learn": [
+        "level",
+        "mentor"
+      ],
+      "mentorHint": "召唤系导师或已入学学院的修业"
+    },
+    "hero_echo": {
+      "name": "英灵回响",
+      "mp": 9,
+      "cd": 5,
+      "buff": 3,
+      "kind": "buff",
+      "lineage": "召唤",
+      "lv": 4,
+      "desc": "早已战死的人在你身侧站直了身体。",
+      "learn": [
+        "level",
+        "mentor"
+      ],
+      "mentorHint": "召唤系导师或已入学学院的修业"
+    },
+    "soul_bind": {
+      "name": "缚魂",
+      "mp": 7,
+      "cd": 4,
+      "mult": 1.6,
+      "kind": "atk",
+      "elem": "暗",
+      "lineage": "召唤",
+      "lv": 4,
+      "status": {
+        "id": "slow",
+        "dur": 2,
+        "power": 0,
+        "chance": 0.5
+      },
+      "desc": "看不见的手抓住了对手的影子。",
+      "learn": [
+        "level",
+        "mentor",
+        "tome"
+      ],
+      "mentorHint": "召唤系导师或已入学学院的修业"
+    },
+    "undead_legion": {
+      "name": "亡灵军团",
+      "mp": 10,
+      "cd": 5,
+      "mult": 1.4,
+      "hits": 3,
+      "kind": "atk",
+      "elem": "暗",
+      "lineage": "召唤",
+      "lv": 5,
+      "desc": "一排排白骨从地里立起来。",
+      "learn": [
+        "level",
+        "insight"
+      ],
+      "insightHint": "需在实战中反复使用同系技能至临界（境界越高越易触发）"
+    },
+    "holy_light": {
+      "name": "圣光术",
+      "mp": 4,
+      "cd": 1,
+      "heal": 34,
+      "mult": 1.7,
+      "kind": "heal",
+      "elem": "神圣",
+      "lineage": "辅助",
+      "lv": 1,
+      "desc": "圣光既疗伤，也灼烧亡灵。",
+      "learn": [
+        "level",
+        "mentor",
+        "faith"
+      ],
+      "mentorHint": "辅助系导师或已入学学院的修业"
+    },
+    "blessing": {
+      "name": "祝福",
+      "mp": 6,
+      "cd": 4,
+      "buff": 2,
+      "kind": "buff",
+      "lineage": "辅助",
+      "lv": 3,
+      "desc": "以祷言为武器与护甲附上祝福。",
+      "learn": [
+        "level",
+        "mentor",
+        "faith"
+      ],
+      "mentorHint": "辅助系导师或已入学学院的修业"
+    },
+    "purify": {
+      "name": "净化",
+      "mp": 6,
+      "cd": 4,
+      "heal": 20,
+      "kind": "heal",
+      "lineage": "辅助",
+      "lv": 3,
+      "cure": [
+        "burn",
+        "bleed",
+        "slow"
+      ],
+      "desc": "把侵入身体的坏东西一件件赶出去。",
+      "learn": [
+        "level",
+        "mentor",
+        "faith"
+      ],
+      "mentorHint": "辅助系导师或已入学学院的修业"
+    },
+    "curse_weak": {
+      "name": "虚弱诅咒",
+      "mp": 5,
+      "cd": 4,
+      "kind": "debuff",
+      "elem": "暗",
+      "lineage": "辅助",
+      "lv": 3,
+      "status": {
+        "id": "vuln",
+        "dur": 3,
+        "power": 2,
+        "chance": 0.7
+      },
+      "desc": "一句诅咒让对手的关节先老了三岁。",
+      "learn": [
+        "level",
+        "mentor",
+        "faith"
+      ],
+      "mentorHint": "辅助系导师或已入学学院的修业"
+    },
+    "divine_shield": {
+      "name": "神圣护盾",
+      "mp": 8,
+      "cd": 5,
+      "ward": 4,
+      "kind": "def",
+      "lineage": "辅助",
+      "lv": 4,
+      "desc": "光凝成盾，边缘烫手。",
+      "learn": [
+        "level",
+        "mentor",
+        "faith"
+      ],
+      "mentorHint": "辅助系导师或已入学学院的修业"
+    },
+    "hymn": {
+      "name": "圣咏",
+      "mp": 7,
+      "cd": 5,
+      "heal": 28,
+      "buff": 2,
+      "kind": "heal",
+      "lineage": "辅助",
+      "lv": 5,
+      "desc": "唱到第二段时，伤口已经在合。",
+      "learn": [
+        "level",
+        "insight",
+        "faith"
+      ],
+      "insightHint": "需在实战中反复使用同系技能至临界（境界越高越易触发）"
+    },
+    "martyr": {
+      "name": "殉道之光",
+      "mp": 10,
+      "cd": 6,
+      "heal": 60,
+      "kind": "heal",
+      "lineage": "辅助",
+      "lv": 6,
+      "desc": "把本该属于自己的光，全数推给别人。",
+      "learn": [
+        "level",
+        "insight",
+        "faith"
+      ],
+      "insightHint": "需在实战中反复使用同系技能至临界（境界越高越易触发）"
+    },
+    "forge_strike": {
+      "name": "锻击",
+      "mp": 4,
+      "cd": 2,
+      "mult": 1.6,
+      "kind": "atk",
+      "elem": "火",
+      "lineage": "生产",
+      "lv": 2,
+      "status": {
+        "id": "burn",
+        "dur": 2,
+        "power": 3,
+        "chance": 0.4
+      },
+      "desc": "像打铁一样打人，落点都是热的。",
+      "learn": [
+        "level",
+        "mentor",
+        "tome"
+      ],
+      "mentorHint": "生产系导师或已入学学院的修业"
+    },
+    "appraise": {
+      "name": "鉴物",
+      "mp": 2,
+      "cd": 3,
+      "mult": 0.8,
+      "hit": 5,
+      "kind": "atk",
+      "lineage": "生产",
+      "lv": 2,
+      "desc": "一眼看出要害在哪，剩下的交给手。",
+      "learn": [
+        "level",
+        "mentor",
+        "tome"
+      ],
+      "mentorHint": "生产系导师或已入学学院的修业"
+    },
+    "temper": {
+      "name": "淬火",
+      "mp": 5,
+      "cd": 4,
+      "ward": 3,
+      "kind": "def",
+      "lineage": "生产",
+      "lv": 3,
+      "desc": "把自己当成一件刚出胚的活儿。",
+      "learn": [
+        "level",
+        "mentor"
+      ],
+      "mentorHint": "生产系导师或已入学学院的修业"
+    },
+    "alchemist_fire": {
+      "name": "炼金之火",
+      "mp": 6,
+      "cd": 3,
+      "mult": 1.7,
+      "kind": "atk",
+      "elem": "火",
+      "lineage": "生产",
+      "lv": 3,
+      "status": {
+        "id": "burn",
+        "dur": 3,
+        "power": 3,
+        "chance": 0.55
+      },
+      "desc": "铜瓶里的火不是寻常的火。",
+      "learn": [
+        "level",
+        "mentor"
+      ],
+      "mentorHint": "生产系导师或已入学学院的修业"
+    },
+    "inscribe_rune": {
+      "name": "铭刻符纹",
+      "mp": 6,
+      "cd": 4,
+      "buff": 2,
+      "kind": "buff",
+      "lineage": "生产",
+      "lv": 3,
+      "desc": "在武器上补完最后一道纹路。",
+      "learn": [
+        "level",
+        "mentor"
+      ],
+      "mentorHint": "生产系导师或已入学学院的修业"
+    },
+    "aimed_shot": {
+      "name": "瞄准射击",
+      "mp": 3,
+      "cd": 2,
+      "mult": 1.6,
+      "hit": 4,
+      "kind": "atk",
+      "elem": "物",
+      "lineage": "敏捷",
+      "lv": 1,
+      "desc": "屏息瞄准的一箭。",
+      "learn": [
+        "level",
+        "mentor"
+      ],
+      "mentorHint": "敏捷系导师或已入学学院的修业"
+    },
+    "wind_flurry": {
+      "name": "疾风连击",
+      "mp": 5,
+      "cd": 3,
+      "mult": 0.95,
+      "hits": 2,
+      "kind": "atk",
+      "elem": "物",
+      "lineage": "敏捷",
+      "lv": 3,
+      "desc": "两段迅捷的连击。",
+      "learn": [
+        "level",
+        "mentor"
+      ],
+      "mentorHint": "敏捷系导师或已入学学院的修业"
+    },
+    "poison_arrow": {
+      "name": "毒矢",
+      "mp": 5,
+      "cd": 3,
+      "mult": 1.3,
+      "kind": "atk",
+      "elem": "暗",
+      "lineage": "敏捷",
+      "lv": 3,
+      "status": {
+        "id": "bleed",
+        "dur": 3,
+        "power": 3,
+        "chance": 0.6
+      },
+      "desc": "箭头上抹的东西来自洞窟最深处。",
+      "learn": [
+        "level",
+        "mentor"
+      ],
+      "mentorHint": "敏捷系导师或已入学学院的修业"
+    },
+    "shadow_step": {
+      "name": "影步",
+      "mp": 6,
+      "cd": 4,
+      "mult": 1.8,
+      "hit": 6,
+      "kind": "atk",
+      "elem": "暗",
+      "lineage": "敏捷",
+      "lv": 4,
+      "desc": "一步跨到对手影子里，再从背后出来。",
+      "learn": [
+        "level",
+        "mentor"
+      ],
+      "mentorHint": "敏捷系导师或已入学学院的修业"
+    },
+    "ult_sword_god": {
+      "name": "【剑神降临】",
+      "mp": 14,
+      "cd": 5,
+      "kind": "atk",
+      "lineage": "物理",
+      "lv": 6,
+      "desc": "剑落之处不是伤口，是判决——三连之后场上只剩风声。",
+      "learn": [
+        "level",
+        "insight"
+      ],
+      "insightHint": "需在实战中反复使用同系技能至临界（境界越高越易触发）",
+      "mult": 2.6,
+      "hits": 3,
+      "elem": "物",
+      "status": {
+        "id": "bleed",
+        "dur": 3,
+        "power": 4,
+        "chance": 0.6
+      }
+    },
+    "ult_god_shield": {
+      "name": "【神之盾壁】",
+      "mp": 12,
+      "cd": 5,
+      "kind": "def",
+      "lineage": "物理",
+      "lv": 6,
+      "desc": "把盾立在身前，也把整支队伍挡在身后。",
+      "learn": [
+        "level",
+        "insight"
+      ],
+      "insightHint": "需在实战中反复使用同系技能至临界（境界越高越易触发）",
+      "ward": 7,
+      "buff": 3
+    },
+    "ult_war_god": {
+      "name": "【武神化身】",
+      "mp": 10,
+      "cd": 6,
+      "kind": "buff",
+      "lineage": "物理",
+      "lv": 6,
+      "desc": "骨骼在皮肤下重排了一遍——此刻他不再需要武器。",
+      "learn": [
+        "level",
+        "insight"
+      ],
+      "insightHint": "需在实战中反复使用同系技能至临界（境界越高越易触发）",
+      "buff": 5,
+      "status": {
+        "id": "vuln",
+        "dur": 2,
+        "power": 2,
+        "chance": 0.5
+      }
+    },
+    "ult_night_end": {
+      "name": "【夜之终焉】",
+      "mp": 15,
+      "cd": 6,
+      "kind": "atk",
+      "lineage": "物理",
+      "lv": 6,
+      "desc": "夜色收拢成一点，从背后落下去。",
+      "learn": [
+        "level",
+        "insight"
+      ],
+      "insightHint": "需在实战中反复使用同系技能至临界（境界越高越易触发）",
+      "mult": 3.8,
+      "elem": "暗",
+      "status": {
+        "id": "bleed",
+        "dur": 3,
+        "power": 6,
+        "chance": 0.8
+      }
+    },
+    "ult_element_god": {
+      "name": "【元素之神】",
+      "mp": 18,
+      "cd": 6,
+      "kind": "atk",
+      "lineage": "法师",
+      "lv": 6,
+      "desc": "四元素在同一瞬低头——雷先动，火随后，霜最后收尾。",
+      "learn": [
+        "level",
+        "insight"
+      ],
+      "insightHint": "需在实战中反复使用同系技能至临界（境界越高越易触发）",
+      "mult": 3.2,
+      "elem": "雷",
+      "status": {
+        "id": "stun",
+        "dur": 1,
+        "power": 0,
+        "chance": 0.5
+      }
+    },
+    "ult_all_law": {
+      "name": "【万法之源】",
+      "mp": 16,
+      "cd": 6,
+      "kind": "atk",
+      "lineage": "法师",
+      "lv": 6,
+      "desc": "所有咒文在同一条咒文里闭合——它就是源头。",
+      "learn": [
+        "level",
+        "insight"
+      ],
+      "insightHint": "需在实战中反复使用同系技能至临界（境界越高越易触发）",
+      "mult": 3,
+      "elem": "暗",
+      "status": {
+        "id": "burn",
+        "dur": 3,
+        "power": 5,
+        "chance": 0.6
+      }
+    },
+    "ult_first_rune": {
+      "name": "【原初刻印者】",
+      "mp": 14,
+      "cd": 6,
+      "kind": "buff",
+      "lineage": "法师",
+      "lv": 6,
+      "desc": "在空气里刻下第一个字，世界照着那个字重排。",
+      "learn": [
+        "level",
+        "insight"
+      ],
+      "insightHint": "需在实战中反复使用同系技能至临界（境界越高越易触发）",
+      "buff": 4
+    },
+    "ult_time_lord": {
+      "name": "【时间之主】",
+      "mp": 17,
+      "cd": 7,
+      "kind": "atk",
+      "lineage": "法师",
+      "lv": 6,
+      "desc": "把对手的一息拉成一炷香——他还在挥剑，剑已经跟不上。",
+      "learn": [
+        "level",
+        "insight"
+      ],
+      "insightHint": "需在实战中反复使用同系技能至临界（境界越高越易触发）",
+      "mult": 2.8,
+      "elem": "雷",
+      "status": {
+        "id": "slow",
+        "dur": 4,
+        "power": 0,
+        "chance": 0.9
+      }
+    },
+    "ult_creation": {
+      "name": "【创世生灵】",
+      "mp": 16,
+      "cd": 6,
+      "kind": "atk",
+      "lineage": "召唤",
+      "lv": 6,
+      "desc": "三头由召唤者亲手编出的生灵同时扑出——它们没有名字，只有使命。",
+      "learn": [
+        "level",
+        "insight"
+      ],
+      "insightHint": "需在实战中反复使用同系技能至临界（境界越高越易触发）",
+      "mult": 1.7,
+      "hits": 3,
+      "elem": "物"
+    },
+    "ult_eternal_forge": {
+      "name": "【永恒工坊】",
+      "mp": 14,
+      "cd": 5,
+      "kind": "def",
+      "lineage": "召唤",
+      "lv": 6,
+      "desc": "齿轮声从虚空中响起来——一座工坊在为你运转。",
+      "learn": [
+        "level",
+        "insight"
+      ],
+      "insightHint": "需在实战中反复使用同系技能至临界（境界越高越易触发）",
+      "ward": 6,
+      "buff": 2
+    },
+    "ult_nether_lord": {
+      "name": "【冥界之主】",
+      "mp": 18,
+      "cd": 6,
+      "kind": "atk",
+      "lineage": "召唤",
+      "lv": 6,
+      "desc": "冥河的水漫过脚背——站在水里的东西开始列队。",
+      "learn": [
+        "level",
+        "insight"
+      ],
+      "insightHint": "需在实战中反复使用同系技能至临界（境界越高越易触发）",
+      "mult": 2.2,
+      "hits": 2,
+      "elem": "暗",
+      "status": {
+        "id": "bleed",
+        "dur": 3,
+        "power": 4,
+        "chance": 0.6
+      }
+    },
+    "ult_valhalla": {
+      "name": "【英灵殿之主】",
+      "mp": 15,
+      "cd": 6,
+      "kind": "buff",
+      "lineage": "召唤",
+      "lv": 6,
+      "desc": "早已战死的名字一个个被叫出来，站到了你身侧。",
+      "learn": [
+        "level",
+        "insight"
+      ],
+      "insightHint": "需在实战中反复使用同系技能至临界（境界越高越易触发）",
+      "buff": 5,
+      "elem": "神圣"
+    },
+    "ult_life_envoy": {
+      "name": "【生命神使】",
+      "mp": 14,
+      "cd": 5,
+      "kind": "heal",
+      "lineage": "辅助",
+      "lv": 6,
+      "desc": "光从掌心落下来时，伤口不是愈合，是\"从未发生过\"。",
+      "learn": [
+        "level",
+        "insight"
+      ],
+      "insightHint": "需在实战中反复使用同系技能至临界（境界越高越易触发）",
+      "heal": 90
+    },
+    "ult_grace": {
+      "name": "【神之恩宠】",
+      "mp": 13,
+      "cd": 5,
+      "kind": "heal",
+      "lineage": "辅助",
+      "lv": 6,
+      "desc": "被垂目的人会感到一种奇怪的笃定：这一战不会死。",
+      "learn": [
+        "level",
+        "insight"
+      ],
+      "insightHint": "需在实战中反复使用同系技能至临界（境界越高越易触发）",
+      "heal": 55,
+      "buff": 3
+    },
+    "ult_god_agent": {
+      "name": "【神之代行者】",
+      "mp": 15,
+      "cd": 6,
+      "kind": "buff",
+      "lineage": "辅助",
+      "lv": 6,
+      "desc": "神不下场，但把权柄借了出去——此刻你说话，像宣判。",
+      "learn": [
+        "level",
+        "insight",
+        "faith"
+      ],
+      "insightHint": "需在实战中反复使用同系技能至临界（境界越高越易触发）",
+      "buff": 4,
+      "elem": "神圣"
+    },
+    "ult_calamity": {
+      "name": "【灾厄之源】",
+      "mp": 14,
+      "cd": 6,
+      "kind": "debuff",
+      "lineage": "辅助",
+      "lv": 6,
+      "desc": "诅咒从指缝漏下去——对手的关节先老了三岁，然后是心。",
+      "learn": [
+        "level",
+        "insight"
+      ],
+      "insightHint": "需在实战中反复使用同系技能至临界（境界越高越易触发）",
+      "elem": "暗",
+      "status": {
+        "id": "vuln",
+        "dur": 4,
+        "power": 4,
+        "chance": 0.85
+      }
+    },
+    "ult_god_smith": {
+      "name": "【神匠】",
+      "mp": 12,
+      "cd": 5,
+      "kind": "def",
+      "lineage": "生产",
+      "lv": 6,
+      "desc": "炉火在战场中央亮起来——你把自己当成了一件待淬的活。",
+      "learn": [
+        "level",
+        "insight"
+      ],
+      "insightHint": "需在实战中反复使用同系技能至临界（境界越高越易触发）",
+      "ward": 5,
+      "buff": 2
+    },
+    "ult_truth": {
+      "name": "【真理探求者】",
+      "mp": 14,
+      "cd": 5,
+      "kind": "atk",
+      "lineage": "生产",
+      "lv": 6,
+      "desc": "把配方推到最后一步，反应堆在敌人身上。",
+      "learn": [
+        "level",
+        "insight"
+      ],
+      "insightHint": "需在实战中反复使用同系技能至临界（境界越高越易触发）",
+      "mult": 2.6,
+      "elem": "火",
+      "status": {
+        "id": "burn",
+        "dur": 3,
+        "power": 5,
+        "chance": 0.65
+      }
+    },
+    "ult_world_forge": {
+      "name": "【世界锻造者】",
+      "mp": 16,
+      "cd": 6,
+      "kind": "atk",
+      "lineage": "生产",
+      "lv": 6,
+      "desc": "锤落的不是铁——是这一小块世界的纹理。",
+      "learn": [
+        "level",
+        "insight"
+      ],
+      "insightHint": "需在实战中反复使用同系技能至临界（境界越高越易触发）",
+      "mult": 2.4,
+      "hits": 2,
+      "elem": "雷"
+    },
+    "ult_god_arm": {
+      "name": "【神之右臂】",
+      "mp": 16,
+      "cd": 6,
+      "kind": "atk",
+      "lineage": "辅助",
+      "lv": 6,
+      "desc": "神借你的手挥出了一击——手是凡人的，力道不是。",
+      "learn": [
+        "level",
+        "insight",
+        "faith"
+      ],
+      "insightHint": "需在实战中反复使用同系技能至临界（境界越高越易触发）",
+      "mult": 3.4,
+      "elem": "神圣",
+      "status": {
+        "id": "stun",
+        "dur": 1,
+        "power": 0,
+        "chance": 0.6
+      }
+    },
+    "ult_dawn_bow": {
+      "name": "【逐日之弓】",
+      "mp": 13,
+      "cd": 5,
+      "kind": "atk",
+      "lineage": "敏捷",
+      "lv": 6,
+      "desc": "弦上搭的不是箭，是一线日光。",
+      "learn": [
+        "level",
+        "insight"
+      ],
+      "insightHint": "需在实战中反复使用同系技能至临界（境界越高越易触发）",
+      "mult": 3.1,
+      "elem": "火",
+      "status": {
+        "id": "burn",
+        "dur": 3,
+        "power": 4,
+        "chance": 0.6
+      }
+    }
+  },
+  "items": {
+    "cloth": {
+      "name": "粗布衣",
+      "type": "arm",
+      "def": 1,
+      "price": 100,
+      "desc": "旅人常服，聊胜于无。",
+      "tier": 1,
+      "craftable": true
+    },
+    "knife_hunt": {
+      "name": "猎刀",
+      "type": "wpn",
+      "atk": 1,
+      "dmg": [
+        1,
+        6
+      ],
+      "price": 7500,
+      "desc": "猎户常用的短刃。",
+      "tier": 1,
+      "craftable": true
+    },
+    "blade_short": {
+      "name": "短刃",
+      "type": "wpn",
+      "atk": 1,
+      "dmg": [
+        1,
+        6
+      ],
+      "price": 8000,
+      "desc": "轻便锋利的双刃短剑。",
+      "tier": 1,
+      "craftable": true
+    },
+    "staff_appr": {
+      "name": "学徒法杖",
+      "type": "wpn",
+      "atk": 1,
+      "dmg": [
+        1,
+        4
+      ],
+      "price": 9000,
+      "desc": "铭刻初阶符文的橡木杖。",
+      "tier": 1,
+      "craftable": true,
+      "stat": {
+        "智力": 1
+      }
+    },
+    "sword_iron": {
+      "name": "铁剑",
+      "type": "wpn",
+      "atk": 2,
+      "dmg": [
+        1,
+        8
+      ],
+      "price": 12000,
+      "desc": "军械铺出品的制式铁剑。",
+      "tier": 2,
+      "craftable": true
+    },
+    "axe_steel": {
+      "name": "精钢战斧",
+      "type": "wpn",
+      "atk": 3,
+      "dmg": [
+        1,
+        10
+      ],
+      "price": 24000,
+      "desc": "矮人锻艺，沉重而致命。",
+      "tier": 3,
+      "craftable": true
+    },
+    "armor_leather": {
+      "name": "硬皮甲",
+      "type": "arm",
+      "def": 2,
+      "price": 9000,
+      "desc": "鞣制皮革铠甲。",
+      "tier": 1,
+      "craftable": true
+    },
+    "armor_chain": {
+      "name": "锁子甲",
+      "type": "arm",
+      "def": 4,
+      "price": 80000,
+      "desc": "环环相扣的铁甲。",
+      "tier": 3,
+      "craftable": true
+    },
+    "shield_oak": {
+      "name": "橡木圆盾",
+      "type": "arm",
+      "def": 2,
+      "price": 9000,
+      "desc": "可格挡劈砍的木盾。",
+      "tier": 2,
+      "craftable": true
+    },
+    "bread": {
+      "name": "黑麦面包",
+      "type": "use",
+      "price": 20,
+      "heal": 12,
+      "desc": "恢复 12 生命。",
+      "giftTag": "food"
+    },
+    "herb_paste": {
+      "name": "药草膏",
+      "type": "use",
+      "price": 120,
+      "heal": 34,
+      "desc": "恢复 34 生命。野外常备。",
+      "giftTag": "herb"
+    },
+    "potion_moon": {
+      "name": "月光药剂",
+      "type": "use",
+      "price": 320,
+      "heal": 999,
+      "desc": "满月甘露，恢复全部生命。",
+      "giftTag": "trinket"
+    },
+    "antidote": {
+      "name": "解毒剂",
+      "type": "use",
+      "price": 150,
+      "heal": 8,
+      "desc": "恢复少量生命并清除中毒。",
+      "giftTag": "herb"
+    },
+    "holy_water": {
+      "name": "圣水",
+      "type": "use",
+      "price": 200,
+      "heal": 20,
+      "desc": "神殿祝圣之水，恢复 20 生命。",
+      "giftTag": "relic"
+    },
+    "rabbit_meat": {
+      "name": "兔肉",
+      "type": "mat",
+      "price": 15,
+      "desc": "新鲜的猎物肉。",
+      "giftTag": "food"
+    },
+    "wolf_pelt": {
+      "name": "灰狼皮",
+      "type": "mat",
+      "price": 90,
+      "desc": "品相不错的毛皮，商人收购。",
+      "giftTag": "pelt"
+    },
+    "venom_gland": {
+      "name": "毒腺",
+      "type": "mat",
+      "price": 60,
+      "desc": "岩甲蛛的毒腺，药师收购。",
+      "giftTag": "rare"
+    },
+    "scrap_blade": {
+      "name": "破铜刀",
+      "type": "mat",
+      "price": 40,
+      "desc": "哥布林的粗劣武器。"
+    },
+    "moonherb": {
+      "name": "月见草",
+      "type": "mat",
+      "price": 40,
+      "desc": "月下绽放的药草，神殿需要。",
+      "giftTag": "herb"
+    },
+    "blade_blank": {
+      "name": "精钢剑坯",
+      "type": "mat",
+      "price": 0,
+      "desc": "布伦丹打成一半的剑坯。"
+    },
+    "letter": {
+      "name": "米娅的信件",
+      "type": "mat",
+      "price": 0,
+      "desc": "火漆封缄的信，要交给「银鸥」的赛琳娜。"
+    },
+    "star_shard": {
+      "name": "星枢残片",
+      "type": "mat",
+      "price": 0,
+      "desc": "泛着微光的古代金属碎片，隐约有低鸣。",
+      "giftTag": "relic"
+    },
+    "platinum": {
+      "name": "白金币",
+      "type": "mat",
+      "price": 10000,
+      "desc": "一枚即抵万铜的贵金属币。",
+      "giftTag": "gem"
+    },
+    "dagger_black": {
+      "name": "违禁匕首",
+      "type": "wpn",
+      "atk": 2,
+      "dmg": [
+        1,
+        6
+      ],
+      "price": 800,
+      "illegal": true,
+      "desc": "黑市货色。持有被查获即属罪证。",
+      "tier": 2,
+      "craftable": true
+    },
+    "dust_dream": {
+      "name": "迷幻粉末",
+      "type": "use",
+      "price": 600,
+      "illegal": true,
+      "heal": 0,
+      "desc": "帝国明令禁止的致幻药物。（持有即违法）",
+      "giftTag": "rare"
+    },
+    "void_essence": {
+      "name": "虚空精华",
+      "type": "mat",
+      "price": 50000,
+      "illegal": true,
+      "quality": "传说",
+      "desc": "暗影议会独家渠道流通的星渊残渣，古研会愿以重金求取。（需 shadow_ally）",
+      "giftTag": "rare"
+    },
+    "star_marrow": {
+      "name": "星髓",
+      "type": "mat",
+      "price": 20000,
+      "quality": "稀有",
+      "desc": "星渊边缘凝结的晶髓，微光在掌心里游走。古研会与神殿都想要它。",
+      "giftTag": "relic"
+    },
+    "seal_rune": {
+      "name": "封魔符",
+      "type": "use",
+      "price": 450,
+      "desc": "神殿古法炼制的封印符石，可镇一时地脉躁动——对星渊裂隙尤其有效。",
+      "giftTag": "rare"
+    },
+    "blade_starsteel": {
+      "name": "星钢长刃",
+      "type": "wpn",
+      "atk": 5,
+      "dmg": [
+        2,
+        12
+      ],
+      "price": 460000,
+      "desc": "钢里嵌着一道星纹的长刃，挥动时像拖着一线夜色。",
+      "tier": 4,
+      "craftable": true
+    },
+    "staff_starforged": {
+      "name": "星辉法杖",
+      "type": "wpn",
+      "atk": 2,
+      "dmg": [
+        2,
+        7
+      ],
+      "price": 380000,
+      "stat": {
+        "智力": 2
+      },
+      "desc": "杖头嵌着一枚温热的星枢残片，靠近时指尖会发麻。",
+      "tier": 4,
+      "craftable": true
+    },
+    "armor_starforged": {
+      "name": "星锻重铠",
+      "type": "arm",
+      "def": 6,
+      "price": 420000,
+      "desc": "甲片背面刻满星纹的重铠，据说能卸开夜里的冷风。",
+      "tier": 4,
+      "craftable": true
+    },
+    "tome_planar": {
+      "name": "位面残卷",
+      "type": "use",
+      "price": 900,
+      "desc": "边缘焦脆的残卷，讲的是世界如何叠在一起。",
+      "codexCat": "位面",
+      "giftTag": "relic",
+      "teach": "time_fold"
+    },
+    "tome_history": {
+      "name": "旧史抄本",
+      "type": "use",
+      "price": 700,
+      "desc": "墨色发灰的抄本，记事的人早已不在。",
+      "codexCat": "历史",
+      "giftTag": "relic",
+      "teach": "appraise"
+    },
+    "tome_faction": {
+      "name": "势力志残页",
+      "type": "use",
+      "price": 800,
+      "desc": "半页势力志，边角被人用指甲划满了记号。",
+      "codexCat": "势力",
+      "giftTag": "relic",
+      "teach": "warcry"
+    },
+    "tome_abyss": {
+      "name": "星渊残简",
+      "type": "use",
+      "price": 1500,
+      "desc": "简上刻着不属于人间的纹路，握久了发凉。",
+      "codexCat": "星渊",
+      "giftTag": "relic",
+      "teach": "soul_bind"
+    },
+    "tome_craft": {
+      "name": "匠作手记",
+      "type": "use",
+      "price": 850,
+      "desc": "前一位匠人留下的手记，页脚沾着炉灰。",
+      "codexCat": "技艺",
+      "giftTag": "relic",
+      "teach": "forge_strike"
+    },
+    "blade_void": {
+      "name": "虚空噬刃",
+      "type": "wpn",
+      "atk": 6,
+      "dmg": [
+        3,
+        14
+      ],
+      "price": 1200000,
+      "desc": "刃口吞掉周围的火光，握久了会听见自己心跳的回声。",
+      "tier": 5,
+      "craftable": true
+    },
+    "slime_fluid": {
+      "name": "史莱姆液",
+      "type": "mat",
+      "price": 25,
+      "tier": 1,
+      "quality": "普通",
+      "desc": "半透明的胶质，炼金台最基础的一味。",
+      "giftTag": "herb"
+    },
+    "golem_core": {
+      "name": "魔像核心",
+      "type": "mat",
+      "price": 200,
+      "tier": 2,
+      "quality": "优秀",
+      "desc": "魔像胸腔里那颗还在发烫的石核，敲开有回响。",
+      "giftTag": "gem"
+    },
+    "worm_hide": {
+      "name": "巨虫皮",
+      "type": "mat",
+      "price": 800,
+      "tier": 3,
+      "quality": "精良",
+      "desc": "地底巨虫的甲壳皮，鞣过能当盾面。",
+      "giftTag": "pelt"
+    },
+    "crystal_silk": {
+      "name": "水晶丝",
+      "type": "mat",
+      "price": 1200,
+      "tier": 3,
+      "quality": "精良",
+      "desc": "水晶蜘蛛吐出的晶丝，铭刻台按尺收。",
+      "giftTag": "gem"
+    },
+    "fusion_core": {
+      "name": "融合核心",
+      "type": "mat",
+      "price": 3000,
+      "tier": 4,
+      "quality": "稀有",
+      "desc": "古代造物把两种生命焊在一处的证据。",
+      "giftTag": "relic"
+    },
+    "wraith_core": {
+      "name": "怨灵核心",
+      "type": "mat",
+      "price": 3500,
+      "tier": 4,
+      "quality": "稀有",
+      "desc": "怨灵术士消散后留下的那点冷，捏久了指尖发麻。",
+      "giftTag": "relic"
+    },
+    "floor_core": {
+      "name": "楼层核心",
+      "type": "mat",
+      "price": 8000,
+      "tier": 4,
+      "quality": "稀有",
+      "desc": "楼层主被击溃后崩出的核——节主之证，每十层一枚。",
+      "giftTag": "relic"
+    },
+    "ancient_core": {
+      "name": "古代能量核心",
+      "type": "mat",
+      "price": 15000,
+      "tier": 5,
+      "quality": "传说",
+      "desc": "古代守卫的动力源，七千年后仍在低鸣。",
+      "giftTag": "relic"
+    },
+    "demon_core": {
+      "name": "恶魔核心",
+      "type": "mat",
+      "price": 18000,
+      "tier": 5,
+      "quality": "传说",
+      "desc": "深渊恶魔心口那团不肯熄的火。",
+      "giftTag": "gem"
+    },
+    "synth_dragon_scale": {
+      "name": "合成龙鳞",
+      "type": "mat",
+      "price": 26000,
+      "tier": 5,
+      "quality": "传说",
+      "desc": "古代文明仿龙而造的甲片，比真龙鳞更密更沉。",
+      "giftTag": "pelt"
+    },
+    "void_shard": {
+      "name": "虚空碎片",
+      "type": "mat",
+      "price": 42000,
+      "tier": 6,
+      "quality": "神话",
+      "desc": "虚空行者散落的一点「非此处」，盯着看眼睛会累。",
+      "giftTag": "relic"
+    },
+    "lord_core": {
+      "name": "领主核心",
+      "type": "mat",
+      "price": 120000,
+      "tier": 7,
+      "quality": "神器",
+      "desc": "魔界领主的核心。古研会曾为它开过一次闭门会。",
+      "giftTag": "relic"
+    }
+  },
+  "monsters": {
+    "rabbit": {
+      "tier": "beast",
+      "name": "暴走角兔",
+      "sv": "兔",
+      "color": "#7d8a68",
+      "hp": 12,
+      "ac": 10,
+      "atk": 1,
+      "dmg": [
+        1,
+        3
+      ],
+      "xp": 8,
+      "loot": [
+        [
+          "rabbit_meat",
+          0.8
+        ]
+      ]
+    },
+    "wolf": {
+      "tier": "common",
+      "name": "灰纹狼",
+      "sv": "狼",
+      "color": "#6a7d92",
+      "hp": 24,
+      "ac": 12,
+      "atk": 3,
+      "dmg": [
+        1,
+        6
+      ],
+      "xp": 16,
+      "loot": [
+        [
+          "wolf_pelt",
+          0.6
+        ]
+      ]
+    },
+    "goblin": {
+      "source": "native",
+      "tier": "common",
+      "tierRange": "见习级～正式级",
+      "name": "哥布林斥候",
+      "sv": "哥",
+      "color": "#5f7a4a",
+      "hp": 20,
+      "ac": 12,
+      "atk": 2,
+      "dmg": [
+        1,
+        5
+      ],
+      "xp": 12,
+      "loot": [
+        [
+          "scrap_blade",
+          0.5
+        ]
+      ]
+    },
+    "bat": {
+      "source": "native",
+      "tier": "beast",
+      "name": "洞窟蝠群",
+      "sv": "蝠",
+      "color": "#5c5470",
+      "hp": 12,
+      "ac": 14,
+      "atk": 2,
+      "dmg": [
+        1,
+        3
+      ],
+      "xp": 7,
+      "loot": []
+    },
+    "spider": {
+      "source": "native",
+      "tier": "common",
+      "name": "岩甲蛛",
+      "sv": "蛛",
+      "color": "#6b5a7d",
+      "hp": 28,
+      "ac": 14,
+      "atk": 3,
+      "dmg": [
+        1,
+        6
+      ],
+      "poison": 0.3,
+      "xp": 20,
+      "loot": [
+        [
+          "venom_gland",
+          0.7
+        ]
+      ]
+    },
+    "skeleton": {
+      "source": "fallen",
+      "tier": "elite",
+      "name": "骷髅兵",
+      "sv": "骸",
+      "color": "#8a8069",
+      "hp": 30,
+      "ac": 13,
+      "atk": 4,
+      "dmg": [
+        1,
+        8
+      ],
+      "undead": true,
+      "xp": 26,
+      "loot": []
+    },
+    "bandit": {
+      "tier": "common",
+      "name": "荒野劫掠者",
+      "sv": "盗",
+      "color": "#8a5a4a",
+      "hp": 26,
+      "ac": 12,
+      "atk": 4,
+      "dmg": [
+        1,
+        7
+      ],
+      "xp": 18,
+      "loot": []
+    },
+    "ghoul": {
+      "source": "fallen",
+      "tier": "elite",
+      "name": "尸鬼祭司",
+      "sv": "祭",
+      "color": "#4a3d5c",
+      "hp": 52,
+      "ac": 13,
+      "atk": 5,
+      "dmg": [
+        1,
+        8
+      ],
+      "undead": true,
+      "xp": 80,
+      "boss": false,
+      "loot": [
+        [
+          "star_shard",
+          1
+        ],
+        [
+          "platinum",
+          0.5
+        ]
+      ]
+    },
+    "phantom": {
+      "tier": "common",
+      "name": "星演幻影",
+      "sv": "影",
+      "color": "#7aa2ff",
+      "hp": 24,
+      "ac": 13,
+      "atk": 2,
+      "dmg": [
+        2,
+        5
+      ],
+      "xp": 0,
+      "loot": []
+    },
+    "templar": {
+      "source": "ancient",
+      "tier": "elite",
+      "name": "圣殿守卫",
+      "sv": "殿",
+      "color": "#c9a227",
+      "hp": 34,
+      "ac": 15,
+      "atk": 5,
+      "dmg": [
+        4,
+        8
+      ],
+      "xp": 90,
+      "loot": [
+        [
+          "holy_water",
+          1
+        ]
+      ]
+    },
+    "abyss_spawn": {
+      "source": "invader",
+      "tier": "elite",
+      "name": "深渊裔",
+      "sv": "渊",
+      "color": "#2a2440",
+      "hp": 46,
+      "ac": 12,
+      "atk": 5,
+      "dmg": [
+        5,
+        10
+      ],
+      "poison": 0.3,
+      "xp": 55,
+      "loot": [
+        [
+          "star_marrow",
+          0.45
+        ],
+        [
+          "void_essence",
+          0.15
+        ]
+      ]
+    },
+    "mutation_beast": {
+      "source": "mutant",
+      "tier": "common",
+      "name": "神罚兽",
+      "sv": "罚",
+      "color": "#8a6a4a",
+      "hp": 22,
+      "ac": 11,
+      "atk": 3,
+      "dmg": [
+        2,
+        5
+      ],
+      "xp": 18,
+      "loot": []
+    },
+    "twisted_plant": {
+      "source": "mutant",
+      "tier": "common",
+      "name": "扭曲植物",
+      "sv": "蔓",
+      "color": "#5a7048",
+      "hp": 18,
+      "ac": 9,
+      "atk": 2,
+      "dmg": [
+        1,
+        4
+      ],
+      "poison": 0.25,
+      "xp": 12,
+      "loot": [
+        [
+          "moonherb",
+          0.5
+        ]
+      ]
+    },
+    "slime": {
+      "source": "native",
+      "tier": "common",
+      "tierRange": "见习级～正式级",
+      "name": "史莱姆",
+      "sv": "粘",
+      "color": "#6fa08a",
+      "hp": 16,
+      "ac": 10,
+      "atk": 2,
+      "dmg": [
+        1,
+        4
+      ],
+      "xp": 10,
+      "loot": [
+        [
+          "slime_fluid",
+          0.9
+        ]
+      ]
+    },
+    "golem": {
+      "source": "ancient",
+      "tier": "common",
+      "tierRange": "见习级～圣徒级",
+      "name": "魔像",
+      "sv": "像",
+      "color": "#7a7468",
+      "hp": 36,
+      "ac": 16,
+      "atk": 3,
+      "dmg": [
+        2,
+        6
+      ],
+      "xp": 34,
+      "loot": [
+        [
+          "golem_core",
+          0.7
+        ]
+      ]
+    },
+    "crystal_spider": {
+      "source": "native",
+      "tier": "elite",
+      "tierRange": "正式级～主教级",
+      "name": "水晶蜘蛛",
+      "sv": "晶",
+      "color": "#8fbcd0",
+      "hp": 58,
+      "ac": 17,
+      "atk": 6,
+      "dmg": [
+        3,
+        8
+      ],
+      "poison": 0.3,
+      "xp": 120,
+      "loot": [
+        [
+          "crystal_silk",
+          0.75
+        ]
+      ]
+    },
+    "worm": {
+      "source": "native",
+      "tier": "elite",
+      "tierRange": "正式级～主教级",
+      "name": "地底巨虫",
+      "sv": "虫",
+      "color": "#8a7a5a",
+      "hp": 70,
+      "ac": 12,
+      "atk": 6,
+      "dmg": [
+        4,
+        10
+      ],
+      "poison": 0.2,
+      "xp": 130,
+      "loot": [
+        [
+          "worm_hide",
+          0.8
+        ]
+      ]
+    },
+    "fusion_beast": {
+      "source": "ancient",
+      "tier": "elite",
+      "tierRange": "正式级～主教级",
+      "name": "融合兽",
+      "sv": "融",
+      "color": "#a0708a",
+      "hp": 62,
+      "ac": 14,
+      "atk": 6,
+      "dmg": [
+        3,
+        9
+      ],
+      "xp": 115,
+      "loot": [
+        [
+          "fusion_core",
+          0.6
+        ]
+      ]
+    },
+    "undead_knight": {
+      "source": "fallen",
+      "tier": "elite",
+      "tierRange": "正式级～主教级",
+      "name": "亡灵骑士",
+      "sv": "骸",
+      "color": "#5c6472",
+      "hp": 76,
+      "ac": 16,
+      "atk": 7,
+      "dmg": [
+        4,
+        11
+      ],
+      "undead": true,
+      "xp": 165,
+      "loot": [
+        [
+          "blade_short",
+          0.35
+        ]
+      ]
+    },
+    "wraith_mage": {
+      "source": "fallen",
+      "tier": "elite",
+      "tierRange": "正式级～主教级",
+      "name": "怨灵术士",
+      "sv": "怨",
+      "color": "#6a5c8a",
+      "hp": 64,
+      "ac": 14,
+      "atk": 8,
+      "dmg": [
+        4,
+        10
+      ],
+      "undead": true,
+      "xp": 150,
+      "loot": [
+        [
+          "wraith_core",
+          0.65
+        ]
+      ]
+    },
+    "ancient_guard": {
+      "source": "ancient",
+      "tier": "areaBoss",
+      "tierRange": "主教级～神阶级",
+      "name": "古代守卫",
+      "sv": "卫",
+      "color": "#9a8f6a",
+      "hp": 120,
+      "ac": 18,
+      "atk": 8,
+      "dmg": [
+        5,
+        12
+      ],
+      "xp": 330,
+      "loot": [
+        [
+          "ancient_core",
+          0.5
+        ]
+      ]
+    },
+    "abyss_demon": {
+      "source": "invader",
+      "tier": "areaBoss",
+      "tierRange": "主教级～神阶级",
+      "name": "深渊恶魔",
+      "sv": "魔",
+      "color": "#7a2f4a",
+      "hp": 150,
+      "ac": 17,
+      "atk": 10,
+      "dmg": [
+        6,
+        14
+      ],
+      "xp": 390,
+      "loot": [
+        [
+          "demon_core",
+          0.5
+        ]
+      ]
+    },
+    "synth_dragon": {
+      "source": "ancient",
+      "tier": "floorLord",
+      "tierRange": "圣徒级～神阶级",
+      "name": "合成龙",
+      "sv": "龙",
+      "color": "#b08a3a",
+      "hp": 260,
+      "ac": 20,
+      "atk": 12,
+      "dmg": [
+        8,
+        18
+      ],
+      "xp": 900,
+      "loot": [
+        [
+          "synth_dragon_scale",
+          0.55
+        ]
+      ]
+    },
+    "void_walker": {
+      "source": "invader",
+      "tier": "floorLord",
+      "tierRange": "圣徒级～神阶级",
+      "name": "虚空行者",
+      "sv": "虚",
+      "color": "#3a2f5a",
+      "hp": 320,
+      "ac": 21,
+      "atk": 14,
+      "dmg": [
+        9,
+        20
+      ],
+      "xp": 1100,
+      "loot": [
+        [
+          "void_shard",
+          0.5
+        ]
+      ]
+    },
+    "demon_lord": {
+      "source": "invader",
+      "tier": "guardian",
+      "tierRange": "神阶级",
+      "name": "魔界领主",
+      "sv": "君",
+      "color": "#5a1f2a",
+      "hp": 520,
+      "ac": 23,
+      "atk": 18,
+      "dmg": [
+        12,
+        26
+      ],
+      "xp": 2200,
+      "loot": [
+        [
+          "lord_core",
+          0.6
+        ]
+      ]
+    }
+  },
+  "factions": {
+    "empire": "圣辉帝国",
+    "temple_war": "战争神殿",
+    "temple_wisdom": "智慧神殿",
+    "temple_life": "生命神殿",
+    "temple_death": "死亡神殿",
+    "temple_chaos": "混沌神殿",
+    "guild": "冒险者公会",
+    "shadow": "暗影议会",
+    "study": "古研会",
+    "frost": "霜铁王庭",
+    "verdant": "翠冠议会",
+    "sand": "砂海商邦",
+    "blood": "血吼王帐",
+    "deep": "掘渊公会"
+  },
+  "ranks": [
+    {
+      "tier": 1,
+      "name": "信徒",
+      "feature": "获得职业认可，正式开始修行"
+    },
+    {
+      "tier": 2,
+      "name": "见习",
+      "feature": "掌握基础技能"
+    },
+    {
+      "tier": 3,
+      "name": "正式",
+      "feature": "独当一面，可承接高级任务"
+    },
+    {
+      "tier": 4,
+      "name": "主教",
+      "feature": "一方强者，可开宗立派"
+    },
+    {
+      "tier": 5,
+      "name": "圣徒",
+      "feature": "接近凡人极限（圣阶）"
+    },
+    {
+      "tier": 6,
+      "name": "神阶",
+      "feature": "踏入神话领域（终极职业）"
+    }
+  ],
+  "weatherText": {
+    "晴": [
+      "天穹澄澈，星子低垂。"
+    ],
+    "多云": [
+      "云层像未干的画布，缓缓变换着形状。"
+    ],
+    "雨": [
+      "细雨斜织，屋檐下拉出一道道水帘。"
+    ],
+    "雾": [
+      "雾气贴着街面流动，十步外只剩轮廓。"
+    ],
+    "雪": [
+      "雪花无声地落，把喧嚣压成安静。"
+    ]
+  },
+  "status": {
+    "burn": {
+      "name": "燃烧",
+      "dot": true,
+      "power": 4,
+      "maxStack": 3,
+      "dur": 3,
+      "elem": "火",
+      "desc": "每回合灼烧扣血，最多叠三层。"
+    },
+    "bleed": {
+      "name": "流血",
+      "dot": true,
+      "power": 3,
+      "maxStack": 3,
+      "dur": 3,
+      "elem": "物",
+      "desc": "伤口不止，每回合失血。"
+    },
+    "freeze": {
+      "name": "冻结",
+      "hitMod": -3,
+      "maxStack": 1,
+      "dur": 2,
+      "immuneBoss": true,
+      "desc": "冰霜迟滞动作，命中下降。"
+    },
+    "stun": {
+      "name": "眩晕",
+      "skip": true,
+      "maxStack": 1,
+      "dur": 1,
+      "immuneBoss": true,
+      "desc": "完全失去该回合行动。"
+    },
+    "slow": {
+      "name": "迟缓",
+      "hitMod": -2,
+      "acMod": -1,
+      "maxStack": 2,
+      "dur": 3,
+      "desc": "时间被拉长，命中与闪避下降。"
+    },
+    "vuln": {
+      "name": "破甲",
+      "acMod": -3,
+      "maxStack": 2,
+      "dur": 3,
+      "desc": "护甲开裂，防御下降。"
+    },
+    "fervor": {
+      "name": "锋锐",
+      "hitMod": 2,
+      "maxStack": 2,
+      "dur": 3,
+      "desc": "手比脑子先动，刀锋自己找得到缝隙。"
+    },
+    "bastion": {
+      "name": "坚壁",
+      "acMod": 3,
+      "maxStack": 1,
+      "dur": 3,
+      "desc": "皮肤底下像垫了一层砖，硬得不像活人。"
+    },
+    "swift": {
+      "name": "疾行",
+      "hitMod": 1,
+      "acMod": 1,
+      "maxStack": 2,
+      "dur": 4,
+      "desc": "脚下的世界慢半拍，你要去哪，脚尖先知道了。"
+    },
+    "oracle": {
+      "name": "神启",
+      "dmgMod": 2,
+      "maxStack": 2,
+      "dur": 2,
+      "desc": "神在耳边报了一个数字，所以你每一刀都落在该落的地方。"
+    }
+  },
+  "elemMod": {
+    "undead": {
+      "神圣": 1.5,
+      "火": 0.5
+    }
+  },
+  "_racesComment": "种族双轴（世界书 §26–§27）：bind=软/强绑定；eff=各职业系经验效率倍率（键为 ClassDef.lineage）；exclusive[]=专属职业线（其他种族不可转职）；continent=常见所在地，homeland=发源/聚居地。",
+  "rankTiers": {
+    "5": [
+      {
+        "id": "saint_mid",
+        "name": "圣阶·中",
+        "feature": "圣阶初段，已越凡人门槛"
+      },
+      {
+        "id": "saint_high",
+        "name": "圣阶·高",
+        "feature": "圣阶中段，各系名宿"
+      },
+      {
+        "id": "saint_peak",
+        "name": "圣阶·极",
+        "feature": "半步神阶，凡人极限"
+      }
+    ],
+    "6": [
+      {
+        "id": "divine_officer",
+        "name": "神官级",
+        "feature": "初入神话领域"
+      },
+      {
+        "id": "divine_general",
+        "name": "神将级",
+        "feature": "神力位阶，可领军"
+      },
+      {
+        "id": "divine_king",
+        "name": "神王级",
+        "feature": "神代遗存之力"
+      }
+    ],
+    "levelMap": {
+      "5": "saint_mid",
+      "6": "saint_peak"
+    }
+  },
+  "rankAlias": {
+    "圣阶·极": [
+      "剑圣级（物理·敏捷）",
+      "武圣级（物理·特殊）",
+      "法圣级（法师系）",
+      "匠圣级（生产系）"
+    ],
+    "圣阶·中": [
+      "圣阶·中段"
+    ],
+    "神官级": [
+      "古代神级（神代遗存神格者）"
+    ],
+    "神王级": [
+      "主神级（仅六主神，超越常规神阶）"
+    ]
+  },
+  "_ranksComment": "境界（世界书 §29–§30）：ranks 为通用六阶；rankTiers 记末两阶的三段细分与 level→细分映射；rankAlias 记 §30 的各系同义别称。职阶若改，派生层（Derived.rankName/rankSub）与学院入学检查（Academy）同源读取。",
+  "_learnComment": "技能学习四通道（世界书 §44）：skills[].learn ∈ {level, mentor, tome, insight, faith}；物品的 teach=<skillId> 表示该卷轴可教此技能；mentorHint/insightHint 为可读线索（不进判定）。判据在 systems/character/Learn.ts。",
+  "_e1Comment": "卡 E1：19 条终极技能已实体化（§38–§43），每条职业线 skillPath 末位指向自己的终极；终极一律 lv6、高耗蓝、长冷却，学习通道为 level+insight（信仰线另加 faith）。",
+  "classMechanics": {
+    "_comment": "卡 E1b：分支专属机制。kind 决定判定形态：shadow=战斗中累积的势（暗杀）/ conservation=时间守恒上限（时空）/ summonRatio=召唤来源比例（召唤）/ curseStack=诅咒叠加（辅助·诅咒）/ soulLoad=亡灵负荷（召唤·亡灵）。全部在 Combat 里结算。",
+    "shadow": {
+      "branch": "ph_assassin",
+      "max": 5,
+      "gainPerRound": 1,
+      "dmgPerStack": 0.15,
+      "resetOnHit": true,
+      "note": "世界书 §32「暗杀路线」：以看不见的势换取一击的分量"
+    },
+    "conservation": {
+      "branch": "fs_time",
+      "selfCostPerSlow": 1,
+      "note": "世界书 §33「时间守恒」：时间不会凭空产生"
+    },
+    "summonRatio": {
+      "branch": "sm_hero",
+      "ancient": 0.6,
+      "hero": 0.3,
+      "self": 0.1,
+      "note": "世界书 §34「英灵召唤」：来源比例决定强度与代价"
+    },
+    "curseStack": {
+      "branch": "au_curse",
+      "weights": {
+        "weak": 0.4,
+        "slow": 0.3,
+        "bleed": 0.2,
+        "vuln": 0.1
+      },
+      "maxStack": 4,
+      "note": "世界书 §35「诅咒路线」：四类诅咒的配比"
+    },
+    "soulLoad": {
+      "branch": "sm_undead",
+      "perSummon": 0.05,
+      "maxLoad": 0.3,
+      "note": "世界书 §34「亡灵召唤」：灵魂负荷上限"
+    }
+  },
+  "monsterSources": {
+    "_comment": "卡 F1 · 世界书 §46 魔物来源分类。魔物的 source 字段引用此表 id。地表野兽与网内投影（暴走角兔/灰纹狼/荒野劫掠者/星演幻影）不属五类，故其 source 缺省——不硬塞。",
+    "ancient": {
+      "name": "古代造物",
+      "def": "古代文明创造的战争兵器、守卫",
+      "typical": [
+        "融合兽",
+        "魔像",
+        "古代守卫"
+      ]
+    },
+    "native": {
+      "name": "地下原生物种",
+      "def": "地下城本土进化出的生命",
+      "typical": [
+        "史莱姆",
+        "哥布林",
+        "地底巨虫"
+      ]
+    },
+    "fallen": {
+      "name": "堕落探险者",
+      "def": "在地下城死亡后转化的亡灵",
+      "typical": [
+        "亡灵骑士",
+        "怨灵术士"
+      ]
+    },
+    "invader": {
+      "name": "魔界入侵者",
+      "def": "从魔界入侵的魔物",
+      "typical": [
+        "深渊恶魔",
+        "虚空行者"
+      ]
+    },
+    "mutant": {
+      "name": "变异体",
+      "def": "受神罚残留影响变异的生物",
+      "typical": [
+        "神罚兽",
+        "扭曲植物"
+      ]
+    }
+  },
+  "monsterTiers": {
+    "_comment": "卡 F1 · 世界书 §47 魔物等级对应：魔物等级 ↔ 境界 ↔ 推荐层数。floorFrom=0 表示地表。floors 为世界书原文，floorFrom/floorTo 供程序判定（recommendedFloors）。",
+    "beast": {
+      "tier": 1,
+      "name": "无害野兽",
+      "rank": "信徒级",
+      "floors": "地表",
+      "floorFrom": 0,
+      "floorTo": 0
+    },
+    "common": {
+      "tier": 2,
+      "name": "普通魔物",
+      "rank": "见习级",
+      "floors": "1-5 层",
+      "floorFrom": 1,
+      "floorTo": 5
+    },
+    "elite": {
+      "tier": 3,
+      "name": "精英魔物",
+      "rank": "正式级",
+      "floors": "6-20 层",
+      "floorFrom": 6,
+      "floorTo": 20
+    },
+    "areaBoss": {
+      "tier": 4,
+      "name": "区域BOSS",
+      "rank": "主教级",
+      "floors": "21-40 层",
+      "floorFrom": 21,
+      "floorTo": 40
+    },
+    "floorLord": {
+      "tier": 5,
+      "name": "楼层主（节主）",
+      "rank": "精英～神阶级（随深度递增）",
+      "floors": "每 10 层 BOSS 房间",
+      "floorFrom": 10,
+      "floorTo": 100,
+      "every": 10
+    },
+    "guardian": {
+      "tier": 6,
+      "name": "地下城守卫",
+      "rank": "神阶级",
+      "floors": "71 层+",
+      "floorFrom": 71,
+      "floorTo": 100
+    }
+  },
+  "monsterEcology": {
+    "_comment": "卡 F1 · 世界书 §52 魔物生态系统。chain 六行取自原文（顶层→基础）；members 是书上的名字，mids 是它在本表里的实体（能为空——顶层的神阶存在尚未实体化）。tier 是链层所对应的 §47 档位。",
+    "chain": [
+      {
+        "level": "顶层",
+        "label": "神阶魔物",
+        "tier": "guardian",
+        "members": [
+          "魔界大君",
+          "古代终极守卫"
+        ],
+        "mids": [
+          "demon_lord"
+        ]
+      },
+      {
+        "level": "高层",
+        "label": "圣徒级魔物",
+        "tier": "floorLord",
+        "members": [
+          "深层节主",
+          "魔界领主",
+          "合成龙"
+        ],
+        "mids": [
+          "synth_dragon",
+          "void_walker"
+        ]
+      },
+      {
+        "level": "中层",
+        "label": "主教级魔物",
+        "tier": "areaBoss",
+        "members": [
+          "古代守卫",
+          "深渊恶魔",
+          "地底巨虫"
+        ],
+        "mids": [
+          "ancient_guard",
+          "abyss_demon",
+          "worm"
+        ]
+      },
+      {
+        "level": "基层",
+        "label": "正式级魔物",
+        "tier": "elite",
+        "members": [
+          "融合兽",
+          "水晶蜘蛛",
+          "哥布林部落"
+        ],
+        "mids": [
+          "fusion_beast",
+          "crystal_spider",
+          "undead_knight",
+          "wraith_mage"
+        ]
+      },
+      {
+        "level": "底层",
+        "label": "见习级魔物",
+        "tier": "common",
+        "members": [
+          "史莱姆",
+          "哥布林",
+          "魔像",
+          "神罚兽"
+        ],
+        "mids": [
+          "slime",
+          "goblin",
+          "golem",
+          "mutation_beast",
+          "twisted_plant"
+        ]
+      },
+      {
+        "level": "基础",
+        "label": "地下城生态",
+        "tier": "beast",
+        "members": [
+          "发光苔藓",
+          "变异植物",
+          "真菌"
+        ],
+        "mids": [
+          "bat"
+        ]
+      }
+    ]
+  }
+}

@@ -126,7 +126,7 @@ seed("w-test", "测试员", "tavern");
 /* ============================================================
    天穹纪元 · 圣辉城（M5 后特性：世界书数据 → 引擎世界）
    ------------------------------------------------------------
-   数据源：tianqiong2/src/data/world/{geo,people}.json（世界书 JSON
+   数据源：tianqiong/src/data/world/{geo,people}.json（世界书 JSON
    事实源）。63 地点全量建模；15 个 NPC 按其 loc 字段落位，关系网
    经 set_relation 命令落进状态表；每位 NPC 的一条身份设定经
    emitEvent 成为世界事实（可在后台「事件」页与 Runtime 事件页查看）。
@@ -134,7 +134,7 @@ seed("w-test", "测试员", "tavern");
    ============================================================ */
 function seedTianqiong() {
   const geo = JSON.parse(
-    readFileSync(new URL("../tianqiong2/src/data/world/geo.json", import.meta.url), "utf8")
+    readFileSync(new URL("../tianqiong/src/data/world/geo.json", import.meta.url), "utf8")
   );
   const locs = Object.entries(geo.locations);
   const store = makeStore("tianqiong-main");
@@ -153,7 +153,7 @@ function seedTianqiong() {
       metadata: {
         name: "天穹纪元 · 圣辉城",
         description:
-          "天穹 2.0 世界书数据在剥离引擎上的建模示例（数据源 tianqiong2/src/data/world/*.json，零改动）"
+          "天穹 2.0 世界书数据在剥离引擎上的建模示例（数据源 tianqiong/src/data/world/*.json，零改动）"
       }
     }
   });
@@ -167,7 +167,7 @@ function seedTianqiong() {
   }
 
   const people = JSON.parse(
-    readFileSync(new URL("../tianqiong2/src/data/world/people.json", import.meta.url), "utf8")
+    readFileSync(new URL("../tianqiong/src/data/world/people.json", import.meta.url), "utf8")
   );
 
   /* NPC 落位 + 关系网：关系数据原样进状态表（数值含义由天穹定义） */

@@ -1,0 +1,90 @@
+/* ============================================================
+   天穹纪元 2.0 · 跨面板交互统一层
+   ------------------------------------------------------------
+   把各界面共用的反馈与切换拉齐到同一套语言。切换的统一基准：
+   PanelOverlay 的 180ms 轻淡入（高频动作只做最轻一档） +
+   行囊落地的「浮起」入场（容器纯淡、面板 10px 上浮 scale .99、
+   0.24s cubic-bezier(.23,1,.32,1)，见 inventory.css bagPop）。
+   本文件在 main.tsx 里排最后：只覆盖「animation 声明」这一项，
+   app.css 冻结规则的其余观感（圆角/阴影/布局）一律不碰。
+
+   被抹平的历史差异：
+   · 三屏（扉页/建档/世界）原本 display 硬切 → 补 180ms 纯淡入
+   · 对话/商店 .sheet 原本窄屏 70px 底部滑入(0.34s) / 桌面
+     scale .92 过冲弹出(0.28s) 两条 → 统一为浮起一条
+   · 检定卡壳原本 scale .55 + rotate -7° 强过冲 → 统一为浮起
+     （仪式感由内部骰子 roll 0.8s 承担，壳与全站一致）
+   · 战斗原本 0.3s 默认 ease 纯淡 → 0.2s 统一曲线纯淡
+   ============================================================ */
+
+@keyframes uiFade{
+  from{opacity:0}
+  to{opacity:1}
+}
+@keyframes uiRise{
+  from{opacity:0;transform:translateY(10px) scale(.99)}
+  to{opacity:1;transform:none}
+}
+
+/* ---------- 三屏切换：与面板换页同档的 180ms 纯淡入 ----------
+   曲线写字面量不写 var()：animation 简含 var() 时 CSSOM 回填不了分项，
+   自检脚本读 style.animationName 会得到空（inventory.css 的 bagPop 同款字面量） */
+.scr.on{animation:uiFade .18s cubic-bezier(.23,1,.32,1) both}
+
+/* ---------- 浮层壳统一为「浮起」----------
+   .sheet（对话/商店/抉择）、检定卡 .cc：同权重后加载接管 animation，
+   其余属性沿用 app.css 既有声明 */
+.sheet{animation:uiRise .24s cubic-bezier(.23,1,.32,1) both}
+.cc{animation:uiRise .24s cubic-bezier(.23,1,.32,1) both}
+/* 战斗是全屏容器（桌面为居中大窗）：容器级只做纯淡，与三屏/面板同档。
+   不能套 uiRise——桌面的 #cbt 靠 translate(-50%,-50%) 居中，位移会打架 */
+#cbt.on{animation:uiFade .2s cubic-bezier(.23,1,.32,1) both}
+
+/* ---------- 全局键盘焦点：Tab 走到哪，哪里有可见焦点 ----------
+   此前全站只有零星组件各自写过 focus-visible（sysd-range / 动作坞），
+   委托、纪闻、档案、地图的行与按钮 Tab 过去毫无表示。
+   只用 :focus-visible（鼠标点击不出现），不加噪。 */
+:focus-visible{
+  outline:2px solid #7fd0d866;
+  outline-offset:2px;
+  border-radius:2px;
+}
+/* 已自带焦点语言的两类元素不重复画：输入类用底色+星青边（sysseal/app 既有），
+   滑签与印石已有自己的 focus-visible */
+.sysd input:focus-visible,
+.sysd textarea:focus-visible,
+input[type=range]:focus-visible{
+  outline:none;
+}
+
+/* ---------- 行式按钮（.pnl-act：委托复命 / 地图行 / 各页行动作） ----------
+   既有规则只有 hover 变色；补同族极淡衬底与键盘焦点态。
+   触达面积是整行，衬底比位移诚实——行不该跳。 */
+.pnl-act{
+  transition:color .2s cubic-bezier(.22,1,.36,1),background-color .2s cubic-bezier(.22,1,.36,1);
+}
+.pnl-act:hover{background:#ffffff06}
+.pnl-act:active{background:#ffffff0a}
+
+/* ---------- 区块小按钮（.sysbtn 仍被系统页外少数入口使用）：
+   与 .m2-row .go 同一款「金印按下」补齐 active 态 ---------- */
+.sysbtn:active{transform:translateY(1px) scale(.995)}
+
+/* ---------- 面板页签（顶栏导航 / 手机 TabBar 共用节奏）：
+   on 态切换已有各自样式；这里只补导航键的 focus-visible 底色，
+   让键盘换页与点击换页读起来是同一件事 ---------- */
+#top-b .nav button:focus-visible{
+  outline:none;
+  color:var(--star);
+  border-color:#7fd0d855;
+  background:#7fd0d812;
+}
+#tabbar button:focus-visible{
+  outline:none;
+  color:var(--star);
+}
+
+@media(prefers-reduced-motion:reduce){
+  .pnl-act,.sysbtn{transition-duration:.01ms}
+  .scr.on,.sheet,.cc,#cbt.on{animation-duration:.01ms}
+}

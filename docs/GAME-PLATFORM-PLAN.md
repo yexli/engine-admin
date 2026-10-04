@@ -3,7 +3,7 @@
 > 制定日期：2026-10-01 · 状态：**规划稿（待确认后分期实施）**
 > 目标：让 world-engine 从"单游戏内嵌库"升级为**多游戏可接入的托管平台**——
 > 任何游戏方/开发方按契约接入，世界在剥离引擎上运行，管理后台全量可见。
-> 天穹（tianqiong2）为第一个参考接入方。
+> 天穹（tianqiong）为第一个参考接入方。
 > 前置事实（已验证）：天穹源码已构建在引擎上（1716 测试对 1.0.3 全绿）；
 > 天穹世界书数据已可在引擎上建模（run-demo-engine 的 tianqiong-main，后台可见）。
 
@@ -73,7 +73,7 @@ export interface GameAdapter {
 ### G1 · 接入规范 + 参考实现（天穹 HTTP 宿主）✅ 已交付（2026-10）
 - ✅ 契约 `world-engine/src/adapter.ts`（v1.0.4）：`GameAdapter`/`GameWorldSeed`
   类型 + `definitionFromSeed` 纯映射 + `hostGameWorld` 装配辅助；适配器测试 5 个；
-- ✅ tianqiong2 `scripts/http-host.mjs`（纯 JS，`node scripts/http-host.mjs` 即起）：
+- ✅ tianqiong `scripts/http-host.mjs`（纯 JS，`node scripts/http-host.mjs` 即起）：
   读世界书 geo/people → GameAdapter → `hostGameWorld` → `startWorldServer`（8798）；
 - ✅ 实测（curl 验证）：tianqiong-main 世界 63 地点 / 15 NPC / 10 关系 / 40 事实
   事件全量落库；暂停→写命令 409→恢复闸门正常；

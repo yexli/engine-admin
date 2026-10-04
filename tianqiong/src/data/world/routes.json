@@ -1,0 +1,264 @@
+{
+  "routes": [
+    {
+      "id": "r_north",
+      "from": "gate",
+      "to": "frosthold",
+      "name": "霜锚堡",
+      "mode": "商队马车",
+      "days": 14,
+      "cost": 800,
+      "danger": 3,
+      "flavor": "帝国官道一路向北，越往霜铁山脉走，风越刀。",
+      "seasonal": {
+        "months": [
+          11,
+          0,
+          1
+        ],
+        "reason": "北方航线 12–2 月冰封，港口的船都上了架。",
+        "until": "待开春冰化"
+      },
+      "tags": [
+        "land",
+        "seasonal"
+      ],
+      "minLevel": 1,
+      "loreRef": "s82",
+      "hub": [
+        "传送阵",
+        "冰海码头",
+        "锻铸工坊"
+      ]
+    },
+    {
+      "id": "r_south",
+      "from": "gate",
+      "to": "goldveil",
+      "name": "金砂城",
+      "mode": "砂海驼队",
+      "days": 10,
+      "cost": 2000,
+      "danger": 3,
+      "flavor": "驼铃摇碎大漠的落日，商队的旗帜在热浪里卷成金纱。",
+      "tags": [
+        "land",
+        "caravan"
+      ],
+      "minLevel": 1,
+      "loreRef": "s82",
+      "hub": [
+        "传送阵",
+        "骆驼商队"
+      ]
+    },
+    {
+      "id": "r_east",
+      "from": "gate",
+      "to": "windport",
+      "name": "翠风港",
+      "mode": "海船",
+      "days": 7,
+      "cost": 1500,
+      "danger": 2,
+      "needPass": "pass_sea",
+      "flavor": "没有海路通行凭证，港口不会放你登船。",
+      "seasonal": {
+        "months": [
+          6,
+          7
+        ],
+        "reason": "东方-南方海路 7–8 月台风季，船家不肯出海。",
+        "until": "待台风季过"
+      },
+      "tags": [
+        "sea",
+        "seasonal"
+      ],
+      "minLevel": 1,
+      "loreRef": "s82",
+      "hub": [
+        "传送阵",
+        "海港"
+      ]
+    },
+    {
+      "id": "r_west",
+      "from": "gate",
+      "to": "bloodhold",
+      "name": "血吼城",
+      "mode": "佣兵护送队",
+      "days": 12,
+      "cost": 1200,
+      "danger": 4,
+      "needPass": "pass_war",
+      "flavor": "西方荒野是战盟的地盘，外人需有战盟的通行信物。",
+      "seasonal": {
+        "months": [
+          10,
+          11,
+          0,
+          1,
+          2
+        ],
+        "reason": "西方-北方草原道 11–3 月大雪封路。",
+        "until": "待雪化"
+      },
+      "tags": [
+        "land",
+        "seasonal",
+        "military"
+      ],
+      "minLevel": 1,
+      "loreRef": "s82",
+      "hub": [
+        "竞技场",
+        "军队要塞"
+      ]
+    },
+    {
+      "id": "r_under",
+      "from": "wild",
+      "to": "deepwell",
+      "name": "深井城",
+      "mode": "深渊梯道",
+      "days": 3,
+      "cost": 1800,
+      "danger": 5,
+      "needPass": "pass_deep",
+      "flavor": "旷野尽头有一道向下的巨井，掘进者的城在黑暗深处。",
+      "tags": [
+        "under",
+        "secret"
+      ],
+      "minLevel": 1,
+      "loreRef": "s82",
+      "hub": [
+        "地下传送阵",
+        "掘渊总部"
+      ]
+    },
+    {
+      "id": "r_sky",
+      "from": "gate",
+      "to": "skycap",
+      "name": "天穹之城",
+      "mode": "飞空艇",
+      "days": 9,
+      "cost": 3000,
+      "danger": 5,
+      "needPass": "pass_sky",
+      "flavor": "天穹之城的门票，是大多数人一辈子也攒不够的星晶。",
+      "tags": [
+        "air"
+      ],
+      "minLevel": 1,
+      "loreRef": "s82",
+      "hub": [
+        "飞艇港",
+        "维度锚点"
+      ]
+    }
+  ],
+  "travelModes": [
+    {
+      "id": "walk",
+      "name": "步行",
+      "speed": 1,
+      "perDay": 0,
+      "note": "短距、贫困"
+    },
+    {
+      "id": "ride",
+      "name": "普通骑乘",
+      "speed": 5,
+      "perDay": 500,
+      "note": "中距、富人"
+    },
+    {
+      "id": "steed",
+      "name": "精良坐骑",
+      "speed": 9,
+      "perDay": 2000,
+      "note": "长距、专业"
+    },
+    {
+      "id": "airship",
+      "name": "飞行器",
+      "speed": 75,
+      "perDay": 120000,
+      "note": "跨大陆、富商"
+    },
+    {
+      "id": "portal",
+      "name": "传送阵",
+      "speed": 0,
+      "perDay": 0,
+      "note": "即时（费用见 portals）"
+    }
+  ],
+  "cityTransit": {
+    "carriage": [
+      500,
+      1000
+    ],
+    "portalPoint": 500,
+    "mount": 300,
+    "walk": 0
+  },
+  "portals": {
+    "tiers": [
+      {
+        "id": "city",
+        "name": "城内",
+        "km": [
+          1,
+          10
+        ],
+        "startup": 0,
+        "perHead": 100
+      },
+      {
+        "id": "short",
+        "name": "短距",
+        "km": [
+          100,
+          1000
+        ],
+        "startup": 100000,
+        "perHead": 500
+      },
+      {
+        "id": "long",
+        "name": "长距",
+        "km": [
+          -1,
+          -1
+        ],
+        "startup": 1000000,
+        "perHead": 5000,
+        "note": "跨大陆，需两端阵已建立"
+      },
+      {
+        "id": "gate",
+        "name": "次元门",
+        "startup": 10000000,
+        "perHead": 1000000,
+        "note": "跨位面"
+      }
+    ],
+    "maxLoad": 100,
+    "banRules": [
+      "禁魔物品",
+      "被诅咒物品",
+      "神器"
+    ],
+    "network": {
+      "continental": 7,
+      "longRange": 35,
+      "cityShort": 200
+    },
+    "_comment": "世界书 §85。载员/禁传/网络规模都已进数据；实现入口在 Travel.canDepart/teleport（卡 S2）。"
+  },
+  "_comment": "跨大陆路线表（卡 E3 建 / 卡 T4 校正分类）。扩展插槽：seasonal{months,reason}（季节封锁）/ tags（航线类型）/ unlock{kind,key,min}（解锁条件）/ minLevel（准入等级）/ hub[]（枢纽设施）/ loreRef（canon 引用）。"
+}

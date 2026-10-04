@@ -1,0 +1,94 @@
+{
+  "id": "siya",
+  "sourceNo": "091",
+  "name": "希雅",
+  "title": "天空浮岛·翼族王",
+  "race": "翼族",
+  "age": 480,
+  "gender": "female",
+  "realm": "战圣级（翼族极限·\"天空之翼\"）",
+  "realmTier": 5,
+  "goal": "已故约1400年；天穹守望者至今奉其为\"浮岛之母\"。",
+  "lore": {
+    "keywords": [
+      "希雅",
+      "翼族王",
+      "天空浮岛",
+      "晨羽王朝",
+      "浮岛统一",
+      "天穹之城"
+    ],
+    "identity": "天空浮岛晨羽王朝的开国国王，翼族的统一者。",
+    "appearance": "史书与翼族壁画记载\"金发金眼、羽翼如雪\"；常立于浮岛边缘，望云海。",
+    "personality": "温和、远见，信奉\"浮岛不该只是避世之地\"。",
+    "abilities": "风系术法、浮岛航线、翼族结盟。",
+    "past": "统一浮岛诸族，立晨羽王朝；定下\"守望者不涉世俗\"的祖训。",
+    "flaw": "传说她晚年曾秘密下访地表一次——那一次行程，在守望者史卷里被整页删去。",
+    "belongings": "晨羽之冠（现存于天穹之城）。"
+  },
+  "loc": "past_hall",
+  "sv": "希",
+  "color": "#6b7f8c",
+  "hours": [
+    0,
+    12
+  ],
+  "greet": {
+    "cold": "你不该上来。",
+    "neutral": "你来看云海的？",
+    "warm": "你来了。……坐下，风刚好。"
+  },
+  "topics": [
+    {
+      "l": "浮岛的将来"
+    },
+    {
+      "l": "云海"
+    },
+    {
+      "l": "避世不是长久之计",
+      "tier": "warm"
+    }
+  ],
+  "voice": "温和、远见，信奉\"浮岛不该只是避世之地\"。",
+  "priority": [
+    "已故约1400年",
+    "天穹守望者至今奉其为\"浮岛之母\""
+  ],
+  "refuseStyle": "direct",
+  "rels": {
+    "frey": {
+      "type": "ally",
+      "val": 30
+    },
+    "dar": {
+      "type": "ally",
+      "val": 20
+    },
+    "mong": {
+      "type": "ally",
+      "val": 20
+    },
+    "naya": {
+      "type": "ally",
+      "val": 20
+    },
+    "selan": {
+      "type": "ally",
+      "val": 20
+    },
+    "zien": {
+      "type": "ally",
+      "val": 20
+    },
+    "dann": {
+      "type": "ally",
+      "val": 20
+    },
+    "galon_ii": {
+      "type": "ally",
+      "val": 20
+    }
+  },
+  "worldImportance": 3
+}

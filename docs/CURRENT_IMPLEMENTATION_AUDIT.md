@@ -62,7 +62,7 @@
 ### 8. Adapter（G1） —— ✅ 真实实现
 - **已实现**：`GameAdapter { gameId, name, seed(): GameWorldSeed }`；seed 字段 worldId/name/ownerGame?/playerName?/startLoc?/locations[]（必填）/npcs?/relations?/facts?；`definitionFromSeed` 纯映射（地点名→attributes.desc 截 128）；`hostGameWorld` 装配：registry.create → NPC 走 create_entity 落位 → 关系走 set_relation → facts 上总线。
 - **代码**：`src/adapter.ts`（164 行）。
-- **测试**：`tests/adapter.test.ts` 5 用例（映射、装配落位/关系/事实、坏种子抛错、pause/resume 闸门）。外部消费者：`tianqiong2/package.json` `file:` 依赖 + 集成验证测试。
+- **测试**：`tests/adapter.test.ts` 5 用例（映射、装配落位/关系/事实、坏种子抛错、pause/resume 闸门）。外部消费者：`tianqiong/package.json` `file:` 依赖 + 集成验证测试。
 - **风险**：`npc.data` 展开进 payload 后除 attributes 外的键被 create_entity 静默丢弃（反直觉）；两处类型洞（`as never`）。
 
 ### 9. HTTP / WebSocket —— ✅ 真实实现
@@ -142,7 +142,7 @@ running/completed/partially_applied/rejected/failed（types.ts:227-232）；流�
 6. **事件名差异**：引擎事实是 `player_moved`（带 location），方案示例写的 `player_entered_tavern` 不存在；语义等价（地点进事实 data），按「事件类型不进 Core、语义由接入方解释」的纪律保留 `player_moved`，不新增游戏专属事件。
 7. **演化提案无法产生对话**：白名单只有 update_attribute/set_relation/move_entity；「米露说什么」目前只能以 proposal.reason（叙事）呈现给玩家，不进世界事实——符合 P5 第一批动作边界，talk 留待后续阶段。
 
-### tianqiong2 真实游戏本体
+### tianqiong 真实游戏本体
 进程内接入（`file:` 依赖 + createWorldContainer 同总线），**未走 8787/8790 HTTP/WS 闭环**（双状态问题，docs/V2.1-PHASE-REPORT.md:115-117 已列为下一阶段首要工作）；游戏内仍有酒馆硬编码（song→selina 直接开对话、观察文案写死）——属游戏本体内部，不在引擎链路上。真实游戏接入网络闭环不在本次 P2 范围（参考宿主即方案 P2 的验收载体）。
 
 ---
@@ -188,14 +188,14 @@ running/completed/partially_applied/rejected/failed（types.ts:227-232）；流�
 8. **库级缺省策略 FULL_CORE_POLICY 全开**：run-managed 已显式传 NPC_EVOLUTION_POLICY，但库级缺省无结构性强制。
 9. **Journal 写失败静默**（P1 已加失败计数暴露，仍不炸运行时——纪律如此）。
 10. **advance_time 无上限 / registry.close 不收尾 / moveRule 不校验地点存在**：内核已知边界，云部署前处理。
-11. **tianqiong2 真实游戏未接网络闭环**（双状态）——P2 后的独立工作项。
+11. **tianqiong 真实游戏未接网络闭环**（双状态）——P2 后的独立工作项。
 12. **平台/演化/日程三处各自复制「1 日=48 刻」常量**——漂移风险，P6 Time/Schedule 收口时统一导出。
 
 ---
 
 ## 八、P0 审计签字
 
-- 审计覆盖：world-engine src 28 文件 / platform src（evolution、npc、worldagent、upstream、router、admin）/ gateway src / memory src / scripts / tianqiong2 接入面 / 全部测试文件。
+- 审计覆盖：world-engine src 28 文件 / platform src（evolution、npc、worldagent、upstream、router、admin）/ gateway src / memory src / scripts / tianqiong 接入面 / 全部测试文件。
 - 方法：4 路并行代码走读（证据到文件:行号）+ 337 项测试实跑 + 源码扫描断言核对（Core/Extension 边界）。
 - 结论：**P0 通过**。P1 进入封口修复（三条工程缺口），P2 按第六节清单执行。
 

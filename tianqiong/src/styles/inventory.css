@@ -1,0 +1,244 @@
+/* ============================================================
+   行囊浮层（方案 A 落地）· .bagovl / .bagsheet / .bgs-*
+   ------------------------------------------------------------
+   只新增类，不改 app.css 的任何既有规则。层级取 56：
+   在 #ovl（50，对话/商店浮层）之上、#cbt（60，战斗）与 #chk（80，检定）之下——
+   站在商店里能开行囊，但战斗与检定时它不该盖在上面。
+   ============================================================ */
+
+.bagovl{position:fixed;inset:0;z-index:56;display:flex;align-items:center;justify-content:center;
+  background:#05070fd9; /* blur(4px) 撤掉（性能收口）：85% 底色下不可感知，代价却是全屏逐帧重采样 */
+  animation:bagIn .18s cubic-bezier(.23,1,.32,1) both}
+@keyframes bagIn{from{opacity:0}to{opacity:1}}
+/* 退场：开有进而关无出，浮层会像被"掐掉"而不是被"关上"。
+   退场用 ease-in（.4,0,1,1）——离场本来该加速离开，与进场的 ease-out 相对称。 */
+.bagovl.out{animation:bagOut .17s cubic-bezier(.4,0,1,1) both;pointer-events:none}
+@keyframes bagOut{from{opacity:1}to{opacity:0}}
+.bagovl.out .bagsheet{animation:bagDown .17s cubic-bezier(.4,0,1,1) both}
+@keyframes bagDown{from{transform:none;opacity:1}to{transform:translateY(6px) scale(.995);opacity:.35}}
+@media(prefers-reduced-motion:reduce){
+  .bagovl,.bagovl.out,.bagsheet,.bagovl.out .bagsheet{animation-duration:.01ms!important}
+}
+.bagsheet{width:min(960px,96vw);height:min(640px,92dvh);display:flex;flex-direction:column;overflow:hidden;
+  background:#111729f7;border:1px solid var(--line2);border-radius:13px;
+  box-shadow:0 30px 80px #000d,0 0 0 1px #00000088;animation:bagPop .24s cubic-bezier(.23,1,.32,1) both}
+@keyframes bagPop{from{transform:translateY(10px) scale(.99);opacity:.6}to{transform:none;opacity:1}}
+.bagsheet:focus{outline:none}
+
+/* ---------- 统计头 ---------- */
+.bgs-hd{flex:none;display:flex;align-items:center;gap:13px;padding:14px 18px;border-bottom:1px solid var(--line);
+  background:linear-gradient(180deg,#161f3a,#121a30)}
+.bgs-hd .ic{width:36px;height:36px;flex:none;border-radius:9px;border:1px solid #d4b26a55;background:#d4b26a12;
+  display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:18px;color:var(--gold2)}
+.bgs-hd h2{font-family:var(--serif);font-size:18px;font-weight:400;letter-spacing:.24em}
+.bgs-hd .sb{font-size:10.5px;color:var(--ink3);letter-spacing:.06em;margin-top:3px}
+.bgs-hd .val{margin-left:auto;text-align:right}
+/* 钱包在上（图标化，与顶栏同一套视觉语言），估值在下（文字，明确不是钱） */
+.bgs-hd .val .n{display:flex;align-items:baseline;gap:6px;justify-content:flex-end;font-family:var(--serif);font-size:16px;color:var(--gold2)}
+.bgs-hd .val .n .tag{font-family:var(--sans);font-size:9.5px;color:var(--ink3);letter-spacing:.14em}
+.bgs-hd .val .l{font-size:10px;color:var(--ink3);letter-spacing:.06em;margin-top:3px;white-space:nowrap}
+.bgs-hd .x{width:36px;height:36px;flex:none;border:1px solid var(--line2);border-radius:7px;background:none;color:var(--ink3);
+  font-size:13px;cursor:pointer;font-family:inherit;transition:.16s}
+.bgs-hd .x:hover{border-color:var(--crimson);color:var(--crimson)}
+.bgs-hd .x:active{transform:scale(.93)}
+
+/* ---------- 两栏主体 ---------- */
+/* minmax(0,1fr) 而不是 1fr：grid 的自动最小值会被表格内容撑开，
+   在 414px 的手机上实测列宽变成 515px 直接溢出视口。 */
+.bgs-bd{flex:1;display:grid;grid-template-columns:296px minmax(0,1fr);min-height:0}
+
+/* 左：装备台账 */
+.bgs-gear{background:#0d1424;border-right:1px solid var(--line);padding:14px 15px;display:flex;flex-direction:column;gap:10px;
+  overflow-y:auto}
+.bgs-gear .g-t{font-size:9.5px;letter-spacing:.3em;color:var(--gold)}
+.bgs-der{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line);border-radius:9px;overflow:hidden;
+  background:#0f1526}
+.bgs-der>div{padding:9px 4px;text-align:center;border-right:1px solid var(--line)}
+.bgs-der>div:last-child{border-right:none}
+.bgs-der .k{font-size:9px;color:var(--ink3);letter-spacing:.12em}
+.bgs-der .v{font-family:var(--serif);font-size:18px;margin-top:2px}
+
+/* 右：物品台账 */
+.bgs-items{display:flex;flex-direction:column;min-height:0;min-width:0}
+.bgs-bar{flex:none;display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:#131a2e}
+.bgs-chips{display:flex;gap:5px;flex-wrap:wrap}
+.bgs-chips button{border:1px solid var(--line2);background:transparent;border-radius:999px;padding:7px 12px;font-size:11px;
+  color:var(--ink3);cursor:pointer;font-family:inherit;transition:.16s;white-space:nowrap}
+.bgs-chips button:hover{color:var(--ink);border-color:var(--star)}
+.bgs-chips button:active{transform:scale(.96)}
+.bgs-chips button.on{background:linear-gradient(135deg,#d4b26a2e,#d4b26a08);border-color:var(--gold);color:var(--gold2)}
+.bgs-chips button em{font-style:normal;opacity:.55;margin-left:4px;font-size:9.5px}
+.bgs-sort{margin-left:auto;font-size:10.5px;color:var(--ink3);letter-spacing:.04em;white-space:nowrap}
+/* 双向滚动：窄屏下六列放不下就横滚，而不是把两栏栅格撑破 */
+.bgs-tb{flex:1;overflow:auto;min-height:0}
+.bgs-tb::-webkit-scrollbar{width:9px}
+.bgs-tb::-webkit-scrollbar-thumb{background:var(--line2);border-radius:5px}
+.bgs-tb table{width:100%;border-collapse:collapse}
+.bgs-tb thead th{position:sticky;top:0;z-index:2;background:#141d33;font-weight:400;font-size:10px;letter-spacing:.14em;
+  color:var(--ink3);text-align:left;padding:9px 13px;border-bottom:1px solid var(--line);cursor:pointer;white-space:nowrap}
+.bgs-tb thead th:hover{color:var(--star)}
+.bgs-tb thead th.r,.bgs-tb td.r{text-align:right}
+/* 列表导航不做过渡（设计工程准则）：↑↓ 是每秒可能按三次的动作，
+   12ms 的 background transition 在连按时会拖出残影；hover 才配过渡——它是单次悬停。 */
+.bgs-tb tbody tr{cursor:pointer;transition:background .16s cubic-bezier(.23,1,.32,1)}
+.bgs-tb tbody tr:hover{background:#1b2540}
+.bgs-tb tbody tr.sel{background:#8ea1f514;box-shadow:inset 2px 0 0 var(--star);transition:none}
+.bgs-tb tbody tr:focus-visible{outline:2px solid var(--star);outline-offset:-2px}
+.bgs-tb tbody tr.ill{box-shadow:inset 2px 0 0 var(--crimson)}
+.bgs-tb tbody tr.ill.sel{box-shadow:inset 2px 0 0 var(--crimson),inset 0 0 0 1px #8ea1f522}
+.bgs-tb td{padding:0 13px;height:38px;border-bottom:1px solid #ffffff0a;white-space:nowrap;font-size:12px;color:var(--ink2)}
+.bgs-tb td.nm{font-family:var(--serif);font-size:13px}
+.bgs-tb td.nm .flag{font-style:normal;font-size:8.5px;color:var(--crimson);border:1px solid #d0685f55;border-radius:3px;
+  padding:0 4px;margin-left:6px;vertical-align:1px}
+.bgs-tb td.num{font-family:var(--mono);font-size:11px}
+.bgs-tb td.val{font-family:var(--mono);font-size:11px;color:var(--gold2)}
+.bgs-tb td.cat{color:var(--ink3);font-size:10.5px}
+.bgs-empty{padding:34px 0;text-align:center;font-size:12px;color:var(--ink3);letter-spacing:.1em}
+.bgs-dt{flex:none;border-top:1px solid var(--line2);background:#0f1526;padding:12px 16px 13px;min-height:104px}
+.bgs-dt .ph{font-size:11px;color:var(--ink3);line-height:1.9}
+.bgs-dt .dt-h{display:flex;align-items:baseline;gap:10px}
+.bgs-dt .dt-h .n{font-family:var(--serif);font-size:15px}
+.bgs-dt .dt-h .m{margin-left:auto;font-size:10px;color:var(--ink3);letter-spacing:.04em}
+.bgs-dt .dt-b{display:flex;gap:24px;margin-top:8px;align-items:flex-start}
+.bgs-dt .desc{flex:1;font-size:11.5px;color:var(--ink2);line-height:1.85}
+.bgs-dt .dt-af{min-width:186px}
+.bgs-dt .dt-af div{display:flex;justify-content:space-between;gap:12px;font-family:var(--serif);font-size:11.5px;padding:2px 0}
+.bgs-dt .dt-af div span:last-child{color:var(--jade);font-family:var(--mono);font-size:10.5px}
+.bgs-dt .dt-a{display:flex;gap:8px;margin-top:10px;align-items:center;flex-wrap:wrap}
+.bgs-dt .dt-a button{border:1px solid var(--line2);background:var(--bg2);border-radius:6px;padding:7px 18px;font-size:12px;
+  color:var(--ink);font-family:inherit;cursor:pointer;transition:.16s}
+.bgs-dt .dt-a button:hover{border-color:var(--star);color:var(--star);background:var(--bg3)}
+.bgs-dt .dt-a button:active{transform:scale(.97)}
+.bgs-dt .dt-a button.pri{border-color:#d4b26a66;background:linear-gradient(135deg,#d4b26a26,#d4b26a08);color:var(--gold2)}
+.bgs-dt .dt-a .hint{font-size:10.5px;color:var(--ink3)}
+
+/* ---------- 窄屏（<900px）：满屏 + 单列。
+     960 宽的两栏在手机上必然挤成一团，这里改为「装备在上、物品在下」，
+     两张装备卡并排、派生三格保留——信息不减，只是换行。 ---------- */
+@media(max-width:899px){
+  .bagsheet{width:100%;height:100%;max-height:none;border-radius:0;border:none}
+  .bgs-hd{padding:12px 14px}
+  .bgs-hd h2{font-size:16px;letter-spacing:.18em}
+  .bgs-bd{grid-template-columns:minmax(0,1fr);grid-template-rows:auto 1fr}
+  /* 窄屏只留「物品 / 数量 / 单价 / 估值」：类别已由上方 chips 表达，
+     状态（违禁）已由行内红标与底部详情承载。实测留五列时行宽 463 > 视口 414，
+     仍要横滚；收成四列 + 名称截断后免横滚。 */
+  .bgs-tb thead th:nth-child(2),.bgs-tb tbody td:nth-child(2),
+  .bgs-tb thead th:nth-child(6),.bgs-tb tbody td:nth-child(6){display:none}
+  .bgs-tb table{min-width:0}
+  .bgs-tb td.nm{max-width:168px;overflow:hidden;text-overflow:ellipsis}
+  .bgs-chips{-webkit-mask:linear-gradient(90deg,#000 0,#000 calc(100% - 22px),transparent 100%);
+    mask:linear-gradient(90deg,#000 0,#000 calc(100% - 22px),transparent 100%)}
+  .bgs-gear{border-right:none;border-bottom:1px solid var(--line);flex-direction:row;flex-wrap:wrap;gap:8px;padding:11px 12px;
+    max-height:none}
+  .bgs-gear .g-t{width:100%}
+  .bgs-der{flex:1 1 100%}
+  .bgs-bar{padding:10px 12px;gap:8px}
+  .bgs-chips{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+  .bgs-chips::-webkit-scrollbar{display:none}
+  .bgs-sort{display:none}
+  .bgs-tb td{padding:0 10px;height:36px}
+  .bgs-dt{padding:11px 12px 12px;min-height:96px}
+  .bgs-dt .dt-b{gap:14px}
+  .bgs-dt .dt-af{min-width:0;flex:1}
+}
+
+/* ==================== 落盘：行囊也走丁 · 照影 ====================
+   与 #pnl-ovl 的页面同一形态：从顶栏下沿铺开、渐变压暗、没有窗口边框。
+   内部（.bgs-bd 的 296px 装备列 + 物品表格）是数据网格而不是卡片堆叠，保持原样。
+   **删掉本段即回到「居中小窗」**——这是本片的回退点。
+
+   切换动画与面板页同构（修复「切到行囊总闪一下」）：
+   面板页不闪，是因为 #pnl-ovl 的压暗底座**挂载即全强度就位**、只让内容 .sheet
+   淡入；行囊此前却让整个容器（含底座渐变）淡入 0.18s——而世界层/面板页都是
+   display 瞬间让位，那 180ms 里绘卷先裸露再被压暗，从面板页打开更是
+   「暗→亮→暗」双重闪变。现在底座不淡（硬就位），切换感由内容层 .bagsheet
+   的 bagIn 0.18s 承担（与 pnlIn/三屏同档；bagIn 本就是纯 opacity 0→1）。 */
+.bagovl{top:var(--top-h);align-items:stretch;justify-content:flex-start;
+  background:linear-gradient(180deg,#080d17c4,#080d17a6 44%,#080d1759);backdrop-filter:none;
+  animation:none}
+.bagsheet{width:100%;max-width:none;height:100%;border:none;border-radius:0;
+  background:none;box-shadow:none;animation:bagIn .18s cubic-bezier(.23,1,.32,1) both;align-items:center}
+.bagsheet > *{width:100%;max-width:1328px}
+/* 退场同理：底座保持不透明直到卸载（170ms 后由 BagOverlay 的定时器卸载），
+   只让内容 bagDown 下沉淡出——容器整体淡出会在关闭时把「暗→亮」闪变重放一遍 */
+.bagovl.out{animation:none;pointer-events:none}
+.bgs-hd{background:none;border-bottom:1px solid #ffffff14;padding:22px 0 15px;gap:14px}
+.bgs-hd .ic{display:none} /* 页头与 #pnl-ovl 对齐：不留方形徽记，标题自己立得住 */
+.bgs-hd h2{font-size:17px;letter-spacing:.2em}
+.bgs-hd .x{width:auto;height:auto;min-height:0;border:none;border-radius:0;font-size:11.5px;letter-spacing:.1em;
+  padding:3px 2px 3px 12px;display:inline-flex;align-items:center}
+.bgs-hd .x:hover{border:none;color:var(--gold2)}
+.bgs-hd .x:active{transform:none}
+/* 详情条与正文同宽收口：它在最底下，不必跟着窗口边缘走。
+   它不在 .bagsheet 的直接子一级里，所以这条要按类名写，不能靠 .bagsheet > *。 */
+.bgs-dt{width:100%;max-width:1328px;margin:0 auto;background:#0d1424a8;border-top:1px solid #ffffff14}
+/* 装备列在 960 窗口里靠底色分栏，铺满全屏后那条深色竖条会从顶贯到底——
+   改成只留一道分界线：与页面其它地方一致，不给表面。 */
+.bgs-gear{background:none;border-right:1px solid #ffffff0f}
+
+/* ── 方案丁 · 装配槽 ─────────────────────────────────────────
+   左栏按「槽」而不是按「件」组织：四个槽固定占位（数据层目前只有武器/护甲两个实体槽，
+   饰品与备用先占位），空槽也留着——玩家一眼就知道还能装什么，而不是"没显示=没有"。
+   两栏各占半幅，分组仍只靠光晕与 1px 线。 */
+.bagovl .bgs-bd{grid-template-columns:1fr 1fr;gap:0 46px;align-items:start;padding:0}
+.bagovl .bgs-gear{border-right:none;padding:0;gap:0}
+/* 页头照稿子逐值对齐：标题与副题**同一行**（baseline），不再上下堆叠 */
+/* 页头的上边距按稿子的 24px（稿子里它挂在 .sheet 上，这里并进来），
+   底边距 15px；合起来 24+27+15 = 66，与稿子的 .head 结束位置（67）差 1px。 */
+.bagovl .bgs-hd{align-items:baseline;padding:24px 0 15px;gap:14px;border-bottom:1px solid #ffffff09}
+.bagovl .bgs-hd .tt{display:flex;flex-direction:row;align-items:baseline;gap:14px}
+.bagovl .bgs-hd h2{font-family:var(--serif);font-size:19px;font-weight:400;letter-spacing:.24em;color:#e9eef7}
+.bagovl .bgs-hd .tt .sb{font-size:11.5px;color:#6d7a90;letter-spacing:.1em;margin-top:0}
+.bagovl .bgs-hd .val{margin-left:auto;display:flex;flex-direction:row;align-items:baseline;gap:18px;text-align:left}
+.bagovl .bgs-hd .val .n{display:flex;align-items:baseline;gap:8px;font-family:var(--serif);font-size:15px;color:#b9c4d8}
+.bagovl .bgs-hd .val .n .tag{font-family:var(--sans);font-size:11px;color:#6d7a90;letter-spacing:.1em}
+.bagovl .bgs-hd .val .l{font-size:10.5px;color:#6d7a90;letter-spacing:.08em}
+.bagovl .bgs-cap{position:relative;display:flex;align-items:baseline;gap:12px;
+  font-family:var(--serif);font-size:13px;font-weight:400;letter-spacing:.22em;color:#b9c4d8;padding:0}
+.bagovl .bgs-cap .r{margin-left:auto;font-family:var(--sans);font-size:10.5px;color:#6d7a90;letter-spacing:.08em}
+/* 两栏的区块起点与稿子一致：.sec 的 padding-top 20px */
+.bagovl .bgs-gear,.bagovl .bgs-items{padding-top:20px}
+/* 同上：行囊页的区块标题也去掉光晕（理由见 shell.css 里那条注释）。 */
+.bagovl .bgs-cap em{font-style:normal;font-family:var(--sans);font-size:10.5px;letter-spacing:.1em;color:#6d7a90}
+.bagovl .bgs-slots{display:flex;flex-direction:column}
+/* 用 flex 而不是 grid：值与小注要在同一行并排，
+   grid 的格子里它们只会各占一行（那样槽高就是 57 而不是稿子的 39）。 */
+.bagovl .bgs-slots .sl{display:flex;align-items:baseline;gap:16px;
+  padding:9px 0;border-bottom:1px solid #ffffff09}
+.bagovl .bgs-slots .sl .k{flex:none;width:64px}
+.bagovl .bgs-slots .sl .k{font-size:11px;color:#6d7a90;letter-spacing:.14em}
+.bagovl .bgs-slots .sl .v{font-family:var(--serif);font-size:13.5px;color:#e9eef7}
+.bagovl .bgs-slots .sl .sub{font-size:10.5px;color:#8b98b0;letter-spacing:.06em}
+/* 表头照稿子：10px 字 / .16em 字距 / #6d7a90 / 底线 #ffffff14 */
+.bagovl .bgs-tb th{padding:0 0 9px;height:auto;line-height:1.6;letter-spacing:.16em;
+  color:#6d7a90;border-bottom:1px solid #ffffff14}
+.bagovl .bgs-tb th:last-child,.bagovl .bgs-tb td:last-child{padding-left:36px}
+.bagovl .bgs-slots .sl.empt .v{color:#6d7a90;font-size:12.5px;letter-spacing:.1em}
+.bagovl .bgs-der{display:flex;margin-top:20px;border-top:1px solid #ffffff09;border-bottom:1px solid #ffffff09}
+.bagovl .bgs-der>div{flex:1;padding:13px 0;text-align:center;border-right:1px solid #ffffff09}
+.bagovl .bgs-der>div:last-child{border-right:none}
+.bagovl .bgs-der .k{font-size:10.5px;color:#6d7a90;letter-spacing:.12em}
+.bagovl .bgs-der .v{font-family:var(--serif);font-size:19px;color:#e9eef7;margin-top:5px;font-variant-numeric:tabular-nums}
+/* 分类行照稿子：不是胶囊按钮，而是无框文字 + 选中项一条金底线
+   （与顶栏导航、页面里的分类行同一套语言） */
+.bagovl .bgs-chips{display:flex;align-items:center;margin:14px 0 6px;border-bottom:1px solid #ffffff09;gap:0}
+.bagovl .bgs-chips button{border:none;background:none;border-radius:0;box-shadow:none;
+  border-bottom:1px solid transparent;color:#8b98b0;font-family:var(--sans);font-size:11.5px;
+  letter-spacing:.12em;padding:8px 16px 10px}
+.bagovl .bgs-chips button:hover{color:#c9d3e3;background:none}
+.bagovl .bgs-chips button.on{color:#efd69b;border-bottom-color:var(--gold);background:none}
+.bagovl .bgs-chips button em{font-style:normal;font-family:var(--mono);font-size:10px;color:#6d7a90;margin-left:5px}
+.bagovl .bgs-chips button.on em{color:#c8a963}
+.bagovl .bgs-items{min-width:0;background:none;border:none}
+/* 稿子里这三处都没有底色：装配栏、派生数字、底部详情条。
+   旧样式给它们各铺了一层深色块（#0d1424 系），在铺满的页面上会读成"卡片"，
+   与沉静式的"不给表面"直接冲突。 */
+.bagovl .bgs-der,.bagovl .bgs-der>div{background:none}
+.bagovl .bgs-dt{background:none;border-top:none}
+/* 底部键位：照稿子 10.5px / .06em / #6d7a90 / 上边距 16px */
+.bagovl .bgs-dt .ph{font-size:10.5px;color:#6d7a90;letter-spacing:.06em;margin-top:16px}
+.bagovl .bgs-tb{background:none}
+.bagovl .bgs-bar{background:none;border-bottom:none;padding:0}
+/* 表头那一行也还留着底色（旧卡片的表头带），一并清掉 */
+.bagovl .bgs-tb table,.bagovl .bgs-tb thead,.bagovl .bgs-tb thead tr,.bagovl .bgs-tb th{background:none}

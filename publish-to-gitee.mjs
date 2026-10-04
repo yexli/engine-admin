@@ -4,6 +4,8 @@
    ------------------------------------------------------------
    仓库内容 = 下列条目，其余一律不发布：
      world-engine/  platform/(不含 data)  admin-web/  scripts/  deploy/  docs/
+     tianqiong/（参考游戏；按其自身 .gitignore 排除 outputs、
+       src-tauri/gen、src-tauri/Cargo.lock、界面截图-*、shot-*.png）
      publish-to-gitee.mjs   .dockerignore
    绝对红线：任何 .env / .env.*  与  platform/data 永不入库（复制后还会自检）。
    用法：
@@ -21,15 +23,19 @@ const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const PUB = path.join(ROOT, '.publish');
 const REMOTE = 'https://gitee.com/yeli52/world-engine-admin.git';
 
-const INCLUDE_DIRS = ['world-engine', 'platform', 'admin-web', 'scripts', 'deploy', 'docs'];
+const INCLUDE_DIRS = ['world-engine', 'platform', 'admin-web', 'scripts', 'deploy', 'docs', 'tianqiong'];
 const INCLUDE_FILES = ['README.md', 'publish-to-gitee.mjs', '.dockerignore'];
 
 const SKIP_DIR = new Set([
   'node_modules', 'dist', '.git', '.mimosa', '.npm-cache', '.pnpm-store',
-  '.turbo', 'coverage', 'test-results', 'playwright-report'
+  '.turbo', 'coverage', 'test-results', 'playwright-report', '.trash'
 ]);
 const SKIP_EXT = new Set(['.log', '.tsbuildinfo']);
-const SKIP_FILE = new Set(['.eslintcache']);
+const SKIP_FILE = new Set(['.eslintcache', '.icon-src.png']);
+
+// tianqiong 自身 .gitignore 的发布版映射：再生成的产物不入库
+const TQ_SKIP_PREFIX = ['tianqiong/outputs', 'tianqiong/src-tauri/gen', 'tianqiong/界面截图-'];
+const TQ_SKIP_FILE = new Set(['tianqiong/src-tauri/Cargo.lock']);
 
 // 红线 1：任何 .env / .env.local / .env.production ...
 const ENV_RE = /^\.env(\.|$)/;
@@ -45,6 +51,10 @@ function shouldCopy(src) {
   if (SKIP_EXT.has(path.extname(base))) return false;
   const rel = relOf(src);
   if (rel === 'platform/data') return false;                 // 红线：平台运行时数据
+  if (TQ_SKIP_PREFIX.some((p) => rel === p || rel.startsWith(p + '/'))) return false;
+  if (TQ_SKIP_FILE.has(rel)) return false;
+  if (rel.startsWith('tianqiong/') && /^shot-.*\.png$/.test(base)) return false;
+  if (rel.startsWith('tianqiong/') && base.endsWith('.local')) return false;
   return true;
 }
 
@@ -58,6 +68,7 @@ function assertNoRedlines() {
       const rel = path.relative(PUB, p).split(path.sep).join('/');
       if (ENV_RE.test(e.name)) hits.push(rel);
       if (rel === 'platform/data') hits.push(rel + '/');
+      if (rel === 'tianqiong/outputs' || rel.startsWith('tianqiong/src-tauri/gen')) hits.push(rel + '/');
       if (e.isDirectory() && rel !== 'platform/data') walk(p);
     }
   };

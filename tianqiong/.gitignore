@@ -1,0 +1,33 @@
+# 天穹纪元 2.0 · 忽略规则
+# 说明：可由脚本 / 构建再生成的产物一律不入库。
+# 注：本文件会随 git subtree 提取成为 Gitee 仓库根的同名文件，路径按「项目根」相对书写。
+
+# ---- 依赖与包缓存 ----
+node_modules
+.npm-cache
+
+# ---- 构建与链接产物 ----
+dist
+src-tauri/target
+src-tauri/gen
+src-tauri/Cargo.lock
+
+# ---- 可再生成的截图（scripts/shot.mjs / verify-*.mjs 重跑即可）----
+# 通配覆盖全部截图目录：原先只列了「落地 / DUI」两项，于是 shot-*.png 与
+# 「界面截图-地图方案 / DE变体 / E2落地」三个目录一直在未忽略状态，共约 60 MB。
+界面截图-*/
+shot-*.png
+outputs/
+
+# ---- 本地与临时 ----
+.trash/
+*.local
+.DS_Store
+Thumbs.db
+.icon-src.png
+.vite.log
+.vite-e.log
+.tauri-dev.log
+
+# ---- AI 工具会话状态（安全扫描/审查的当日运行态，重跑即再生成）----
+.mimosa

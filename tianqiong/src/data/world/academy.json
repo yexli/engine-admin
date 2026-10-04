@@ -1,0 +1,1039 @@
+{
+  "note": "卡 H6 · 培养学院（零逻辑 · 纯 canon 数据）。学院名/所在大陆/城市/专长/学制/年费逐字取自 lore.json s100「100. 主要学院」；学制阶段与学位等级取自 s101「101. 学院学制」；神殿培养体系取自 s103；锻铸/矮人专属取自 s36 与 s26。core/academy.ts 不得硬编码学院名与数值——一律读本文件。",
+  "loreRef": [
+    "s36",
+    "s99",
+    "s100",
+    "s101",
+    "s102",
+    "s103",
+    "s104"
+  ],
+  "paths": [
+    "战士学院",
+    "法师学院",
+    "神殿学院",
+    "生产学院"
+  ],
+  "pathsNote": "四路径是机制归类（focus: warrior/mage/temple/craft → 路径名），供 UI 分组与入学分流；学院名以 s100 canon 为准（帝国圣学院／翠风学园／金砂商院／霜锚武馆／血吼战学院／深井学院／浮岛观星台＋冒险者训练营），不得用「战士学院」等抽象名替换真实学院名。",
+  "focusPath": {
+    "warrior": "战士学院",
+    "mage": "法师学院",
+    "temple": "神殿学院",
+    "craft": "生产学院"
+  },
+  "mechanismNote": "s99 四大培养路径：师徒制（最传统）／学院制（最系统）／神殿制（最权威）／自学·野路（最艰难）。本卡实现其中的「学院制」：入学 → 学习 → 毕业 → 实战。神殿制见 templeSchools（s103）。",
+  "terms": {
+    "years": 5,
+    "termsPerYear": 3,
+    "ticksPerTerm": 1440,
+    "studyTicks": 1440,
+    "courseDuration": 4320,
+    "note": "s101 标准学制（5年制）为缺省；各学院按 s100 自定 years（3–8 年）。1 学期 = 30 日 × 48 刻 = 1440 刻；1 学年 = 3 学期 = 4320 刻；一次修业（study）推进 1 学期，故每门课程需 3 次成功修业。课程数 = 学制年数。",
+    "stageNames": [
+      "第1年：基础（识字、魔法理论、体能）",
+      "第2年：入门（职业基础技能、初级魔法）",
+      "第3年：专精（细分路线选择）",
+      "第4年：实战（任务、考核）",
+      "第5年：毕业（论文、答辩、毕业任务）"
+    ],
+    "stageNamesNote": "s101 逐年阶段原文。学制长于 5 年的学院（翠风学园 6 年／深井学院 6 年／浮岛观星台 8 年）在「专精」「实战」两阶段内以 s101 原文词汇延伸（专精深化·实战深化·论文与答辩），不引入新术语。",
+    "degrees": [
+      {
+        "name": "学徒",
+        "equiv": "见习",
+        "career": "基础工作",
+        "atRatio": 0.25
+      },
+      {
+        "name": "学士",
+        "equiv": "正式",
+        "career": "冒险者/商会",
+        "atRatio": 0.5
+      },
+      {
+        "name": "大师",
+        "equiv": "主教",
+        "career": "学院教师/神殿",
+        "atRatio": 0.75
+      },
+      {
+        "name": "贤者",
+        "equiv": "神阶",
+        "career": "院长/神殿高层",
+        "atRatio": 1
+      }
+    ],
+    "degreesNote": "s101 学位等级：学徒（见习·基础工作）／学士（正式·冒险者/商会）／大师（主教·学院教师/神殿）／贤者（神阶·院长/神殿高层）。atRatio = 修满该比例（按已结业课程刻数 / 学制总刻数）即可在毕业时取得对应学位；各学院实际授予的学位写在 graduateReward.title。"
+  },
+  "exam": {
+    "baseDc": 8,
+    "perCourseDc": 2,
+    "stat": "智力",
+    "failExp": 0,
+    "failExpGain": 8,
+    "note": "考核走 core/checks.ts 的 check(label, stat, dc)（d20 + 属性调整 + 雨天 -1，20 大成功）。dc = baseDc + perCourseDc × 课程序（0 基），各课程可在 curriculum[].dc 覆写（本文件已逐门写明）。failExp 为挂科扣减的经验（0＝不扣），failExpGain 为挂科仍获的经验（失败亦有心得）。挂科记 academy.failed，不驱逐学籍。"
+  },
+  "enrollNote": "入学为报名制：不与玩家所在地点绑定（s84 星枢传讯／远程通讯塔 + s104 学院—公会—神殿三方关系：学院教学、公会认证、神殿祝福），报名与学期考核经公会与星枢网办理，毕业任务赴本院完成。前置检查五档（卡 L2 补齐为 s101「入学要求」的全量）：年龄（12-25 岁）/ 资质（三选一）/ 境界（rank，走 derived.rankTierName）/ 种族（race，缺省不限）/ 学费（读了寒门通道之后实缴的那部分）。",
+  "entry": {
+    "_comment": "卡 L2 · s101「入学要求」四条：年龄 · 资质测试 · 出身 · 学费与寒门通道。本块是全局缺省，学院可在 entryReq 覆写（资质候选属性按各院专长收窄）。",
+    "ageMin": 12,
+    "ageMax": 25,
+    "ageNote": "s101：年龄 12-25 岁。年龄取自卡 L1 的寿命系统（PlayerState.birthTick 派生），与寿数同源。",
+    "aptitude": {
+      "stats": [
+        "智力",
+        "体质",
+        "感知"
+      ],
+      "map": {
+        "智力": "魔力",
+        "体质": "体能",
+        "感知": "智慧"
+      },
+      "min": 10,
+      "note": "s101：「资质测试：魔力/体能/智慧三选一」。魔力=智力／体能=体质／智慧=感知，三者取**最高**者与门槛比对——一门通即可入，正合「三选一」。世界书未写测试形式（笔试/试炼），故落成属性门槛而非新增一套检定交互；各学院按 s100 的专长收窄候选轴（武馆看力量与体质、商院看智力与魅力），冒险者训练营最宽（s100「免费但需通过测试」）。min 缺省 10 = 凡人基准属性值，只有浮岛观星台这类八年制最高学府抬到 12。"
+    },
+    "aid": [
+      {
+        "id": "guild_advance",
+        "name": "冒险者公会签约代偿",
+        "faction": "guild",
+        "rep": 20,
+        "cover": 1,
+        "debt": true,
+        "note": "s101 寒门通道之一：公会在学籍册上作保、学费由公会垫付，这笔钱记在账上，毕业前须还清。",
+        "payback": "coin"
+      },
+      {
+        "id": "temple_sponsor",
+        "name": "五大神殿预备役资助",
+        "faction": "temple_life",
+        "rep": 20,
+        "cover": 1,
+        "debt": true,
+        "note": "s101 寒门通道之一：受神殿资助者毕业后入预备役。此处同样记为一笔待偿的账（服役的落地见 s103 神殿体系）。",
+        "payback": "service",
+        "serviceYears": 3,
+        "servicePay": 3000
+      },
+      {
+        "id": "military_bond",
+        "name": "军工定向（服役抵扣）",
+        "faction": "empire",
+        "rep": 30,
+        "cover": 1,
+        "debt": true,
+        "note": "s101 寒门通道之一：以服役抵扣学费，帝国军需处出这笔钱。",
+        "payback": "service",
+        "serviceYears": 2,
+        "servicePay": 4000
+      }
+    ],
+    "aidNote": "寒门通道按势力声望开门（rep 门槛读 WorldState.rep）。cover = 代偿比例。偿还方式分两种（payback）：coin 还钱（公会代偿——公会是做生意的，账要平），service 服役（神殿预备役 3 年 / 军工定向 2 年——§101 原文说的是「预备役资助」与「服役抵扣」，它们本来就不是借款）。服役期间按年发军饷并积累该势力声望，期满另有记录。"
+  },
+  "academies": [
+    {
+      "id": "imperial",
+      "name": "帝国圣学院",
+      "continent": "中央大陆",
+      "city": "圣辉城",
+      "specialty": "物理、法师、辅助",
+      "years": 5,
+      "terms": 9,
+      "focus": "mage",
+      "path": "法师学院",
+      "tuition": 1000,
+      "entryReq": {
+        "gold": 1000,
+        "rank": "正式",
+        "scholarship": {
+          "rate": 0.3,
+          "needStat": {
+            "智力": 14
+          },
+          "note": "s101：帝国圣学院有 30% 奖学金"
+        }
+      },
+      "curriculum": [
+        {
+          "courseId": "imperial_y1",
+          "name": "第1年·基础（识字、魔法理论、体能）",
+          "year": 1,
+          "duration": 4320,
+          "skills": [],
+          "goldCost": 80,
+          "dc": 8,
+          "stat": "智力"
+        },
+        {
+          "courseId": "imperial_y2",
+          "name": "第2年·入门（职业基础技能、初级魔法）",
+          "year": 2,
+          "duration": 4320,
+          "skills": [
+            "firebolt"
+          ],
+          "goldCost": 80,
+          "dc": 10,
+          "stat": "智力"
+        },
+        {
+          "courseId": "imperial_y3",
+          "name": "第3年·专精（细分路线选择）",
+          "year": 3,
+          "duration": 4320,
+          "skills": [
+            "arcane_ward"
+          ],
+          "goldCost": 100,
+          "dc": 12,
+          "stat": "智力"
+        },
+        {
+          "courseId": "imperial_y4",
+          "name": "第4年·实战（任务、考核）",
+          "year": 4,
+          "duration": 4320,
+          "skills": [
+            "blessing"
+          ],
+          "goldCost": 100,
+          "dc": 14,
+          "stat": "智力"
+        },
+        {
+          "courseId": "imperial_y5",
+          "name": "第5年·毕业（论文、答辩、毕业任务）",
+          "year": 5,
+          "duration": 4320,
+          "skills": [],
+          "goldCost": 120,
+          "dc": 16,
+          "stat": "智力"
+        }
+      ],
+      "graduateReward": {
+        "skills": [
+          "arcane_ward"
+        ],
+        "title": "大师"
+      },
+      "mentor": {
+        "npcId": "vandel",
+        "name": "范德尔",
+        "title": "古研会学者·帝国圣学院客座",
+        "race": "人类",
+        "loc": "market",
+        "role": "驻圣辉城招生使",
+        "seeded": false
+      },
+      "canonRef": "s100"
+    },
+    {
+      "id": "windport",
+      "name": "翠风学园",
+      "continent": "东方群岛",
+      "city": "翠风港",
+      "specialty": "时空、元素、英灵",
+      "years": 6,
+      "terms": 9,
+      "focus": "mage",
+      "path": "法师学院",
+      "tuition": 800,
+      "entryReq": {
+        "gold": 800,
+        "rank": "正式",
+        "aptitude": [
+          "智力",
+          "感知"
+        ]
+      },
+      "curriculum": [
+        {
+          "courseId": "windport_y1",
+          "name": "第1年·基础（识字、魔法理论、体能）",
+          "year": 1,
+          "duration": 4320,
+          "skills": [],
+          "goldCost": 60,
+          "dc": 8,
+          "stat": "智力"
+        },
+        {
+          "courseId": "windport_y2",
+          "name": "第2年·入门（职业基础技能、初级魔法）",
+          "year": 2,
+          "duration": 4320,
+          "skills": [
+            "firebolt"
+          ],
+          "goldCost": 60,
+          "dc": 10,
+          "stat": "智力"
+        },
+        {
+          "courseId": "windport_y3",
+          "name": "第3年·专精（时空、元素）",
+          "year": 3,
+          "duration": 4320,
+          "skills": [],
+          "goldCost": 70,
+          "dc": 12,
+          "stat": "智力"
+        },
+        {
+          "courseId": "windport_y4",
+          "name": "第4年·专精深化（英灵）",
+          "year": 4,
+          "duration": 4320,
+          "skills": [
+            "aimed_shot"
+          ],
+          "goldCost": 70,
+          "dc": 13,
+          "stat": "智力"
+        },
+        {
+          "courseId": "windport_y5",
+          "name": "第5年·实战（任务、考核）",
+          "year": 5,
+          "duration": 4320,
+          "skills": [],
+          "goldCost": 80,
+          "dc": 15,
+          "stat": "智力"
+        },
+        {
+          "courseId": "windport_y6",
+          "name": "第6年·毕业（论文、答辩、毕业任务）",
+          "year": 6,
+          "duration": 4320,
+          "skills": [],
+          "goldCost": 90,
+          "dc": 17,
+          "stat": "智力"
+        }
+      ],
+      "graduateReward": {
+        "skills": [
+          "firebolt"
+        ],
+        "title": "大师"
+      },
+      "mentor": {
+        "npcId": "tutor_wind",
+        "name": "雅拉·风吟",
+        "title": "翠风学园讲师·时空科",
+        "race": "精灵",
+        "loc": "plaza",
+        "role": "翠风学园驻中央大陆招生使",
+        "seeded": true
+      },
+      "canonRef": "s100"
+    },
+    {
+      "id": "goldveil",
+      "name": "金砂商院",
+      "continent": "南方沙漠",
+      "city": "金砂城",
+      "specialty": "商业、炼金、召唤",
+      "years": 4,
+      "terms": 9,
+      "focus": "craft",
+      "path": "生产学院",
+      "tuition": 1500,
+      "entryReq": {
+        "gold": 1500,
+        "rank": "见习",
+        "aptitude": [
+          "智力",
+          "魅力"
+        ]
+      },
+      "curriculum": [
+        {
+          "courseId": "goldveil_y1",
+          "name": "第1年·基础（识字、算术、炼金理论）",
+          "year": 1,
+          "duration": 4320,
+          "skills": [],
+          "goldCost": 120,
+          "dc": 8,
+          "stat": "智力"
+        },
+        {
+          "courseId": "goldveil_y2",
+          "name": "第2年·入门（商业基础技能、初级炼金）",
+          "year": 2,
+          "duration": 4320,
+          "skills": [
+            "firebolt"
+          ],
+          "goldCost": 120,
+          "dc": 10,
+          "stat": "智力",
+          "recipes": [
+            "rc_moon_potion"
+          ]
+        },
+        {
+          "courseId": "goldveil_y3",
+          "name": "第3年·专精（商业、炼金、召唤）",
+          "year": 3,
+          "duration": 4320,
+          "skills": [
+            "arcane_ward"
+          ],
+          "goldCost": 150,
+          "dc": 13,
+          "stat": "智力",
+          "recipes": [
+            "rc_seal_rune"
+          ]
+        },
+        {
+          "courseId": "goldveil_y4",
+          "name": "第4年·毕业（论文、答辩、毕业任务）",
+          "year": 4,
+          "duration": 4320,
+          "skills": [],
+          "goldCost": 160,
+          "dc": 15,
+          "stat": "智力",
+          "recipes": [
+            "rc_marrow_refine",
+            "rc_star_tonic"
+          ]
+        }
+      ],
+      "graduateReward": {
+        "skills": [
+          "blessing"
+        ],
+        "title": "学士"
+      },
+      "mentor": {
+        "npcId": "otto",
+        "name": "奥托",
+        "title": "砂海行商·金砂商院账房讲席",
+        "race": "地精",
+        "loc": "market",
+        "role": "金砂商院驻圣辉城招生使（兼催账）",
+        "seeded": false
+      },
+      "canonRef": "s100"
+    },
+    {
+      "id": "frosthold",
+      "name": "霜锚武馆",
+      "continent": "北方冻土",
+      "city": "霜锚堡",
+      "specialty": "物理、锻铸战技",
+      "years": 3,
+      "terms": 9,
+      "focus": "craft",
+      "path": "生产学院",
+      "tuition": 200,
+      "entryReq": {
+        "gold": 200,
+        "rank": "见习",
+        "race": "dwarf",
+        "aptitude": [
+          "力量",
+          "体质"
+        ]
+      },
+      "curriculum": [
+        {
+          "courseId": "frosthold_y1",
+          "name": "第1年·基础（体能、矿料辨识）",
+          "year": 1,
+          "duration": 4320,
+          "skills": [
+            "heavy_slash"
+          ],
+          "goldCost": 20,
+          "dc": 8,
+          "stat": "力量"
+        },
+        {
+          "courseId": "frosthold_y2",
+          "name": "第2年·专精（锻铸战技）",
+          "year": 2,
+          "duration": 4320,
+          "skills": [
+            "guard_break"
+          ],
+          "goldCost": 25,
+          "dc": 11,
+          "stat": "力量",
+          "recipes": [
+            "rc_steel_axe"
+          ]
+        },
+        {
+          "courseId": "frosthold_y3",
+          "name": "第3年·毕业（论文、答辩、毕业任务）",
+          "year": 3,
+          "duration": 4320,
+          "skills": [],
+          "goldCost": 30,
+          "dc": 14,
+          "stat": "力量",
+          "recipes": [
+            "rc_chain_mail"
+          ]
+        }
+      ],
+      "graduateReward": {
+        "skills": [
+          "guard_break"
+        ],
+        "title": "学徒"
+      },
+      "mentor": {
+        "npcId": "brendan",
+        "name": "布伦丹",
+        "title": "铁匠铺主·霜锚武馆推荐人",
+        "race": "矮人",
+        "loc": "market",
+        "role": "霜锚武馆驻圣辉城推荐人",
+        "seeded": false
+      },
+      "raceNote": "s36 锻造路线（矮人专属）／s26 矮人强绑定·生产系专属／s16 霜铁王庭矮人主导／s83 霜锚堡锻铸工坊——非矮人不得入馆（熔炉认手不认人）",
+      "canonRef": "s100"
+    },
+    {
+      "id": "bloodhold",
+      "name": "血吼战学院",
+      "continent": "西方荒野",
+      "city": "血吼城",
+      "specialty": "物理、暗杀、王帐",
+      "years": 4,
+      "terms": 9,
+      "focus": "warrior",
+      "path": "战士学院",
+      "tuition": 300,
+      "entryReq": {
+        "gold": 300,
+        "rank": "见习",
+        "aptitude": [
+          "敏捷",
+          "体质"
+        ]
+      },
+      "curriculum": [
+        {
+          "courseId": "bloodhold_y1",
+          "name": "第1年·基础（体能、阵列）",
+          "year": 1,
+          "duration": 4320,
+          "skills": [
+            "heavy_slash"
+          ],
+          "goldCost": 25,
+          "dc": 8,
+          "stat": "力量"
+        },
+        {
+          "courseId": "bloodhold_y2",
+          "name": "第2年·入门（武器基础技能）",
+          "year": 2,
+          "duration": 4320,
+          "skills": [],
+          "goldCost": 25,
+          "dc": 10,
+          "stat": "力量"
+        },
+        {
+          "courseId": "bloodhold_y3",
+          "name": "第3年·专精（暗杀、王帐）",
+          "year": 3,
+          "duration": 4320,
+          "skills": [
+            "wind_flurry"
+          ],
+          "goldCost": 30,
+          "dc": 12,
+          "stat": "敏捷"
+        },
+        {
+          "courseId": "bloodhold_y4",
+          "name": "第4年·毕业（论文、答辩、毕业任务）",
+          "year": 4,
+          "duration": 4320,
+          "skills": [],
+          "goldCost": 35,
+          "dc": 14,
+          "stat": "力量"
+        }
+      ],
+      "graduateReward": {
+        "skills": [
+          "guard_break"
+        ],
+        "title": "学士"
+      },
+      "mentor": {
+        "npcId": "galon",
+        "name": "加隆",
+        "title": "公会接待人·退役剑士·血吼战学院保荐人",
+        "race": "人类",
+        "loc": "guild",
+        "role": "血吼战学院驻圣辉城保荐人",
+        "seeded": false
+      },
+      "canonRef": "s100"
+    },
+    {
+      "id": "deepwell",
+      "name": "深井学院",
+      "continent": "地下深渊",
+      "city": "深井城",
+      "specialty": "召唤、构装、符文",
+      "years": 6,
+      "terms": 9,
+      "focus": "craft",
+      "path": "生产学院",
+      "tuition": 500,
+      "entryReq": {
+        "gold": 500,
+        "rank": "正式",
+        "aptitude": [
+          "智力",
+          "感知"
+        ]
+      },
+      "curriculum": [
+        {
+          "courseId": "deepwell_y1",
+          "name": "第1年·基础（识字、地脉常识、体能）",
+          "year": 1,
+          "duration": 4320,
+          "skills": [],
+          "goldCost": 40,
+          "dc": 8,
+          "stat": "智力"
+        },
+        {
+          "courseId": "deepwell_y2",
+          "name": "第2年·入门（构装基础技能、初级符文）",
+          "year": 2,
+          "duration": 4320,
+          "skills": [
+            "firebolt"
+          ],
+          "goldCost": 40,
+          "dc": 10,
+          "stat": "智力",
+          "recipes": [
+            "rc_rune_staff"
+          ]
+        },
+        {
+          "courseId": "deepwell_y3",
+          "name": "第3年·专精（召唤、构装）",
+          "year": 3,
+          "duration": 4320,
+          "skills": [],
+          "goldCost": 50,
+          "dc": 12,
+          "stat": "智力",
+          "recipes": [
+            "rc_seal_pair",
+            "rc_ward_shield"
+          ]
+        },
+        {
+          "courseId": "deepwell_y4",
+          "name": "第4年·专精深化（符文）",
+          "year": 4,
+          "duration": 4320,
+          "skills": [
+            "arcane_ward"
+          ],
+          "goldCost": 50,
+          "dc": 13,
+          "stat": "智力",
+          "recipes": [
+            "rc_starforged_armor"
+          ]
+        },
+        {
+          "courseId": "deepwell_y5",
+          "name": "第5年·实战（任务、考核）",
+          "year": 5,
+          "duration": 4320,
+          "skills": [],
+          "goldCost": 60,
+          "dc": 15,
+          "stat": "智力"
+        },
+        {
+          "courseId": "deepwell_y6",
+          "name": "第6年·毕业（论文、答辩、毕业任务）",
+          "year": 6,
+          "duration": 4320,
+          "skills": [],
+          "goldCost": 70,
+          "dc": 17,
+          "stat": "智力"
+        }
+      ],
+      "graduateReward": {
+        "skills": [
+          "holy_light"
+        ],
+        "title": "大师"
+      },
+      "mentor": {
+        "npcId": "tutor_deepwell",
+        "name": "科兹·幽鸣",
+        "title": "深井学院符文科教习",
+        "race": "不死族",
+        "loc": "alley",
+        "role": "深井学院驻地表招生使",
+        "seeded": true
+      },
+      "canonRef": "s100"
+    },
+    {
+      "id": "skycap",
+      "name": "浮岛观星台",
+      "continent": "天空浮岛",
+      "city": "浮岛中枢",
+      "specialty": "时空、奥秘、神道",
+      "years": 8,
+      "terms": 9,
+      "focus": "temple",
+      "path": "神殿学院",
+      "tuition": 1200,
+      "entryReq": {
+        "gold": 1200,
+        "rank": "主教",
+        "aptitude": [
+          "智力",
+          "感知"
+        ],
+        "aptitudeMin": 12
+      },
+      "curriculum": [
+        {
+          "courseId": "skycap_y1",
+          "name": "第1年·基础（识字、星象、体能）",
+          "year": 1,
+          "duration": 4320,
+          "skills": [],
+          "goldCost": 100,
+          "dc": 8,
+          "stat": "智力"
+        },
+        {
+          "courseId": "skycap_y2",
+          "name": "第2年·入门（奥秘基础技能、初级神道）",
+          "year": 2,
+          "duration": 4320,
+          "skills": [
+            "firebolt"
+          ],
+          "goldCost": 100,
+          "dc": 10,
+          "stat": "智力"
+        },
+        {
+          "courseId": "skycap_y3",
+          "name": "第3年·专精（时空、奥秘）",
+          "year": 3,
+          "duration": 4320,
+          "skills": [],
+          "goldCost": 110,
+          "dc": 12,
+          "stat": "智力"
+        },
+        {
+          "courseId": "skycap_y4",
+          "name": "第4年·专精深化（神道）",
+          "year": 4,
+          "duration": 4320,
+          "skills": [
+            "holy_light"
+          ],
+          "goldCost": 110,
+          "dc": 13,
+          "stat": "智力"
+        },
+        {
+          "courseId": "skycap_y5",
+          "name": "第5年·实战（任务、考核）",
+          "year": 5,
+          "duration": 4320,
+          "skills": [],
+          "goldCost": 120,
+          "dc": 15,
+          "stat": "智力"
+        },
+        {
+          "courseId": "skycap_y6",
+          "name": "第6年·实战深化（任务、考核）",
+          "year": 6,
+          "duration": 4320,
+          "skills": [],
+          "goldCost": 120,
+          "dc": 16,
+          "stat": "智力"
+        },
+        {
+          "courseId": "skycap_y7",
+          "name": "第7年·论文与答辩",
+          "year": 7,
+          "duration": 4320,
+          "skills": [],
+          "goldCost": 130,
+          "dc": 18,
+          "stat": "智力"
+        },
+        {
+          "courseId": "skycap_y8",
+          "name": "第8年·毕业（毕业任务）",
+          "year": 8,
+          "duration": 4320,
+          "skills": [],
+          "goldCost": 140,
+          "dc": 19,
+          "stat": "智力"
+        }
+      ],
+      "graduateReward": {
+        "skills": [
+          "arcane_ward",
+          "holy_light"
+        ],
+        "title": "贤者"
+      },
+      "mentor": {
+        "npcId": "tutor_skycap",
+        "name": "阿亚·晨羽",
+        "title": "浮岛观星台星象科教习",
+        "race": "翼族",
+        "loc": "temple",
+        "role": "观星台驻圣辉城招生使",
+        "seeded": true
+      },
+      "canonRef": "s100"
+    },
+    {
+      "id": "camp",
+      "name": "冒险者训练营",
+      "continent": "各大陆",
+      "city": "圣辉城分营",
+      "specialty": "通用（免费但需通过测试）",
+      "years": 1,
+      "terms": 9,
+      "focus": "warrior",
+      "path": "战士学院",
+      "tuition": 0,
+      "entryReq": {
+        "gold": 0,
+        "rank": "见习"
+      },
+      "curriculum": [
+        {
+          "courseId": "camp_y1",
+          "name": "入营测试与基础（识字、体能）",
+          "year": 1,
+          "duration": 4320,
+          "skills": [
+            "heavy_slash"
+          ],
+          "goldCost": 0,
+          "dc": 10,
+          "stat": "体质"
+        }
+      ],
+      "graduateReward": {
+        "skills": [
+          "heavy_slash"
+        ],
+        "title": "学徒"
+      },
+      "mentor": {
+        "npcId": "tutor_camp",
+        "name": "罗兰·铁锋",
+        "title": "冒险者训练营教头·退役冒险者",
+        "race": "人类",
+        "loc": "guild",
+        "role": "训练营教头（圣辉城分营）",
+        "seeded": true
+      },
+      "note": "s100 跨大陆联合组织：冒险者训练营——每个大陆至少 1 所，免费但需通过测试；入营测试即第 1 门课程的考核（dc 提高）。",
+      "canonRef": "s100"
+    }
+  ],
+  "templeSchools": [
+    {
+      "temple": "战争神殿",
+      "deity": "war",
+      "direction": "物理骑士",
+      "years": "5-10年",
+      "entry": "信仰+武斗"
+    },
+    {
+      "temple": "智慧神殿",
+      "deity": "wisdom",
+      "direction": "法师/奥秘",
+      "years": "7-15年",
+      "entry": "信仰+智慧"
+    },
+    {
+      "temple": "生命神殿",
+      "deity": "life",
+      "direction": "治疗/辅助",
+      "years": "5-12年",
+      "entry": "信仰+慈悲"
+    },
+    {
+      "temple": "死亡神殿",
+      "deity": "death",
+      "direction": "亡灵/召唤",
+      "years": "7-15年",
+      "entry": "信仰+死亡观"
+    },
+    {
+      "temple": "混沌神殿",
+      "deity": "chaos",
+      "direction": "诅咒/混沌",
+      "years": "5-10年",
+      "entry": "信仰+献祭"
+    }
+  ],
+  "templeSchoolsNote": "s103 五大神殿培养体系（逐字）。神殿制与学院制并行（s99）：信仰入门 → 神术修炼 → 神官晋升，对应 core/deity.ts 的信仰阶位。",
+  "mentorNote": "每所学院的导师 NPC（验收二·NPC 独立性）：goal／interest／bottomLine 均独立于玩家与彼此，greet 三档与 NpcDef.greet 同形。seeded=true 者为本卡新增的导师（npcId 尚未落在 people.json，由主线在 D1/D2/D3 接线时按此数据播种：name/title/race/loc 齐备，可直出 NpcDef）；seeded=false 者复用 people.json 既有 NPC，本处字段为其目标/底线在学院事务上的展开。loc 一律取圣辉城可达地点（plaza／tavern／market／temple／guild／alley），玩家在首都能见到全部招生使。",
+  "campNote": "s100 跨大陆联合组织：古代技术研究会（帝国／浮岛／金砂／翠风四大学院联合，专注古代文明研究）与冒险者训练营（每个大陆至少 1 所，免费但需通过测试）。训练营圣辉城分营即玩家开局可入的免费学院；古代技术研究会不另设学籍，由帝国圣学院・翠风学园・金砂商院・浮岛观星台四院联合承担（对应各院 mentor 的 goal）。",
+  "growthPaths": {
+    "_comment": "卡 A1（世界书 §99/§102/§103）：四条培养路径的统一契约。优/劣是给玩家看的取舍，不进数值；产出说明这条线最终给什么；门槛与周期供判定。",
+    "paths": [
+      {
+        "id": "college",
+        "name": "学院制",
+        "cycle": "3–8 年（各院自定）",
+        "cost": "首年学费 200–1500 铜，逐年递减",
+        "pros": [
+          "体系完整，可拿学位",
+          "课程固定，进度可预期",
+          "同窗与导师人脉"
+        ],
+        "cons": [
+          "周期最长",
+          "须按时出席",
+          "学费是硬门槛"
+        ],
+        "yields": [
+          "技能（课程解锁）",
+          "称号（学徒/学士/大师/贤者）",
+          "学院声望"
+        ],
+        "entry": {
+          "gold": true,
+          "rank": "见习",
+          "race": "多数不限"
+        },
+        "impl": "academy.json 的 academies + terms + degrees；入口 Academy.enroll/study"
+      },
+      {
+        "id": "mentor",
+        "name": "师徒制",
+        "cycle": "1–3 年（随师出行）",
+        "cost": "拜师礼 500 铜 + 出师谢礼",
+        "pros": [
+          "上手最快",
+          "师傅替你背书",
+          "能学到书本上没有的活手艺"
+        ],
+        "cons": [
+          "一次只跟一位师傅",
+          "与师傅绑定行程",
+          "师傅的名声即你的名声"
+        ],
+        "yields": [
+          "技能（mentor 通道）",
+          "师门称号",
+          "师傅的关系网"
+        ],
+        "entry": {
+          "gold": true,
+          "rank": "信徒",
+          "race": "不限"
+        },
+        "impl": "Growth.apprentice / Growth.masterTick / Growth.graduate"
+      },
+      {
+        "id": "temple",
+        "name": "神殿培养",
+        "cycle": "3–6 年（神殿学制）",
+        "cost": "免学费，须服事（每日祈祷/值守）",
+        "pros": [
+          "不花钱",
+          "信仰阶位直通",
+          "神赐技能（fa 通道）"
+        ],
+        "cons": [
+          "须守教义（违则逐出）",
+          "行程受神殿调度",
+          "与其它神系互相牵制"
+        ],
+        "yields": [
+          "信仰阶位",
+          "神赐技能",
+          "神殿声望与庇护"
+        ],
+        "entry": {
+          "faith": "该神偏好 ≥ 20",
+          "rank": "信徒"
+        },
+        "impl": "academy.json 的 templeSchools + Deity 的信仰阶位；入口 Growth.templeEnroll"
+      },
+      {
+        "id": "self",
+        "name": "自学",
+        "cycle": "不定（看悟性）",
+        "cost": "零（可自费买书/材料）",
+        "pros": [
+          "不欠人情",
+          "路线自定",
+          "实战领悟更快"
+        ],
+        "cons": [
+          "无称号可拿",
+          "无人指点，效率最低",
+          "卡在关口时只能自己磨"
+        ],
+        "yields": [
+          "技能（实战领悟通道）",
+          "少量见闻"
+        ],
+        "entry": {
+          "gold": false
+        },
+        "impl": "Growth.selfStudy（消耗时间换领悟点）"
+      }
+    ],
+    "apprentice": {
+      "gift": 500,
+      "giftGraduate": 2000,
+      "minAtt": 20,
+      "minChats": 4,
+      "minDays": 3,
+      "teachEvery": 3,
+      "maxTeaches": 3,
+      "expPerStudy": 12,
+      "title": "师门弟子"
+    },
+    "selfStudy": {
+      "ticks": 12,
+      "insightPerStudy": 3,
+      "maxPerDay": 2,
+      "expPerStudy": 6
+    }
+  }
+}

@@ -1,0 +1,403 @@
+{
+  "grades": {
+    "D": {
+      "label": "轻罪",
+      "penalty": "fine"
+    },
+    "C": {
+      "label": "中罪",
+      "penalty": "fine_atone"
+    },
+    "B": {
+      "label": "重罪",
+      "penalty": "jail"
+    },
+    "A": {
+      "label": "极恶罪",
+      "penalty": "exile"
+    },
+    "S": {
+      "label": "灭世罪",
+      "penalty": "death"
+    }
+  },
+  "_comment": "罪名表按世界书 §88 五档 15 类对齐（原实现 8 条，且「亵渎神殿」错标为 B 级）。fineBase 不照搬 §89 赎罪标准（那是赎罪门槛、以金币计的百万级数），沿用本作铜基数的既有标定；赎罪门槛见下方 atonement。",
+  "crimes": {
+    "petty_theft": {
+      "name": "行窃",
+      "grade": "D",
+      "wantedAdd": 1,
+      "fineBase": 300
+    },
+    "threat": {
+      "name": "恐吓市民",
+      "grade": "D",
+      "wantedAdd": 1,
+      "fineBase": 400
+    },
+    "public_disorder": {
+      "name": "扰乱秩序",
+      "grade": "D",
+      "wantedAdd": 1,
+      "fineBase": 200
+    },
+    "illegal_trade": {
+      "name": "违规营业",
+      "grade": "D",
+      "wantedAdd": 1,
+      "fineBase": 500
+    },
+    "assault": {
+      "name": "当街行凶",
+      "grade": "C",
+      "wantedAdd": 2,
+      "fineBase": 600
+    },
+    "theft": {
+      "name": "一般盗窃",
+      "grade": "C",
+      "wantedAdd": 2,
+      "fineBase": 800
+    },
+    "fraud": {
+      "name": "诈骗",
+      "grade": "C",
+      "wantedAdd": 2,
+      "fineBase": 900
+    },
+    "smuggling": {
+      "name": "倒卖禁货",
+      "grade": "B",
+      "wantedAdd": 2,
+      "fineBase": 1200,
+      "jailDays": 2
+    },
+    "grand_larceny": {
+      "name": "重大盗窃",
+      "grade": "B",
+      "wantedAdd": 2,
+      "fineBase": 1800,
+      "jailDays": 3
+    },
+    "murder": {
+      "name": "杀人",
+      "grade": "B",
+      "wantedAdd": 2,
+      "fineBase": 5000,
+      "jailDays": 8
+    },
+    "heresy": {
+      "name": "亵渎神殿",
+      "grade": "A",
+      "wantedAdd": 3,
+      "fineBase": 6000,
+      "jailDays": 5,
+      "exileTo": "wild"
+    },
+    "massacre": {
+      "name": "屠杀平民",
+      "grade": "A",
+      "wantedAdd": 3,
+      "fineBase": 9000,
+      "jailDays": 8,
+      "exileTo": "wild"
+    },
+    "treason": {
+      "name": "叛国",
+      "grade": "A",
+      "wantedAdd": 3,
+      "fineBase": 8000,
+      "jailDays": 8,
+      "exileTo": "wild"
+    },
+    "arson": {
+      "name": "纵火",
+      "grade": "A",
+      "wantedAdd": 3,
+      "fineBase": 3000,
+      "jailDays": 5,
+      "exileTo": "wild"
+    },
+    "deicide": {
+      "name": "弑神（灭世）",
+      "grade": "S",
+      "wantedAdd": 3,
+      "fineBase": 0
+    },
+    "summon_demon": {
+      "name": "召唤深渊恶魔",
+      "grade": "S",
+      "wantedAdd": 3,
+      "fineBase": 0
+    },
+    "break_seal": {
+      "name": "破坏封印",
+      "grade": "S",
+      "wantedAdd": 3,
+      "fineBase": 0
+    },
+    "apostasy": {
+      "name": "叛神",
+      "grade": "S",
+      "wantedAdd": 3,
+      "fineBase": 0
+    },
+    "soul_trade": {
+      "name": "贩卖灵魂",
+      "grade": "A",
+      "wantedAdd": 3,
+      "fineBase": 7000,
+      "jailDays": 6,
+      "exileTo": "wild"
+    },
+    "break_pact": {
+      "name": "背叛盟约",
+      "grade": "B",
+      "wantedAdd": 2,
+      "fineBase": 2000,
+      "jailDays": 3
+    },
+    "kill_surrendered": {
+      "name": "屠杀降者",
+      "grade": "B",
+      "wantedAdd": 2,
+      "fineBase": 2500,
+      "jailDays": 4
+    },
+    "desecrate_dead": {
+      "name": "亵渎死者",
+      "grade": "B",
+      "wantedAdd": 2,
+      "fineBase": 1600,
+      "jailDays": 2
+    }
+  },
+  "_comment_tiers": "世界书 §90 通缉六档：颜色 + 赏金区间（金币）。档位由 wanted 累进值映射（1/2/3 → 橙/红/黑），白名=无通缉、黄名=有案底未决、神罚=S 级。",
+  "wantedTiers": [
+    {
+      "id": "white",
+      "name": "白名",
+      "color": "#e8e8e8",
+      "bounty": [
+        0,
+        0
+      ],
+      "note": "守法"
+    },
+    {
+      "id": "yellow",
+      "name": "黄名",
+      "color": "#e0c04a",
+      "bounty": [
+        0,
+        0
+      ],
+      "note": "轻罪未决（警告）"
+    },
+    {
+      "id": "orange",
+      "name": "橙名",
+      "color": "#d98a3a",
+      "bounty": [
+        10,
+        100
+      ],
+      "note": "C 级罪"
+    },
+    {
+      "id": "red",
+      "name": "红名",
+      "color": "#c0392b",
+      "bounty": [
+        100,
+        1000
+      ],
+      "note": "B 级罪"
+    },
+    {
+      "id": "black",
+      "name": "黑名",
+      "color": "#3b3b3b",
+      "bounty": [
+        1000,
+        100000
+      ],
+      "note": "A 级罪"
+    },
+    {
+      "id": "divine",
+      "name": "神罚",
+      "color": "#d4af37",
+      "bounty": [
+        1000000,
+        0
+      ],
+      "note": "S 级罪"
+    }
+  ],
+  "_comment_atonement": "世界书 §89 赎罪标准（金币门槛）。S 级不接受赎罪（null）。",
+  "atonement": {
+    "D": {
+      "min": 10,
+      "max": 100
+    },
+    "C": {
+      "min": 100,
+      "max": 1000
+    },
+    "B": {
+      "min": 10000,
+      "max": 100000
+    },
+    "A": {
+      "min": 1000000,
+      "max": 1000000,
+      "needTemple": true
+    },
+    "S": null
+  },
+  "jurisdictions": {
+    "plaza": "strict",
+    "tavern": "strict",
+    "market": "strict",
+    "temple": "strict",
+    "guild": "strict",
+    "gate": "strict",
+    "alley": "lawless",
+    "wild": "lawless",
+    "cave": "lawless",
+    "cave2": "lawless",
+    "cave3": "lawless"
+  },
+  "penalties": {
+    "fine": "罚金",
+    "fine_atone": "罚金 + 当众赎罪",
+    "jail": "监禁",
+    "exile": "流放",
+    "death": "处决"
+  },
+  "order": [
+    "S",
+    "A",
+    "B",
+    "C",
+    "D"
+  ],
+  "ironLaws": [
+    {
+      "no": 1,
+      "text": "不可亵渎神明",
+      "grade": "A",
+      "crime": "heresy",
+      "scope": "全大陆通用"
+    },
+    {
+      "no": 2,
+      "text": "不可破坏封印",
+      "grade": "S",
+      "crime": "break_seal",
+      "scope": "全大陆通用"
+    },
+    {
+      "no": 3,
+      "text": "不可召唤深渊恶魔",
+      "grade": "S",
+      "crime": "summon_demon",
+      "scope": "全大陆通用"
+    },
+    {
+      "no": 4,
+      "text": "不可贩卖灵魂",
+      "grade": "A",
+      "crime": "soul_trade",
+      "scope": "全大陆通用"
+    },
+    {
+      "no": 5,
+      "text": "不可背叛盟约",
+      "grade": "B",
+      "crime": "break_pact",
+      "scope": "签约方通用"
+    },
+    {
+      "no": 6,
+      "text": "不可屠杀降者",
+      "grade": "B",
+      "crime": "kill_surrendered",
+      "scope": "战争法"
+    },
+    {
+      "no": 7,
+      "text": "不可亵渎死者",
+      "grade": "B",
+      "crime": "desecrate_dead",
+      "scope": "东方/中央最严"
+    }
+  ],
+  "tribunal": {
+    "name": "神殿审判庭",
+    "scope": "异端/渎圣案跨大陆专属管辖",
+    "seat": "跨大陆",
+    "judge": "主教级神官以上",
+    "appeal": "神殿终审"
+  },
+  "whitePact": {
+    "name": "白盟约",
+    "note": "签约方相互引渡；未签约大陆实际无法引渡",
+    "members": [
+      "中央大陆",
+      "东方群岛",
+      "南方沙漠",
+      "天空浮岛"
+    ],
+    "nonMembers": [
+      "北方冻土",
+      "西方荒野",
+      "地下深渊"
+    ],
+    "minGrade": "B"
+  },
+  "adventurer": {
+    "rights": [
+      {
+        "id": "quest_immunity",
+        "text": "公会任务期间伤人/杀魔物不违法"
+      },
+      {
+        "id": "self_defense",
+        "text": "被魔物攻击时反击不违法"
+      },
+      {
+        "id": "bounty_keep",
+        "text": "悬赏任务所得归自己"
+      },
+      {
+        "id": "guild_shield",
+        "text": "低等级冒险者受公会保护"
+      }
+    ],
+    "limits": [
+      {
+        "id": "no_civilian",
+        "text": "不可攻击平民",
+        "penalty": "降级 + 处罚"
+      },
+      {
+        "id": "no_private_duel",
+        "text": "不可私斗",
+        "penalty": "需公会备案"
+      },
+      {
+        "id": "no_dark_job",
+        "text": "不可接黑任务",
+        "penalty": "降声望，多数大陆视同助刑"
+      },
+      {
+        "id": "no_smuggling",
+        "text": "不可走私",
+        "penalty": "违禁品零容忍"
+      }
+    ]
+  },
+  "_r4Comment": "法律扩展（卡 R4 · §87–§93）：ironLaws=七铁律→罪名→罪级的引用链；tribunal=跨大陆审判庭；whitePact=白盟约引渡协议（签约方与最低引渡罪级）；adventurer=冒险者特权与限制（判定在 Law.ts）。"
+}

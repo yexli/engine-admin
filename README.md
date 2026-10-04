@@ -90,7 +90,7 @@ deploy/                compose 部署（见 docs/DEPLOY.md）
 docs/                  规划与指南（GAME-PLATFORM-PLAN / SDK-GUIDE / DEPLOY）
 ```
 
-> `tianqiong2/`（参考游戏《天穹纪元》）为独立项目，不入本仓。
+> `tianqiong/`（参考游戏《天穹纪元》）为独立项目，不入本仓。
 
 ## 文档
 

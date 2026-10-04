@@ -1,0 +1,339 @@
+{
+  "version": 1,
+  "loreRefs": [
+    "s36",
+    "s83"
+  ],
+  "quality": {
+    "names": [
+      "普通",
+      "优秀",
+      "精良",
+      "稀有",
+      "传说",
+      "神话",
+      "神器"
+    ],
+    "colors": [
+      "#cfcabf",
+      "#8fd18a",
+      "#6fb6ff",
+      "#c08cff",
+      "#ffb454",
+      "#ff7a5c",
+      "#ffe28a"
+    ],
+    "base": [
+      45,
+      25,
+      15,
+      10,
+      4,
+      0.9,
+      0.1
+    ],
+    "shift": [
+      -0.15,
+      -0.08,
+      0,
+      0.1,
+      0.25,
+      0.4,
+      0.5
+    ],
+    "maxRoll": 5
+  },
+  "caps": {
+    "affix": 3,
+    "scalePerQuality": 0.15,
+    "pricePerAffix": 0.1
+  },
+  "crit": {
+    "base": 0.05,
+    "max": 0.4
+  },
+  "affixes": [
+    {
+      "id": "af_sharp",
+      "name": "锋锐",
+      "kind": "wpn",
+      "tierMin": 1,
+      "tierMax": 3,
+      "weight": 30,
+      "eff": {
+        "atk": 1
+      }
+    },
+    {
+      "id": "af_heavy",
+      "name": "沉猛",
+      "kind": "wpn",
+      "tierMin": 2,
+      "tierMax": 5,
+      "weight": 14,
+      "eff": {
+        "atk": 2
+      }
+    },
+    {
+      "id": "af_swift",
+      "name": "迅捷",
+      "kind": "wpn",
+      "tierMin": 1,
+      "tierMax": 4,
+      "weight": 18,
+      "eff": {
+        "haste": 1
+      }
+    },
+    {
+      "id": "af_serrated",
+      "name": "锯齿",
+      "kind": "wpn",
+      "tierMin": 2,
+      "tierMax": 5,
+      "weight": 16,
+      "eff": {
+        "atk": 1,
+        "crit": 0.03
+      }
+    },
+    {
+      "id": "af_vampiric",
+      "name": "饮血",
+      "kind": "wpn",
+      "tierMin": 2,
+      "tierMax": 5,
+      "weight": 8,
+      "eff": {
+        "leech": 0.15
+      }
+    },
+    {
+      "id": "af_duelist",
+      "name": "决斗",
+      "kind": "wpn",
+      "tierMin": 3,
+      "tierMax": 5,
+      "weight": 10,
+      "eff": {
+        "crit": 0.06
+      }
+    },
+    {
+      "id": "af_stout",
+      "name": "厚实",
+      "kind": "arm",
+      "tierMin": 1,
+      "tierMax": 3,
+      "weight": 30,
+      "eff": {
+        "def": 1
+      }
+    },
+    {
+      "id": "af_bulwark",
+      "name": "壁垒",
+      "kind": "arm",
+      "tierMin": 3,
+      "tierMax": 5,
+      "weight": 8,
+      "eff": {
+        "def": 2
+      }
+    },
+    {
+      "id": "af_lithe",
+      "name": "轻盈",
+      "kind": "arm",
+      "tierMin": 2,
+      "tierMax": 4,
+      "weight": 12,
+      "eff": {
+        "haste": 1
+      }
+    },
+    {
+      "id": "af_thorns",
+      "name": "荆棘",
+      "kind": "arm",
+      "tierMin": 2,
+      "tierMax": 5,
+      "weight": 10,
+      "eff": {
+        "thorns": 2
+      }
+    },
+    {
+      "id": "af_runeward",
+      "name": "符文护壁",
+      "kind": "arm",
+      "tierMin": 2,
+      "tierMax": 5,
+      "weight": 14,
+      "eff": {
+        "ward": 1
+      }
+    },
+    {
+      "id": "af_aegis",
+      "name": "神盾",
+      "kind": "arm",
+      "tierMin": 4,
+      "tierMax": 5,
+      "weight": 3,
+      "eff": {
+        "def": 1,
+        "ward": 1
+      }
+    },
+    {
+      "id": "af_runed",
+      "name": "铭文",
+      "kind": "both",
+      "tierMin": 2,
+      "tierMax": 5,
+      "weight": 12,
+      "eff": {
+        "stat": {
+          "智力": 2
+        }
+      }
+    },
+    {
+      "id": "af_bear",
+      "name": "熊力",
+      "kind": "both",
+      "tierMin": 2,
+      "tierMax": 5,
+      "weight": 12,
+      "eff": {
+        "stat": {
+          "力量": 2
+        }
+      }
+    },
+    {
+      "id": "af_hawk",
+      "name": "鹰眼",
+      "kind": "both",
+      "tierMin": 2,
+      "tierMax": 5,
+      "weight": 12,
+      "eff": {
+        "stat": {
+          "感知": 2
+        }
+      }
+    },
+    {
+      "id": "af_serpent",
+      "name": "蛇敏",
+      "kind": "both",
+      "tierMin": 2,
+      "tierMax": 5,
+      "weight": 12,
+      "eff": {
+        "stat": {
+          "敏捷": 2
+        }
+      }
+    },
+    {
+      "id": "af_oak",
+      "name": "橡魄",
+      "kind": "both",
+      "tierMin": 3,
+      "tierMax": 5,
+      "weight": 9,
+      "eff": {
+        "stat": {
+          "体质": 2
+        }
+      }
+    },
+    {
+      "id": "af_grace",
+      "name": "风仪",
+      "kind": "both",
+      "tierMin": 3,
+      "tierMax": 5,
+      "weight": 9,
+      "eff": {
+        "stat": {
+          "魅力": 2
+        }
+      }
+    },
+    {
+      "id": "af_flame",
+      "name": "烈焰",
+      "kind": "both",
+      "tierMin": 2,
+      "tierMax": 5,
+      "weight": 10,
+      "eff": {
+        "elem": 3
+      }
+    },
+    {
+      "id": "af_frost",
+      "name": "霜蚀",
+      "kind": "both",
+      "tierMin": 2,
+      "tierMax": 5,
+      "weight": 10,
+      "eff": {
+        "elem": 2,
+        "ward": 1
+      }
+    },
+    {
+      "id": "af_storm",
+      "name": "雷引",
+      "kind": "both",
+      "tierMin": 3,
+      "tierMax": 5,
+      "weight": 7,
+      "eff": {
+        "elem": 4
+      }
+    },
+    {
+      "id": "af_starforged",
+      "name": "星锻",
+      "kind": "both",
+      "tierMin": 4,
+      "tierMax": 5,
+      "weight": 3,
+      "eff": {
+        "atk": 2,
+        "def": 1
+      }
+    },
+    {
+      "id": "af_eternal",
+      "name": "永恒",
+      "kind": "both",
+      "tierMin": 5,
+      "tierMax": 5,
+      "weight": 2,
+      "eff": {
+        "def": 2,
+        "ward": 2
+      }
+    },
+    {
+      "id": "af_bloodlust",
+      "name": "血饮",
+      "kind": "both",
+      "tierMin": 4,
+      "tierMax": 5,
+      "weight": 4,
+      "eff": {
+        "leech": 0.1,
+        "crit": 0.03
+      }
+    }
+  ]
+}

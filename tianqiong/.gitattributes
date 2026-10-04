@@ -1,0 +1,17 @@
+# 行尾统一：仓库内一律 LF，检出到任何平台都是 LF。
+# 理由：本工程文本资产全部已是 LF；显式声明可避免 Windows 编辑器写回 CRLF
+# 造成"整文件 diff"噪音，也避免 git 在 checkout 时偷偷转换。
+# 注：本文件会随 git subtree 提取成为 Gitee 仓库根的同名文件。
+* text=auto eol=lf
+
+# 二进制资产不参与行尾与差异计算
+*.webp binary
+*.png binary
+*.jpg binary
+*.ico binary
+*.icns binary
+*.woff2 binary
+
+# 生成物标记（便于 git diff 时折叠）
+src/data/world/dungeon.json linguist-generated=true
+package-lock.json linguist-generated=true

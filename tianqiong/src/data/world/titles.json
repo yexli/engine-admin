@@ -1,0 +1,236 @@
+{
+  "version": 1,
+  "loreRefs": [
+    "s100",
+    "s109"
+  ],
+  "suppressCost": 1200,
+  "note": "称号条件一律用 WorldState 既有字段表达（kills/flag/level/rep/axis/craftLv/codexCount/dungeonBest/abyss/wanted/crime/exiled/gold/academy），core/title.ts 只做判定，不硬编码条件语义。",
+  "titles": [
+    {
+      "id": "ti_slayer",
+      "name": "屠龙者",
+      "tier": 5,
+      "negative": false,
+      "cond": {
+        "kind": "kills",
+        "key": "dragon",
+        "min": 1
+      },
+      "desc": "你亲手了结过一条龙。",
+      "react": "酒馆里有人压低声音复述那一战，版本每传一次都更长一点。"
+    },
+    {
+      "id": "ti_abyss_sealer",
+      "name": "星渊封印者",
+      "tier": 5,
+      "negative": false,
+      "cond": {
+        "kind": "abyss",
+        "key": "sealed",
+        "min": 1
+      },
+      "desc": "你参与过对星渊的封印。",
+      "react": "神殿的执事见到你会先低头；古研会的人会请你喝茶。"
+    },
+    {
+      "id": "ti_champion",
+      "name": "神选魁首",
+      "tier": 5,
+      "negative": false,
+      "cond": {
+        "kind": "theoselect_champion"
+      },
+      "desc": "百年神选之上，你站到了最后。",
+      "react": "五殿的钟为你多敲了一次。"
+    },
+    {
+      "id": "ti_forgemaster",
+      "name": "铁匠大师",
+      "tier": 4,
+      "negative": false,
+      "cond": {
+        "kind": "craftLv",
+        "key": "forge",
+        "min": 8
+      },
+      "desc": "炉火认得你的手。",
+      "react": "布伦丹把最里侧的那台砧子让了出来。"
+    },
+    {
+      "id": "ti_field_marshal",
+      "name": "军团长",
+      "tier": 4,
+      "negative": false,
+      "cond": {
+        "kind": "axis",
+        "faction": "empire",
+        "axis": "military",
+        "min": 70
+      },
+      "desc": "帝国的军务规程里出现了你的名字。",
+      "react": "城门口的哨兵认得你，盘查多半只是点头。"
+    },
+    {
+      "id": "ti_spymaster",
+      "name": "情报网之主",
+      "tier": 4,
+      "negative": false,
+      "cond": {
+        "kind": "axis",
+        "faction": "guild",
+        "axis": "intelligence",
+        "min": 80
+      },
+      "desc": "公会的耳目替你留意整座城。",
+      "react": "消息比你先到。"
+    },
+    {
+      "id": "ti_alchemist",
+      "name": "大炼金术师",
+      "tier": 3,
+      "negative": false,
+      "cond": {
+        "kind": "craftLv",
+        "key": "alchemy",
+        "min": 6
+      },
+      "desc": "铜器里的低语你听得懂。",
+      "react": "金砂商院会寄来新到的方子。"
+    },
+    {
+      "id": "ti_inscriber",
+      "name": "铭刻师",
+      "tier": 3,
+      "negative": false,
+      "cond": {
+        "kind": "craftLv",
+        "key": "inscribe",
+        "min": 6
+      },
+      "desc": "星枢的纹路服从你的手。",
+      "react": "神殿把西回廊的钥匙留了一把给你。"
+    },
+    {
+      "id": "ti_deep_diver",
+      "name": "深渊行者",
+      "tier": 3,
+      "negative": false,
+      "cond": {
+        "kind": "dungeonBest",
+        "min": 50
+      },
+      "desc": "你下到过地脉熔窟。",
+      "react": "矿工们见了你会问一句：下面还有多深？"
+    },
+    {
+      "id": "ti_scholar",
+      "name": "藏书家",
+      "tier": 3,
+      "negative": false,
+      "cond": {
+        "kind": "codexCount",
+        "min": 60
+      },
+      "desc": "星枢藏书里有大半你都读过。",
+      "react": "范德尔开始改口叫你「同行」。"
+    },
+    {
+      "id": "ti_graduate",
+      "name": "学院出身",
+      "tier": 2,
+      "negative": false,
+      "cond": {
+        "kind": "academy",
+        "key": "graduated",
+        "min": 1
+      },
+      "desc": "你从一所学院毕业了。",
+      "react": "导师会在信里提你的论文。"
+    },
+    {
+      "id": "ti_veteran",
+      "name": "老练冒险者",
+      "tier": 2,
+      "negative": false,
+      "cond": {
+        "kind": "level",
+        "min": 5
+      },
+      "desc": "你已经不是初来乍到的那个。",
+      "react": "公会任务板前的年轻人会给你让路。"
+    },
+    {
+      "id": "ti_guildmate",
+      "name": "公会中人",
+      "tier": 1,
+      "negative": false,
+      "cond": {
+        "kind": "rep",
+        "faction": "guild",
+        "min": 20
+      },
+      "desc": "公会记你的账。",
+      "react": "加隆会多看你一眼。"
+    },
+    {
+      "id": "ti_known",
+      "name": "小有名声",
+      "tier": 1,
+      "negative": false,
+      "cond": {
+        "kind": "codexCount",
+        "min": 20
+      },
+      "desc": "你读过的书开始改变你说的话。",
+      "react": "有人在广场上认出了你。"
+    },
+    {
+      "id": "ti_silver",
+      "name": "薄有身家",
+      "tier": 1,
+      "negative": false,
+      "cond": {
+        "kind": "gold",
+        "min": 10000
+      },
+      "desc": "你的钱袋沉了。",
+      "react": "商人报的价开始带上笑意。"
+    },
+    {
+      "id": "ti_outlaw",
+      "name": "通缉要犯",
+      "tier": 3,
+      "negative": true,
+      "cond": {
+        "kind": "wanted",
+        "min": 3
+      },
+      "desc": "三座城门都贴着你的画像。",
+      "react": "城卫的目光在你脸上停得太久。"
+    },
+    {
+      "id": "ti_heresy",
+      "name": "亵渎者",
+      "tier": 4,
+      "negative": true,
+      "cond": {
+        "kind": "crime",
+        "key": "heresy"
+      },
+      "desc": "你对神殿做过不该做的事。",
+      "react": "祭司们说话时会先看一眼门。"
+    },
+    {
+      "id": "ti_exile",
+      "name": "流放者",
+      "tier": 3,
+      "negative": true,
+      "cond": {
+        "kind": "exiled"
+      },
+      "desc": "你被逐出过圣辉城。",
+      "react": "城门处的登记簿上还留着你的名字。"
+    }
+  ]
+}

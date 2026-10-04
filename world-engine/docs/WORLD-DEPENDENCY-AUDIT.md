@@ -1,6 +1,6 @@
 # WORLD-DEPENDENCY-AUDIT（世界引擎抽取 · 依赖审计）
 
-> Phase 0 产出 · 审计对象：`tianqiong2/src/world`（11 个文件）及其依赖面
+> Phase 0 产出 · 审计对象：`tianqiong/src/world`（11 个文件）及其依赖面
 > 审计方式：逐文件通读 + 全仓 import 扫描 + 门禁测试（arch-deps / arch-infra / eslint flat config）核对
 > 本阶段未修改任何业务代码。
 

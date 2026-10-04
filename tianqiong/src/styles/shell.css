@@ -1,0 +1,1323 @@
+/* ============================================================
+   天穹纪元 2.0 · 外壳（方案 B「雾港」1:1 落地）
+   ------------------------------------------------------------
+   本文件是设计定稿 outputs/单页界面-5方案/方案B-雾港.html 游戏界面部分的
+   **原样移植**：选择器与声明逐条照搬，不重新设计、不"顺手优化"。
+
+   仅做五类必要改动，其余一字未动：
+   1) 类名避让（改本文件，不改 app.css）：
+        .who  → .hud-who   （chat.css 的说话者占用）
+        .seal → .hud-seal  （app.css 标题屏符印占用）
+        .ring → .hud-ring  （app.css 顶栏日晷环占用）
+   2) 关键帧加 b- 前缀：mist / lineIn / drift，避免与 fx.css 同名互相覆盖。
+   3) #ovl → #pnl-ovl：app.css 的 SheetHost 浮层已占用 #ovl，
+      同 id 双份会让点击被后插入的那个永久拦截（实测踩到过）。
+   4) 顶部补 :root 令牌与三条基础规则（原型写在全局段，本文件需要自带）。
+   5) 2026-09 视觉优化（用户既定方案）：文件末尾新增「视觉优化」段，
+      并改写了「背景 · 丁方案基准」段——恢复时段光/氛围层、径向暗场减淡、
+      窄屏角色卡折叠修复等，逐条注释了原因，集中在末尾便于整体回退。
+   另：原型 .scr 的 display/flex-direction 来自它自己的基础段，
+   这里显式写出 #scr-game 的，以压过 app.css 里 min-width:900px 的横排规则。
+
+   为什么是新文件：约束文档 §6#6 禁止手改 app.css 中来自原型的规则观感；
+   既有先例一致（chat.css「不碰冻结 app.css」）。
+   ============================================================ */
+
+:root{
+  /* 2026-09 提亮：原令牌比原型（#0b0f1d/#111729/#171f38）还暗一档，叠加绘卷 brightness(.74)
+     与多重暗角后，全屏亮度均值只有 18.5/255（暗部占 92%+），读起来"黑压压"。
+     这里只抬亮度与线/次级文字对比，色相与"雾港"夜色不变。 */
+  --bg0:#0e1524; --bg1:#161f33; --bg2:#1d2740; --line:#2c3b5e; --line2:#42598a;
+  --ink:#e9eef7; --ink2:#b9c4d8; --ink3:#8b98b0; --gold:#c8a963; --gold2:#efd69b;
+  --star:#7fd0d8; --star2:#4a8fa8; --crimson:#d1716a; --jade:#6fc7a4;
+  --q2:#7fb4ff; --q3:#b592ff; --q4:#ffb454; --q5:#ff7f6b;
+  --mono:ui-monospace,Consolas,monospace;
+  /* 版式对齐线：左列宽 / 列间距 / 页边距——dock 与输入条都靠它对齐叙事列 */
+  --hud-w:274px; --col-gap:26px; --edge:24px;
+}
+::selection{background:#7fd0d844}
+/* 数字一律等宽：血条数值、时辰、时间戳不跳动 */
+.num,.hud-ring .lb b,#top-b .stamp,.chronicle .tm,.beat{
+  font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
+::-webkit-scrollbar{width:7px;height:7px}
+::-webkit-scrollbar-thumb{background:#22304d;border-radius:4px;transition:background .2s}
+::-webkit-scrollbar-thumb:hover{background:#34486f}
+::-webkit-scrollbar-track{background:transparent}
+/* 一切可点元素都该有按下去的实感 */
+button:active{transform:translateY(1px)}
+/* will-change:transform 已删（性能收口）：浏览器对真正做动画的元素会自动提层，
+   给几十个静态段落/按钮强提合成层只会吃掉显存、拖慢滚动——效果没有，代价常驻。 */
+#app{max-width:none}
+
+/* ==================== 标题屏（原型定稿，逐条照搬） ====================
+   关键帧沿用本文件已有的 b-drift（与 #stage img 同一条），另加 b-fm / b-riseIn。
+   选择器全部挂在 #scr-title 下，不与 app.css 的标题规则互串。 */
+#scr-title{position:relative;align-items:center;justify-content:center;text-align:center;padding:32px;overflow:hidden}
+#scr-title .layer{position:absolute;inset:0;z-index:0;overflow:hidden}
+#scr-title .layer img{width:100%;height:100%;object-fit:cover;filter:saturate(.82) brightness(.78) contrast(1.03);
+  animation:b-drift 60s ease-in-out infinite alternate}
+#scr-title .layer::after{content:"";position:absolute;inset:0;
+  background:radial-gradient(circle at 50% 44%,transparent 20%,#111a2b 88%),linear-gradient(180deg,#111a2b80,transparent 30%,#111a2bd9)}
+#scr-title .fm{position:absolute;inset:-10%;z-index:1;pointer-events:none;opacity:.42}
+#scr-title .fm i{position:absolute;display:block;border-radius:50%;background:radial-gradient(circle,#7fd0d822,transparent 68%);filter:blur(26px)}
+#scr-title .fm i:nth-child(1){width:62%;height:46%;left:-8%;top:32%;animation:b-fm 34s ease-in-out infinite alternate}
+#scr-title .fm i:nth-child(2){width:54%;height:40%;right:-6%;top:50%;animation:b-fm 44s ease-in-out infinite alternate-reverse}
+#scr-title .fm i:nth-child(3){width:72%;height:34%;left:14%;top:6%;animation:b-fm 52s ease-in-out infinite alternate;opacity:.55}
+@keyframes b-fm{from{transform:translateX(-5%)}to{transform:translateX(6%)}}
+#scr-title .inner{position:relative;z-index:2}
+/* 阶梯浮现：从眉标往下依次落位，像卷轴展开 */
+#scr-title .inner>*{animation:b-riseIn .85s cubic-bezier(.22,1,.36,1) both}
+#scr-title .inner>*:nth-child(2){animation-delay:.09s}
+#scr-title .inner>*:nth-child(3){animation-delay:.17s}
+#scr-title .inner>*:nth-child(4){animation-delay:.25s}
+#scr-title .inner>*:nth-child(5){animation-delay:.35s}
+@keyframes b-riseIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+#scr-title .k{font-size:10px;letter-spacing:.6em;text-indent:.6em;color:var(--star);opacity:.9}
+#scr-title h1{font-family:var(--serif);font-size:clamp(38px,6vw,60px);font-weight:600;letter-spacing:.3em;text-indent:.3em;margin:18px 0 0;
+  color:#fff;text-shadow:0 6px 44px #000d,0 0 64px #7fd0d83d}
+#scr-title .en{margin-top:14px;font-size:10px;letter-spacing:.44em;text-indent:.44em;color:var(--ink3)}
+#scr-title .tag{margin-top:30px;font-family:var(--serif);font-size:14px;line-height:2.3;color:var(--ink2);max-width:420px;margin-left:auto;margin-right:auto}
+#scr-title .btns{margin-top:44px;display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.btn-b{padding:14px 34px;border:1px solid #c8a96366;border-radius:999px;font-family:var(--serif);font-size:14.5px;letter-spacing:.26em;text-indent:.26em;
+  color:var(--gold2);background:#0e1524b8;backdrop-filter:blur(10px);transition:.3s}
+.btn-b:hover{background:#c8a96322;box-shadow:0 0 34px #c8a9632e;letter-spacing:.34em;text-indent:.34em}
+.btn-b.ghost{border-color:#34486f;color:var(--ink2)}
+.btn-b.ghost:hover{border-color:var(--star);color:var(--star);box-shadow:0 0 28px #7fd0d829}
+.btn-b.dim{opacity:.4}
+#scr-title .foot{position:absolute;bottom:20px;left:0;right:0;z-index:2;text-align:center;font-size:10px;color:var(--ink3);letter-spacing:.22em}
+@media(max-width:820px){
+  #scr-title .tag{font-size:13px;max-width:330px}
+  #scr-title .btns{margin-top:34px}
+  .btn-b{padding:12px 26px;font-size:13.5px}
+}
+
+/* ==================== 建档屏（原型定稿，逐条照搬） ====================
+   注意复位 app.css 的 #scr-create：那边是 `padding:30px 26px 50px;max-width:560px;margin:0 auto`，
+   把版心压在了 560。原型的版心是 .inner 的 720，且背景是整屏 fixed 图层——
+   不复位就会得到一个"背景只铺中间一条"的怪东西。 */
+#scr-create{overflow-y:auto;position:relative;padding:0;max-width:none;width:auto;margin:0}
+#scr-create .bg{position:fixed;inset:0;z-index:0}
+#scr-create .bg img{width:100%;height:100%;object-fit:cover;filter:saturate(.62) brightness(.58) blur(2px)}
+#scr-create .bg::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,#0e1524e0,#0e1524cc 40%,#0e1524f2)}
+#scr-create .inner{position:relative;z-index:1;width:100%;max-width:720px;margin:0 auto;padding:52px 28px 72px}
+.step-n{font-family:var(--mono);font-size:10.5px;letter-spacing:.34em;color:var(--star);opacity:.85}
+#scr-create h2{font-family:var(--serif);font-size:clamp(24px,3.4vw,30px);font-weight:400;letter-spacing:.16em;margin:12px 0 8px}
+#scr-create .lead{font-family:var(--serif);font-size:13.5px;line-height:2.05;color:var(--ink2);margin-bottom:30px}
+#scr-create .q{margin-bottom:34px}
+#scr-create .q .lb{font-size:11px;letter-spacing:.4em;color:var(--gold);margin-bottom:14px}
+#scr-create .q .lb b{font-family:var(--mono);color:var(--ink3);font-weight:400;margin-right:10px;letter-spacing:.1em}
+#inp-name{width:100%;padding:15px 18px;border:1px solid var(--line2);border-radius:12px;background:#161f33cc;backdrop-filter:blur(6px);
+  font-size:17px;font-family:var(--serif);letter-spacing:.14em;color:var(--ink)}
+#inp-name:focus{outline:none;border-color:var(--star);box-shadow:0 0 0 3px #7fd0d81f}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(196px,1fr));gap:12px}
+.op{border:1px solid var(--line);border-radius:14px;background:#161f33cc;backdrop-filter:blur(6px);padding:16px;text-align:left;
+  transition:.24s;position:relative;overflow:hidden;width:100%}
+.op:hover{border-color:var(--line2);transform:translateY(-3px)}
+.op.sel{border-color:var(--star);background:#122132f2;box-shadow:0 0 0 1px #7fd0d855,0 14px 40px #0008}
+.op.sel::before{content:"";position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--star)}
+.op h4{font-family:var(--serif);font-size:17px;font-weight:400;margin-bottom:6px}
+.op .md{font-size:10px;letter-spacing:.2em;color:var(--star);margin-bottom:9px}
+.op p{font-size:11.5px;line-height:1.8;color:var(--ink3)}
+/* 卡 R1 的绑定/大陆两行是落地版独有的信息，比原型多——用更淡的次级行区分 */
+.op p.sub{margin-top:5px;font-size:10.5px;color:var(--ink3);opacity:.8}
+/* 六维：固定三列，六项正好两行 */
+.st{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:28px}
+@media(max-width:520px){.st{grid-template-columns:repeat(2,1fr)}}
+.st-i{border:1px solid var(--line);border-radius:12px;background:#161f33b8;backdrop-filter:blur(6px);padding:12px 14px}
+.st-i .n{font-size:10px;color:var(--ink3);letter-spacing:.2em}
+.st-i .v{font-family:var(--serif);font-size:23px;margin-top:5px;line-height:1.1}
+.st-i .d{font-size:10px;color:var(--jade);margin-top:4px;height:13px}
+.st-i .d.dn{color:var(--crimson)}
+#scr-create .btn-next{display:block;width:100%;margin-top:0;padding:17px 0;border-radius:999px;font-family:var(--serif);font-size:15px;
+  letter-spacing:.4em;text-indent:.4em;color:#0a0d16;background:linear-gradient(135deg,#efd69b,#c8a963);transition:.25s;
+  box-shadow:0 10px 34px #c8a96326;font-weight:700}
+#scr-create .btn-next:hover{filter:brightness(1.08);transform:translateY(-2px)}
+#scr-create .btn-back{display:block;width:100%;text-align:center;color:var(--ink3);font-size:12.5px;padding:12px;margin-top:8px}
+@media(max-width:820px){
+  #scr-create .inner{padding:38px 20px 60px}
+}
+
+/* ==================== 游戏主界面 ==================== */
+/* display 必须挂在 .on 上：.scr 的基础规则是 display:none，只给活动屏 .on{display:flex}。
+   写成裸 #scr-game{display:flex} 会把这条覆盖掉——游戏外壳于是在标题屏/创角屏上
+   也一直渲染，并参与 #app 的 flex 分配（实测桌面被切成 767+673、移动 498+434，
+   标题插画因此只占了半屏）。这个坑很安静：画面上只表现为"背景没铺满"。 */
+#scr-game{position:relative;overflow:hidden}
+#scr-game.on{display:flex;flex-direction:column}
+#stage{position:absolute;inset:0;z-index:0;overflow:hidden}
+#stage img{width:100%;height:100%;object-fit:cover;object-position:center 42%;filter:saturate(.95) brightness(.9) contrast(1.02);
+  animation:b-drift 72s ease-in-out infinite alternate;transition:opacity .34s ease,filter .9s ease}
+@keyframes b-drift{from{transform:scale(1.02) translate(0,0)}to{transform:scale(1.1) translate(-1.6%,-1.2%)}}
+#stage img.fading{opacity:0}
+#stage .vign{position:absolute;inset:0;
+  background:radial-gradient(ellipse at 50% 34%,transparent 38%,#111a2b7a 96%),
+    linear-gradient(180deg,#111a2b9e 0,#111a2b3d 16%,transparent 40%,#111a2b96 86%,#111a2bb8 100%)}
+/* 噪点不再用 mix-blend-mode:overlay（性能收口）：底下绘卷一直在动，混合模式会让
+   这层全屏纹理每帧跟着重新混合。改普通合成（透明度 0.05→0.04 找回含蓄感），
+   静态层只画一次，视觉上仍是那层极淡的颗粒。 */
+#stage .grain{position:absolute;inset:0;opacity:.04;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/></filter><rect width='140' height='140' filter='url(%23n)'/></svg>")}
+/* 雾：三团低对比气流贴着画面下半走，慢到几乎察觉不到——察觉到了就说明太快。
+   blur(46px) 已删（性能收口）：径向渐变本身就是高斯式衰减，超大模糊在它上面
+   几乎不可见，却要常驻三块全屏级模糊纹理。 */
+#stage .mist{position:absolute;inset:-12%;pointer-events:none;opacity:.55}
+#stage .mist i{position:absolute;display:block;border-radius:50%;
+  background:radial-gradient(ellipse,#a8c0d624,transparent 70%)}
+#stage .mist i:nth-child(1){width:72%;height:38%;left:-12%;top:56%;animation:b-mist 46s ease-in-out infinite alternate}
+#stage .mist i:nth-child(2){width:62%;height:30%;right:-10%;top:68%;animation:b-mist 64s ease-in-out infinite alternate-reverse}
+#stage .mist i:nth-child(3){width:84%;height:24%;left:6%;top:78%;opacity:.65;animation:b-mist 54s ease-in-out infinite alternate}
+@keyframes b-mist{from{transform:translateX(-4%) scaleY(1)}to{transform:translateX(5%) scaleY(1.08)}}
+
+/* ---- 顶栏 ---- */
+#top-b{position:relative;z-index:3;flex:none;display:flex;align-items:center;gap:16px;padding:13px 24px;
+  border-bottom:1px solid #22304d59;background:linear-gradient(180deg,#111a2bf2,#111a2b00)}
+#top-b .brand{font-family:var(--serif);font-size:15px;letter-spacing:.32em;color:var(--gold2);white-space:nowrap}
+#top-b .stamp{font-family:var(--mono);font-size:10px;letter-spacing:.18em;color:var(--ink3);white-space:nowrap}
+#top-b .loc{flex:1;min-width:0;font-family:var(--serif);font-size:18px;letter-spacing:.12em;display:flex;align-items:baseline;gap:9px;justify-content:center}
+#top-b .loc small{font-size:10px;color:var(--ink3);letter-spacing:.1em;font-family:var(--sans);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#top-b .nav{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
+#top-b .nav button{padding:7px 13px;border-radius:999px;font-size:12px;letter-spacing:.1em;color:var(--ink2);
+  border:1px solid transparent;transition:color .24s,border-color .24s,background .24s;white-space:nowrap;position:relative}
+#top-b .nav button:hover{color:var(--star);border-color:#7fd0d855;background:#7fd0d812}
+#top-b .nav button:active{background:#7fd0d81f}
+#top-b .nav button.on{color:var(--star);border-color:#7fd0d855;background:#7fd0d812}
+
+/* ---- 主体：左列 + 叙事（flex 流式，不用绝对定位承托正文）---- */
+#wrap{flex:1;min-height:0;display:flex;gap:var(--col-gap);padding:0 var(--edge);position:relative;z-index:2}
+/* 上下渐隐：叙事滚到边界时融进背景，而不是被硬生生切断 */
+#wrap::before,#wrap::after{content:"";position:absolute;left:0;right:0;pointer-events:none;z-index:2}
+#wrap::before{top:0;height:26px;background:linear-gradient(180deg,#111a2bb8,transparent)}
+#wrap::after{bottom:0;height:52px;background:linear-gradient(180deg,transparent,#111a2bb3)}
+#hud-col{width:var(--hud-w);flex:none;overflow-y:auto;padding:16px 0}
+#story{flex:1;min-width:0;overflow-y:auto;padding:16px 0}
+/* 叙事贴住左列，右半边留给绘卷——这是 B 的定义 */
+#view-inner{max-width:720px}
+
+/* ---- 角色卡 ---- */
+.hud-card{border:1px solid #22304dbb;border-radius:16px;background:#111a2be0;backdrop-filter:blur(16px) saturate(130%);
+  box-shadow:0 24px 60px -30px #000;padding:16px 16px 17px}
+.hud-who{display:flex;align-items:center;gap:13px;margin-bottom:15px;cursor:pointer;border-radius:10px;transition:.2s}
+.hud-who:hover .hud-tx b{color:var(--gold2)}
+:focus-visible{outline:2px solid #7fd0d8aa;outline-offset:3px;border-radius:6px}
+.hud-seal{flex:none;width:54px;height:54px;border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative;
+  background:radial-gradient(circle at 35% 30%,#1d2b45,#0a0f1a 78%);border:1px solid var(--line2);box-shadow:0 0 22px #7fd0d824}
+.hud-seal::after{content:"";position:absolute;inset:4px;border-radius:50%;border:1px dashed #7fd0d845}
+.hud-seal i{font-family:var(--serif);font-style:normal;font-size:22px;color:var(--gold2);text-shadow:0 0 14px #c8a96355}
+.hud-tx{min-width:0}
+.hud-tx b{font-family:var(--serif);font-size:17px;font-weight:400;display:block}
+.hud-tx span{font-size:10px;color:var(--star);letter-spacing:.1em;display:block;margin-top:4px}
+.hud-ring{margin-bottom:11px}
+.hud-ring .lb{display:flex;justify-content:space-between;font-size:10px;color:var(--ink3);margin-bottom:5px;letter-spacing:.14em}
+.hud-ring .lb b{font-family:var(--serif);color:var(--ink2);font-weight:400}
+.rbar{height:5px;border-radius:3px;background:#ffffff0f;overflow:hidden}
+.rbar i{display:block;height:100%;border-radius:3px;transition:width .5s;position:relative;overflow:hidden}
+.rbar i::after{content:"";position:absolute;inset:0 0 55% 0;background:linear-gradient(180deg,#ffffff30,transparent)}
+.rbar.hp i{background:linear-gradient(90deg,#e0867a,#b8453c)}
+.rbar.mp i{background:linear-gradient(90deg,#8fb6ff,#4f6fd0)}
+.rbar.sp i{background:linear-gradient(90deg,#6fc7a4,#3a8b6c)}
+.badges{display:flex;flex-wrap:wrap;gap:6px;margin-top:13px}
+.badges span{font-size:9.5px;border:1px solid #22304d;border-radius:999px;padding:3px 9px;color:var(--ink3);background:#ffffff08}
+.badges span.g{color:var(--gold2);border-color:#c8a96355}
+.badges span.r{color:var(--crimson);border-color:#d1716a55}
+.badges span.j{color:var(--jade);border-color:#6fc7a455}
+.hud-acts{margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.hud-acts button{border:1px solid #22304d;border-radius:9px;padding:9px 6px;font-size:11.5px;color:var(--ink2);transition:.22s}
+.hud-acts button:hover{border-color:var(--star);color:var(--star);background:#7fd0d810}
+
+/* ---- 今日纪年 ---- */
+.chronicle{margin-top:16px;border:1px solid #22304d99;border-radius:16px;background:#111a2bc4;backdrop-filter:blur(12px);padding:15px 16px 14px}
+.chronicle h5{font-size:10px;letter-spacing:.34em;color:var(--ink3);margin-bottom:13px}
+.chronicle ul{list-style:none;position:relative;padding-left:16px}
+.chronicle ul::before{content:"";position:absolute;left:4px;top:6px;bottom:12px;width:1px;background:linear-gradient(180deg,#7fd0d855,#22304d,transparent)}
+.chronicle li{position:relative;padding-bottom:15px;font-size:11.5px;line-height:1.6}
+.chronicle li:last-child{padding-bottom:2px}
+.chronicle li::before{content:"";position:absolute;left:-16px;top:4px;width:7px;height:7px;border-radius:50%;background:#22304d;border:1px solid #34486f}
+.chronicle li.now::before{background:var(--star);box-shadow:0 0 0 3px #111a2b,0 0 10px #7fd0d8}
+.chronicle li .tm{display:block;font-family:var(--mono);font-size:9.5px;color:var(--ink3);letter-spacing:.1em}
+.chronicle li .tx{display:block;color:var(--ink2);margin-top:3px}
+.chronicle li.now .tm{color:var(--star)}
+.chronicle li.now .tx{color:var(--ink)}
+.chronicle .empty{font-size:11px;color:var(--ink3);line-height:1.8}
+
+/* ---- 叙事 ---- */
+.sc-tag{display:inline-flex;align-items:center;gap:10px;font-size:10.5px;letter-spacing:.3em;color:var(--star);margin-bottom:16px;
+  border:1px solid #7fd0d844;border-radius:999px;padding:5px 14px;background:#111a2bcc;backdrop-filter:blur(6px)}
+/* ---- 小说式排版（A 的缩进正文 + C 的时刻标记）----
+   正文首行缩进两格连排：中文小说的传统排法，信息密度最高；
+   时刻标记只在**时刻变化时**出现一次（金色小字 + 右侧渐隐线）。
+   原先「一条消息一张卡片」：同刻连发就重复三四遍时刻戳，叙事被切成清单。 */
+/* 正文区**没有背景**。
+   曾经这里有一层半透明底 + 圆角 + 毛玻璃 + 阴影，用来压住绘卷的亮部；
+   但它是一块有边界的方块，读起来仍像卡片——而方块的边界正是"界面"的信号。
+   现在对比度交给背景层：时段光线把绘卷整体压暗，.halo 再把正文那一处压得更沉，
+   文字自己只用两层极淡投影贴住底。所以这里只剩排版，没有面。 */
+.nar-p{margin:0 0 .32em;text-indent:2em;animation:b-lineIn .5s cubic-bezier(.22,1,.36,1) both}
+@keyframes b-lineIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.beat{display:flex;align-items:center;gap:10px;margin:18px 0 10px;text-indent:0;
+  font-family:var(--sans);font-size:10.5px;letter-spacing:.3em;color:var(--gold)}
+.beat::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,#c8a9634d,transparent)}
+#view-log>.beat:first-child{margin-top:0}
+/* 入场段落（场景印象）：不是「发生过的事」，只在颜色上比正文淡一档，
+   位置紧跟场景胶囊，因此不再挂时刻标记。
+   不写 italic：CJK 没有真斜体，浏览器对整段做合成斜切——
+   看起来就像"换了款字体"（字体统一改造 2026-09，文件末尾有兜底） */
+.nar-p.opening{color:var(--ink2)}
+/* 对白与正文同排：中文小说的对话就在段内，引号自己承担区分 */
+.nar-p.say{text-indent:2em}
+/* 收获 / 损失：无底色单行小字——连着好几条时，做成块会把书页切成碎片 */
+.nar-p.flag{text-indent:0;font-family:var(--sans);font-size:11.5px;margin:.18em 0;letter-spacing:.05em}
+.nar-p.gain{color:var(--gold2)}
+.nar-p.bad{color:var(--crimson)}
+/* 系统提示退到最外层：灰字 + 左线（斜体已去——合成斜切见 .nar-p.opening 处注） */
+.nar-p.sys{text-indent:0;font-family:var(--sans);font-size:11.5px;color:var(--ink3);
+  line-height:1.9;border-left:2px solid #42598a55;padding-left:11px;margin:.55em 0}
+/* AI 织成的正文就是主正文（每一步操作都经它），颜色只比规则叙事偏一点点，
+   标识交给行尾的 ✦ 角标——若整段染成紫色，界面会整体偏色 */
+.nar-p.ai{color:#e4e2f4}
+/* 润色期间的写作占位：被撤下的那一批原文由它顶上，呼吸提示系统在工作 */
+.nar-p.writing{text-indent:0;font-family:var(--sans);font-size:12px;letter-spacing:.16em;color:var(--ink3);
+  margin-top:.5em;animation:b-writing 1.5s ease-in-out infinite}
+@keyframes b-writing{0%,100%{opacity:.4}50%{opacity:1}}
+.npc-chips{display:flex;gap:9px;flex-wrap:wrap;margin:16px 0 6px}
+/* .npc-chip 的胶囊样式已删除：组件早就改成了 .npc-chips .who 的细字点列，
+   这组规则没有任何引用（死 CSS）。绘制语言属于卡片，与沉静式相反，留着只会误导后来人。 */
+/* .choices / .choice 保留：它们是与原型 1:1 的资产，但目前**无人使用**——
+   core 没有"当前可选剧情分支"这个数据源（见 SceneView 的说明）。
+   底部那两组「行动 / 交涉」才是现在真正的选项界面。 */
+.choices{margin:20px 0 6px;display:flex;flex-direction:column;gap:9px}
+.choices::before{content:"—— 此刻你可以 ——";font-size:10px;letter-spacing:.4em;color:var(--ink3);margin-bottom:3px}
+.choice{position:relative;text-align:left;border:1px solid #22304d;border-left:2px solid var(--star);border-radius:11px;
+  padding:13px 40px 13px 16px;background:#111a2be6;backdrop-filter:blur(8px);font-family:var(--serif);font-size:14.5px;transition:.24s}
+.choice::after{content:"›";position:absolute;right:16px;top:50%;font-size:19px;line-height:1;color:var(--star);
+  transform:translateY(-50%) translateX(-5px);opacity:0;transition:.24s}
+.choice:hover{border-color:var(--star);background:#0e1c2cf5;transform:translateX(6px);box-shadow:0 12px 30px #0008}
+.choice:hover::after{opacity:1;transform:translateY(-50%) translateX(0)}
+.choice.q{border-left-color:var(--gold);background:#0e1320e6}
+.choice.q::after{color:var(--gold2)}
+.choice.q:hover{border-color:var(--gold);background:#1a1a24f5}
+.choice.stale::after{display:none}
+.choice .s{display:block;font-family:var(--sans);font-size:10px;color:var(--ink3);margin-top:5px}
+.choice.stale{opacity:.3;pointer-events:none}
+
+/* ---- 输入条：固定在动作坞下方，不随叙事滚动 ----
+   与叙事列共用同一条对齐线（左列宽 + 列间距），读起来像"对这条叙事说话"。 */
+#composer{flex:none;position:relative;z-index:3;padding:0 var(--edge) 18px}
+#composer .composer-in{display:flex;gap:10px;margin-left:calc(var(--hud-w) + var(--col-gap));max-width:720px}
+#composer input{flex:1;min-width:0;padding:14px 20px;border:1px solid #22304d;border-radius:999px;background:#111a2be6;backdrop-filter:blur(10px);
+  font-size:13px;color:var(--ink);transition:.24s}
+#composer input::placeholder{color:var(--ink3)}
+#composer input:focus{outline:none;border-color:var(--star);box-shadow:0 0 0 3px #7fd0d81f;background:#0b1424f2}
+#composer input:disabled{opacity:.6}
+.free-go{flex:none;width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#efd69b,#c8a963);color:#0a0d16;font-size:17px;transition:.24s}
+.free-go:hover:not(:disabled){filter:brightness(1.12);transform:scale(1.05)}
+.free-go:disabled{opacity:.5;cursor:default}
+
+/* ---- 底部动作坞：玻璃浮条 ---- */
+/* ⚠️ 本段（以及上面的 #composer 基础段）已被文件末尾的「沉静式 · 1:1 复刻」整段覆盖，
+   实际生效的是那一段——改底部栏请改那里，这里只作无沉静式时的兜底。
+   底部动作坞：**单行横向滚动**。
+   原先 max-height:154px + 坞内纵向滚动，组一多就出现内滚动条、内容被切，
+   三组并排时高度也参差。现在坞高恒定（一行按钮），横向滚出更多分组。 */
+#dock{flex:none;position:relative;z-index:3;margin:0 var(--edge) 10px;border-radius:18px;padding:10px 14px 11px;
+  border:1px solid #22304dcc;background:#111a2be6;backdrop-filter:blur(16px) saturate(130%);box-shadow:0 26px 70px -34px #000}
+.dock-row{display:flex;gap:20px;flex-wrap:nowrap;overflow-x:auto;align-items:flex-start;
+  scrollbar-width:none;-webkit-mask:linear-gradient(90deg,#000 0,#000 calc(100% - 18px),transparent 100%);
+  mask:linear-gradient(90deg,#000 0,#000 calc(100% - 18px),transparent 100%)}
+.dock-row::-webkit-scrollbar{display:none}
+.dock-g{display:flex;flex-direction:column;gap:6px;flex:none}
+.dock-g.quick .lb{color:var(--gold)}
+.dock-g .lb{font-size:9.5px;letter-spacing:.34em;color:var(--ink3)}
+.dock-g.battle .lb{color:var(--crimson)}
+.dock-btns{display:flex;gap:7px;flex-wrap:nowrap}
+.act{border:1px solid #22304d;border-radius:999px;padding:9px 16px;font-family:var(--serif);font-size:13px;letter-spacing:.08em;
+  color:var(--ink2);transition:.24s;display:inline-flex;align-items:center;gap:7px;background:none}
+.act:hover{border-color:var(--star);color:var(--star);background:#7fd0d812;transform:translateY(-2px)}
+.act small{font-family:var(--sans);font-size:9.5px;color:var(--ink3)}
+.dock-g.battle .act{border-color:#d1716a55;color:#e8a49d}
+.dock-g.battle .act:hover{border-color:var(--crimson);color:var(--crimson);background:#d1716a14}
+
+/* ==================== 弹层：雾玻璃（原型 .sheet 全套，逐条照搬） ====================
+   两处改名：
+     #ovl → #pnl-ovl   app.css 的 SheetHost 已占用 #ovl，同 id 双份会让后插入的
+                       那个永久拦截点击（实测踩到过）
+     #sheet-body → .pnl-body   同上，避免与 SheetHost 的内容容器同名
+   .pnl-body 的 min-height:0 不是可选项：flex 子项默认 min-height:auto，
+   不写这一行，内容会把容器撑破、被 .sheet 的 overflow:hidden 裁掉且滚不动。 */
+#pnl-ovl{position:fixed;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;padding:22px;
+  background:#0b1120a8;backdrop-filter:blur(9px)}
+#pnl-ovl .sheet{display:flex;flex-direction:column;width:min(640px,94vw);max-width:min(640px,94vw);max-height:86dvh;
+  border-radius:18px;overflow:hidden;
+  border:1px solid #33476e;background:linear-gradient(180deg,#151e32f7,#101728f8);backdrop-filter:blur(18px);
+  box-shadow:0 40px 110px -40px #000;animation:b-shIn .34s cubic-bezier(.2,1.04,.36,1) both}
+/* 注意 width 与 max-width 是两件事：app.css 的 .sheet 写的是 max-width:min(560px,94vw)，
+   只覆盖 width 会被它压回 560——这条不是冗余，是必需。 */
+@keyframes b-shIn{from{opacity:0;transform:translateY(24px) scale(.97)}to{opacity:1;transform:none}}
+#pnl-ovl .sh-head{flex:none;display:flex;align-items:center;gap:12px;padding:17px 20px 14px;border-bottom:1px solid #1c2740}
+#pnl-ovl .sh-t{flex:1;min-width:0}
+#pnl-ovl .sh-t b{display:block;font-family:var(--serif);font-size:16.5px;font-weight:400;letter-spacing:.2em;color:var(--gold2)}
+#pnl-ovl .sh-t span{display:block;font-size:10.5px;color:var(--ink3);margin-top:3px;letter-spacing:.1em}
+/* 面板浮层关闭钮（2026-09-29）：移动端没有 ESC，回程入口藏在底栏 tab 里，
+   首次打开面板的玩家找不到退路——六页共用一个明确的 ✕，与 NPC 对话浮层同语义。
+   margin-left:auto 在移动段（sh-t 占满）无副作用，桌面段（sh-t 不占满）负责右推。 */
+#pnl-ovl .sh-close{flex:none;margin-left:auto;width:30px;height:30px;border:1px solid #2a3a5e;border-radius:8px;background:#101a30cc;color:var(--ink2);font-size:13px;line-height:1;cursor:pointer;transition:border-color .15s,color .15s}
+#pnl-ovl .sh-close:hover{border-color:var(--gold2);color:var(--gold2)}
+/* ==================== 面板打开时，世界那一层让位（落盘第 0 片） ====================
+   面板铺满之后不再有 blur 兜底，HUD（#wrap）与输入条（#composer）会直接透上来与页面叠着。
+   选择器要求 data-view 属性存在：首屏（标题/建档）没有这个属性，那时 #wrap 照常渲染。 */
+body[data-view]:not([data-view='main']) #wrap,
+body[data-view]:not([data-view='main']) #composer{display:none}
+/* 行囊是从任何一页都能打开的半透明浮层。它底下若还立着刚看的那一页，
+   两个页头、两套内容就会叠着一起读（实测：角色页 + 行囊 = 两个「持有」、两个标题）。
+   行囊打开时把页面临时让出去，关掉自动恢复（data-view 回到 curTab）。 */
+body[data-view='bag'] #pnl-ovl{display:none}
+/* 同上：sheet 打开时页面临时让位。世界层保持原样——对话本来就该浮在绘卷上。 */
+body[data-sheet='1'] #pnl-ovl{display:none}
+/* #wrap 一直是那根"把底栏顶到底部"的弹簧（它是 flex:1）。它让位之后，
+   窄屏的标签栏会跟着顶栏跑到顶上——补一条 margin-top:auto 让它自己沉底。 */
+body[data-view]:not([data-view='main']) #tabbar{margin-top:auto}
+
+.pnl-body{flex:1;min-height:0;overflow-y:auto;padding:17px 20px 26px}
+.pnl-body::-webkit-scrollbar{width:6px}
+.pnl-body::-webkit-scrollbar-thumb{background:var(--line2);border-radius:4px}
+
+/* ==================== 窄屏：只收缩，不重排 ====================
+   断点 820px：900px 宽的笔记本仍走双列（左列 274 + 叙事 552，够读）。 */
+@media(max-width:820px){
+  #top-b{flex-wrap:wrap;gap:8px 10px;padding:11px 16px}
+  #top-b .brand{font-size:13.5px;letter-spacing:.24em}
+  /* 2026-09 打磨：底部标签栏已承载七个页面导航，顶栏不再重复一遍——
+     只留底栏没有的那一个入口（行囊）。省下的高度全给叙事区。 */
+  #top-b .nav{order:2;margin-left:auto;gap:2px}
+  #top-b .nav button{display:none}
+  #top-b .nav button.bag{display:inline-block;padding:7px 14px;font-size:12px}
+  /* 地点与时辰并作一行：地点大字在左，时辰小字右对齐——三行顶栏压成两行 */
+  #top-b .loc{order:3;flex:1 1 auto;min-width:0;justify-content:flex-start;font-size:15.5px}
+  #top-b .stamp{order:4;flex:0 0 auto;margin-left:auto;font-size:9.5px}
+  /* 竖屏时画幅被拉长，暗角会吃掉整张绘卷——把渐变压扁，让画透出来 */
+  #stage .vign{background:radial-gradient(ellipse at 50% 20%,transparent 42%,#111a2b99 100%),
+    linear-gradient(180deg,#111a2bcc 0,#111a2b44 13%,transparent 32%,#111a2ba6 80%,#111a2be6 100%)}
+  #wrap{flex-direction:column;gap:0;padding:0 14px}
+  #hud-col{width:100%;flex:none;overflow:visible;padding:12px 0 0}
+  /* 角色卡折叠：窄屏默认只留一行，点开才展开——把叙事高度还给正文 */
+  .hud-card{padding:11px 13px}
+  .hud-who{margin-bottom:0}
+  .hud-seal{width:44px;height:44px}
+  .hud-seal i{font-size:18px}
+  .hud-card .hud-ring,.hud-card .hud-acts,.hud-card .badges{display:none}
+  .hud-card.open{padding:14px 15px 15px}
+  .hud-card.open .hud-who{margin-bottom:12px}
+  .hud-card.open .hud-ring{display:block;margin-bottom:8px}
+  .hud-card.open .hud-ring .lb{font-size:9.5px;margin-bottom:4px}
+  .hud-card.open .badges{display:flex}
+  .hud-card.open .hud-acts{display:flex;gap:7px;overflow-x:auto;padding-bottom:2px}
+  .hud-who::after{content:"⌄";margin-left:auto;font-size:14px;color:var(--ink3);transition:transform .28s;flex:none}
+  .hud-card.open .hud-who::after{transform:rotate(180deg)}
+  #story{flex:1;min-height:0;padding:12px 0}
+  #view-inner{max-width:none}
+  .chronicle{display:none}
+  .hud-acts button{flex:none;white-space:nowrap;padding:9px 14px}
+  #dock{margin:0 var(--edge) 8px;border-radius:15px;padding:9px 12px 10px}
+  :root{--edge:14px;--col-gap:0px}
+  #composer{padding:0 var(--edge) 12px}
+  #composer .composer-in{margin-left:0;max-width:none}
+  #composer input{padding:12px 16px;font-size:13px}
+  .dock-row{gap:18px}
+}
+@media(max-width:520px){
+  /* 检定卡窄屏保护：默认 264px 的卡片在 430px 视口下装不下「感知 +0 · 难度 11」一行，
+     实测骰子难度被挤到第二行。这里只放宽窄屏宽度，不动 app.css 里来自原型的那条规则。 */
+  #chk .cc{width:min(296px,92vw)}
+  #chk .cc .st{white-space:nowrap}
+  .nar-p{font-size:14.5px}
+  .act{padding:8px 13px;font-size:12.5px}
+}
+/* ==================== 系统面板 · 提示词卡 ====================
+   面板里的 textarea 与条目编辑器：沿用 app.css 的 .card 视觉，只补它没有的控件。 */
+.card textarea{width:100%;background:#0c1220cc;border:1px solid var(--line2);border-radius:8px;color:var(--ink);
+  font-family:var(--sans);font-size:12px;line-height:1.7;padding:9px 11px;resize:vertical}
+.card textarea:focus{outline:none;border-color:var(--star);box-shadow:0 0 0 3px #7fd0d81f}
+
+/* ==================== 浮层遮罩（覆盖 app.css 的原型值） ====================
+   app.css 的 #ovl 用 #05070fcc（80% 黑）、#chk 用 #05070fd9（85% 黑）：浮层一开就把
+   绘卷整个吃掉，只剩黑底——"界面昏暗"的另一半来源。这里同特异性 + 后加载覆盖，
+   app.css 里那两条原型规则一字未动。 */
+#ovl{background:#0b1120a6}
+#chk{background:#0b1120c4}
+
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+/* ==================== 沉静式重排（叙事窗口 · 定稿见 outputs/叙事窗口-沉静式-完整版.html） ====================
+   四条原则：一个焦点（正文是唯一焦点）· 留白即留白（两侧是页边距，不填东西）·
+   不用表面（取消毛玻璃/阴影/圆角边框——它们是"卡片语言"，每出现一次就提醒一次"这是界面"）·
+   动效隐形（只淡入、不移位）。
+   规则集中在此处覆盖前文，便于整体回退。
+   ================================================================================================ */
+
+/* ---- 叙事列：居中、边缘渐隐、无滚动条 ---- */
+
+/* ==================== 沉静式 · 1:1 复刻 ====================
+   源：outputs/叙事窗口-沉静式-完整版.html
+   规则逐条照搬样稿，**只把选择器映射到项目的类名**，数值一个不改：
+     .stage→#stage  .top→#top-b  .wrap→#wrap  .hud→#hud-col  .read→#story
+     .column→#view-inner  .scene→.sc-tag  .nar→.nar-p  .castline→.npc-chips
+     .dock→#dock  .dock .a→.act  .composer→#composer  .hud .chr→.chronicle li
+   项目原有规则与之冲突的一律让位（本块在文件末尾，同特异性后加载胜）。
+   样稿里没有的元素按"修边"处理，逐条注明见下。
+   ======================================================== */
+
+/* ---- 尺寸令牌：样稿的 30px 边距、250px 左栏、无列间距（间距由 .hud 的 padding-right 承担） ---- */
+/* --read-x = 叙事列的**文本左边缘**，正文 / 动作坞 / 输入条三行共用这一条轴。
+   窄屏（正文列撑不满 660px）时它就是"边距 + 左栏"；宽屏时正文列居中，
+   左边缘 = 50vw + 左栏半宽 - 330 + 8（330 = 正文列半宽，8 = #view-inner 的内边距）。
+   实测：953px → 288、1280px → 443、1920px → 763，与 #view-inner 的文本列逐像素吻合。 */
+:root{--edge:30px;--hud-w:250px;--col-gap:0px;
+  --read-x:max(calc(var(--edge) + var(--hud-w) + 8px), calc(50vw + var(--hud-w) / 2 - 322px))}
+
+/* ---- 顶栏（样稿 .top）：一条极淡的分隔线，导航是纯文字而不是胶囊按钮 ---- */
+#top-b{position:relative;z-index:3;flex:none;display:flex;align-items:baseline;gap:18px;
+  padding:15px var(--edge) 11px;font-size:11.5px;color:#8b98b0;letter-spacing:.06em;
+  background:linear-gradient(180deg,#05090ff2,#05090f00)}
+#top-b .brand{font-family:var(--serif);font-size:12px;letter-spacing:.26em;color:var(--gold2)}
+#top-b .stamp{font-family:var(--mono);font-size:11.5px;letter-spacing:.06em;color:#8b98b0}
+#top-b .loc{flex:0 0 auto;display:flex;align-items:baseline;gap:8px;margin:0;
+  font-family:var(--serif);font-size:15px;letter-spacing:.08em;color:#e9eef7}
+#top-b .loc small{font-family:var(--sans);font-size:11.5px;letter-spacing:.06em;color:#8b98b0}
+/* gap + 按钮 padding 的横向分量 = 样稿的 20px 视觉间距（8+6+6） */
+#top-b .nav{margin-left:auto;display:flex;gap:8px;flex-wrap:nowrap;justify-content:flex-end}
+/* 修边：样稿的导航是 <span>（纯展示），项目里它是可点按钮——把 padding 归零后
+   点击区只剩文字大小（实测 24×15），触屏按不中。用 padding 撑开、负 margin 抵消，
+   视觉与样稿一模一样，命中区回到 36×31。 */
+#top-b .nav button{padding:8px 6px;border:none;border-radius:0;background:none;
+  font-family:var(--sans);font-size:11.5px;letter-spacing:.06em;color:#93a0b6;transition:color .22s}
+#top-b .nav button:hover,#top-b .nav button.on,#top-b .nav button:active{
+  color:var(--gold2);border:none;background:none}
+
+/* ---- 布局 ---- */
+#wrap{flex:1;min-height:0;display:flex;gap:0;padding:0 var(--edge);position:relative;z-index:2}
+#wrap::before,#wrap::after{display:none} /* 样稿没有这两条压边渐变 */
+#hud-col{width:var(--hud-w);flex:none;overflow-y:auto;padding:20px 24px 0 0;position:relative}
+#hud-col::after{content:"";position:absolute;right:0;top:22px;bottom:22px;width:1px;
+  background:linear-gradient(180deg,transparent,#ffffff1f 18%,#ffffff1f 82%,transparent)}
+/* 底部内边距必须大于 mask 的渐隐区（34px）：原来只有 34px，滚到底时最后一行正好落在
+   渐隐带里，看着就是"被底部那条黑边压掉半截"。现在给到 82px，文字稳稳落在清晰区，
+   下方多出来的是一段自然的收尾留白。 */
+#story{flex:1;min-width:0;overflow-y:auto;padding:26px 0 82px;display:flex;justify-content:center;
+  scrollbar-width:none;
+  /* 底部不再渐隐（原来占最后 34px）：那一段是"文字被吃掉"的真正原因——
+     内容比视口长时，没滚到底的最后一行正好落在渐隐带里，看着就是被一条黑影压掉半截。
+     顶部那 30px 的渐隐保留（标题淡入背景是好看的），底部改成干净边界：
+     露不全就是露不全，滚一下就能看到，而不是"淡到看不见"。 */
+  -webkit-mask:linear-gradient(180deg,transparent 0,#000 30px,#000 100%);
+  mask:linear-gradient(180deg,transparent 0,#000 30px,#000 100%)}
+#story::-webkit-scrollbar{display:none}
+#view-inner{width:100%;max-width:660px;margin:0;padding:0 8px}
+
+/* ---- 左栏（样稿 .hud）：无卡片，靠分隔线与字距 ---- */
+.hud-card{border:none;border-radius:0;background:none;backdrop-filter:none;box-shadow:none;padding:0}
+/* 修边：样稿左栏没有印章（它是文字直出），这里一并隐去 */
+.hud-seal{display:none}
+.hud-who{gap:0;padding:0;background:none;border:none}
+.hud-tx b{font-family:var(--serif);font-size:19px;letter-spacing:.04em;font-weight:400;color:var(--ink)}
+.hud-tx span{font-size:11px;color:#8b98b0}
+.hud-who{margin-bottom:14px}
+.hud-ring .lb{display:flex;justify-content:space-between;font-size:11px;color:#93a0b6;margin-bottom:5px;
+  text-shadow:0 1px 6px #05090fcc}
+.hud-ring .lb b{color:#b9c4d8;font-weight:500}
+.hud-ring .rbar,.hud-ring .rbar i{border-radius:0}
+.hud-ring .rbar{height:2px;background:#ffffff16;margin-bottom:12px;position:relative}
+.hud-ring .rbar i{position:absolute;left:0;top:0;bottom:0;background:#c06a63}
+.hud-ring .rbar.mp i{background:#5580b5}
+.hud-ring .rbar.sp i{background:#8f7fb0}
+.badges{font-size:11px;color:#b9c4d8;margin:14px 0 22px;text-shadow:0 1px 6px #05090fcc}
+.hud-acts{gap:0}
+.hud-acts button{border:none;border-radius:0;background:none;backdrop-filter:none;padding:9px 11px;
+  font-size:12px;color:var(--ink2);text-shadow:0 1px 6px #05090fcc;transition:color .22s}
+.hud-acts button:hover{color:var(--gold2);background:#ffffff08;transform:none}
+/* 纪年（样稿 .hud h6 + .hud .chr）：左侧一条细线，没有圆点与时间轴 */
+.chronicle{margin-top:20px;border:none;border-radius:0;background:none;backdrop-filter:none;box-shadow:none;padding:0}
+.chronicle h5{font-size:10px;letter-spacing:.3em;color:#8b98b0;font-weight:500;margin:0 0 10px}
+.chronicle ul{list-style:none;padding-left:0;position:static}
+.chronicle ul::before{display:none}
+.chronicle li{padding:0 0 11px 9px;border-left:1px solid #ffffff0f;font-size:11px;line-height:1.9;position:static}
+.chronicle li:last-child{padding-bottom:2px}
+.chronicle li::before{display:none}
+.chronicle li .tm{font-family:var(--mono);font-size:10px;color:#7e8ba1;display:block;margin-bottom:2px}
+.chronicle li .tx{color:#a3aec0;display:block;margin-top:0;text-shadow:0 1px 6px #05090fcc}
+.chronicle li.now::before,.chronicle li.now .tm{color:#7e8ba1}
+.chronicle li.now .tx{color:#b9c4d8}
+.chronicle .empty{font-size:11px;color:#8b98b0}
+
+/* ---- 叙事列 ---- */
+.sc-tag{display:block;border:none;border-radius:0;background:none;backdrop-filter:none;box-shadow:none;padding:0;
+  margin-bottom:24px;font-family:var(--sans);font-size:11px;letter-spacing:.2em;color:#93a0b6;
+  text-shadow:0 1px 8px #05090fcc}
+.beat{display:flex;align-items:center;gap:9px;margin:24px 0 13px;font-size:10px;letter-spacing:.32em;color:var(--gold);
+  text-shadow:0 1px 10px #05090fd9}
+.beat::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,#c8a96344,transparent)}
+.nar-p{font-family:var(--serif);font-size:15.5px;line-height:2.15;margin:0 0 .38em;text-indent:2em;color:#eaeff7;
+  text-shadow:0 1px 3px #05090f99,0 0 22px #05090f59}
+.nar-p.opening{color:#adb9cd}
+.nar-p.sys{text-indent:0;font-family:var(--sans);font-size:11px;color:#93a0b6;
+  border-left:1px solid #ffffff1f;padding-left:11px;margin:.7em 0;text-shadow:0 1px 6px #05090fcc}
+.nar-p.check{text-indent:0;font-family:var(--sans);font-size:11px;color:#8fc3c9;letter-spacing:.04em;margin:.7em 0;
+  border-left:1px solid #7fd0d844;padding-left:11px;text-shadow:0 1px 6px #05090fcc}
+.nar-p.flag{text-indent:0;font-family:var(--sans);font-size:11px;letter-spacing:.05em;margin:.3em 0;
+  text-shadow:0 1px 6px #05090fcc}
+.nar-p.gain{color:#c8a86a}
+.nar-p.bad{color:#c08a86}
+.nar-p.ai{color:#eaeff7}
+.nar-p.writing{text-indent:0;font-family:var(--sans);font-size:11px;letter-spacing:.22em;color:#7b8798;margin-top:.9em}
+/* 流式草稿（流式输出开启时才有）：正在长出来的那句正文。
+   光标是「还在写」的唯一信号——没有它，半截句子看起来像被截断了。
+   草稿按正文字号排（不再是占位的小字）：它马上就是正文。 */
+.nar-p.writing.drafting{font-family:var(--serif);font-size:15.5px;line-height:2.15;letter-spacing:.02em;color:#eaeff7;
+  text-indent:2em;animation:none}
+.draft-caret{display:inline-block;width:2px;height:1em;margin-left:3px;vertical-align:-.12em;background:var(--gold2);
+  animation:draftCaret 1s steps(2,start) infinite}
+@keyframes draftCaret{0%,100%{opacity:1}50%{opacity:.12}}
+@media(prefers-reduced-motion:reduce){.draft-caret{animation:none}}
+
+/* ---- 在场人物（样稿 .castline）：细字点列 ---- */
+.npc-chips{display:block;margin:28px 0 6px;padding-top:15px;border-top:1px solid #ffffff0f;
+  font-family:var(--sans);font-size:11.5px;color:#93a0b6;letter-spacing:.06em;line-height:2.1;
+  text-shadow:0 1px 6px #05090fcc}
+.npc-chips .lb{color:#93a0b6;margin-right:6px}
+.npc-chips .who{display:inline;border:none;border-radius:0;background:none;backdrop-filter:none;box-shadow:none;
+  padding:0;margin:0;font-family:var(--serif);font-size:12.5px;letter-spacing:.04em;cursor:pointer;
+  border-bottom:1px solid transparent;transition:color .22s,border-color .22s;transform:none}
+.npc-chips .who:hover{border-bottom-color:#c8a96366;background:none;transform:none;box-shadow:none}
+.npc-chips .sep{color:#4a566b;margin:0 5px}
+
+/* ---- 行动坞（样稿 .dock）：只有一条向背景溶开的渐变，没有边框 ----
+   三处落地修正，都有实测依据：
+
+   ① 组标签移到**行首内联**（原先是按钮上方独立的一行小字）。
+      标签与按钮分属两行时，组的宽度完全随内容漂移（实测 330 / 345 / 542 / 741），
+      900px 视口下「行动」与「交涉」相隔 769px，"喝一杯"到底属于哪一组只能猜。
+      内联后标签紧贴首按钮，底部栏还省下一整行（53px → 40px），叙事区多出十几像素。
+
+   ② **换行优先**，不再靠横向滚动把内容藏起来。
+      旧规则是 flex-wrap:nowrap + overflow-x:auto，而 mask 早被置成 none、
+      滚动条又被 ::-webkit-scrollbar{display:none} 藏掉——溢出因此完全不可见：
+      1100px 视口实测溢出 59px、953px 溢出 206px、900px 溢出 259px，末尾的
+      「翻阅藏书」整个消失且没有任何提示。宁可让坞变高，也不能让动作消失。
+      窄屏仍回落成横滚（那里换行会把叙事挤没），但带上了渐隐提示，见文末。
+
+   ③ 左轴与叙事列对齐（--read-x）：正文 / 动作 / 输入三行这才真的在同一条线上。
+      旧写法 calc(var(--edge) + var(--hud-w) + 24px) 在 953px 视口实测偏右 16px、
+      1280px 偏左 12px；而且 --hud-w 在窄屏是 auto，那条 calc 会整条失效。 */
+#dock{flex:none;margin:0;padding:12px var(--edge) 15px var(--read-x);position:relative;z-index:3;display:flex;
+  align-items:baseline;border:none;border-radius:0;box-shadow:none;max-height:none;
+  overflow:visible;background:none}
+/* 底部暗场：**只有一条向画里溶开的渐变**——没有材质、没有边界、没有上缘线。
+   这条底衬前后试过三版，都记在这里，免得下次再走一遍：
+   ① 样稿原值 90% / 95%：那是配样稿的程序化亮背景定的。项目底部还压着时段光线与绘卷暗部，
+      三层叠下来底部亮度只剩 10（实测），比周围约 20 的绘卷黑一倍——成了一块黑板；
+   ② 雾化（backdrop-filter）+ 上缘发丝线：亮度够了，但那两样都在"指出这里是界面"——
+      一块描得出边的玻璃面，加一条横贯屏幕的线，沉浸式最忌讳的正是这个；
+   ③ 现在这版：只把底部压下去一点点（32% → 0 接 43% → 32%，两段在交界处取值相同，
+      所以是一条连续的坡而不是两块拼起来的底色），压到文字读得清就停手，
+      其余全部交给每段文字自己的 text-shadow。
+   另外不做 mask 的水平裁切：那会在超宽屏上留下一条"左亮右暗"的分界，同样是看得见的框。
+   两侧留白是绘卷，底部也该是——它只是"更暗一点的那片绘卷"。 */
+.dock-row{display:flex;flex-wrap:wrap;column-gap:30px;row-gap:7px;align-items:baseline;overflow:visible;
+  /* 行宽一直给到右边距，不套正文列的 660px：每多一行就是 37px 常驻高度，
+     实测「行动」组（4 个动作 741px）在 1280px 视口里一行放得下、限宽 660 就要拆成两行，
+     整条底栏因此从 171px 涨到 201px。左轴对齐才是这个栏真正需要的东西。 */
+  width:100%}
+/* 行首标签 + 一组按钮。
+   flex 必须允许收缩（0 1 auto）并且封顶在行宽内：组一旦定成 flex:none，
+   它的宽度就是 .dock-btns 的 max-content——按钮不会换行，整组直接顶出容器
+   （实测 1280px 溢出 114px、900px 溢出 192px，就是这一条造成的）。 */
+.dock-g{display:flex;flex-direction:row;flex:0 1 auto;min-width:0;max-width:100%;gap:11px;align-items:baseline}
+.dock-g .lb{flex:none;font-size:9.5px;letter-spacing:.3em;color:#8b98ac;
+  /* 字距会在末字之后多留一个 .3em，用负 margin 吃回去，标签到首按钮的间距才等于 gap */
+  margin-right:-.3em}
+.dock-btns{display:flex;gap:6px;flex-wrap:wrap;row-gap:2px;align-items:baseline}
+.act{border:none;border-radius:0;padding:8px 6px;background:none;font-family:var(--serif);
+  font-size:13.5px;color:#d3dbe8;letter-spacing:.06em;text-shadow:0 1px 6px #05090fcc;transition:color .22s;
+  /* 按钮永不压缩：一压缩中文就折行，按钮会从 36px 涨到 146px（移动端实测）。
+     排不下是容器的事——桌面换行、窄屏横滚，两者都比"把字挤成三行"好。 */
+  flex:none;white-space:nowrap}
+.act:hover:not(:disabled){border:none;color:var(--gold2);background:none;transform:none}
+.act small{font-family:var(--sans);font-size:10px;color:#9aa7bc;margin-left:6px}
+/* 键盘可达：动作坞此前只有 hover 与触摸的 :active，Tab 走过来时看不出焦点在哪 */
+#dock .act:focus-visible,#composer .free-go:focus-visible{
+  outline:1px solid rgba(127,208,216,.55);outline-offset:4px;border-radius:2px}
+#composer input:focus-visible{outline:none}
+/* 自由行动解析中（F-14）：core 侧有权威去重，但按钮必须看起来真的停了，
+   否则玩家在这一两秒里连点几次，得到的只有"点了没反应"。 */
+.act:disabled{color:#6c7891;text-shadow:none;cursor:default}
+.act:disabled small{color:#616d80}
+.dock-g.quick .lb{color:var(--gold)}
+
+/* ---- 输入条（样稿 .composer）：一条底线，与正文同宽同轴 ---- */
+/* 左边缘直接用 --read-x——与动作坞、叙事列同一条轴。
+   旧写法 calc(var(--edge) + var(--hud-w) + 24px) 只是个近似值：953px 视口实测比正文列
+   右 16px、1280px 反而左 12px，"与正文列同轴"其实从来没有真的对齐过；
+   而且 --hud-w 在窄屏会被置成 auto，那条 calc 会整条失效（padding 全部回落成 0）。 */
+#composer{flex:none;padding:2px var(--edge) 20px var(--read-x);display:flex;position:relative;z-index:3;
+  background:none}
+#composer::before{background:linear-gradient(0deg,#05090f6e,#05090f5c);
+  backdrop-filter:blur(18px) saturate(1.18);-webkit-backdrop-filter:blur(18px) saturate(1.18)}
+/* margin 必须显式归零：基础段给过 margin-left:calc(--hud-w + --col-gap)，
+   那一条不会被 padding 覆盖，输入框会整整右移一个左栏宽（953px 实测 +250px）。 */
+#composer .composer-in{margin:0;width:min(660px, calc(100vw - var(--read-x) - var(--edge)));gap:10px}
+#composer input{flex:1;min-width:0;border:none;border-bottom:1px solid #ffffff1f;border-radius:0;background:none;
+  backdrop-filter:none;padding:11px 2px;font-size:12.5px;color:#93a0b6;font-family:var(--sans);
+  text-shadow:0 1px 6px #05090fcc}
+#composer input::placeholder{color:#93a0b6}
+#composer input:focus{outline:none;border-bottom-color:#7fd0d899;box-shadow:none;background:none}
+/* 解析中的样子：不是"空了"，是"在跑"——placeholder 换成进度句、箭头换成省略号（Composer.tsx） */
+#composer input:disabled{color:#6c7891;opacity:1}
+/* 字数：只有逼近 40 字上限时才出现，不做常驻装饰 */
+#composer .cnt{flex:none;font-size:10.5px;color:#7b8798;letter-spacing:.08em;font-variant-numeric:tabular-nums;
+  text-shadow:0 1px 6px #05090fcc}
+/* 修边：样稿的输入区只有一条底线、没有提交按钮；项目需要可点的提交，
+   就把它降成一个文字箭头，保留金色仅在按下时出现 */
+#composer .free-go{flex:none;width:auto;height:auto;border-radius:0;background:none;color:#93a0b6;
+  font-size:15px;padding:10px 13px;transition:color .22s}
+#composer .free-go:hover:not(:disabled){color:var(--gold2);transform:none;filter:none}
+#composer .free-go:disabled{color:#6c7891}
+/* ==================== 沉静式 · 窄屏回落（修边） ====================
+   上面那组 1:1 规则是**桌面版**（250px 左栏 + 30px 边距）。
+   它排在文件末尾，会把中间那段 @media(max-width:820px) 整个盖掉——
+   所以窄屏必须在这里重写一遍：左栏回落成整宽的单列，顶栏允许换行，底部横滚。
+   折叠行为（.hud-card.open / .hud-who::after）仍由原媒体查询提供，这里不动。
+   ================================================================== */
+@media(max-width:820px){
+  /* --hud-w 在这里是 auto，所以 --read-x 必须同步改成"只有边距"——
+     否则那个 max() 里含 auto 的分支会让整条自定义属性失效 */
+  :root{--edge:14px;--col-gap:0px;--hud-w:auto;--read-x:var(--edge)}
+  #top-b{gap:12px;padding:12px var(--edge) 9px;align-items:baseline;flex-wrap:wrap}
+  #top-b .brand{font-size:11px;letter-spacing:.2em}
+  #top-b .stamp{font-size:10.5px;order:3;flex-basis:100%;margin-top:2px}
+  #top-b .loc{font-size:15px;order:2}
+  #top-b .nav{margin-left:auto;gap:14px;flex-wrap:wrap;order:1}
+  #top-b .nav button{font-size:11.5px}
+
+  #wrap{flex-direction:column;gap:0;padding:0 var(--edge)}
+  #hud-col{width:auto;flex:none;padding:12px 0 0;overflow:visible}
+  #hud-col::after{display:none}
+  /* 窄屏同理：底部栏是三层（动作坞 + 输入条 + 标签栏），收尾留白给到 72px */
+  #story{display:block;padding:12px 0 72px}
+  #view-inner{max-width:none;padding:0}
+
+  #dock{padding:10px var(--edge) 11px}
+  /* 窄屏回到横滚：六个动作换行会占掉三四行、把叙事挤没。
+     但这次保留右侧渐隐——它是"右边还有"的唯一提示；旧规则把 mask 置成 none 之后，
+     430px 视口下六个动作有四个既看不见、也无从知道还有（实测溢出 583px）。 */
+  .dock-row{width:auto;flex:1;flex-wrap:nowrap;overflow-x:auto;column-gap:24px;row-gap:0;
+    scrollbar-width:none;
+    -webkit-mask:linear-gradient(90deg,#000 0,#000 calc(100% - 26px),transparent 100%);
+    mask:linear-gradient(90deg,#000 0,#000 calc(100% - 26px),transparent 100%)}
+  .dock-row::-webkit-scrollbar{display:none}
+  /* 横滚里组一律不收缩：收缩会把组压得比内容窄，按钮被挤出组外、后一组的标签
+     直接叠在按钮上（430px 实测「交涉 / 秘录」两个标签压在「住宿 / 喝一杯」上面）。 */
+  .dock-g{flex:none;max-width:none}
+  .dock-btns{flex-wrap:nowrap}
+  #composer{padding:0 var(--edge) 12px}
+  #composer .composer-in{width:100%}
+  #composer input{padding:12px 2px;font-size:13px}
+}
+@media(max-width:520px){
+  .nar-p{font-size:14.5px}
+  /* 命中区：这里原本是 padding:0，按钮只有 18px 高（正好一个字高），指尖按不中。
+     换成与桌面同档的内边距，命中区回到 36px。 */
+  .act{padding:8px 8px;font-size:12.5px}
+  #top-b .nav{gap:11px}
+  #top-b .nav button{font-size:10.5px}
+}
+/* ==================== 背景：两级 + 时段光线 + 径向暗场 ====================
+   这段曾在 1:1 复刻时被"按行号截取文件"误删（取前 486 行时把后面整段切掉了）——
+   补回时一并记下教训：**改文件不要用行号切**，要么用 edit，要么先确认切掉的范围。
+   两级背景：有绘卷用绘卷，没有就用地点自己的 color 生成程序化光场
+   （63 个地点只有 2 张绘卷，缺图是常态）。
+   时段：JS 只改 [data-time] 一个属性，filter 与色层都挂在属性选择器上。
+   ==================================================================== */
+#stage{--bgf:brightness(.72) saturate(.92) contrast(1.02)}
+#stage .layer{position:absolute;inset:0;width:100%;height:100%}
+#stage .field{z-index:0;filter:var(--bgf);transition:filter .9s ease}
+#stage .art{z-index:1;filter:var(--bgf);transition:opacity .8s ease,filter .9s ease}
+#stage .art.fading{opacity:0}
+#stage .light{position:absolute;inset:0;z-index:2;pointer-events:none;transition:background .9s ease}
+#stage .vign{z-index:3}
+#stage .mist{z-index:4}
+#stage .grain{z-index:5}
+/* 径向暗场压在最上：正文所在处沉下去、四周透出背景。
+   它不是卡片——没有边界、没有底，只是一处更暗的地方。
+   浓度 2026-09 降了一档（中心 d9→c2）：正文可读性已由每段文字自己的
+   text-shadow 承担，85% 的暗场把绘卷和剪影一起压没了——
+   它该是「更暗一点的那片画」，不是黑板。 */
+#stage .halo{position:absolute;inset:0;z-index:6;pointer-events:none;
+  background:radial-gradient(58% 66% at 62% 44%, #070c16c2 0%, #070c1687 56%, #070c1600 100%)}
+
+/* 四档时段（2026-09 重新标定）：晨/昼明显打开（昼比夜亮一倍），
+   暮夜沉下去——文字在说清晨、画面就不能是夜。
+   底部浓度同步降档（8c→5a / 66→42）：剪影与地平线光带都在下半屏，
+   底部黑罩一直压到 55% 会把它们整个吃掉；压边缘暗角是 .vign 的事。 */
+#stage[data-time="dawn"]{--bgf:brightness(.9) saturate(.86) hue-rotate(-6deg)}
+#stage[data-time="dawn"] .light{background:linear-gradient(180deg,#1c3a5240,#0a14205a)}
+#stage[data-time="noon"]{--bgf:brightness(1.02) saturate(1.02)}
+#stage[data-time="noon"] .light{background:linear-gradient(180deg,#3a30201f,#0a142042)}
+#stage[data-time="dusk"]{--bgf:brightness(.76) saturate(1)}
+#stage[data-time="dusk"] .light{background:linear-gradient(180deg,#3a1f0a38,#0a14205a)}
+#stage[data-time="night"]{--bgf:brightness(.55) saturate(.7) contrast(1.06)}
+#stage[data-time="night"] .light{background:linear-gradient(180deg,#07102299,#04070ee0)}
+
+/* 窄屏：正文回到整屏居中，暗场的光心也跟着回到中点 */
+@media (max-width:900px){
+  #stage .halo{background:radial-gradient(72% 64% at 50% 44%, #070c16c2 0%, #070c1687 58%, #070c1600 100%)}
+}
+
+/* ==================== 丁 · 竖排边注（1:1 落地） ====================
+   源：outputs/底部栏-丁-竖排边注-落地方案.html —— 逐条照搬，**数值一个不改**，
+   只把选择器映射到项目的类名：
+     .hud→#hud-col   .hud .who→.hud-who   .hud .seal→.hud-seal   .hud .ring→.hud-ring
+     .hud .rb→.rbar  .hud .acts4→.hud-acts  .hud .tx→.hud-tx
+     .side / .sa / .key→同名新增      .bot→#composer      .mini-bot→#dock
+   样式集中在这一块覆盖前文，便于整体回退。
+   ================================================================== */
+
+/* ---- 左栏：一列 flex，只有纪年可伸缩，动作区贴住下缘 ---- */
+#hud-col{display:flex;flex-direction:column;overflow:hidden;padding:20px 24px 0 0}
+#hud-col::after{top:22px;bottom:0}
+#hud-col .hud-who{display:flex;align-items:center;gap:11px;margin-bottom:18px}
+#hud-col .hud-seal{display:flex;flex:none;width:38px;height:38px;align-items:center;justify-content:center;
+  border:1px solid #ffffff1f;border-radius:3px;font-family:var(--serif);font-size:19px;color:var(--gold2)}
+#hud-col .hud-seal i{font-style:normal}
+#hud-col .hud-tx b{display:block;font-family:var(--serif);font-size:20px;font-weight:400;letter-spacing:.1em;color:var(--ink)}
+#hud-col .hud-tx span{font-size:11px;color:#8b98b0;letter-spacing:.12em}
+#hud-col .hud-ring{margin-bottom:11px;font-size:11px;color:#8b98b0;letter-spacing:.08em}
+#hud-col .hud-ring .lb{display:flex;justify-content:space-between;font-size:11px;color:#93a0b6;margin-bottom:5px;
+  text-shadow:0 1px 6px #05090fcc}
+#hud-col .hud-ring .lb b{color:#b9c4d8;font-weight:500}
+#hud-col .hud-ring .rbar,#hud-col .hud-ring .rbar.mp,#hud-col .hud-ring .rbar.sp{
+  display:block;height:2px;background:#ffffff14;margin-bottom:0;position:relative}
+#hud-col .hud-ring .rbar i,#hud-col .hud-ring .rbar.mp i,#hud-col .hud-ring .rbar.sp i{
+  position:absolute;left:0;top:0;bottom:0;border-radius:0;background:linear-gradient(90deg,#c8a96380,#efd69b)}
+#hud-col .badges{margin:14px 0 18px;display:flex;flex-wrap:wrap;gap:7px;font-size:11px;color:#b9c4d8;
+  text-shadow:0 1px 6px #05090fcc}
+#hud-col .badges span{padding:2px 10px;border:1px solid #ffffff14;border-radius:999px;font-size:11px;color:#b9c4d8;
+  letter-spacing:.06em}
+#hud-col .badges .g{color:var(--gold2);border-color:#c8a9633d}
+#hud-col .hud-acts{display:grid;grid-template-columns:1fr 1fr;gap:8px 9px;padding-bottom:20px;
+  border-bottom:1px solid #ffffff0f}
+#hud-col .hud-acts button{border:none;border-top:1px solid #ffffff0f;border-radius:0;background:none;backdrop-filter:none;
+  box-shadow:none;padding:7px 0;font-size:12.5px;color:#b9c4d8;letter-spacing:.1em;text-align:center;
+  text-shadow:0 1px 6px #05090fcc;transition:color .22s}
+#hud-col .hud-acts button:hover{color:var(--gold2);background:none;transform:none}
+/* 落地补强②：动作区在下缘占固定高度，窗口一矮，纪年会被挤到只剩二十几像素
+   （953×700 实测 25px，肉眼就是"没了"）。给纪年一条底线，动作区随之可压缩、自己滚。 */
+#hud-col .chronicle{flex:1 1 auto;min-height:92px;overflow-y:auto;scrollbar-width:none;padding-top:16px;margin-top:0}
+#hud-col .chronicle::-webkit-scrollbar{display:none}
+#hud-col .chronicle h5{margin:0 0 12px;font-size:10.5px;letter-spacing:.22em;color:#7d8a9e;font-weight:400}
+#hud-col .chronicle ul{list-style:none;margin:0;padding:0 0 0 12px;border-left:1px solid #ffffff12}
+#hud-col .chronicle li{margin-bottom:12px;font-size:11px;line-height:1.8;color:#8b98b0;border-left:none;padding:0}
+#hud-col .chronicle li .tm{font-family:var(--mono);font-size:10px;color:#93a0b6;display:block;margin-bottom:2px}
+#hud-col .chronicle li .tx{color:#8b98b0;display:block;margin-top:0;text-shadow:0 1px 6px #05090fcc}
+#hud-col .chronicle li.now .tm{color:var(--gold2)}
+#hud-col .chronicle li.now .tx{color:#b9c4d8}
+#hud-col .chronicle .empty{font-size:11px;color:#8b98b0}
+
+/* ---- 竖排边注（样稿 .side / .sa）：悬停是一条金线，不是一个按钮 ---- */
+/* 动作区接在「此刻在场」之后，占满这一列剩下的高度——不再用 margin-top:auto 把它顶到底：
+   纪年迁走之后，那一顶就在中段留下一大片空白（实测 1440×900 下约 200px）。 */
+.side{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;margin-top:0;
+  padding:18px 0 18px;position:relative}
+.side::-webkit-scrollbar{display:none}
+.side::before{content:"";position:absolute;left:0;right:0;top:0;height:1px;
+  background:linear-gradient(90deg,#ffffff1f,transparent)}
+.side h6{margin:0 0 7px;font-size:9.5px;font-weight:400;letter-spacing:.3em;color:#7d8a9e}
+.side h6.mt{margin-top:15px}
+.sa{display:flex;align-items:baseline;width:100%;gap:10px;padding:5px 0 5px 9px;position:relative;
+  font-family:var(--serif);font-size:13px;letter-spacing:.05em;color:#d3dbe8;text-align:left;background:none;border:none;
+  cursor:pointer;text-shadow:0 1px 6px #05090fcc;transition:color .2s,padding .2s}
+.sa small{font-family:var(--sans);font-size:9.5px;color:#8b98ac;margin-left:auto;letter-spacing:.02em;white-space:nowrap}
+.sa::before{content:"";position:absolute;left:0;top:4px;bottom:4px;width:1px;background:var(--gold2);
+  opacity:0;transform:scaleY(.4);transform-origin:top;transition:opacity .2s,transform .24s cubic-bezier(.32,.72,0,1)}
+.sa:hover:not(:disabled){color:var(--gold2)}
+.sa:hover small{color:#b9c4d8}
+.sa:hover::before{opacity:.85;transform:scaleY(1)}
+.sa.dg{color:#d9a29b}
+.sa.dg:hover:not(:disabled){color:#e8a49d}
+.sa .key{position:absolute;right:0;top:5px;font-family:var(--mono);font-size:9px;color:#5d6b81;opacity:0;
+  transition:opacity .2s}
+.side:hover .sa .key{opacity:1}
+.sa:disabled{color:#6c7891;cursor:default}
+.sa:disabled::before{display:none}
+#hud-col .side .sa:focus-visible{outline:1px solid rgba(127,208,216,.55);outline-offset:2px;border-radius:2px}
+
+/* ---- 底栏：只剩自由行动（样稿 .bot），高 66px，呼吸底衬 ---- */
+#composer{position:relative;flex:none;height:66px;display:flex;align-items:center;justify-content:flex-start;
+  padding:0 var(--edge) 0 var(--read-x);background:none}
+/* backdrop-filter 必须显式清零：前文那句雾化版（#composer::before 的 blur(18px) saturate(1.18)）
+   只写了 background 是覆盖不掉的——它会让底部 66px 被整片模糊，看着就是"一层模糊蒙版"
+   外加一条横带。这是早先"雾化"实验的残留。 */
+#composer::before{content:"";position:absolute;inset:0;pointer-events:none;
+  backdrop-filter:none;-webkit-backdrop-filter:none;
+  background:linear-gradient(0deg,#05090f12,#05090f00);
+  transition:background .45s cubic-bezier(.32,.72,0,1)}
+#composer:hover::before{background:linear-gradient(0deg,#05090f94,#05090f14)}
+/* 落地偏离①：样稿里 focus 与 hover 同值（58%）。样稿是静态演示，项目里"正在输入"却是常态，
+   58% 会变成一条常驻的深色带——降到 38%，仍有明确的"就位"感，但不再是横贯屏幕的一杠。 */
+#composer:focus-within::before{background:linear-gradient(0deg,#05090f61,#05090f0d)}
+/* position:relative 是样稿里就有的（.bot .ask{…;position:relative}），落地时漏抄了这一行——
+   少了它，.shade（::before）会绘制在输入框之上：静止时压 7%，一点进去（:focus-within）压 58%，
+   于是"输入框整个没掉了"，而那层盖住内容的深色正是用户看到的那条明显蓝带。 */
+#composer .composer-in{position:relative;width:min(660px,100%);display:flex;align-items:center;gap:10px;margin:0}
+#composer input{border:none;border-bottom:1px solid #ffffff1f;border-radius:0;background:none;backdrop-filter:none;
+  padding:10px 2px;font-family:var(--sans);font-size:12.5px;color:#93a0b6;text-shadow:0 1px 6px #05090fcc}
+#composer input:focus{outline:none;border-bottom-color:#7fd0d899;box-shadow:none;background:none}
+#composer .free-go{flex:none;font-size:15px;color:#93a0b6;padding:9px 2px;border-radius:0;background:none;
+  width:auto;height:auto}
+#composer .free-go:hover:not(:disabled){color:var(--gold2);transform:none;filter:none}
+
+/* ---- 窄屏回落（样稿 .mini-bot）：动作回到底部横排 ---- */
+@media(max-width:820px){
+  #hud-col{display:block;overflow:visible;padding:12px 0 0}
+  /* 窄屏的 #dock 同样要清掉基础段的卡片化修饰（圆角 / 阴影 / 毛玻璃） */
+  #dock{padding:10px 14px 11px;background:linear-gradient(0deg,#05090f94,#05090f00);
+    border:none;border-radius:0;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none}
+  #composer{height:auto;padding:0 14px 12px;background:none}
+  #composer::before{display:none}
+  #composer .composer-in{width:100%}
+  #composer input{padding:12px 2px;font-size:13px}
+}
+
+/* ==================== 背景 · 丁方案基准（2026-09 视觉优化：接回时段与氛围） ====================
+   本段原是丁样稿的 1:1 复制，把时段光、雾、噪点、漂移整体关死——
+   代价是四个时段看起来一个样（文字在说清晨、画面是夜），画面也因此是"死"的。
+   视觉优化只保留它的底色基准，其余交还给上面的四档规则：
+   · 绘卷/光场重新吃 --bgf（晨 .9 / 昼 1.02 / 暮 .76 / 夜 .55），删掉固定 filter；
+   · .light 四档光线恢复（那条覆盖四档的固定渐变已删）；
+   · 雾、噪点、暗角低强度恢复：雾 0.55→0.30，暗角各段透明度约为原 6 折，
+     噪点维持 0.05（它本来就是最含蓄的一层）；
+   · 漂移换成 b-drift-soft：900px 底图经不起 b-drift 那 8% 的放大（放大即发虚），
+     压到 3.6%、150s——察觉不到在动，但画面是活的。
+   想整体回退：删掉本段即回到「四档全关」的丁样稿状态。
+   ============================================================ */
+#stage{background:#0b0f1d}
+#stage img{animation:b-drift-soft 150s ease-in-out infinite alternate}
+@keyframes b-drift-soft{from{transform:scale(1.012) translate(0,0)}to{transform:scale(1.048) translate(-.8%,-.6%)}}
+#stage .vign{background:radial-gradient(ellipse at 50% 34%,transparent 42%,#111a2b5c 96%),
+  linear-gradient(180deg,#111a2b73 0,#111a2b2e 16%,transparent 40%,#111a2b69 86%,#111a2b8f 100%)}
+#stage .mist{opacity:.3}
+
+/* ---- 此刻在场（2026-09 自叙事列末尾迁入左栏） ----
+   左栏的空白由它填：它本来就属于"此刻"，与动作区同一组信息；常驻在左侧，
+   比挂在叙事流尾巴上（会被滚走）更合它"知道谁在"的用途。 */
+.cast-side{flex:none;padding:16px 0 0}
+.cast-side h6{margin:0 0 8px;font-size:9.5px;font-weight:400;letter-spacing:.3em;color:#7d8a9e}
+.cast-side .row{font-size:11.5px;line-height:1.95;color:#93a0b6;letter-spacing:.06em;text-shadow:0 1px 6px #05090fcc}
+.cast-side .who{display:inline;border:none;border-radius:0;background:none;padding:0;margin:0;cursor:pointer;
+  font-family:var(--serif);font-size:12.5px;letter-spacing:.04em;transition:color .22s}
+.cast-side .who:hover{color:var(--gold2)}
+.cast-side .sep{color:#4a566b;margin:0 5px}
+.cast-side .more{color:#5f6b7d;letter-spacing:.08em}
+
+/* ==================== 落盘：面板铺开（丁 · 照影） ====================
+   源：outputs/整合稿-甲顶栏+丁页面.html（1440 基准；三列实测量的 412px 与稿子逐值吻合）
+   规则全部集中在本段覆盖前文——**删掉这一段即回到「居中小窗」**，这是本片的回退点。
+   ------------------------------------------------------------------------- */
+:root{--top-h:58px} /* 顶栏实测高度：面板从它下沿开始，不再盖住导航 */
+:root{--ease:cubic-bezier(.22,1,.36,1)}
+
+/* 面板打开（挂载）时淡入一次；换页的那一次走 WAAPI（见 PanelOverlay），
+   两条路分开，才不会在同一元素上互相顶掉。 */
+@keyframes pnlIn{from{opacity:0}to{opacity:1}}
+#pnl-ovl .sheet{animation:pnlIn .2s var(--ease) both}
+
+/* ① 层：从顶栏下沿起铺满其余。压暗做成渐变——上半屏压 77% 换可读性，下半屏让绘卷透出来 */
+#pnl-ovl{top:var(--top-h);display:block;padding:0;
+  background:linear-gradient(180deg,#080d17c4,#080d17a6 44%,#080d1759);backdrop-filter:none}
+
+/* ② 窗口 → 页面：边框、底色、圆角、阴影、尺寸上限、入场位移全部撤掉 */
+#pnl-ovl .sheet{width:auto;max-width:none;max-height:none;height:100%;border:none;border-radius:0;
+  background:none;backdrop-filter:none;box-shadow:none}
+/* 入场动画不在这里写：见文件末尾的 pnlIn / pnlSwap —— 同文件里后写的胜，
+   先前这里留了一条 animation:none，会把换页淡入一起吃掉。 */
+
+/* ③ 页头降级：窗口标题栏 → 一行页面题头（标题 · 副标题 ………… 回到世界） */
+#pnl-ovl .sh-head{width:100%;max-width:1328px;margin:0 auto;padding:24px 0 15px;border-bottom:1px solid #ffffff14}
+/* 标题与副标题并排一行——原实现是两行堆叠，页头因此比稿子高 40px，
+   整片的起点跟着往下压，观感上就是"头重"。 */
+/* 绘卷提亮之后，主体文字与画面亮部的对比会掉一截。
+   项目在叙事列里用的就是这一手——极淡的暗投影把字从背景里托出来，
+   而不是把整屏再压暗回去（那样等于把刚找回来的层次感又丢了）。 */
+#pnl-ovl .pnl-body,#pnl-ovl .sh-head{text-shadow:0 1px 4px #05090fb3}
+#pnl-ovl .sh-t{display:flex;align-items:baseline;gap:14px}
+#pnl-ovl .sh-t b{display:inline;font-size:17px}
+#pnl-ovl .sh-t span{display:inline;font-size:11px;letter-spacing:.16em;margin-top:0}
+
+/* ④ 正文 → 三列网格：页头固定，只滚正文。（区块原语见「页面区块」段） */
+/* overflow-x:hidden 是必需的：区块标题的光晕比标题宽 30px，
+   而一个方向设了 auto 之后另一个方向会跟着变 auto，不写它会冒出一条横向滚动条。 */
+#pnl-ovl .pnl-body{width:100%;max-width:1328px;margin:0 auto;padding:6px 0 48px;overflow-x:hidden;
+  display:grid;grid-template-columns:repeat(3,1fr);grid-auto-flow:row dense;gap:0 46px;align-content:start}
+
+/* ⑤ 页面区块原语：区块 = 标题 + 行组；分组只靠标题背后那团光，没有边框与底色 */
+/* align-self:start 是为了不被同行的高块拉伸；但它在 flex 容器（地图页的 .m2 是 flex column）
+   里会让块收缩到内容宽——「四方」因此只剩 213px。width:100% 兜住这一条。 */
+.pnl-sec{position:relative;padding:21px 0 17px;align-self:start;width:100%;min-width:0}
+/* grid/flex 的经典陷阱：item 的 min-width 默认是 auto，内容一撑就把列宽顶开。
+   实测：势力外交那张 14 列矩阵把整个网格撑到超出 1328，连带「今日纪年」的正文
+   也画到了邻列上。列宽必须钉死，溢出的部分交给块内部自己滚（.dip-scroll）。 */
+/* 地图页的横滑轨道在 flex 列里会被压缩（flex-shrink 默认 1），而它自己是 overflow:hidden，
+   于是把当前层的内容裁掉一截——873 高的视口下实测：内容 449px 被压到 281px，
+   「地图看不全」就是这么来的。给它 flex:none，让整体高度撑开，交给 .pnl-body 去滚。 */
+#pnl-ovl .m2-rail{flex:none}
+/* 岔路提示：列表改成行式之后，这里也统一到同一套小字 */
+#pnl-ovl .m2-hint{font-size:10.5px;color:#6d7a90;text-align:center;padding:16px 0 6px;letter-spacing:.06em}
+/* 非区块内容（地图的四层轨道、行囊容器、还没换壳的旧卡）整行铺开——
+   不然它们在网格里只占第一列（实测：地图的卡片墙缩在左侧三分之一）。 */
+.pnl-body > *{min-width:0;grid-column:1/-1}
+.pnl-body > .pnl-sec[data-w='1']{grid-column:span 1}
+.pnl-body > .pnl-sec[data-w='2']{grid-column:span 2}
+.pnl-body > .pnl-sec[data-w='3']{grid-column:span 3}
+.pnl-sec[data-w='2'] > *,.pnl-sec[data-w='3'] > *{min-width:0}
+.pnl-sec > h6,.pnl-sec > h5{position:relative;z-index:0;font-size:11.5px;font-weight:400;letter-spacing:.25em;
+  color:#b9c4d8;margin:0 0 13px}
+/* 区块标题背后的光晕：删掉了。
+   它在 701×45 的元素上是个极度扁平的椭圆（closest-side + 宽矩形），
+   在稿子的绘卷亮度下几乎看不见，而实机的绘卷被提亮过 1.4 倍——
+   同一条就显形成横贯的亮带。分组改由区块标题自己的字距与小注承担。 */
+/* 区块标题右侧的小注（原 .card .rt），与 em 同一套处理 */
+.pnl-sec > h6 .rt,.pnl-sec > h5 .rt{font-size:10.5px;font-weight:400;letter-spacing:.1em;color:#6d7a90;margin-left:10px}
+.pnl-row{display:flex;justify-content:space-between;gap:16px;font-size:12.5px;padding:5px 0;
+  border-bottom:1px solid #ffffff09}
+.pnl-row:last-child{border-bottom:none}
+.pnl-row > span{color:#8b98b0;white-space:nowrap;flex:none;max-width:46%}
+/* b 要「占满剩余 + 可换行」：只写 min-width:0 还不够，长句仍会画到邻列
+   （实测：纪闻的见闻正文越过列边界压到第二块上）。 */
+.pnl-row > b{flex:1 1 auto;min-width:0;overflow-wrap:anywhere;text-wrap:pretty;
+  font-family:var(--serif);font-weight:400;color:#e9eef7;text-align:right}
+/* 行式按钮：与行同一套节奏，但整行可点 */
+.pnl-act{display:flex;justify-content:space-between;align-items:center;gap:16px;width:100%;
+  padding:10px 0;border:none;border-bottom:1px solid #ffffff09;background:none;
+  font-size:12.5px;color:var(--ink2);letter-spacing:.02em;text-align:left;transition:color .22s}
+.pnl-act:hover{color:var(--gold2)}
+/* 行式列表：地图的三层选择（大陆 / 地区 / 地点）用它，与其它页的行同一套节奏。
+   卡片语言在这里退场——七列卡片墙铺满之后，层级感反而没了。 */
+/* 两列用 grid + 统一行高：多列布局会在列底把最后一行裁断（实测），
+   而 grid 若让行自由伸缩，两列又会因为元信息行数不同而错位。给定 min-height 最稳。 */
+/* 三列：这是数据导航页，密度该在 4-5。两列时行宽 641，箭头会飘到离内容 400px 的地方。 */
+.pnl-list{display:grid;grid-template-columns:repeat(3,1fr);gap:0 46px}
+.pnl-item{display:flex;align-items:center;gap:13px;width:100%;min-height:70px;text-align:left;padding:11px 0;
+  border:none;border-bottom:1px solid #ffffff09;background:none;transition:background .22s}
+.pnl-item:hover{background:#ffffff08}
+.pnl-item .ic{order:1;width:34px;height:34px;flex:none;border-radius:9px;display:flex;align-items:center;justify-content:center;
+  background:#3b4a8f;font-family:var(--serif);font-size:15px;color:#fff;box-shadow:inset 0 0 0 1px #ffffff1f}
+/* 文字块按内容宽、箭头紧跟其后：写成 flex:1 会把箭头推到行的最右端，
+   在 412px 的列里就是离内容 300px 的一个孤零零的符号（上一版就是这样）。 */
+.pnl-item .tx{order:2;flex:0 1 auto;min-width:0}
+.pnl-item .tx b{display:block;font-family:var(--serif);font-size:15px;font-weight:400;letter-spacing:.06em;color:#e9eef7}
+.pnl-item .tx i{display:block;font-style:normal;font-size:10.5px;color:#8b98b0;margin-top:4px;line-height:1.6}
+.pnl-item .tx i.warn{color:#6d7a90}
+.pnl-item .flag{font-style:normal;font-size:10.5px;color:var(--gold2);margin-left:9px}
+.pnl-item .now-dot{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--gold2);
+  margin-right:5px;vertical-align:middle}
+.pnl-item .go{order:3;flex:none;margin-left:2px;font-size:12px;color:#5f6b80;transition:color .22s}
+.pnl-item:hover .go,.pnl-item.on .go{color:var(--gold2)}
+.pnl-item .act{order:4;flex:none;margin-left:auto;font-size:11px;color:var(--gold2);
+  border:1px solid #d4b26a59;border-radius:999px;padding:3px 10px}
+/* 行式入口的说明文字限宽：不限的话它会贴到 1328 的另一端，中间空一千像素 */
+#pnl-ovl .pnl-sec .pnl-act{max-width:720px}
+.pnl-item.lk{opacity:.66}
+.pnl-act b{font-family:var(--serif);font-weight:400;font-size:11.5px;color:#8b98b0;white-space:nowrap}
+.pnl-sec > h6 em{font-style:normal;font-size:9.5px;letter-spacing:.1em;color:#5f6b80;margin-left:10px}
+/* 因果链：沿一条竖线向上追溯，线本身就是"父子"这件事 */
+/* 长表格与长快照在块内自理：势力外交 14 行、上下文分层若干屏，
+   让它们自己滚，别把整页撑到两屏以上。 */
+.pnl-sec .dip-scroll{max-height:min(400px,52vh);overflow-y:auto}
+/* 滚动条统一成与主题一致的半透明白——默认那条在 Windows 上是浅蓝的，
+   在夜色界面上非常突兀（实测截图里就是一竖道蓝）。 */
+#pnl-ovl ::-webkit-scrollbar{width:6px;height:6px}
+#pnl-ovl ::-webkit-scrollbar-thumb{background:#ffffff26;border-radius:3px}
+#pnl-ovl ::-webkit-scrollbar-thumb:hover{background:#efd69b66}
+#pnl-ovl ::-webkit-scrollbar-track{background:transparent}
+#pnl-ovl,#pnl-ovl *{scrollbar-width:thin;scrollbar-color:#ffffff26 transparent}
+.bagovl ::-webkit-scrollbar{width:6px;height:6px}
+.bagovl ::-webkit-scrollbar-thumb{background:#ffffff26;border-radius:3px}
+.bagovl ::-webkit-scrollbar-track{background:transparent}
+.pnl-sec .dip-scroll::-webkit-scrollbar{width:6px}
+.pnl-sec .dip-scroll::-webkit-scrollbar-thumb{background:var(--line2);border-radius:3px}
+#pnl-ovl .pnl-sec pre{font-size:11px;line-height:1.9}
+/* 配置类内容限宽：跨列的块有 870 甚至 1328，输入框与长按钮铺满就散了——
+   表单的眼动是纵向的，宽度超过 640 之后每一行都在横向漂。 */
+#pnl-ovl .pnl-sec > .sysbtn,
+#pnl-ovl .pnl-sec pre{max-width:640px}
+/* 区块内的小分段：给"评分盘前十 / 人物志"这类子表一个标题，不与区块标题争层级 */
+.pnl-sub{margin-top:10px}
+.pnl-sub .lb{font-size:9.5px;letter-spacing:.22em;color:#5f6b80;margin-bottom:5px}
+/* 今日纪年：最后一条是"现在"，与左栏那套同样的处理 */
+.pnl-row.now > span,.pnl-row.now > b{color:var(--gold2)}
+.pnl-chain{margin:2px 0 12px;padding-left:11px;border-left:1px solid #ffffff1f}
+.pnl-chain > div{font-size:11.5px;line-height:2;margin-bottom:2px;color:var(--ink3)}
+/* 落在 #pnl-ovl 里的旧行原语（.kv / .st-row）与 .pnl-row 拉平：
+   行距、字号、那道极淡的分隔线——整合稿的节奏感有一半来自它，缺了就显得散。
+   只作用于面板子树，SheetHost（对话/商店）那边不动。 */
+#pnl-ovl .kv{display:flex;justify-content:space-between;gap:16px;padding:5px 0;
+  border-bottom:1px solid #ffffff09;font-size:12.5px}
+#pnl-ovl .kv span:last-child{font-family:var(--serif)}
+#pnl-ovl .st-row{padding:5px 0;border-bottom:1px solid #ffffff09;font-size:12.5px}
+/* 整宽按钮的宽度口径要跟着块走：按后代选，而不是只认直接子元素。 */
+#pnl-ovl .pnl-sec .sysbtn{width:100%;max-width:100%;box-sizing:border-box;margin-left:0;margin-right:0}
+/* 数据要能对齐：等宽数字（时戳、经验、生命值这类） */
+#pnl-ovl .pnl-row > b,#pnl-ovl .kv span:last-child,#pnl-ovl .st-row .v{
+  font-variant-numeric:tabular-nums}
+.pnl-row.note{display:block;padding:0 0 11px}
+.pnl-row.note > span{display:block;white-space:normal;flex:none;color:#7d8a9e;font-size:10.5px;letter-spacing:.06em;margin-bottom:2px}
+.pnl-row.note > b{display:block;text-align:left;font-family:var(--sans);font-size:11.5px;line-height:1.85;color:var(--ink2);white-space:normal}
+/* 空态与说明条：网格里占满整行，不缩在第一列居中 */
+#pnl-ovl .pnl-body > .empty{grid-column:1/-1}
+#pnl-ovl .pnl-body > .empty{text-align:left;padding:26px 0;font-size:12.5px;line-height:2;color:var(--ink3)}
+/* 跨列的块：内部再分栏，行成对并排——宽度用掉，label 与值仍在一行里 */
+.pnl-sec[data-w='2']{grid-column:span 2;display:grid;grid-template-columns:1fr 1fr;column-gap:46px}
+.pnl-sec[data-w='3']{grid-column:span 3;display:grid;grid-template-columns:repeat(3,1fr);column-gap:46px}
+/* 默认全部跨满整块——表格、按钮组、包裹层不该缩进某一列里去；
+   只有行（.pnl-row）与显式声明分栏的层（.pnl-col）才落进内部栅格，成对并排。 */
+.pnl-sec[data-w='2'] > *,.pnl-sec[data-w='3'] > *{grid-column:1/-1}
+.pnl-sec[data-w='2'] > .pnl-row,.pnl-sec[data-w='3'] > .pnl-row,
+.pnl-sec[data-w='2'] > .pnl-col,.pnl-sec[data-w='3'] > .pnl-col{grid-column:auto}
+
+/* ⑥ 顶栏 · 甲 · 刻度：项间一道 1px 竖线分栏，当前项脚下一条金线向两侧展开 */
+#top-b .nav{gap:0}
+#top-b .nav button{position:relative;padding:9px 15px;font-size:12px;letter-spacing:.14em;color:#8b98b0;
+  border:none;border-radius:0;background:none;transition:color .24s}
+#top-b .nav button + button::before{content:"";position:absolute;left:0;top:50%;width:1px;height:9px;
+  margin-top:-4.5px;background:#ffffff14}
+#top-b .nav button:hover{color:#c9d3e3}
+#top-b .nav button.on{color:var(--gold2)}
+#top-b .nav button::after{content:"";position:absolute;left:15px;right:15px;bottom:5px;height:1px;
+  background:linear-gradient(90deg,#efd69b00,#efd69b,#efd69b00);opacity:0;transform:scaleX(.2);
+  transform-origin:50% 50%;transition:opacity .3s,transform .4s cubic-bezier(.22,1,.36,1)}
+#top-b .nav button.on::after{opacity:1;transform:scaleX(1)}
+
+/* ⑧ 面板打开时绘卷按「画面」而不是「时辰」来显影。
+   实机的绘卷走晨昏调色（--bgf：白天 .72、夜里 .52，晨光还带 -6° 冷偏移），
+   叠上面板那层压暗就几乎全黑——整合稿里"纸页浮在夜色之上"的层次感就是这样丢的。
+   面板里玩家读的是信息，天色的时间语义交给顶栏的时辰戳；
+   这里把绘卷拉回可辨的亮度与饱和度（稿子的基准是 brightness(.9) saturate(.95)）。 */
+body[data-view]:not([data-view='main']) #stage .art,
+body[data-view]:not([data-view='main']) #stage .field{filter:brightness(1.42) saturate(1.02) contrast(1.02)}
+
+/* ⑦ 窄屏：顶栏不再常驻（导航本来就在底栏），面板从屏幕顶起、让出 --bot-h 那一条，
+   三列回落单列、跨列块退回普通块。--bot-h 由 GameShell 实测（dock/composer 此时已被隐去，
+   它量到的就是底栏高度），这里直接用。 */
+@media(max-width:820px){
+  /* 窄屏顶栏要留着：它是行囊唯一的入口（底栏七个页里没有行囊）。
+     面板改从顶栏下沿起——与桌面同一套避让逻辑，两层页头不会叠。 */
+  #pnl-ovl{top:var(--top-h);bottom:var(--bot-h,52px)}
+  #pnl-ovl .sh-head{padding:16px 0 12px}
+  #pnl-ovl .pnl-body{grid-template-columns:1fr;gap:0;padding-bottom:24px}
+  .pnl-sec[data-w='2'],.pnl-sec[data-w='3']{grid-column:span 1;display:block}
+  .pnl-sec{padding:18px 0 14px}
+  .pnl-row{font-size:12px}
+  .bagovl{top:0;bottom:var(--bot-h,52px)}
+  .bagsheet > *{max-width:none}
+}
+
+/* ==================== 视觉优化（2026-09 · 既定方案，集中在末尾便于回退） ====================
+   本段靠「同文件后写胜出」覆盖前文。六条：
+   ① 窄屏角色卡折叠修复（CSS 冲突）
+   ② 窄屏动作坞小注隐藏
+   ③ 日志悬浮钮降存在感
+   ④ 左栏动作行小注紧跟标签
+   ⑤ 输入条对比度 / 金钱徽章提级
+   ⑥ 剪影层样式（元素在 SceneStage，SVG 由 ui/art/silhouette.ts 生成）
+   ================================================================================= */
+
+/* ① 窄屏角色卡折叠：丁段的 #hud-col .badges / #hud-col .hud-acts（带 ID，
+   特异性更高）一直压着 820px 段的折叠规则（.hud-card .badges{display:none}），
+   窄屏因此永远展开——430px 下首屏约四成高度被角色卡吃掉。
+   这里用「更高特异性 + :not(.open)」只折叠未展开态，.open 的展开规则得以生效。
+   开关在 HudCard：窄屏点身份行展开/收起（桌面点击仍是跳转角色页）。 */
+@media(max-width:820px){
+  #hud-col .hud-card:not(.open) .hud-ring,
+  #hud-col .hud-card:not(.open) .hud-acts,
+  #hud-col .hud-card:not(.open) .badges{display:none}
+
+  /* ② 动作坞小注（「感知检定·发现异常」这类）让每个按钮宽出一倍，
+     430px 一屏只见两三个动作。窄屏只留动作名，说明进悬浮提示（title）。 */
+  #dock .act small{display:none}
+}
+
+/* ③ 日志悬浮钮：z-70 直接压在叙事正文上（移动端实测盖字）。
+   不挪位置——--bot-h 的让位逻辑是对的；只降存在感：静止半透明，hover/聚焦恢复。 */
+.rl-fab{opacity:.62;transition:opacity .2s}
+.rl-fab:hover,.rl-fab:focus-visible{opacity:1}
+
+/* ④ 左栏动作行：小注紧跟标签——原 margin-left:auto 把注推到列右边，
+   250px 列中间是大空洞，读一行要左右扫。放不下时注落到标签下一行左对齐；
+   padding-right 给右侧的快捷键角标留位。 */
+.sa{flex-wrap:wrap;row-gap:1px}
+.sa small{margin-left:8px;margin-right:0;flex:1 1 auto;min-width:0;white-space:normal;
+  line-height:1.55;padding-right:20px}
+
+/* ⑤ 输入条：自由行动是核心入口，不该靠猜才发现——底线与已输入文字各提一档对比，
+   placeholder 再压一档，与「已输入」拉开层次（原两者同为 #93a0b6）。 */
+#composer input{color:#b9c4d8;border-bottom-color:#ffffff2b}
+#composer input::placeholder{color:#8f9db5}
+/* 金钱是玩家最常核对的数字，从「天气/时段」那一排里提出半档 */
+#hud-col .badges .g{font-size:12px;letter-spacing:.04em}
+
+/* ⑥ 剪影层：缺绘卷的 61 个地点靠它获得地平线；有绘卷时垫在画下（z 序在 .art 之前），
+   换景交叉淡入的空档也不再闪黑。轻微模糊+压暗，让它退到"远景"的位置上。 */
+#stage .sil{position:absolute;left:0;right:0;bottom:0;z-index:1;pointer-events:none;
+  background-size:100% 100%;background-repeat:no-repeat;
+  filter:blur(1.2px) brightness(.94);opacity:.92}
+
+/* ⑦ 字体统一（2026-09 · 思源宋体自带 + 去合成斜体）。
+   @font-face 在 main.tsx 引入 @fontsource/noto-serif-sc（400/600，101 个 unicode-range
+   分片按需加载），与 --serif 栈首位同名——文档内 @font-face 优先于本机同名安装字体，
+   玩家机器装没装思源宋、装的什么版本都不再影响渲染。
+   这里是配套兜底：CJK 没有真斜体，font-style:italic 触发整段合成斜切，
+   看起来就像"换了款字体"——AI 富文本（rich() 白名单放行 <i>/<em>）带进正文的
+   斜体一律按正体渲染，强调交给字重与颜色。 */
+.nar-p i,.nar-p em{font-style:normal}
+
+/* ==================== 地图页 · 旅人朱印 · 雾玻璃（方案四适配版落地） ====================
+   源：outputs/地图页-5方案/方案四-司务-雾玻璃适配.html
+   四层横滑钻取退役（旧 .m2-* 规则留在 app.css 冻结区，不再有引用）。
+   三块玻璃浮岛：大陆与地区（左）｜地点列表（中）｜地点情报（右）+ 朱印落款条 + 通栏 footer。
+   玻璃材质与 SheetHost 浮层同源：#151e32 渐变半透明 + blur(18px) saturate(1.18)
+   + 1px 高光内边——主题一致性由材质本身保证。
+   注意：面板铺开后的 #pnl-ovl 压暗层在上文「落盘」段；玻璃要读得出磨砂，
+   地图页那层压暗单独放轻一档（本段末尾那条 data-view='map' 覆盖）。
+   ================================================================================ */
+body[data-view='map'] #pnl-ovl{background:linear-gradient(180deg,#080d17b8,#080d178c 44%,#080d1730)}
+
+.m3{--glass-bg:linear-gradient(180deg,#151e32f0,#101728e6);--glass-line:#ffffff1f;
+  --glass-hi:inset 0 1px 0 #ffffff14,0 24px 60px -30px #000;
+  --cinnabar:#c25b52; /* 朱印色：样稿 :root 的同名令牌，收进 .m3 作用域，不外溢 */
+  display:flex;flex-direction:column;gap:14px;padding-bottom:4px}
+.m3-pane,.m3-mast,.m3-foot{background:var(--glass-bg);
+  /* backdrop-filter 已删（性能收口）：面板铺开时底下绘卷仍在动，18px 全幅模糊
+     每帧连续重采样。底色透明度 d9/cc→f0/e6 补回实底感，观感仍是同一家雾玻璃。 */
+  border:1px solid var(--glass-line);border-radius:14px;box-shadow:var(--glass-hi)}
+@media(prefers-reduced-transparency:reduce){
+  .m3-pane,.m3-mast,.m3-foot{background:#121a2bf5;backdrop-filter:none;-webkit-backdrop-filter:none}}
+
+/* ---- 朱印文号条：页题在 sh-head，这里只押印与落款；粘在滚动口顶部 ---- */
+.m3-mast{position:sticky;top:0;z-index:3;display:flex;align-items:center;gap:16px;padding:13px 20px}
+.m3-seal{flex:none;width:44px;height:44px;border:1px solid #c25b5288;border-radius:3px;position:relative;
+  display:flex;align-items:center;justify-content:center;transform:rotate(-2deg);
+  font-family:var(--serif);font-size:20px;color:#c25b52;text-shadow:0 0 12px #c25b5244;background:#0c132266}
+.m3-seal::after{content:"";position:absolute;inset:3px;border:1px solid #c25b5240;border-radius:2px}
+.m3-count{font-family:var(--serif);font-size:13.5px;letter-spacing:.1em;color:var(--ink2);
+  text-shadow:0 1px 6px #05090f99}
+.m3-count b{font-weight:400;color:var(--gold2)}
+.m3-docn{margin-left:auto;text-align:right;font-family:var(--mono);font-size:10px;color:#8b98b0;line-height:1.9;
+  text-shadow:0 1px 6px #05090f99}
+
+/* ---- 三栏簿册：不设内滚，整页随 .pnl-body 走；各栏自持高度 ---- */
+.m3-ledger{display:grid;grid-template-columns:222px 1fr 350px;gap:14px;align-items:start}
+.m3-pane{min-width:0}
+.m3-gut{padding:14px 12px 16px}
+.m3-rows{padding:8px 18px 16px}
+.m3-mark{padding:16px 18px 18px}
+
+.m3-g{font-family:var(--serif);font-size:11px;letter-spacing:.42em;color:#8b98b0;margin:14px 4px 8px;white-space:nowrap}
+.m3-g:first-child{margin-top:2px}
+.m3-rl{display:flex;align-items:center;gap:9px;width:100%;padding:8px 9px;font-size:12.5px;color:var(--ink2);
+  border-radius:8px;transition:background .22s,color .2s}
+.m3-rl:hover{color:var(--gold2);background:#ffffff0a}
+.m3-rl.on{color:var(--gold2);background:#c8a96314}
+.m3-rl.lk{opacity:.42}
+.m3-rl .n{font-family:var(--serif);letter-spacing:.06em;white-space:nowrap;min-width:0}
+.m3-rl .n .now{font-family:var(--sans);font-style:normal;font-size:8.5px;color:var(--cinnabar);
+  border:1px solid #c25b5255;border-radius:2px;padding:0 4px;margin-left:7px;letter-spacing:.16em;vertical-align:1px}
+.m3-rl .meta{margin-left:auto;font-size:9.5px;color:#6d7a90;white-space:nowrap}
+.m3-go-stamp{flex:none;font-size:10px;letter-spacing:.08em;color:var(--gold2);border:1px solid #c8a9634d;
+  border-radius:2px;padding:2px 7px;white-space:nowrap}
+.m3-rl .m3-go-stamp{margin-left:6px}
+.m3-rl .meta + .m3-go-stamp{margin-left:6px}
+.m3-special{display:flex;align-items:center;gap:11px;width:100%;margin-top:10px;padding:10px 9px;border-radius:9px;
+  text-align:left;transition:background .22s}
+.m3-special:hover{background:#ffffff0d}
+.m3-special .seal2{background:#8a6abf}
+.m3-special b{display:block;font-family:var(--serif);font-size:13.5px;font-weight:400;letter-spacing:.08em;color:var(--ink)}
+.m3-special .k{display:block;font-size:9.5px;color:#8b98b0;margin-top:3px;letter-spacing:.04em}
+.m3-special .k3{display:block;font-size:9.5px;color:var(--gold2);margin-top:2px;letter-spacing:.06em}
+
+.m3-seg{display:flex;align-items:baseline;gap:12px;margin:10px 0 6px}
+.m3-seg b{font-family:var(--serif);font-size:15px;font-weight:400;letter-spacing:.14em;color:var(--ink)}
+.m3-seg .k{font-size:9.5px;letter-spacing:.2em;color:#6d7a90}
+.m3-seg .zhu{margin-left:auto;font-size:10px;color:var(--cinnabar);letter-spacing:.08em}
+.m3-rg{display:flex;align-items:center;gap:13px;width:100%;padding:9px 10px;border-radius:9px;transition:background .22s}
+.m3-rg:hover{background:#ffffff0d}
+.m3-rg.on{background:#c8a9631a;box-shadow:inset 0 0 0 1px #c8a9632e}
+.m3-rg .seal2,.m3-mark .seal2,.m3-special .seal2{flex:none;border-radius:3px;display:flex;align-items:center;justify-content:center;
+  font-family:var(--serif);color:#fff;box-shadow:inset 0 0 0 1px #ffffff24}
+.m3-rg .seal2{width:30px;height:30px;font-size:14px}
+.m3-rg .tx{min-width:0;display:flex;align-items:baseline;gap:0;flex:1 1 auto}
+.m3-rg .nm{font-family:var(--serif);font-size:15.5px;font-weight:400;letter-spacing:.06em;color:var(--ink);
+  text-shadow:0 1px 6px #05090f66;white-space:nowrap}
+.m3-rg.on .nm{color:var(--gold2)}
+.m3-rg .mt{font-size:10.5px;color:#8b98ac;letter-spacing:.04em;margin-left:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.m3-stamp{flex:none;font-size:10px;letter-spacing:.14em;color:#8b98b0;border:1px solid #ffffff14;
+  border-radius:2px;padding:2px 7px;white-space:nowrap}
+.m3-stamp.dg{color:#c25b52;border-color:#c25b5255;text-shadow:0 0 8px #c25b5233}
+.m3-stamp.now{color:var(--star);border-color:#7fd0d844}
+.m3-empty{padding:22px 4px;font-size:12px;color:var(--ink3);line-height:2}
+
+/* ---- 批注栏 ---- */
+.m3-mark .m3-h{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+.m3-mark .m3-h .seal2{width:40px;height:40px;font-size:18px}
+.m3-mark .t b{display:block;font-family:var(--serif);font-size:18px;font-weight:400;letter-spacing:.12em;color:var(--ink)}
+.m3-mark .t span{display:block;font-size:10.5px;color:var(--ink3);letter-spacing:.1em;margin-top:4px}
+.m3-body{font-family:var(--serif);font-size:13px;line-height:2.05;color:var(--ink2);padding:6px 0 12px;
+  text-shadow:0 1px 6px #05090f99}
+.m3-kv{display:flex;justify-content:space-between;gap:14px;padding:7px 0;border-bottom:1px solid #ffffff09;font-size:12px}
+.m3-kv span{color:var(--ink3)}
+.m3-kv b{font-family:var(--serif);font-weight:400;color:var(--ink2);font-variant-numeric:tabular-nums}
+.m3-kv b.star{color:#c25b52;letter-spacing:.1em}
+.m3-kv b.now{color:var(--star)}
+.m3-kv b.via{color:#9a8fb8}
+.m3-sec{font-size:9.5px;letter-spacing:.3em;color:#8b98b0;margin:15px 0 7px}
+.m3-chips{display:flex;flex-wrap:wrap;gap:6px}
+.m3-chip{font-size:10.5px;color:var(--ink2);border:1px solid #ffffff14;border-radius:2px;padding:3px 10px}
+.m3-route{display:flex;flex-wrap:wrap;gap:4px 6px;font-size:11.5px;color:var(--ink2);padding:2px 0 4px}
+.m3-route .seg em{font-style:normal;color:#5f6b80;margin:0 6px}
+.m3-route b{font-family:var(--serif);font-weight:400}
+.m3-route b.now{color:var(--star)}
+.m3-route b.end{color:var(--gold2)}
+.m3-list{display:flex;flex-direction:column}
+.m3-row{display:flex;align-items:center;gap:10px;width:100%;padding:7px 2px;border-bottom:1px solid #ffffff09;
+  font-size:12px;color:var(--ink2);text-align:left;transition:color .2s}
+.m3-row:last-child{border-bottom:none}
+.m3-row.clickable:hover{color:var(--gold2)}
+.m3-row .dot{flex:none;width:5px;height:5px;border-radius:50%}
+.m3-row .nm{min-width:0}
+.m3-row .nm em{font-style:normal;font-size:10px;color:#6d7a90}
+.m3-row .nm em.warn{color:#c25b52;opacity:.85}
+.m3-row .mt{margin-left:auto;font-size:10px;color:#6d7a90;white-space:nowrap}
+.m3-row .go{flex:none;font-size:11px;color:var(--gold2);border:1px solid #d4b26a59;border-radius:999px;padding:3px 10px}
+.m3-row .go:disabled{color:#6c7891;border-color:#ffffff14;cursor:default}
+.m3-cta{display:flex;flex-direction:column;gap:8px;margin-top:16px}
+.m3-go{width:100%;text-align:center;font-family:var(--serif);font-size:13.5px;letter-spacing:.22em;color:#0a0d16;
+  background:linear-gradient(135deg,#efd69b,#c8a963);padding:12px 0;border-radius:8px}
+.m3-go.ghost{background:none;color:var(--ink2);border:1px solid #ffffff14}
+.m3-go:disabled{background:none;color:#6c7891;border:1px solid #ffffff14;cursor:default}
+.m3-go:not(:disabled):active{transform:translateY(1px)}
+
+/* ---- 通栏：四方与星枢 ---- */
+.m3-foot{padding:10px 20px;display:flex;gap:26px;flex-wrap:wrap;
+  background:linear-gradient(180deg,#151e32e6,#101728d4)}
+.m3-foot button{font-size:12px;color:var(--ink2);display:flex;gap:9px;align-items:baseline;padding:4px 0;transition:color .2s}
+.m3-foot button:hover{color:var(--gold2)}
+.m3-foot button span{font-size:10px;color:#6d7a90}
+
+/* 窄屏回落：单列，批注栏跟在址行后面（浏览 → 点行 → 顺着往下读）；
+   文号条不再粘顶（单列滚动里它会让出大半屏） */
+@media(max-width:820px){
+  .m3-ledger{grid-template-columns:1fr}
+  .m3-mast{position:static}
+  .m3-rg .nm{white-space:normal}
+  .m3-rg .mt{white-space:normal}
+  .m3-foot{gap:12px 20px}
+}
+
+
+

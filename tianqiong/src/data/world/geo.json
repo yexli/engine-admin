@@ -1,0 +1,1406 @@
+{
+  "locations": {
+    "plaza": {
+      "name": "中央广场",
+      "sv": "辉",
+      "color": "#b8912f",
+      "area": "圣辉城",
+      "continent": "中央大陆",
+      "danger": 0,
+      "abilities": [
+        "urban",
+        "patrolled",
+        "starnet",
+        "theoselect"
+      ],
+      "desc": [
+        "广场的石板被晨光洗得发白，白杨树影下散坐着歇脚的旅人。",
+        "喷泉的水声混着叫卖声，帝国的纹章旗在神殿方向缓缓摆动。",
+        "黄昏的广场点起鲸油灯，晚归的鸽群掠过圣钟塔尖顶。"
+      ],
+      "locked": false
+    },
+    "tavern": {
+      "name": "银鸥酒馆",
+      "sv": "鸥",
+      "color": "#b4695f",
+      "area": "圣辉城",
+      "continent": "中央大陆",
+      "danger": 0,
+      "abilities": [
+        "urban",
+        "patrolled",
+        "rest_lodging",
+        "drink",
+        "gossip"
+      ],
+      "desc": [
+        "麦酒与炖肉的香气扑面而来，木梁上挂着风干的香料束。",
+        "酒馆里人声嘈杂，吟游诗人的琴声断断续续地从角落传来。"
+      ],
+      "locked": false
+    },
+    "market": {
+      "name": "东市集市",
+      "sv": "市",
+      "color": "#3f7d5f",
+      "area": "圣辉城",
+      "continent": "中央大陆",
+      "danger": 1,
+      "abilities": [
+        "urban",
+        "patrolled",
+        "shop",
+        "gossip",
+        "pickpocket"
+      ],
+      "desc": [
+        "摊贩的遮阳棚挤挤挨挨，香料、织物与铁器各占一街。",
+        "集市人潮涌动，秤杆声、讨价声与骆驼的响鼻交织成市井的乐章。"
+      ],
+      "locked": false
+    },
+    "temple": {
+      "name": "圣辉神殿",
+      "sv": "圣",
+      "color": "#c9a227",
+      "area": "圣辉城",
+      "continent": "中央大陆",
+      "danger": 0,
+      "abilities": [
+        "urban",
+        "patrolled",
+        "sacred",
+        "pray",
+        "heal",
+        "theoselect"
+      ],
+      "desc": [
+        "高耸的彩窗把光滤成琥珀色，圣徽下的长明烛静静燃烧。",
+        "管风琴的余韵在大厅里回荡，值夜神官正擦拭烛台。"
+      ],
+      "locked": false
+    },
+    "guild": {
+      "name": "冒险者公会",
+      "sv": "会",
+      "color": "#3b4a8f",
+      "area": "圣辉城",
+      "continent": "中央大陆",
+      "danger": 0,
+      "abilities": [
+        "urban",
+        "patrolled"
+      ],
+      "desc": [
+        "木质任务板钉满羊皮纸，各色委托徽章叮当作响。",
+        "大厅里刀剑与酒杯碰撞，冒险者大声吹嘘着地下的见闻。"
+      ],
+      "locked": false
+    },
+    "gate": {
+      "name": "城门内街",
+      "sv": "门",
+      "color": "#5c5a7d",
+      "area": "圣辉城",
+      "continent": "中央大陆",
+      "danger": 0,
+      "abilities": [
+        "urban",
+        "patrolled",
+        "gossip",
+        "pay_fine"
+      ,
+      "exchange"],
+      "desc": [
+        "巨大的圣辉城门缓缓开合，人群在卫兵注视下排成长龙。",
+        "岗哨火把彻夜不熄，城卫队纹章在暮色里泛着冷光。"
+      ],
+      "locked": false
+    },
+    "alley": {
+      "name": "深巷",
+      "sv": "巷",
+      "color": "#4a4453",
+      "area": "圣辉城",
+      "continent": "中央大陆",
+      "danger": 2,
+      "abilities": [
+        "urban",
+        "patrolled",
+        "backstreet"
+      ],
+      "desc": [
+        "集市的喧嚣在身后骤然熄灭，巷中只剩滴水声。",
+        "檐影下的窄巷散发潮气，几道视线在暗处无声地打量着你。"
+      ],
+      "locked": false
+    },
+    "wild": {
+      "name": "城外旷野",
+      "sv": "野",
+      "color": "#5a7d5f",
+      "area": "圣辉平原",
+      "continent": "中央大陆",
+      "danger": 2,
+      "abilities": [
+        "rest_camping",
+        "wilderness",
+        "explore_wild"
+      ],
+      "desc": [
+        "帝国大道向远方延伸，麦田尽头是起伏的丘陵。",
+        "风把云影推过草浪，远处偶尔传来狼嚎。"
+      ],
+      "locked": false
+    },
+    "cave": {
+      "name": "浅层洞窟·一层",
+      "sv": "窟",
+      "color": "#5c5470",
+      "area": "帝国山脉",
+      "continent": "中央大陆",
+      "danger": 3,
+      "abilities": [
+        "explore_cave"
+      ],
+      "desc": [
+        "洞口垂着枯藤，火把只能照出三步内的湿滑岩壁。",
+        "苔藓的荧光在岩缝间明灭，深处隐约有窸窣声。"
+      ],
+      "locked": false
+    },
+    "cave2": {
+      "name": "浅层洞窟·二层",
+      "sv": "渊",
+      "color": "#4a3d5c",
+      "area": "帝国山脉",
+      "continent": "中央大陆",
+      "danger": 4,
+      "abilities": [
+        "explore_cave"
+      ],
+      "desc": [
+        "岩层在此断裂下陷，古代砌道的残迹从碎石中露出棱角。",
+        "空气变得阴冷，墙上的爪痕越来越密。"
+      ],
+      "locked": false
+    },
+    "cave3": {
+      "name": "浅层洞窟·三层",
+      "sv": "祭",
+      "color": "#3d3550",
+      "area": "帝国山脉",
+      "continent": "中央大陆",
+      "danger": 5,
+      "abilities": [
+        "explore_cave"
+      ],
+      "desc": [
+        "地下河的轰鸣在黑暗中回荡，古代祭坛的轮廓浮现在火光尽头。",
+        "这里的黑暗仿佛有重量，烛火不安地摇曳。"
+      ],
+      "locked": false
+    },
+    "frosthold": {
+      "name": "霜锚堡",
+      "sv": "霜",
+      "color": "#6f8fb0",
+      "area": "霜铁冻原",
+      "continent": "北方冻土",
+      "danger": 3,
+      "abilities": [
+        "urban"
+      ,
+      "exchange"],
+      "locked": true,
+      "desc": [
+        "冰封山脉下的矮人要塞，炉火终年不熄，锤声如雷。"
+      ]
+    },
+    "windport": {
+      "name": "翠风港",
+      "sv": "翠",
+      "color": "#5f9e6f",
+      "area": "翠风群岛",
+      "continent": "东方群岛",
+      "danger": 2,
+      "abilities": [
+        "urban"
+      ,
+      "exchange"],
+      "locked": true,
+      "desc": [
+        "世界树垂荫的精灵港湾，帆船与魔法灯影交相辉映。"
+      ]
+    },
+    "goldveil": {
+      "name": "金砂城",
+      "sv": "纱",
+      "color": "#c79a4a",
+      "area": "金砂绿洲",
+      "continent": "南方沙漠",
+      "danger": 2,
+      "abilities": [
+        "urban"
+      ,
+      "exchange"],
+      "locked": true,
+      "desc": [
+        "商队云集的沙漠明珠，十二商会的旗帜在热风中猎猎作响。"
+      ]
+    },
+    "bloodhold": {
+      "name": "血吼城",
+      "sv": "血",
+      "color": "#a4503f",
+      "area": "血吼草原",
+      "continent": "西方荒野",
+      "danger": 4,
+      "abilities": [
+        "urban"
+      ,
+      "exchange"],
+      "locked": true,
+      "desc": [
+        "火山脚下的兽人战盟之城，图腾与战鼓回荡不息。"
+      ]
+    },
+    "deepwell": {
+      "name": "深井城",
+      "sv": "井",
+      "color": "#4a4460",
+      "area": "浅层聚居区",
+      "continent": "地下深渊",
+      "danger": 5,
+      "abilities": [
+        "urban"
+      ,
+      "exchange"],
+      "locked": true,
+      "desc": [
+        "掘渊公会开凿的深渊巨井，矿脉与古代遗迹交织。"
+      ]
+    },
+    "skycap": {
+      "name": "天穹之城",
+      "sv": "穹",
+      "color": "#8fb6d6",
+      "area": "主浮岛",
+      "continent": "天空浮岛",
+      "danger": 5,
+      "abilities": [
+        "urban"
+      ,
+      "exchange"],
+      "locked": true,
+      "desc": [
+        "悬于云海之上的浮空圣域，星矿与风系资源汇聚之地。"
+      ]
+    },
+    "pantheon_hall": {
+      "name": "万神殿",
+      "sv": "神",
+      "color": "#d8cfa8",
+      "area": "六神议事之庭",
+      "continent": "神界",
+      "danger": 0,
+      "abilities": [],
+      "locked": true,
+      "desc": [
+        "六把椅子围成半环，从未坐满过。殿中不供像——神自己坐着，不需要像。"
+      ]
+    },
+    "domain_war": {
+      "name": "战争神域",
+      "sv": "战",
+      "color": "#b0693f",
+      "area": "铁与誓约",
+      "continent": "神界",
+      "danger": 0,
+      "abilities": [],
+      "locked": true,
+      "desc": [
+        "锻炉终年不熄，兵器架上每一件都还记得自己主人的手。"
+      ]
+    },
+    "domain_wisdom": {
+      "name": "智慧神域",
+      "sv": "智",
+      "color": "#6f7fa8",
+      "area": "万法之鉴",
+      "continent": "神界",
+      "danger": 0,
+      "abilities": [],
+      "locked": true,
+      "desc": [
+        "此地没有墙，只有层层叠叠的书页，和不肯落地的墨。"
+      ]
+    },
+    "domain_life": {
+      "name": "生命神域",
+      "sv": "生",
+      "color": "#7fa86f",
+      "area": "本源之林",
+      "continent": "神界",
+      "danger": 0,
+      "abilities": [],
+      "locked": true,
+      "desc": [
+        "树根扎进时间里，开花的那一刻，整界都听得见。"
+      ]
+    },
+    "domain_death": {
+      "name": "冥府",
+      "sv": "冥",
+      "color": "#5a5a6b",
+      "area": "亡者归处",
+      "continent": "神界",
+      "danger": 0,
+      "abilities": [],
+      "locked": true,
+      "desc": [
+        "没有火，也没有审判台，只有一条越走越窄的路。"
+      ]
+    },
+    "domain_chaos": {
+      "name": "归墟",
+      "sv": "墟",
+      "color": "#8a5a8a",
+      "area": "混沌之外",
+      "continent": "神界",
+      "danger": 0,
+      "abilities": [],
+      "locked": true,
+      "desc": [
+        "这里的秩序由「无」划定，多看一眼，就多丢一分自己。"
+      ]
+    },
+    "domain_dragon": {
+      "name": "龙脊界碑",
+      "sv": "龙",
+      "color": "#8ca0a8",
+      "area": "守界之地",
+      "continent": "神界",
+      "danger": 0,
+      "abilities": [],
+      "locked": true,
+      "desc": [
+        "一块碑，一条线。线的那边，不属于任何一位神。"
+      ]
+    },
+    "nether_court": {
+      "name": "黑雾议庭",
+      "sv": "雾",
+      "color": "#7a4458",
+      "area": "七领主之庭",
+      "continent": "魔界",
+      "danger": 6,
+      "abilities": [],
+      "locked": true,
+      "desc": [
+        "七把椅子围着一张空桌。第一把椅子后面站着雾，雾里有人。"
+      ]
+    },
+    "nether_waste": {
+      "name": "裂隙荒原",
+      "sv": "荒",
+      "color": "#6b4a4a",
+      "area": "魔界荒原",
+      "continent": "魔界",
+      "danger": 6,
+      "abilities": [],
+      "locked": true,
+      "desc": [
+        "地面裂开又合上。裂口里长出来的东西，从来不认名字。"
+      ]
+    },
+    "nether_core": {
+      "name": "造物之核",
+      "sv": "核",
+      "color": "#8a3a3a",
+      "area": "魔界最底",
+      "continent": "魔界",
+      "danger": 6,
+      "abilities": [],
+      "locked": true,
+      "desc": [
+        "地底最深处，一颗还在运转的造物心脏——它早已不记得自己为谁而跳。"
+      ]
+    },
+    "past_hall": {
+      "name": "英灵殿",
+      "sv": "灵",
+      "color": "#6b7f8c",
+      "area": "往昔之殿",
+      "continent": "往昔之地",
+      "danger": 5,
+      "abilities": [],
+      "locked": true,
+      "desc": [
+        "死去的英雄仍佩着剑，只是不再拔。殿里安静得能听见剑鞘里的锈。"
+      ]
+    },
+    "origin_void": {
+      "name": "原初之地",
+      "sv": "初",
+      "color": "#a8a07f",
+      "area": "神代遗迹",
+      "continent": "往昔之地",
+      "danger": 5,
+      "abilities": [],
+      "locked": true,
+      "desc": [
+        "第一缕光落下的地方。如今只剩光本身，在等一个还看得见它的人。"
+      ]
+    },
+    "star_abyss": {
+      "name": "星渊",
+      "sv": "渊",
+      "color": "#4f6b7a",
+      "area": "星枢之下",
+      "continent": "往昔之地",
+      "danger": 5,
+      "abilities": [],
+      "locked": true,
+      "desc": [
+        "你听不见任何声音，但你知道有什么东西，正在回望你。"
+      ]
+    },
+    "heaven_gate": {
+      "name": "天门",
+      "sv": "门",
+      "color": "#c8d0d8",
+      "area": "天界之门",
+      "continent": "往昔之地",
+      "danger": 5,
+      "abilities": [],
+      "locked": true,
+      "desc": [
+        "门是开着的，只是从没有人从这一侧走过去。"
+      ]
+    },
+    "palace": {
+      "name": "皇宫",
+      "sv": "皇",
+      "color": "#a8892f",
+      "area": "圣辉城",
+      "continent": "中央大陆",
+      "danger": 0,
+      "abilities": [
+        "urban",
+        "patrolled"
+      ],
+      "locked": false,
+      "desc": [
+        "白金线皇袍与不佩冠冕的朝会。殿外的石阶被几百年的鞋底磨出一道浅弧。"
+      ]
+    },
+    "noble": {
+      "name": "贵族区",
+      "sv": "贵",
+      "color": "#9a8558",
+      "area": "圣辉城",
+      "continent": "中央大陆",
+      "danger": 0,
+      "abilities": [
+        "urban",
+        "patrolled",
+        "gossip"
+      ],
+      "locked": false,
+      "desc": [
+        "铁栅栏后是另一种安静——车辙很深，说话很轻，谁都认识谁。"
+      ]
+    },
+    "guild_hall": {
+      "name": "公会总会",
+      "sv": "会",
+      "color": "#7f8a5c",
+      "area": "圣辉城",
+      "continent": "中央大陆",
+      "danger": 0,
+      "abilities": [
+        "urban",
+        "patrolled",
+        "gossip"
+      ],
+      "locked": false,
+      "desc": [
+        "八城分会的委托盘在这里汇总。总长桌上那份名册，比城卫的还厚。"
+      ]
+    },
+    "tower_one": {
+      "name": "星枢一塔",
+      "sv": "塔",
+      "color": "#6f7fa8",
+      "area": "圣辉城",
+      "continent": "中央大陆",
+      "danger": 0,
+      "abilities": [
+        "urban",
+        "patrolled",
+        "starnet"
+      ],
+      "locked": false,
+      "desc": [
+        "塔身刻满入网者留下的旧符。守塔人说，一塔的线最早，也最沉。"
+      ]
+    },
+    "shrine_war": {
+      "name": "战争神殿",
+      "sv": "战",
+      "color": "#b0693f",
+      "area": "圣辉城",
+      "continent": "中央大陆",
+      "danger": 0,
+      "abilities": [
+        "urban",
+        "patrolled",
+        "sacred",
+        "pray"
+      ],
+      "locked": false,
+      "desc": [
+        "甲胄挂在殿柱上，缴获的断刃插了一整面墙。这里的神不劝人放下刀。"
+      ]
+    },
+    "shrine_wisdom": {
+      "name": "智慧神殿",
+      "sv": "智",
+      "color": "#6f7fa8",
+      "area": "圣辉城",
+      "continent": "中央大陆",
+      "danger": 0,
+      "abilities": [
+        "urban",
+        "patrolled",
+        "sacred",
+        "pray"
+      ],
+      "locked": false,
+      "desc": [
+        "殿内不点烛，只开天窗。光落在一排排不肯合上的书上。"
+      ]
+    },
+    "shrine_life": {
+      "name": "生命神殿",
+      "sv": "生",
+      "color": "#7fa86f",
+      "area": "圣辉城",
+      "continent": "中央大陆",
+      "danger": 0,
+      "abilities": [
+        "urban",
+        "patrolled",
+        "sacred",
+        "pray",
+        "heal"
+      ],
+      "locked": false,
+      "desc": [
+        "药草味先到，人声后到。长明烛下总有人在等一个好消息。"
+      ]
+    },
+    "shrine_chaos": {
+      "name": "混沌神殿",
+      "sv": "混",
+      "color": "#8a5a8a",
+      "area": "圣辉城",
+      "continent": "中央大陆",
+      "danger": 1,
+      "abilities": [
+        "urban",
+        "patrolled",
+        "sacred",
+        "pray"
+      ],
+      "locked": false,
+      "desc": [
+        "这座殿没有正门，只有一圈怎么走都会绕回原处的回廊。"
+      ]
+    },
+    "frost_forge": {
+      "name": "锻族工坊",
+      "sv": "锻",
+      "color": "#8a6f4f",
+      "area": "霜铁冻原",
+      "continent": "北方冻土",
+      "danger": 3,
+      "abilities": [
+        "urban",
+        "patrolled",
+        "shop"
+      ],
+      "locked": true,
+      "desc": [
+        "炉火终年不熄，铁砧的响声隔着两条街都听得见。这里的规矩是「先看活，再谈价」。"
+      ]
+    },
+    "frost_market": {
+      "name": "冻原商栈",
+      "sv": "栈",
+      "color": "#7f8a9a",
+      "area": "霜铁冻原",
+      "continent": "北方冻土",
+      "danger": 3,
+      "abilities": [
+        "urban",
+        "patrolled",
+        "shop",
+        "gossip",
+        "pickpocket"
+      ],
+      "locked": true,
+      "desc": [
+        "毛皮、矿石、极夜海的鲸油——都堆在门口，冻得比人还硬。"
+      ]
+    },
+    "frost_guild": {
+      "name": "公会北境分会",
+      "sv": "会",
+      "color": "#6f8fb0",
+      "area": "霜铁冻原",
+      "continent": "北方冻土",
+      "danger": 3,
+      "abilities": [
+        "urban",
+        "patrolled",
+        "gossip"
+      ],
+      "locked": true,
+      "desc": [
+        "分会门口的悬赏板结着一层薄冰，最新的那张还带着墨的湿气。"
+      ]
+    },
+    "frost_tower": {
+      "name": "星枢四塔",
+      "sv": "塔",
+      "color": "#7f9ab0",
+      "area": "霜铁冻原",
+      "continent": "北方冻土",
+      "danger": 3,
+      "abilities": [
+        "urban",
+        "patrolled",
+        "starnet"
+      ],
+      "locked": true,
+      "desc": [
+        "四塔立在霜锚堡最高处。塔身的符在极夜里会自己亮起来，像一排不肯睡的灯。"
+      ]
+    },
+    "wind_council": {
+      "name": "大贤者塔",
+      "sv": "贤",
+      "color": "#7fa87f",
+      "area": "翠风群岛",
+      "continent": "东方群岛",
+      "danger": 2,
+      "abilities": [
+        "urban",
+        "patrolled",
+        "gossip"
+      ],
+      "locked": true,
+      "desc": [
+        "七大家族的位置围成一圈，中间那把椅子空着的年头比谁都长。"
+      ]
+    },
+    "wind_port": {
+      "name": "翠风港",
+      "sv": "港",
+      "color": "#5f8f9f",
+      "area": "翠风群岛",
+      "continent": "东方群岛",
+      "danger": 2,
+      "abilities": [
+        "urban",
+        "patrolled",
+        "shop",
+        "gossip",
+        "pickpocket"
+      ],
+      "locked": true,
+      "desc": [
+        "潮水把船推回来又送出去。桅杆上的风铃响得比人说话还密。"
+      ]
+    },
+    "wind_guild": {
+      "name": "公会东方分会",
+      "sv": "会",
+      "color": "#6f9f8f",
+      "area": "翠风群岛",
+      "continent": "东方群岛",
+      "danger": 2,
+      "abilities": [
+        "urban",
+        "patrolled",
+        "gossip"
+      ],
+      "locked": true,
+      "desc": [
+        "海路的委托都从这里签发——船期一改，板上那排纸就得重抄一遍。"
+      ]
+    },
+    "wind_tower": {
+      "name": "星枢二塔",
+      "sv": "塔",
+      "color": "#7fafaf",
+      "area": "翠风群岛",
+      "continent": "东方群岛",
+      "danger": 2,
+      "abilities": [
+        "urban",
+        "patrolled",
+        "starnet"
+      ],
+      "locked": true,
+      "desc": [
+        "二塔的缘法偏爱风。守塔人开的窗，从来不关。"
+      ]
+    },
+    "gold_bazaar": {
+      "name": "商邦会堂",
+      "sv": "商",
+      "color": "#c9a24f",
+      "area": "金砂绿洲",
+      "continent": "南方沙漠",
+      "danger": 2,
+      "abilities": [
+        "urban",
+        "patrolled",
+        "shop",
+        "gossip"
+      ],
+      "locked": true,
+      "desc": [
+        "议长的锤子一落下，半个金砂港的货就换了主人。"
+      ]
+    },
+    "gold_harbor": {
+      "name": "金砂港",
+      "sv": "港",
+      "color": "#b8923f",
+      "area": "金砂绿洲",
+      "continent": "南方沙漠",
+      "danger": 3,
+      "abilities": [
+        "urban",
+        "patrolled",
+        "shop",
+        "gossip",
+        "pickpocket"
+      ],
+      "locked": true,
+      "desc": [
+        "骆驼比船多，账单比骆驼多。沙暴来时，整座港会安静得像没人。"
+      ]
+    },
+    "gold_guild": {
+      "name": "公会南方分会",
+      "sv": "会",
+      "color": "#bfa04f",
+      "area": "金砂绿洲",
+      "continent": "南方沙漠",
+      "danger": 3,
+      "abilities": [
+        "urban",
+        "patrolled",
+        "gossip"
+      ],
+      "locked": true,
+      "desc": [
+        "分会的墙上挂着一张沙海地图，走过的路线用炭笔一道道划出来。"
+      ]
+    },
+    "gold_tower": {
+      "name": "星枢三塔",
+      "sv": "塔",
+      "color": "#c9b06f",
+      "area": "金砂绿洲",
+      "continent": "南方沙漠",
+      "danger": 3,
+      "abilities": [
+        "urban",
+        "patrolled",
+        "starnet"
+      ],
+      "locked": true,
+      "desc": [
+        "三塔建在绿洲的泉眼上。守塔人说，星髓与水脉在这里是同一件东西。"
+      ]
+    },
+    "gold_shrine": {
+      "name": "死亡神殿分殿",
+      "sv": "冥",
+      "color": "#8a7a6f",
+      "area": "金砂绿洲",
+      "continent": "南方沙漠",
+      "danger": 3,
+      "abilities": [
+        "urban",
+        "patrolled",
+        "sacred",
+        "pray"
+      ],
+      "locked": true,
+      "desc": [
+        "殿里没有香，只有一排排刻着名字的石牌。沙子天天往里钻，有人天天往外扫。"
+      ]
+    },
+    "blood_camp": {
+      "name": "血吼王帐",
+      "sv": "帐",
+      "color": "#a85f3f",
+      "area": "血吼草原",
+      "continent": "西方荒野",
+      "danger": 4,
+      "abilities": [
+        "urban",
+        "patrolled"
+      ],
+      "locked": true,
+      "desc": [
+        "牛皮大帐围成一圈，旗子按战团排。进帐之前，得先把武器交给门口的年轻人。"
+      ]
+    },
+    "blood_shaman": {
+      "name": "萨满议会",
+      "sv": "萨",
+      "color": "#8f6f5f",
+      "area": "血吼草原",
+      "continent": "西方荒野",
+      "danger": 4,
+      "abilities": [
+        "urban",
+        "patrolled",
+        "pray"
+      ],
+      "locked": true,
+      "desc": [
+        "图腾柱立在露天，风一过就一起响。萨满不劝战，也不劝和——他只报天气。"
+      ]
+    },
+    "blood_guild": {
+      "name": "公会西方分会",
+      "sv": "会",
+      "color": "#a07050",
+      "area": "血吼草原",
+      "continent": "西方荒野",
+      "danger": 4,
+      "abilities": [
+        "urban",
+        "patrolled",
+        "gossip"
+      ],
+      "locked": true,
+      "desc": [
+        "这里的悬赏不写在纸上，直接钉在门框——认字的人少，认血的人多。"
+      ]
+    },
+    "blood_tower": {
+      "name": "星枢五塔",
+      "sv": "塔",
+      "color": "#a8806f",
+      "area": "血吼草原",
+      "continent": "西方荒野",
+      "danger": 4,
+      "abilities": [
+        "urban",
+        "patrolled",
+        "starnet"
+      ],
+      "locked": true,
+      "desc": [
+        "五塔的星斗台是百年神选的观战处。台边栏杆被攥出了手印。"
+      ]
+    },
+    "deep_council": {
+      "name": "掘渊评议会",
+      "sv": "评",
+      "color": "#6f6a8a",
+      "area": "浅层聚居区",
+      "continent": "地下深渊",
+      "danger": 5,
+      "abilities": [
+        "urban",
+        "patrolled",
+        "gossip"
+      ],
+      "locked": true,
+      "desc": [
+        "评议会开在三百米深的岩腔里。说话的声音往上飘，飘不出去。"
+      ]
+    },
+    "deep_shrine": {
+      "name": "死亡神殿分殿",
+      "sv": "冥",
+      "color": "#5a5a6b",
+      "area": "浅层聚居区",
+      "continent": "地下深渊",
+      "danger": 5,
+      "abilities": [
+        "urban",
+        "patrolled",
+        "sacred",
+        "pray"
+      ],
+      "locked": true,
+      "desc": [
+        "深渊里的死亡神殿不点灯。他们说，这里离归处最近，用不着引路。"
+      ]
+    },
+    "deep_guild": {
+      "name": "公会地下分会",
+      "sv": "会",
+      "color": "#707a8a",
+      "area": "浅层聚居区",
+      "continent": "地下深渊",
+      "danger": 5,
+      "abilities": [
+        "urban",
+        "patrolled",
+        "gossip"
+      ],
+      "locked": true,
+      "desc": [
+        "分会只接一种委托：往下走的。往上的，掘渊自己会办。"
+      ]
+    },
+    "deep_tower": {
+      "name": "星枢六塔",
+      "sv": "塔",
+      "color": "#6a7a9a",
+      "area": "浅层聚居区",
+      "continent": "地下深渊",
+      "danger": 5,
+      "abilities": [
+        "urban",
+        "patrolled",
+        "starnet"
+      ],
+      "locked": true,
+      "desc": [
+        "六塔最深处那道门始终锁着。守塔人说他只是在看守，不是在等谁。"
+      ]
+    },
+    "sky_watch": {
+      "name": "守望者观星台",
+      "sv": "望",
+      "color": "#a8b8c8",
+      "area": "主浮岛",
+      "continent": "天空浮岛",
+      "danger": 5,
+      "abilities": [
+        "urban",
+        "patrolled",
+        "gossip"
+      ],
+      "locked": true,
+      "desc": [
+        "星图铺满一地，压着石子防风。守望长说，看久了会发现浮岛也在看回来。"
+      ]
+    },
+    "sky_guild": {
+      "name": "公会浮岛分会",
+      "sv": "会",
+      "color": "#98a8b8",
+      "area": "主浮岛",
+      "continent": "天空浮岛",
+      "danger": 5,
+      "abilities": [
+        "urban",
+        "patrolled",
+        "gossip"
+      ],
+      "locked": true,
+      "desc": [
+        "分会不接地面委托——飞空艇的泊位比委托本身还金贵。"
+      ]
+    },
+    "sky_tower": {
+      "name": "星枢七塔",
+      "sv": "塔",
+      "color": "#b0c0d0",
+      "area": "主浮岛",
+      "continent": "天空浮岛",
+      "danger": 5,
+      "abilities": [
+        "urban",
+        "patrolled",
+        "starnet"
+      ],
+      "locked": true,
+      "desc": [
+        "七塔立在浮岛边缘，往下就是云海。塔里的风，从不停。"
+      ]
+    }
+  },
+  "travel": {
+    "plaza": {
+      "tavern": 1,
+      "market": 1,
+      "temple": 1,
+      "guild": 1,
+      "gate": 2,
+      "alley": 2,
+      "palace": 2,
+      "noble": 1
+    },
+    "tavern": {
+      "plaza": 1
+    },
+    "market": {
+      "plaza": 1,
+      "alley": 2
+    },
+    "temple": {
+      "plaza": 1,
+      "shrine_war": 1,
+      "shrine_wisdom": 1,
+      "shrine_life": 1,
+      "shrine_chaos": 2
+    },
+    "guild": {
+      "plaza": 1
+    },
+    "gate": {
+      "plaza": 2,
+      "wild": 3
+    },
+    "alley": {
+      "market": 2,
+      "plaza": 2
+    },
+    "wild": {
+      "gate": 3,
+      "cave": 3
+    },
+    "cave": {
+      "wild": 3,
+      "cave2": 2
+    },
+    "cave2": {
+      "cave": 2,
+      "cave3": 2
+    },
+    "cave3": {
+      "cave2": 2
+    },
+    "palace": {
+      "plaza": 2
+    },
+    "noble": {
+      "plaza": 1,
+      "guild_hall": 1,
+      "tower_one": 2
+    },
+    "guild_hall": {
+      "noble": 1
+    },
+    "tower_one": {
+      "noble": 2
+    },
+    "shrine_war": {
+      "temple": 1
+    },
+    "shrine_wisdom": {
+      "temple": 1
+    },
+    "shrine_life": {
+      "temple": 1
+    },
+    "shrine_chaos": {
+      "temple": 2
+    },
+    "frosthold": {
+      "frost_forge": 1,
+      "frost_market": 1,
+      "frost_guild": 1,
+      "frost_tower": 2
+    },
+    "frost_forge": {
+      "frosthold": 1
+    },
+    "frost_market": {
+      "frosthold": 1
+    },
+    "frost_guild": {
+      "frosthold": 1
+    },
+    "frost_tower": {
+      "frosthold": 2
+    },
+    "windport": {
+      "wind_council": 1,
+      "wind_port": 1,
+      "wind_guild": 1,
+      "wind_tower": 2
+    },
+    "wind_council": {
+      "windport": 1
+    },
+    "wind_port": {
+      "windport": 1
+    },
+    "wind_guild": {
+      "windport": 1
+    },
+    "wind_tower": {
+      "windport": 2
+    },
+    "goldveil": {
+      "gold_bazaar": 1,
+      "gold_harbor": 1,
+      "gold_guild": 1,
+      "gold_tower": 2,
+      "gold_shrine": 1
+    },
+    "gold_bazaar": {
+      "goldveil": 1
+    },
+    "gold_harbor": {
+      "goldveil": 1
+    },
+    "gold_guild": {
+      "goldveil": 1
+    },
+    "gold_tower": {
+      "goldveil": 2
+    },
+    "gold_shrine": {
+      "goldveil": 1
+    },
+    "bloodhold": {
+      "blood_camp": 1,
+      "blood_shaman": 1,
+      "blood_guild": 1,
+      "blood_tower": 2
+    },
+    "blood_camp": {
+      "bloodhold": 1
+    },
+    "blood_shaman": {
+      "bloodhold": 1
+    },
+    "blood_guild": {
+      "bloodhold": 1
+    },
+    "blood_tower": {
+      "bloodhold": 2
+    },
+    "deepwell": {
+      "deep_council": 1,
+      "deep_shrine": 1,
+      "deep_guild": 1,
+      "deep_tower": 2
+    },
+    "deep_council": {
+      "deepwell": 1
+    },
+    "deep_shrine": {
+      "deepwell": 1
+    },
+    "deep_guild": {
+      "deepwell": 1
+    },
+    "deep_tower": {
+      "deepwell": 2
+    },
+    "skycap": {
+      "sky_watch": 1,
+      "sky_guild": 1,
+      "sky_tower": 2
+    },
+    "sky_watch": {
+      "skycap": 1
+    },
+    "sky_guild": {
+      "skycap": 1
+    },
+    "sky_tower": {
+      "skycap": 2
+    }
+  },
+  "landmarks": [
+    {
+      "id": "lm_silverpeak",
+      "name": "银顶",
+      "kind": "natural",
+      "continent": "中央大陆",
+      "area": "帝国山脉",
+      "note": "帝国山脉最高峰，5000 米",
+      "danger": 2
+    },
+    {
+      "id": "lm_worldtree",
+      "name": "世界树",
+      "kind": "natural",
+      "continent": "东方群岛",
+      "area": "月咏森林",
+      "note": "精灵圣树",
+      "danger": 1
+    },
+    {
+      "id": "lm_goldcap",
+      "name": "金顶",
+      "kind": "natural",
+      "continent": "南方沙漠",
+      "area": "香料丘陵",
+      "note": "古代遗迹",
+      "danger": 2
+    },
+    {
+      "id": "lm_frostapex",
+      "name": "永冻之巅",
+      "kind": "natural",
+      "continent": "北方冻土",
+      "area": "冰封山脉",
+      "note": "兽人发源地圣地",
+      "danger": 3
+    },
+    {
+      "id": "lm_bloodpeak",
+      "name": "血吼峰",
+      "kind": "natural",
+      "continent": "西方荒野",
+      "area": "熔岩山脉",
+      "note": "活火山",
+      "danger": 4
+    },
+    {
+      "id": "lm_mainwell",
+      "name": "主井",
+      "kind": "natural",
+      "continent": "地下深渊",
+      "area": "浅层聚居区",
+      "note": "深井城主井，深 3000 米",
+      "danger": 3
+    },
+    {
+      "id": "lm_stormeye",
+      "name": "风暴眼",
+      "kind": "natural",
+      "continent": "天空浮岛",
+      "area": "云海",
+      "note": "永不停息的旋风",
+      "danger": 4
+    },
+    {
+      "id": "lm_imperialpalace",
+      "name": "皇城",
+      "kind": "artificial",
+      "continent": "中央大陆",
+      "area": "圣辉城",
+      "note": "帝国首都",
+      "danger": 1
+    },
+    {
+      "id": "lm_sagetower",
+      "name": "大贤者塔",
+      "kind": "artificial",
+      "continent": "东方群岛",
+      "area": "翠风群岛",
+      "note": "议会中心",
+      "danger": 1
+    },
+    {
+      "id": "lm_chamberhall",
+      "name": "商会会堂",
+      "kind": "artificial",
+      "continent": "南方沙漠",
+      "area": "金砂绿洲",
+      "note": "内陆商业中心",
+      "danger": 1
+    },
+    {
+      "id": "lm_chieftainhall",
+      "name": "大酋长殿",
+      "kind": "artificial",
+      "continent": "北方冻土",
+      "area": "霜铁冻原",
+      "note": "王庭中心",
+      "danger": 1
+    },
+    {
+      "id": "lm_wartemple",
+      "name": "战神殿",
+      "kind": "artificial",
+      "continent": "西方荒野",
+      "area": "血吼草原",
+      "note": "王帐中心",
+      "danger": 2
+    },
+    {
+      "id": "lm_councilhall",
+      "name": "评议会",
+      "kind": "artificial",
+      "continent": "地下深渊",
+      "area": "浅层聚居区",
+      "note": "掘渊中心",
+      "danger": 1
+    },
+    {
+      "id": "lm_observatory",
+      "name": "观星台",
+      "kind": "artificial",
+      "continent": "天空浮岛",
+      "area": "主浮岛",
+      "note": "守望者中心",
+      "danger": 1
+    }
+  ],
+  "dangerZones": [
+    {
+      "id": "dz_godforsaken",
+      "name": "神弃之地",
+      "continent": "中央大陆",
+      "stars": 6,
+      "reason": "神罚遗址"
+    },
+    {
+      "id": "dz_frostsea",
+      "name": "星霜海深处",
+      "continent": "东方群岛",
+      "stars": 3,
+      "reason": "海兽"
+    },
+    {
+      "id": "dz_deepsand",
+      "name": "大沙海深处",
+      "continent": "南方沙漠",
+      "stars": 3,
+      "reason": "沙虫"
+    },
+    {
+      "id": "dz_polarnight",
+      "name": "极夜海",
+      "continent": "北方冻土",
+      "stars": 5,
+      "reason": "冰巨魔"
+    },
+    {
+      "id": "dz_lavamts",
+      "name": "熔岩山脉",
+      "continent": "西方荒野",
+      "stars": 4,
+      "reason": "火系魔物"
+    },
+    {
+      "id": "dz_below100",
+      "name": "100 层以下",
+      "continent": "地下深渊",
+      "stars": 6,
+      "reason": "深渊魔物"
+    },
+    {
+      "id": "dz_timerift",
+      "name": "时空乱流",
+      "continent": "天空浮岛",
+      "stars": 5,
+      "reason": "空间裂缝"
+    }
+  ],
+  "_s1Comment": "卡 S1（世界书 §73/§75）：landmarks=14 处地标（8 自然 + 6 人工，按世界书原文合计 14）；dangerZones=六星险区 7 处（stars 1–6，6=神罚级禁区）。两者的 continent/area 都与 locations 的分层对齐，地图可按大陆→地区聚合。"
+}

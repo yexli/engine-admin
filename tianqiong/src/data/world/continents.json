@@ -1,0 +1,297 @@
+{
+  "_comment": "大陆定义（《后续开发方案-阶段J》卡 J5）。大陆是机制实体，不只是地点上的一个字符串：它持有枢纽、解锁条件、气候与主导势力。新增一个大陆 = 这里加一条 + geo.json 加地点 + routes.json 加通路，**不需要改任何代码**。",
+  "_howto": [
+    "1. 本文件 items 里加一条：id / name / hub（该大陆的枢纽地点 id）/ unlock / climate",
+    "2. geo.json 的 locations 加地点，每个地点带 continent 字段指向本大陆名，枢纽地点标 hub: true 之外无需特殊标记",
+    "3. routes.json 加一条从大陆枢纽到大陆枢纽的路线（from 用枢纽 id，to 用另一个大陆的枢纽 id）",
+    "4. 可选：economy.json 的 region 加该地点的物价修正；people.json 加 NPC",
+    "5. 跑 npm test —— cardJ5 的数据完整性用例会检查：每个地点的大陆必须已定义、每个大陆的枢纽必须真实存在、每条路线的两端必须可达",
+    "解锁条件 kind 三选一：open（起点大陆）/ reputation（某势力声望达标）/ flag（某个世界 flag）",
+    "缺的从来不是框架，是内容：这套结构就是为「先填中央大陆、后铺其余大陆」设计的。"
+  ],
+  "order": [
+    "中央大陆",
+    "北方冻土",
+    "东方群岛",
+    "南方沙漠",
+    "西方荒野",
+    "地下深渊",
+    "天空浮岛",
+    "神界",
+    "魔界",
+    "往昔之地"
+  ],
+  "items": {
+    "中央大陆": {
+      "id": "central",
+      "name": "中央大陆",
+      "hub": "gate",
+      "unlock": {
+        "kind": "open"
+      },
+      "climate": "温带",
+      "faction": "empire",
+      "dangerBase": 0,
+      "loreRef": "s8",
+      "flavor": "帝国的心脏，圣辉城的钟声覆盖四境。所有远路的起点都在城门的关文房。",
+      "lawStrict": 5,
+      "lawTrait": "神法+王法，最严",
+      "court": "神法-王法双院",
+      "courtAppeal": "神殿终审",
+      "extradition": true,
+      "climateDetail": {
+        "temp": "-5~30℃",
+        "rain": "中",
+        "seasons": "春夏秋冬分明"
+      },
+      "agri": [
+        "春耕",
+        "春种",
+        "夏耘",
+        "秋收",
+        "冬藏"
+      ]
+    },
+    "北方冻土": {
+      "id": "north",
+      "name": "北方冻土",
+      "hub": "frosthold",
+      "unlock": {
+        "kind": "reputation",
+        "faction": "empire",
+        "min": 20,
+        "hint": "帝国声望 ≥ 20：关文房才会为你开具北境通行文书"
+      },
+      "climate": "寒带",
+      "faction": "frost",
+      "dangerBase": 3,
+      "loreRef": "s8",
+      "flavor": "霜铁山脉终年封雪，矮人的锤声在冰层下回响。",
+      "lawStrict": 2,
+      "lawTrait": "部落习惯法",
+      "court": "部落会议",
+      "courtAppeal": "王庭大会终审",
+      "extradition": false,
+      "climateDetail": {
+        "temp": "-40~10℃",
+        "rain": "少",
+        "seasons": "冬长夏短"
+      },
+      "agri": [
+        "冬猎",
+        "备耕",
+        "春种",
+        "夏耘",
+        "夏收"
+      ]
+    },
+    "东方群岛": {
+      "id": "east",
+      "name": "东方群岛",
+      "hub": "windport",
+      "unlock": {
+        "kind": "reputation",
+        "faction": "guild",
+        "min": 25,
+        "hint": "冒险者公会声望 ≥ 25：公会的海路文书才够格登船"
+      },
+      "climate": "海洋性",
+      "faction": "verdant",
+      "dangerBase": 2,
+      "loreRef": "s8",
+      "flavor": "世界树的垂荫落在翠风港的帆上，潮声里混着精灵语的歌。",
+      "lawStrict": 4,
+      "lawTrait": "精灵传统，讲究和谐",
+      "court": "大贤者庭",
+      "courtAppeal": "大贤者终审",
+      "extradition": true,
+      "climateDetail": {
+        "temp": "5~35℃",
+        "rain": "多",
+        "seasons": "春夏秋（无冬）"
+      },
+      "agri": [
+        "春耕",
+        "春盛",
+        "夏耘",
+        "秋收",
+        "冬藏"
+      ]
+    },
+    "南方沙漠": {
+      "id": "south",
+      "name": "南方沙漠",
+      "hub": "goldveil",
+      "unlock": {
+        "kind": "reputation",
+        "faction": "empire",
+        "min": 45,
+        "hint": "帝国声望 ≥ 45：砂海只认有分量的名头"
+      },
+      "climate": "热带干旱",
+      "faction": "sand",
+      "dangerBase": 2,
+      "loreRef": "s8",
+      "flavor": "十二商会的旗帜在金砂城的热风里翻卷，驼铃摇碎落日。",
+      "lawStrict": 3,
+      "lawTrait": "商法为主，金钱可赎",
+      "court": "商事仲裁庭",
+      "courtAppeal": "商邦大会终审",
+      "extradition": true,
+      "climateDetail": {
+        "temp": "15~50℃",
+        "rain": "极少",
+        "seasons": "凉热两季"
+      },
+      "agri": [
+        "凉季",
+        "凉季",
+        "热季",
+        "热季",
+        "凉季"
+      ]
+    },
+    "西方荒野": {
+      "id": "west",
+      "name": "西方荒野",
+      "hub": "bloodhold",
+      "unlock": {
+        "kind": "reputation",
+        "faction": "empire",
+        "min": 60,
+        "hint": "帝国声望 ≥ 60：战盟只与有背书的人谈通行"
+      },
+      "climate": "火山带",
+      "faction": "blood",
+      "dangerBase": 4,
+      "loreRef": "s8",
+      "flavor": "火山脚下，血吼王帐的战鼓彻夜不息。",
+      "lawStrict": 2,
+      "lawTrait": "王帐法，强者为尊",
+      "court": "王帐决斗庭",
+      "courtAppeal": "血吼酋长终审",
+      "extradition": false,
+      "climateDetail": {
+        "temp": "-10~40℃",
+        "rain": "少",
+        "seasons": "四季分明"
+      },
+      "agri": [
+        "春耕",
+        "春种",
+        "夏耘",
+        "夏耘",
+        "秋收"
+      ]
+    },
+    "地下深渊": {
+      "id": "under",
+      "name": "地下深渊",
+      "hub": "deepwell",
+      "unlock": {
+        "kind": "flag",
+        "flag": "leak_3",
+        "hint": "星渊魔气渗入达到三级：深渊梯道才会显形"
+      },
+      "climate": "地底",
+      "faction": "deep",
+      "dangerBase": 5,
+      "loreRef": "s13",
+      "flavor": "掘进者的巨井直贯地脉，矿灯在深处连成一条发亮的河。",
+      "lawStrict": 1,
+      "lawTrait": "掘渊规章，最松",
+      "court": "掘渊评议会",
+      "courtAppeal": "评议会终审",
+      "extradition": false,
+      "climateDetail": {
+        "temp": "15℃",
+        "rain": "潮",
+        "seasons": "无季节"
+      },
+      "agri": [
+        "无季节",
+        "无季节",
+        "无季节",
+        "无季节",
+        "无季节"
+      ]
+    },
+    "天空浮岛": {
+      "id": "sky",
+      "name": "天空浮岛",
+      "hub": "skycap",
+      "unlock": {
+        "kind": "flag",
+        "flag": "theoselect_open",
+        "hint": "百年神选开启之后：飞空艇才向凡尘开放泊位"
+      },
+      "climate": "高空气流",
+      "faction": "study",
+      "dangerBase": 5,
+      "loreRef": "s4",
+      "flavor": "云海之上的浮空圣域，星矿的光在夜里像倒悬的星空。",
+      "lawStrict": 4,
+      "lawTrait": "守望者法，重视平衡",
+      "court": "守望者审判",
+      "courtAppeal": "守望长终审",
+      "extradition": true,
+      "climateDetail": {
+        "temp": "-20~20℃",
+        "rain": "多",
+        "seasons": "四季分明"
+      },
+      "agri": [
+        "春耕",
+        "春种",
+        "夏耘",
+        "夏盛",
+        "秋收"
+      ]
+    },
+    "神界": {
+      "id": "heavens",
+      "name": "神界",
+      "hub": "pantheon_hall",
+      "unlock": {
+        "kind": "flag",
+        "flag": "gate_of_heavens",
+        "hint": "六主神的神域。凡人不得其门而入——除非哪一天有神亲自开门。"
+      },
+      "climate": "恒春",
+      "dangerBase": 0,
+      "otherworld": true,
+      "flavor": "云阶之上没有昼夜，六座神域各自成界。万神殿的门从不对凡人开。"
+    },
+    "魔界": {
+      "id": "nether",
+      "name": "魔界",
+      "hub": "nether_court",
+      "unlock": {
+        "kind": "flag",
+        "flag": "gate_of_nether",
+        "hint": "魔气渗出的另一侧。裂隙开过，但门不在人手里。"
+      },
+      "climate": "腐坏",
+      "dangerBase": 6,
+      "otherworld": true,
+      "flavor": "空气本身在腐烂，七把椅子围着一张空桌。"
+    },
+    "往昔之地": {
+      "id": "past",
+      "name": "往昔之地",
+      "hub": "past_hall",
+      "unlock": {
+        "kind": "flag",
+        "flag": "gate_of_past",
+        "hint": "时间之外的一隅，只对英灵与星渊的回应者开门。"
+      },
+      "climate": "无",
+      "dangerBase": 5,
+      "otherworld": true,
+      "flavor": "死去的英雄在这里仍佩着剑，而星渊在更下面低声回应。"
+    }
+  },
+  "_lawComment": "法律（卡 R4 · 世界书 §87–§92）：lawStrict=严格度 1–5 星；lawTrait=执法特点；court/courtAppeal=当地法院与上诉；extradition=是否白盟约签约方（跨大陆引渡前提）。",
+  "_agriComment": "卡 S1（世界书 §64/§72）：climateDetail 记温度/雨量/季节；agri 是按「1-2月 / 3-4月 / 5-6月 / 7-8月 / 9-12月」五段排的农时。",
+  "_otherworldComment": "otherworld=true 的三块大陆（神界／魔界／往昔之地）是**非人间**：它们存在的理由不是给玩家探索，而是给「不在地图上的人」一个合法落脚点（主神、魔界领主、古代英灵各自 loc 指向这里）。因此它们刻意没有法院／地标／气候细节／农时，护栏测试按此标记豁免。平民世界的数据要求不适用于它们。新增第四块异界大陆时照打此标记即可。"
+}

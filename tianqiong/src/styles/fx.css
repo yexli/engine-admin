@@ -1,0 +1,269 @@
+/* ============================================================
+   天穹纪元 2.0 · 表现层动效层（卡 P1「表现层打磨」· 并行轨）
+   ------------------------------------------------------------
+   · 纯增量文件：只新增选择器与 @keyframes，不复制也不修改 app.css
+     中来自原型的规则观感（《技术架构与开发约束》§6 禁止事项第 6 条）。
+   · 载入位置：main.tsx 中排在 app.css / chat.css 之后 —— 当且仅当
+     同权重同属性冲突时由本文件接管（例：受击抖动 200ms、战斗 HP 0.3s）。
+   · 配色零新增主色：全部取 app.css :root 既有令牌的等价字面量。
+   · 所有新增动画均在 prefers-reduced-motion:reduce 下降级为静态（见文末）。
+   ============================================================ */
+
+:root{
+  --fx-ease:cubic-bezier(.2,.9,.3,1);
+  --fx-pop:cubic-bezier(.2,1.35,.4,1);
+  --fx-ok:#6cbf94;    /* == --jade */
+  --fx-no:#d0685f;    /* == --crimson */
+  --fx-crit:#f0d391;  /* == --gold2 */
+}
+
+/* ============================================================
+   1. 检定演出（#chk · CheckOverlay.tsx）
+   ============================================================ */
+
+/* --- 1.1 骰子 3D 旋转舞台 --- */
+#chk .cc{perspective:700px}
+#chk .cc .die{
+  transform-style:preserve-3d;will-change:transform;
+  animation:fxDieRoll3d .82s var(--fx-ease) both;
+  transition:border-color .3s ease,box-shadow .3s ease;
+}
+#chk .cc .die .dv{display:block;line-height:1;transform-origin:50% 56%;--fx-pop-max:1.4}
+#chk .cc .die.ok{border-color:var(--fx-ok);box-shadow:inset 0 0 22px rgba(108,191,148,.3),0 0 26px rgba(108,191,148,.24)}
+#chk .cc .die.no{border-color:var(--fx-no);box-shadow:inset 0 0 22px rgba(208,104,95,.28),0 0 26px rgba(208,104,95,.22)}
+#chk .cc .die.ok .dv{color:var(--fx-ok);text-shadow:0 0 14px rgba(108,191,148,.55)}
+#chk .cc .die.no .dv{color:var(--fx-no);text-shadow:0 0 14px rgba(208,104,95,.5)}
+#chk .cc .die .dv.pop{animation:fxDiePop .5s var(--fx-pop) both}
+
+@keyframes fxDieRoll3d{
+  0%{transform:rotateX(-108deg) rotateY(126deg) translateZ(-40px) scale(.8);opacity:.12}
+  35%{transform:rotateX(48deg) rotateY(-62deg) translateZ(14px) scale(1.07)}
+  65%{transform:rotateX(-20deg) rotateY(24deg) translateZ(-7px) scale(.98)}
+  85%{transform:rotateX(8deg) rotateY(-8deg) translateZ(2px)}
+  100%{transform:none;opacity:1}
+}
+@keyframes fxDiePop{
+  0%{transform:scale(1);text-shadow:0 0 0 rgba(0,0,0,0)}
+  40%{transform:scale(var(--fx-pop-max,1.4));text-shadow:0 0 18px currentColor,0 0 42px currentColor}
+  100%{transform:scale(1);text-shadow:0 0 12px currentColor}
+}
+
+/* --- 1.2 成功绿光 / 失败红光 / 大成功金光的径向闪烁 --- */
+#chk .chk-flash{position:absolute;inset:0;pointer-events:none;opacity:0;z-index:0}
+#chk .chk-flash.ok{
+  background:radial-gradient(circle at 50% 46%,rgba(108,191,148,.46) 0%,rgba(108,191,148,.16) 34%,transparent 68%);
+  animation:fxFlashOk .74s var(--fx-ease) .6s both;
+}
+#chk .chk-flash.no{
+  background:radial-gradient(circle at 50% 46%,rgba(208,104,95,.48) 0%,rgba(208,104,95,.17) 34%,transparent 68%);
+  animation:fxFlashNo .74s var(--fx-ease) .6s both;
+}
+#chk .chk-flash.crit{
+  background:radial-gradient(circle at 50% 46%,rgba(240,211,145,.55) 0%,rgba(212,178,106,.2) 32%,transparent 66%);
+  animation:fxFlashCrit .9s var(--fx-ease) .6s both;
+}
+#chk .cc{position:relative;z-index:1}
+@keyframes fxFlashOk{
+  0%{opacity:0}14%{opacity:1}38%{opacity:.28}58%{opacity:.86}100%{opacity:0}
+}
+@keyframes fxFlashNo{
+  0%{opacity:0}10%{opacity:1}26%{opacity:.16}42%{opacity:.92}56%{opacity:.12}70%{opacity:.7}100%{opacity:0}
+}
+@keyframes fxFlashCrit{
+  0%{opacity:0}10%{opacity:1}22%{opacity:.5}34%{opacity:1}60%{opacity:.34}82%{opacity:.72}100%{opacity:0}
+}
+
+/* --- 1.3 关键数字（d20 点数 / 总值）弹出：scale 1→1.4→1 + text-shadow --- */
+#chk .cc .rs{--fx-pop-max:1.16;position:relative;z-index:1}
+#chk .cc .rs.pop{animation:fxNumPop .46s var(--fx-pop) both}
+#chk .cc .rs.ok{text-shadow:0 0 16px rgba(108,191,148,.55)}
+#chk .cc .rs.no{text-shadow:0 0 16px rgba(208,104,95,.5)}
+@keyframes fxNumPop{
+  0%{transform:scale(1)}
+  42%{transform:scale(var(--fx-pop-max,1.4));text-shadow:0 0 18px currentColor,0 0 40px currentColor}
+  100%{transform:scale(1)}
+}
+
+/* ============================================================
+   2. 战斗演出（#cbt · CombatOverlay.tsx）
+   ============================================================ */
+
+/* --- 2.1 HP 条平滑过渡（0.3s；作用域仅限战斗层，不动顶栏/侧栏原型节奏） --- */
+#cbt .foe .fh i,
+#cbt .cbt-me .bar i{transition:width .3s cubic-bezier(.2,.8,.3,1)}
+
+/* --- 2.2 受击震动（foeHit 事件 · translate 抖动 200ms）+ 受击闪白 --- */
+#cbt .foe.fx-hit{animation:fxShake200 .2s ease}
+#cbt .foe.fx-hit .sv{animation:fxHurtBlink .2s ease}
+@keyframes fxShake200{
+  0%{transform:translateX(0)}
+  15%{transform:translateX(-7px)}
+  32%{transform:translateX(6px)}
+  50%{transform:translateX(-4px)}
+  70%{transform:translateX(3px)}
+  88%{transform:translateX(-1px)}
+  100%{transform:translateX(0)}
+}
+@keyframes fxHurtBlink{
+  0%{filter:brightness(1)}
+  28%{filter:brightness(1.85) saturate(.55)}
+  100%{filter:brightness(1)}
+}
+
+/* --- 2.3 技能光效（纯 CSS animation，不引外部库） --- */
+#cbt .fx-cast{position:absolute;inset:0;z-index:3;overflow:hidden;border-radius:inherit;pointer-events:none}
+#cbt .fx-cast::before{
+  content:"";position:absolute;left:50%;top:44%;width:min(76vw,540px);aspect-ratio:1;
+  background:radial-gradient(circle,rgba(142,161,245,.44) 0%,rgba(212,178,106,.24) 30%,transparent 66%);
+  animation:fxCastBloom .62s var(--fx-ease) both;
+}
+#cbt .fx-cast::after{
+  content:"";position:absolute;left:50%;top:44%;width:min(54vw,370px);aspect-ratio:1;
+  border:2px solid rgba(212,178,106,.7);border-radius:50%;
+  animation:fxCastRing .62s var(--fx-ease) both;
+}
+@keyframes fxCastBloom{
+  0%{opacity:0;transform:translate(-50%,-50%) scale(.42)}
+  30%{opacity:1;transform:translate(-50%,-50%) scale(1.06)}
+  100%{opacity:0;transform:translate(-50%,-50%) scale(1.32)}
+}
+@keyframes fxCastRing{
+  0%{opacity:.9;transform:translate(-50%,-50%) scale(.24)}
+  100%{opacity:0;transform:translate(-50%,-50%) scale(1.55)}
+}
+
+/* --- 2.4 伤害数字 / 重击（暴击表现）：放大 + 金色 ---
+   注：core 的 CombatState 无 crit 字段、d20 点数不出口（types 冻结，本卡不改），
+   故"重击"由 CombatOverlay 侧按「单次伤害 ≥ 目标生命上限 1/3」保守推导。 */
+#cbt .cbt-log .e .dmg{
+  display:inline-block;font-family:var(--serif);font-weight:600;font-size:1.08em;
+  letter-spacing:.02em;padding:0 2px;transform-origin:50% 60%;
+  animation:fxDmgPop .34s var(--fx-pop) both;
+}
+#cbt .cbt-log .e.me .dmg{color:var(--fx-crit)}
+#cbt .cbt-log .e.foe .dmg{color:#e58b82}
+#cbt .cbt-log .e .dmg.heavy{
+  font-size:1.4em;color:var(--fx-crit);
+  text-shadow:0 0 12px rgba(240,211,145,.6),0 0 30px rgba(212,178,106,.38);
+  animation:fxDmgPop .46s var(--fx-pop) both;
+}
+@keyframes fxDmgPop{
+  0%{transform:scale(.62);opacity:.25}
+  45%{transform:scale(1.24);opacity:1}
+  100%{transform:scale(1);opacity:1}
+}
+
+/* ============================================================
+   3. 对白演出（#ovl · SheetHost.tsx）
+   ============================================================ */
+
+/* --- 3.1 立绘淡入：opacity 0→1 + translateY(10px)→0 --- */
+#ovl .fx-art{animation:fxArtIn .5s var(--fx-ease) both}
+/* 只做 scale：ArtImage 的 <img> 用内联 opacity 做加载淡入，动 opacity 会打架 */
+#ovl .fx-art img{animation:fxArtImgIn .68s var(--fx-ease) both}
+#ovl .sh-h .sv.fx-art-av{animation:fxArtIn .42s var(--fx-ease) both}
+@keyframes fxArtIn{
+  from{opacity:0;transform:translateY(10px)}
+  to{opacity:1;transform:none}
+}
+@keyframes fxArtImgIn{
+  from{transform:scale(1.045)}
+  to{transform:none}
+}
+
+/* --- 3.2 情绪 tag（怒/喜/惊/疑/冷）--- */
+#ovl .fx-emo{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:21px;height:20px;padding:0 5px;margin-left:8px;
+  border:1px solid currentColor;border-radius:5px;background:#0000003d;
+  font-family:var(--serif);font-size:11.5px;line-height:1;letter-spacing:.04em;
+  vertical-align:2px;animation:fxEmoPulse 2.8s ease-in-out infinite;
+}
+#ovl .fx-emo.nu{color:#e08a7e}
+#ovl .fx-emo.xi{color:var(--jade)}
+#ovl .fx-emo.jing{color:var(--gold2)}
+#ovl .fx-emo.yi{color:var(--star)}
+#ovl .fx-emo.leng{color:#8ea0c9}
+@keyframes fxEmoPulse{
+  0%,100%{box-shadow:0 0 0 0 rgba(0,0,0,0);opacity:.88}
+  50%{box-shadow:0 0 10px -1px currentColor;opacity:1}
+}
+
+/* ============================================================
+   4. 移动端手感（:active 反馈 / 长按 tooltip / 安全区）
+   ============================================================ */
+
+/* --- 4.1 触摸反馈：:active scale(.96)（仅指针粗糙设备，桌面 hover 规则不受影响） --- */
+@media (pointer:coarse){
+  #tabbar button{transition:transform .12s ease,color .15s ease}
+  #tabbar button:active{transform:scale(.96)}
+  #topbar .bars{transition:transform .12s ease}
+  #topbar .bars:active{transform:scale(.96)}
+  .act:active,.opt:active,.npc-chip:active,.sysbtn:active,.free button:active,
+  .shop-row button:active,.cbt-acts button:active,.chat-chips button:active,
+  .inv-row .ops button:active{transform:scale(.96)}
+}
+/* 长按目标不弹系统菜单 / 不选中文字（配合 useLongPress） */
+#tabbar button,#topbar .bars{-webkit-touch-callout:none;user-select:none}
+/* 长按命中区：横向再放宽 6px。
+   E2 顶栏把 .bars 改成了两行容器（生命/法力），它自身已有 ~52px 高——
+   原先为「5px 细条」纵向补的 -12px 会把热区压到下方货币行上，
+   所以收掉纵向外扩：加高之后，纵向本来就不缺命中面。 */
+#topbar .bars{position:relative}
+#topbar .bars::after{content:"";position:absolute;inset:0 -6px}
+
+/* --- 4.2 长按 tooltip（500ms；React 侧 useLongPress 提供锚点坐标） --- */
+.fx-tip{
+  position:fixed;z-index:85;transform:translate(-50%,-100%);
+  max-width:min(78vw,300px);padding:8px 12px;border-radius:8px;
+  background:#0e1322f2;border:1px solid var(--line2);color:var(--ink);
+  font-family:var(--serif);font-size:12px;line-height:1.6;letter-spacing:.04em;
+  box-shadow:0 10px 28px #000b,0 0 18px #d4b26a1f;
+  pointer-events:none;animation:fxTipIn .16s ease both;
+}
+.fx-tip::after{
+  content:"";position:absolute;left:50%;bottom:-5px;width:8px;height:8px;
+  transform:translateX(-50%) rotate(45deg);
+  background:#0e1322;border-right:1px solid var(--line2);border-bottom:1px solid var(--line2);
+}
+@keyframes fxTipIn{
+  from{opacity:0;transform:translate(-50%,calc(-100% + 6px))}
+  to{opacity:1;transform:translate(-50%,-100%)}
+}
+
+/* --- 4.3 安全区（index.html 已带 viewport-fit=cover） --- */
+#app{padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+#topbar{padding-top:calc(10px + env(safe-area-inset-top,0px))}
+#ovl .sheet{padding-bottom:env(safe-area-inset-bottom,0px)}
+#cbt .cbt-acts{padding-bottom:calc(22px + env(safe-area-inset-bottom,0px))}
+#chk{padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}
+
+/* ============================================================
+   5. 降级：prefers-reduced-motion → 全部新增动效静态化
+   （app.css 已用 * 规则压掉时长；此处额外把 animation-name 置空，
+     避免 animation-delay + fill:both 造成"先隐身再闪一下"。）
+   ============================================================ */
+@media (prefers-reduced-motion:reduce){
+  #chk .cc .die,
+  #chk .cc .die .dv,
+  #chk .cc .rs,
+  #chk .chk-flash,
+  #cbt .foe.fx-hit,
+  #cbt .foe.fx-hit .sv,
+  #cbt .fx-cast::before,
+  #cbt .fx-cast::after,
+  #cbt .cbt-log .e .dmg,
+  #ovl .fx-art,
+  #ovl .fx-art img,
+  #ovl .sh-h .sv.fx-art-av,
+  #ovl .fx-emo,
+  .fx-tip{animation:none!important;transform:none}
+  #chk .chk-flash,
+  #cbt .fx-cast{display:none}
+  #cbt .cbt-log .e .dmg,
+  #cbt .cbt-log .e .dmg.heavy{font-size:1.14em;text-shadow:none}
+  #cbt .foe .fh i,
+  #cbt .cbt-me .bar i{transition:none}
+  #tabbar button,
+  #topbar .bars{transition:none}
+}

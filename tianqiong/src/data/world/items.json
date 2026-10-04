@@ -1,0 +1,3444 @@
+{
+  "version": 1,
+  "_comment": "卡 N1 · 道具扩展批 1「地脉」+ 批 2「行装」+ 批 3「风土」+ 批 4「深渊与禁忌」：分层材料 25 + 战斗消耗品 15 + 武器 10。与 tables.json.items 同构，由 data/worldBook.ts 聚合（tables 在前，既有 id 顺序不动）。desc 之外的字段全进判定：eff 是消耗品效果的唯一事实源，loreRefs 供阶段 K 的玩法层消费统计，规则层不读。",
+  "loreRefs": [
+    "s36",
+    "s53",
+    "s54",
+    "s114",
+    "s116"
+  ],
+  "items": {
+    "moss_ember": {
+      "name": "苔芯火绒",
+      "type": "mat",
+      "price": 45,
+      "tier": 1,
+      "quality": "普通",
+      "desc": "岩壁缝里自己烧着的苔，掐下来还烫手。修士用它引火，炼金用它入门。",
+      "giftTag": "herb",
+      "loreRefs": [
+        "s53"
+      ]
+    },
+    "cave_pearl": {
+      "name": "洞珠",
+      "type": "mat",
+      "price": 60,
+      "tier": 1,
+      "quality": "普通",
+      "desc": "蝙蝠粪与滴水养了几十年的珠子，一捏就碎，碎了才有用。",
+      "giftTag": "gem",
+      "loreRefs": [
+        "s53"
+      ]
+    },
+    "twist_bark": {
+      "name": "扭纹木皮",
+      "type": "mat",
+      "price": 55,
+      "tier": 1,
+      "quality": "普通",
+      "desc": "被魔气拧过纹路的树皮，鞣开之后会自己合拢，像没裂过。",
+      "loreRefs": [
+        "s53"
+      ]
+    },
+    "glow_lichen": {
+      "name": "荧光地衣",
+      "type": "mat",
+      "price": 50,
+      "tier": 1,
+      "quality": "普通",
+      "desc": "地下唯一不骗人的光源。研磨后敷在伤口上，绿得很安分。",
+      "giftTag": "herb",
+      "loreRefs": [
+        "s53"
+      ]
+    },
+    "rat_tooth": {
+      "name": "鼠王牙",
+      "type": "mat",
+      "price": 35,
+      "tier": 1,
+      "quality": "普通",
+      "desc": "从巨鼠窝最深处拔出来的那颗，齿根还温着。磨成粉能咬住铁。",
+      "loreRefs": [
+        "s53"
+      ]
+    },
+    "brick_dust": {
+      "name": "古砖灰",
+      "type": "mat",
+      "price": 150,
+      "tier": 2,
+      "quality": "优秀",
+      "desc": "砌道砖碾成的灰。掺进新墙的砂浆里，新墙会记得旧纹。",
+      "loreRefs": [
+        "s53"
+      ]
+    },
+    "iron_vein": {
+      "name": "铁脉碎",
+      "type": "mat",
+      "price": 220,
+      "tier": 2,
+      "quality": "优秀",
+      "desc": "深埋的矿脉崩下来的断口，断面上的星点不是光，是铁。",
+      "loreRefs": [
+        "s53"
+      ]
+    },
+    "bone_coin": {
+      "name": "殉葬币",
+      "type": "mat",
+      "price": 180,
+      "tier": 2,
+      "quality": "优秀",
+      "desc": "骷髅指骨间夹着的冥币。成色不明，但它认得死人的手。",
+      "giftTag": "relic",
+      "loreRefs": [
+        "s53"
+      ]
+    },
+    "rune_ash": {
+      "name": "符烬",
+      "type": "mat",
+      "price": 260,
+      "tier": 2,
+      "quality": "优秀",
+      "desc": "符文陷阱烧过之后剩下的灰。凑近看，灰里还立着一个字。",
+      "giftTag": "relic",
+      "loreRefs": [
+        "s53"
+      ]
+    },
+    "spider_glass": {
+      "name": "蛛瞳玻璃",
+      "type": "mat",
+      "price": 320,
+      "tier": 2,
+      "quality": "精良",
+      "desc": "水晶蜘蛛的眼球凝成的凸透镜，对着火看，火会分成两朵。",
+      "giftTag": "gem",
+      "loreRefs": [
+        "s53"
+      ]
+    },
+    "lava_tear": {
+      "name": "熔泪",
+      "type": "mat",
+      "price": 1100,
+      "tier": 3,
+      "quality": "精良",
+      "desc": "熔窟壁上淌下又冻住的玻璃泪。落地不碎，是它自己不想碎。",
+      "giftTag": "gem",
+      "loreRefs": [
+        "s53"
+      ]
+    },
+    "worm_silk": {
+      "name": "巨虫丝",
+      "type": "mat",
+      "price": 1300,
+      "tier": 3,
+      "quality": "精良",
+      "desc": "从蛆虫腺体里抽出的白丝，晾干后韧得像钢丝，还会自己找直。",
+      "loreRefs": [
+        "s53"
+      ]
+    },
+    "ember_core": {
+      "name": "余烬核",
+      "type": "mat",
+      "price": 1600,
+      "tier": 3,
+      "quality": "精良",
+      "desc": "熔窟里烧了几百年的石头心，敲开还是烫的，搁一夜也凉不下来。",
+      "giftTag": "relic",
+      "loreRefs": [
+        "s53"
+      ]
+    },
+    "starhub_alloy": {
+      "name": "星枢合金",
+      "type": "mat",
+      "price": 2400,
+      "tier": 3,
+      "quality": "精良",
+      "desc": "星枢塔外墙剥落的板，轻、硬，而且记得自己原来的形状。",
+      "giftTag": "relic",
+      "loreRefs": [
+        "s53",
+        "s11"
+      ]
+    },
+    "seal_wax": {
+      "name": "古封蜡",
+      "type": "mat",
+      "price": 900,
+      "tier": 3,
+      "quality": "精良",
+      "desc": "古代守卫身上的封蜡，七千年了还软着，按下去会回弹。",
+      "giftTag": "relic",
+      "loreRefs": [
+        "s53"
+      ]
+    },
+    "demon_horn": {
+      "name": "魔角粉",
+      "type": "mat",
+      "price": 18000,
+      "tier": 4,
+      "quality": "稀有",
+      "desc": "恶魔断角磨的粉。掺进铭刻墨里，墨会自己找符文的位置。",
+      "loreRefs": [
+        "s53"
+      ]
+    },
+    "hell_sulfur": {
+      "name": "魔界硫磺",
+      "type": "mat",
+      "price": 9000,
+      "tier": 4,
+      "quality": "稀有",
+      "desc": "只在魔界裂隙边结块。闻久了会做梦，梦里全是别人的名字。",
+      "loreRefs": [
+        "s53"
+      ]
+    },
+    "soul_slag": {
+      "name": "魂渣",
+      "type": "mat",
+      "price": 12000,
+      "tier": 4,
+      "quality": "稀有",
+      "desc": "灵魂被抽走之后剩下的壳。轻得不像话，风一吹就飘起来。",
+      "giftTag": "relic",
+      "loreRefs": [
+        "s53"
+      ]
+    },
+    "torture_iron": {
+      "name": "刑铁",
+      "type": "mat",
+      "price": 15000,
+      "tier": 4,
+      "quality": "稀有",
+      "desc": "从魔界刑具上拆下来的铁。握久了掌心会疼，放下就不疼了。",
+      "loreRefs": [
+        "s53"
+      ]
+    },
+    "guardian_lens": {
+      "name": "守卫镜片",
+      "type": "mat",
+      "price": 14000,
+      "tier": 4,
+      "quality": "稀有",
+      "desc": "古代守卫的眼睛。透过它看人，能看见对方身上有几层魔气。",
+      "giftTag": "gem",
+      "loreRefs": [
+        "s53"
+      ]
+    },
+    "hollow_gear": {
+      "name": "中空齿轮",
+      "type": "mat",
+      "price": 11000,
+      "tier": 4,
+      "quality": "稀有",
+      "desc": "从古代造物里拆出来的齿轮，中空的。转起来没有声音。",
+      "loreRefs": [
+        "s53"
+      ]
+    },
+    "abyss_ink": {
+      "name": "渊墨",
+      "type": "mat",
+      "price": 26000,
+      "tier": 5,
+      "quality": "传说",
+      "desc": "星渊裂隙里凝出来的黑。蘸着它写字，字会自己往纸里渗。",
+      "giftTag": "relic",
+      "loreRefs": [
+        "s53",
+        "s116"
+      ]
+    },
+    "void_salt": {
+      "name": "虚盐",
+      "type": "mat",
+      "price": 31000,
+      "tier": 5,
+      "quality": "传说",
+      "desc": "虚空侵蚀过的地方结出的盐晶。舔一口，会忘记刚刚在想什么。",
+      "loreRefs": [
+        "s53",
+        "s116"
+      ]
+    },
+    "star_nerve": {
+      "name": "星脉",
+      "type": "mat",
+      "price": 38000,
+      "tier": 5,
+      "quality": "传说",
+      "desc": "从星髓里抽出的发光纤维，随心脏的节奏明暗，你自己的心跳。",
+      "giftTag": "relic",
+      "loreRefs": [
+        "s53",
+        "s116"
+      ]
+    },
+    "silent_bell": {
+      "name": "无声铃",
+      "type": "mat",
+      "price": 45000,
+      "tier": 5,
+      "quality": "传说",
+      "desc": "一口钟被星渊吃掉了声音，只剩壳。摇它的时候，你听见的是安静。",
+      "giftTag": "relic",
+      "loreRefs": [
+        "s53",
+        "s116"
+      ]
+    },
+    "salve_ember": {
+      "name": "余烬膏",
+      "type": "use",
+      "price": 260,
+      "tier": 1,
+      "heal": 25,
+      "combat": true,
+      "desc": "苔芯火绒熬的膏，抹上去像有人从里面把你捂热。",
+      "eff": [
+        {
+          "kind": "heal",
+          "power": 25
+        }
+      ],
+      "giftTag": "herb",
+      "loreRefs": [
+        "s53",
+        "s36"
+      ]
+    },
+    "antidote_pure": {
+      "name": "净毒散",
+      "type": "use",
+      "price": 420,
+      "tier": 1,
+      "combat": true,
+      "desc": "洞珠研的粉，冲水喝下去，火从喉咙一路凉到指尖。",
+      "eff": [
+        {
+          "kind": "cure",
+          "status": "burn"
+        }
+      ],
+      "giftTag": "herb",
+      "loreRefs": [
+        "s53",
+        "s36"
+      ]
+    },
+    "oil_flame": {
+      "name": "引火油",
+      "type": "use",
+      "price": 300,
+      "tier": 1,
+      "combat": true,
+      "desc": "装在薄陶瓶里的油，砸开就着。瓶口塞着一小撮还在燃的苔。",
+      "eff": [
+        {
+          "kind": "dot",
+          "status": "burn",
+          "power": 4,
+          "dur": 3
+        }
+      ],
+      "giftTag": "trinket",
+      "loreRefs": [
+        "s53",
+        "s36"
+      ]
+    },
+    "tonic_ironblood": {
+      "name": "铁血剂",
+      "type": "use",
+      "price": 700,
+      "tier": 2,
+      "heal": 60,
+      "combat": true,
+      "desc": "铁脉碎泡的酒，喝下去牙会发麻，伤口合得比你想的快。",
+      "eff": [
+        {
+          "kind": "heal",
+          "power": 60
+        }
+      ],
+      "giftTag": "herb",
+      "loreRefs": [
+        "s53",
+        "s36"
+      ]
+    },
+    "unguent_warm": {
+      "name": "暖筋油",
+      "type": "use",
+      "price": 640,
+      "tier": 2,
+      "combat": true,
+      "desc": "扭纹木皮熬的油，搓在冻僵的关节上，骨头会自己接回原来的角度。",
+      "eff": [
+        {
+          "kind": "cure",
+          "status": "freeze"
+        }
+      ],
+      "giftTag": "herb",
+      "loreRefs": [
+        "s53",
+        "s36"
+      ]
+    },
+    "powder_hemo": {
+      "name": "断血粉",
+      "type": "use",
+      "price": 520,
+      "tier": 2,
+      "combat": true,
+      "desc": "蛛瞳玻璃磨的粉，撒在伤口上会让血流得慢一点——慢到你有时间跑。",
+      "eff": [
+        {
+          "kind": "dot",
+          "status": "bleed",
+          "power": 4,
+          "dur": 3
+        }
+      ],
+      "giftTag": "trinket",
+      "loreRefs": [
+        "s53",
+        "s36"
+      ]
+    },
+    "incense_fervor": {
+      "name": "锋锐香",
+      "type": "use",
+      "price": 560,
+      "tier": 2,
+      "combat": true,
+      "desc": "点燃后烟是斜的，往你的刀刃那个方向斜。",
+      "eff": [
+        {
+          "kind": "buff",
+          "status": "fervor",
+          "dur": 3
+        }
+      ],
+      "giftTag": "trinket",
+      "loreRefs": [
+        "s53",
+        "s36"
+      ]
+    },
+    "draught_bastion": {
+      "name": "坚壁饮",
+      "type": "use",
+      "price": 600,
+      "tier": 2,
+      "combat": true,
+      "desc": "古砖灰兑的浑水，喝下去皮肤底下像垫了一层砖。",
+      "eff": [
+        {
+          "kind": "buff",
+          "status": "bastion",
+          "dur": 3
+        }
+      ],
+      "giftTag": "trinket",
+      "loreRefs": [
+        "s53",
+        "s36"
+      ]
+    },
+    "tea_swift": {
+      "name": "疾行茶",
+      "type": "use",
+      "price": 480,
+      "tier": 2,
+      "combat": true,
+      "desc": "荧光地衣焙的茶，趁热喝。等你放下杯子，屋子已经比你记得的小了。",
+      "eff": [
+        {
+          "kind": "buff",
+          "status": "swift",
+          "dur": 4
+        }
+      ],
+      "giftTag": "herb",
+      "loreRefs": [
+        "s53",
+        "s36"
+      ]
+    },
+    "draught_deep": {
+      "name": "深脉饮",
+      "type": "use",
+      "price": 2600,
+      "tier": 3,
+      "heal": 140,
+      "combat": true,
+      "desc": "余烬核与熔泪同煮，喝一口，胸口那块空地重新长出火来。",
+      "eff": [
+        {
+          "kind": "heal",
+          "power": 140
+        }
+      ],
+      "giftTag": "rare",
+      "loreRefs": [
+        "s53",
+        "s36"
+      ]
+    },
+    "salt_clear": {
+      "name": "涤心盐",
+      "type": "use",
+      "price": 3200,
+      "tier": 3,
+      "combat": true,
+      "desc": "虚盐混着古封蜡，含在舌下。你会想起自己原本打算做什么，然后忘掉疼。",
+      "eff": [
+        {
+          "kind": "cure"
+        }
+      ],
+      "giftTag": "rare",
+      "loreRefs": [
+        "s53",
+        "s36"
+      ]
+    },
+    "ice_splinter": {
+      "name": "霜棱弹",
+      "type": "use",
+      "price": 1800,
+      "tier": 3,
+      "combat": true,
+      "desc": "洞珠冻在蛛瞳玻璃里，一掷就开。碎的地方会结一层白，白不化。",
+      "eff": [
+        {
+          "kind": "dot",
+          "status": "freeze",
+          "dur": 2,
+          "chance": 0.75
+        }
+      ],
+      "giftTag": "trinket",
+      "loreRefs": [
+        "s53",
+        "s36"
+      ]
+    },
+    "oil_oracle": {
+      "name": "神启油",
+      "type": "use",
+      "price": 2200,
+      "tier": 3,
+      "combat": true,
+      "desc": "抹在眼皮上，眼睑内里会浮起一行数字。那个数字是你的下一刀。",
+      "eff": [
+        {
+          "kind": "buff",
+          "status": "oracle",
+          "dur": 2
+        }
+      ],
+      "giftTag": "relic",
+      "loreRefs": [
+        "s53",
+        "s36"
+      ]
+    },
+    "paste_warcry": {
+      "name": "战吼膏",
+      "type": "use",
+      "price": 2400,
+      "tier": 3,
+      "combat": true,
+      "desc": "魔角粉调的膏，抹在喉咙上。你还没出声，敌人已经后退了半步。",
+      "eff": [
+        {
+          "kind": "buff",
+          "status": "fervor",
+          "dur": 3
+        },
+        {
+          "kind": "buff",
+          "status": "swift",
+          "dur": 4
+        }
+      ],
+      "giftTag": "rare",
+      "loreRefs": [
+        "s53",
+        "s36"
+      ]
+    },
+    "incense_ironwall": {
+      "name": "铁壁香",
+      "type": "use",
+      "price": 2800,
+      "tier": 3,
+      "combat": true,
+      "desc": "守卫镜片碾碎拌进封蜡里烧。烟不散，绕着人堆起一圈看不见的墙。",
+      "eff": [
+        {
+          "kind": "buff",
+          "status": "bastion",
+          "dur": 3
+        },
+        {
+          "kind": "buff",
+          "status": "oracle",
+          "dur": 2
+        }
+      ],
+      "giftTag": "relic",
+      "loreRefs": [
+        "s53",
+        "s36"
+      ]
+    },
+    "wpn_moss_cleaver": {
+      "name": "苔纹砍刀",
+      "type": "wpn",
+      "price": 8200,
+      "tier": 1,
+      "atk": 1,
+      "dmg": [
+        1,
+        6
+      ],
+      "craftable": true,
+      "desc": "刀身是捡来的旧铁，刃口那层绿是自己长上去的，砍树比砍人顺手。",
+      "affixPool": [
+        "af_sharp",
+        "af_stout",
+        "af_swift"
+      ],
+      "loreRefs": [
+        "s54",
+        "s114"
+      ]
+    },
+    "wpn_ratfang_dirk": {
+      "name": "鼠牙匕",
+      "type": "wpn",
+      "price": 9500,
+      "tier": 1,
+      "atk": 1,
+      "dmg": [
+        1,
+        4
+      ],
+      "stat": {
+        "敏捷": 1
+      },
+      "craftable": true,
+      "desc": "刃是鼠王牙磨的，短得几乎不算武器——所以要贴近了用。",
+      "affixPool": [
+        "af_sharp",
+        "af_swift",
+        "af_duelist"
+      ],
+      "loreRefs": [
+        "s54",
+        "s114"
+      ]
+    },
+    "wpn_brick_mace": {
+      "name": "砌道锤",
+      "type": "wpn",
+      "price": 18000,
+      "tier": 2,
+      "atk": 2,
+      "dmg": [
+        2,
+        8
+      ],
+      "craftable": true,
+      "desc": "锤头是一整块古砖压的。它压过墙，也压过墙塌下来之后的东西。",
+      "affixPool": [
+        "af_heavy",
+        "af_stout",
+        "af_thorns"
+      ],
+      "loreRefs": [
+        "s54",
+        "s114"
+      ]
+    },
+    "wpn_bonelight_staff": {
+      "name": "骨灯杖",
+      "type": "wpn",
+      "price": 18000,
+      "tier": 2,
+      "atk": 1,
+      "dmg": [
+        1,
+        6
+      ],
+      "stat": {
+        "智力": 2
+      },
+      "craftable": true,
+      "desc": "杖头用殉葬币嵌成一盏灯，照见的东西比火把多一样。",
+      "affixPool": [
+        "af_runed",
+        "af_runeward",
+        "af_stout"
+      ],
+      "loreRefs": [
+        "s54",
+        "s114"
+      ]
+    },
+    "wpn_wormsilk_whip": {
+      "name": "虫丝鞭",
+      "type": "wpn",
+      "price": 26000,
+      "tier": 3,
+      "atk": 2,
+      "dmg": [
+        1,
+        8
+      ],
+      "stat": {
+        "敏捷": 1
+      },
+      "craftable": true,
+      "desc": "巨虫丝搓的鞭子，甩出去会自己找直，收回来时带着一层灰。",
+      "affixPool": [
+        "af_swift",
+        "af_serrated",
+        "af_lithe"
+      ],
+      "loreRefs": [
+        "s54",
+        "s114"
+      ]
+    },
+    "wpn_lavaglass_edge": {
+      "name": "熔璃长刃",
+      "type": "wpn",
+      "price": 32000,
+      "tier": 3,
+      "atk": 3,
+      "dmg": [
+        2,
+        10
+      ],
+      "craftable": true,
+      "desc": "刃口是熔泪凝的玻璃，砍中人之后那道口子会自己烧起来。",
+      "affixPool": [
+        "af_sharp",
+        "af_heavy",
+        "af_serrated"
+      ],
+      "loreRefs": [
+        "s54",
+        "s114"
+      ]
+    },
+    "wpn_soulslag_blade": {
+      "name": "魂渣刃",
+      "type": "wpn",
+      "price": 465000,
+      "tier": 4,
+      "atk": 4,
+      "dmg": [
+        3,
+        10
+      ],
+      "craftable": true,
+      "desc": "刀薄得能透光。挥过的地方，被砍的人会先觉得冷，再觉得疼。",
+      "affixPool": [
+        "af_vampiric",
+        "af_duelist",
+        "af_serrated"
+      ],
+      "loreRefs": [
+        "s54",
+        "s114"
+      ]
+    },
+    "wpn_demonhorn_axe": {
+      "name": "魔角斧",
+      "type": "wpn",
+      "price": 420000,
+      "tier": 4,
+      "atk": 4,
+      "dmg": [
+        2,
+        12
+      ],
+      "craftable": true,
+      "desc": "斧柄缠着刑铁，斧刃是魔角磨的。它砍下去的时候带着一点回声。",
+      "affixPool": [
+        "af_heavy",
+        "af_bulwark",
+        "af_thorns"
+      ],
+      "loreRefs": [
+        "s54",
+        "s114"
+      ]
+    },
+    "wpn_voidsalt_saber": {
+      "name": "虚盐弯刀",
+      "type": "wpn",
+      "price": 1250000,
+      "tier": 5,
+      "atk": 5,
+      "dmg": [
+        3,
+        14
+      ],
+      "craftable": true,
+      "desc": "刀脊上结着一层盐。被它划开的人，事后总说不清伤口在哪边。",
+      "affixPool": [
+        "af_sharp",
+        "af_heavy",
+        "af_duelist"
+      ],
+      "loreRefs": [
+        "s54",
+        "s114",
+        "s116"
+      ]
+    },
+    "wpn_starnerve_spear": {
+      "name": "星脉长枪",
+      "type": "wpn",
+      "price": 1380000,
+      "tier": 5,
+      "atk": 6,
+      "dmg": [
+        2,
+        16
+      ],
+      "craftable": true,
+      "desc": "枪杆里穿着一根星脉，握久了会觉得它比你更清楚该往哪刺。",
+      "affixPool": [
+        "af_heavy",
+        "af_swift",
+        "af_runed"
+      ],
+      "loreRefs": [
+        "s54",
+        "s114",
+        "s116"
+      ]
+    },
+    "lamp_moss": {
+      "name": "苔灯",
+      "type": "use",
+      "price": 320,
+      "tier": 1,
+      "utility": [
+        "light"
+      ],
+      "desc": "一小把还没熄的苔芯封在鳔壳里。它不照亮整条走廊，只照亮你需要看见的那三步。",
+      "giftTag": "trinket",
+      "loreRefs": [
+        "s53",
+        "s45"
+      ]
+    },
+    "jar_glow": {
+      "name": "地衣瓶",
+      "type": "use",
+      "price": 380,
+      "tier": 1,
+      "utility": [
+        "light"
+      ],
+      "desc": "磨碎的荧光地衣兑了水，摇一摇就亮。亮度不如火把，但它不会把你也照给暗处的东西看。",
+      "giftTag": "trinket",
+      "loreRefs": [
+        "s53",
+        "s45"
+      ]
+    },
+    "knife_web": {
+      "name": "割网短刀",
+      "type": "use",
+      "price": 200,
+      "tier": 1,
+      "utility": [
+        "blade"
+      ],
+      "desc": "刃口带细齿，专为割黏丝开的。砍人不成，脱身够用。",
+      "giftTag": "trinket",
+      "loreRefs": [
+        "s53",
+        "s45"
+      ]
+    },
+    "piton_iron": {
+      "name": "铁脉岩钉",
+      "type": "use",
+      "price": 260,
+      "tier": 1,
+      "utility": [
+        "rope"
+      ],
+      "desc": "六枚一束，敲进岩壁时声音很闷——那说明它吃住了。",
+      "giftTag": "trinket",
+      "loreRefs": [
+        "s53",
+        "s45"
+      ]
+    },
+    "stone_warm": {
+      "name": "暖石",
+      "type": "use",
+      "price": 480,
+      "tier": 1,
+      "utility": [
+        "warm"
+      ],
+      "desc": "余烬核的碎渣压成的石头，揣在怀里能热一整夜。冷的地方，它比刀有用。",
+      "giftTag": "trinket",
+      "loreRefs": [
+        "s53",
+        "s45"
+      ]
+    },
+    "shears_bone": {
+      "name": "骨剪",
+      "type": "use",
+      "price": 520,
+      "tier": 2,
+      "utility": [
+        "blade"
+      ],
+      "desc": "殉葬币熔铸的双刃剪。剪网、剪绳、剪开缠在骨头上的东西，都顺手。",
+      "giftTag": "trinket",
+      "loreRefs": [
+        "s53",
+        "s45"
+      ]
+    },
+    "pouch_spore": {
+      "name": "孢子袋",
+      "type": "use",
+      "price": 620,
+      "tier": 2,
+      "utility": [
+        "light",
+        "breathe"
+      ],
+      "desc": "袋里的孢子一边发亮一边吃灰。举着它走，你吸进去的比吐出来的干净。",
+      "giftTag": "trinket",
+      "loreRefs": [
+        "s53",
+        "s45"
+      ]
+    },
+    "hook_grapnel": {
+      "name": "三爪钩",
+      "type": "use",
+      "price": 700,
+      "tier": 2,
+      "utility": [
+        "rope"
+      ],
+      "desc": "三个爪往三个方向咬，越拉越紧。扔上去的时候要听回声——回声短，就是咬住了。",
+      "giftTag": "trinket",
+      "loreRefs": [
+        "s53",
+        "s45"
+      ]
+    },
+    "rope_wormsilk": {
+      "name": "虫丝绳",
+      "type": "use",
+      "price": 900,
+      "tier": 2,
+      "utility": [
+        "rope"
+      ],
+      "desc": "三十尺巨虫丝搓的绳。它比麻绳细，比铁链轻，而且从不打结。",
+      "giftTag": "trinket",
+      "loreRefs": [
+        "s53",
+        "s45"
+      ]
+    },
+    "mask_gas": {
+      "name": "滤烟面罩",
+      "type": "use",
+      "price": 1100,
+      "tier": 2,
+      "utility": [
+        "breathe"
+      ],
+      "desc": "皮罩里垫了三层符烬与炭。戴上之后你的呼吸声变得很陌生。",
+      "giftTag": "trinket",
+      "loreRefs": [
+        "s53",
+        "s45"
+      ]
+    },
+    "charm_ward": {
+      "name": "驱邪护符",
+      "type": "use",
+      "price": 1400,
+      "tier": 2,
+      "utility": [
+        "ward"
+      ],
+      "desc": "神殿祝圣过的铁片，边缘刻着一句读不完的祷文。魔气靠近时它会发烫。",
+      "giftTag": "relic",
+      "loreRefs": [
+        "s53",
+        "s45"
+      ]
+    },
+    "compass_vein": {
+      "name": "地脉罗盘",
+      "type": "use",
+      "price": 1500,
+      "tier": 2,
+      "utility": [
+        "detect"
+      ],
+      "desc": "指针不指北，指地脉。地下待久了，你会开始信它多过信自己的方向感。",
+      "giftTag": "trinket",
+      "loreRefs": [
+        "s53",
+        "s45"
+      ]
+    },
+    "lens_detect": {
+      "name": "辨伪镜",
+      "type": "use",
+      "price": 1600,
+      "tier": 2,
+      "utility": [
+        "detect"
+      ],
+      "desc": "蛛瞳玻璃磨的镜片。透过它看墙，假的墙会先眨一下眼。",
+      "giftTag": "gem",
+      "loreRefs": [
+        "s53",
+        "s45"
+      ]
+    },
+    "bladder_deep": {
+      "name": "深潜气囊",
+      "type": "use",
+      "price": 1800,
+      "tier": 3,
+      "utility": [
+        "breathe",
+        "warm"
+      ],
+      "desc": "巨虫鳔囊做的呼吸袋，能藏半刻钟的空气。地脉毒气与冷水都进不来。",
+      "giftTag": "trinket",
+      "loreRefs": [
+        "s53",
+        "s45"
+      ]
+    },
+    "bell_still": {
+      "name": "静音铃",
+      "type": "use",
+      "price": 2000,
+      "tier": 3,
+      "utility": [
+        "detect"
+      ],
+      "desc": "无声铃拆出的内胆，系在腰上探路。它不响——但它会震，震到手心发麻就是前面有东西。",
+      "giftTag": "relic",
+      "loreRefs": [
+        "s53",
+        "s45"
+      ]
+    },
+    "lantern_star": {
+      "name": "星纹提灯",
+      "type": "use",
+      "price": 2200,
+      "tier": 3,
+      "utility": [
+        "light",
+        "detect"
+      ],
+      "desc": "星枢合金打的灯罩，光出来是一圈一圈的。古代符文在它的光里会自己浮起来。",
+      "giftTag": "relic",
+      "loreRefs": [
+        "s53",
+        "s45"
+      ]
+    },
+    "plate_guard": {
+      "name": "守卫残片",
+      "type": "use",
+      "price": 2400,
+      "tier": 3,
+      "utility": [
+        "ward"
+      ],
+      "desc": "守卫镜片崩下的一角，边缘磨圆了贴身带着。它记得自己以前是做什么的。",
+      "giftTag": "relic",
+      "loreRefs": [
+        "s53",
+        "s45"
+      ]
+    },
+    "veil_abyss": {
+      "name": "渊墨披巾",
+      "type": "use",
+      "price": 2600,
+      "tier": 3,
+      "utility": [
+        "ward",
+        "warm"
+      ],
+      "desc": "渊墨染黑的厚布，裹住口鼻往下走。魔气绕着它走，像水绕过一块石头。",
+      "giftTag": "relic",
+      "loreRefs": [
+        "s53",
+        "s45"
+      ]
+    },
+    "tal_ember": {
+      "name": "引火符",
+      "type": "use",
+      "price": 380,
+      "tier": 1,
+      "combat": true,
+      "desc": "薄绢上写着火字的一半。贴在身上烧起来的时候，那半个字会补全。",
+      "eff": [
+        {
+          "kind": "cure",
+          "status": "burn"
+        }
+      ],
+      "giftTag": "relic",
+      "loreRefs": [
+        "s114",
+        "s36"
+      ]
+    },
+    "tal_thaw": {
+      "name": "解冻符",
+      "type": "use",
+      "price": 760,
+      "tier": 2,
+      "combat": true,
+      "desc": "符纸始终是湿的。拍在冻僵的关节上，冰会自己退回去。",
+      "eff": [
+        {
+          "kind": "cure",
+          "status": "freeze"
+        }
+      ],
+      "giftTag": "relic",
+      "loreRefs": [
+        "s114",
+        "s36"
+      ]
+    },
+    "tal_bind": {
+      "name": "缚地符",
+      "type": "use",
+      "price": 800,
+      "tier": 2,
+      "combat": true,
+      "desc": "掷出去贴住地面，那一小块地就变得很黏。踩上去的人会觉得自己在泥里。",
+      "eff": [
+        {
+          "kind": "dot",
+          "status": "slow",
+          "dur": 3
+        }
+      ],
+      "giftTag": "relic",
+      "loreRefs": [
+        "s114",
+        "s36"
+      ]
+    },
+    "tal_flame": {
+      "name": "灼炎符",
+      "type": "use",
+      "price": 850,
+      "tier": 2,
+      "combat": true,
+      "desc": "用魔界硫磺调的墨。烧起来的时候有一小截是黑色的火。",
+      "eff": [
+        {
+          "kind": "dot",
+          "status": "burn",
+          "power": 5,
+          "dur": 3
+        }
+      ],
+      "giftTag": "relic",
+      "loreRefs": [
+        "s114",
+        "s36"
+      ]
+    },
+    "tal_bleed": {
+      "name": "割魂符",
+      "type": "use",
+      "price": 880,
+      "tier": 2,
+      "combat": true,
+      "desc": "符上只有一道竖线。它落下的地方，那道线会出现在人身上。",
+      "eff": [
+        {
+          "kind": "dot",
+          "status": "bleed",
+          "power": 5,
+          "dur": 3
+        }
+      ],
+      "giftTag": "relic",
+      "loreRefs": [
+        "s114",
+        "s36"
+      ]
+    },
+    "tal_frost": {
+      "name": "缚霜符",
+      "type": "use",
+      "price": 900,
+      "tier": 2,
+      "combat": true,
+      "desc": "以霜原冻髓调墨写在薄绢上。掷出时空气里会落下一层白，白不化。",
+      "eff": [
+        {
+          "kind": "dot",
+          "status": "freeze",
+          "dur": 2,
+          "chance": 0.75
+        }
+      ],
+      "giftTag": "relic",
+      "loreRefs": [
+        "s114",
+        "s36"
+      ]
+    },
+    "tal_focus": {
+      "name": "凝神符",
+      "type": "use",
+      "price": 900,
+      "tier": 2,
+      "combat": true,
+      "desc": "贴在眉心。睁眼的时候，你已经在心里把这一刀走完了。",
+      "eff": [
+        {
+          "kind": "buff",
+          "status": "oracle",
+          "dur": 2
+        }
+      ],
+      "giftTag": "relic",
+      "loreRefs": [
+        "s114",
+        "s36"
+      ]
+    },
+    "tal_edge": {
+      "name": "锐金符",
+      "type": "use",
+      "price": 920,
+      "tier": 2,
+      "combat": true,
+      "desc": "符纸边缘割手。缠在刀柄上，刀会轻一点。",
+      "eff": [
+        {
+          "kind": "buff",
+          "status": "fervor",
+          "dur": 3
+        }
+      ],
+      "giftTag": "relic",
+      "loreRefs": [
+        "s114",
+        "s36"
+      ]
+    },
+    "tal_bulwark": {
+      "name": "磐石符",
+      "type": "use",
+      "price": 940,
+      "tier": 2,
+      "combat": true,
+      "desc": "古砖灰调的墨，写出来的字是方的。贴在胸口，人就往地里沉了半寸。",
+      "eff": [
+        {
+          "kind": "buff",
+          "status": "bastion",
+          "dur": 3
+        }
+      ],
+      "giftTag": "relic",
+      "loreRefs": [
+        "s114",
+        "s36"
+      ]
+    },
+    "tal_sunder": {
+      "name": "裂甲符",
+      "type": "use",
+      "price": 950,
+      "tier": 2,
+      "combat": true,
+      "desc": "专为破铁写的符。它不伤人，只伤甲——但甲坏了，人也就快了。",
+      "eff": [
+        {
+          "kind": "dot",
+          "status": "vuln",
+          "dur": 3
+        }
+      ],
+      "giftTag": "relic",
+      "loreRefs": [
+        "s114",
+        "s36"
+      ]
+    },
+    "tal_haste": {
+      "name": "风足符",
+      "type": "use",
+      "price": 860,
+      "tier": 2,
+      "combat": true,
+      "desc": "系在脚踝上，符纸一直朝后飘。你走出十步，它才飘完。",
+      "eff": [
+        {
+          "kind": "buff",
+          "status": "swift",
+          "dur": 4
+        }
+      ],
+      "giftTag": "relic",
+      "loreRefs": [
+        "s114",
+        "s36"
+      ]
+    },
+    "tal_daze": {
+      "name": "迷神符",
+      "type": "use",
+      "price": 2400,
+      "tier": 3,
+      "combat": true,
+      "desc": "用迷幻粉末调的墨。对方看一眼就愣住——那一瞬足够你换一个位置。",
+      "eff": [
+        {
+          "kind": "dot",
+          "status": "stun",
+          "dur": 1,
+          "chance": 0.5
+        }
+      ],
+      "giftTag": "rare",
+      "loreRefs": [
+        "s114",
+        "s36"
+      ]
+    },
+    "tal_purge": {
+      "name": "净身符",
+      "type": "use",
+      "price": 2600,
+      "tier": 3,
+      "combat": true,
+      "desc": "贴在喉结上，从里往外烧一遍。烧完之后你干净了，也空了一点。",
+      "eff": [
+        {
+          "kind": "cure"
+        },
+        {
+          "kind": "heal",
+          "power": 20
+        }
+      ],
+      "giftTag": "relic",
+      "loreRefs": [
+        "s114",
+        "s36"
+      ]
+    },
+    "tal_twin": {
+      "name": "双纹符",
+      "type": "use",
+      "price": 2800,
+      "tier": 3,
+      "combat": true,
+      "desc": "一张纸正反两面各写一道。贴上去的时候两道一起亮。",
+      "eff": [
+        {
+          "kind": "buff",
+          "status": "fervor",
+          "dur": 3
+        },
+        {
+          "kind": "buff",
+          "status": "bastion",
+          "dur": 3
+        }
+      ],
+      "giftTag": "rare",
+      "loreRefs": [
+        "s114",
+        "s36"
+      ]
+    },
+    "arm_moss_jerkin": {
+      "name": "苔纹皮甲",
+      "type": "arm",
+      "price": 8000,
+      "tier": 1,
+      "def": 2,
+      "craftable": true,
+      "desc": "鞣过的硬皮上养着一层苔。苔还活着，所以甲也还算软的。",
+      "affixPool": [
+        "af_stout",
+        "af_lithe",
+        "af_thorns"
+      ],
+      "loreRefs": [
+        "s54",
+        "s114"
+      ]
+    },
+    "arm_rat_cloak": {
+      "name": "鼠皮斗篷",
+      "type": "arm",
+      "price": 7000,
+      "tier": 1,
+      "def": 1,
+      "stat": {
+        "敏捷": 1
+      },
+      "craftable": true,
+      "desc": "拼了一百多张灰鼠皮。不好看，但在地下没有人看你。",
+      "affixPool": [
+        "af_lithe",
+        "af_swift",
+        "af_stout"
+      ],
+      "loreRefs": [
+        "s54",
+        "s114"
+      ]
+    },
+    "arm_glow_cloak": {
+      "name": "荧光斗篷",
+      "type": "arm",
+      "price": 13000,
+      "tier": 2,
+      "def": 2,
+      "stat": {
+        "感知": 1
+      },
+      "craftable": true,
+      "desc": "织进了荧光地衣的丝。披着它走夜路，脚下总是亮的——也就总是被人看见。",
+      "affixPool": [
+        "af_lithe",
+        "af_runeward",
+        "af_stout"
+      ],
+      "loreRefs": [
+        "s54",
+        "s114"
+      ]
+    },
+    "arm_ember_gauntlet": {
+      "name": "余烬护手",
+      "type": "arm",
+      "price": 14000,
+      "tier": 2,
+      "def": 2,
+      "stat": {
+        "力量": 1
+      },
+      "craftable": true,
+      "desc": "余烬核碎渣嵌在指节上，握拳的时候指缝会漏出红光。",
+      "affixPool": [
+        "af_stout",
+        "af_thorns",
+        "af_bulwark"
+      ],
+      "loreRefs": [
+        "s54",
+        "s114"
+      ]
+    },
+    "arm_seal_gambeson": {
+      "name": "封蜡软甲",
+      "type": "arm",
+      "price": 15000,
+      "tier": 2,
+      "def": 3,
+      "craftable": true,
+      "desc": "夹层里糊了一层古封蜡，砍进去的刀会被蜡含住，拔出来要费点劲。",
+      "affixPool": [
+        "af_stout",
+        "af_runeward",
+        "af_thorns"
+      ],
+      "loreRefs": [
+        "s54",
+        "s114"
+      ]
+    },
+    "arm_bone_scale": {
+      "name": "骨鳞胸甲",
+      "type": "arm",
+      "price": 16000,
+      "tier": 2,
+      "def": 3,
+      "craftable": true,
+      "desc": "殉葬币熔开浇在骨片上，一片片缝起来。穿上它走路会响。",
+      "affixPool": [
+        "af_stout",
+        "af_bulwark",
+        "af_thorns"
+      ],
+      "loreRefs": [
+        "s54",
+        "s114"
+      ]
+    },
+    "arm_brick_aegis": {
+      "name": "砌道盾",
+      "type": "arm",
+      "price": 17000,
+      "tier": 2,
+      "def": 3,
+      "craftable": true,
+      "desc": "一面古砖压实的方盾。它挡过几千年的塌方，不缺你这一次。",
+      "affixPool": [
+        "af_thorns",
+        "af_bulwark",
+        "af_runeward"
+      ],
+      "loreRefs": [
+        "s54",
+        "s114"
+      ]
+    },
+    "arm_wormsilk_robe": {
+      "name": "虫丝袍",
+      "type": "arm",
+      "price": 30000,
+      "tier": 3,
+      "def": 3,
+      "stat": {
+        "智力": 1
+      },
+      "craftable": true,
+      "desc": "整件袍子没有一道缝——巨虫丝自己长在一起了。穿着它施法，袖子会先动。",
+      "affixPool": [
+        "af_runed",
+        "af_runeward",
+        "af_lithe"
+      ],
+      "loreRefs": [
+        "s54",
+        "s114"
+      ]
+    },
+    "arm_crystal_ward": {
+      "name": "水晶丝护壁",
+      "type": "arm",
+      "price": 34000,
+      "tier": 3,
+      "def": 4,
+      "craftable": true,
+      "desc": "水晶丝编的护胸，光打上去会散成很多小块。据说它能替主人先碎一次。",
+      "affixPool": [
+        "af_runeward",
+        "af_aegis",
+        "af_stout"
+      ],
+      "loreRefs": [
+        "s54",
+        "s114"
+      ]
+    },
+    "arm_lens_hood": {
+      "name": "镜片兜帽",
+      "type": "arm",
+      "price": 35000,
+      "tier": 3,
+      "def": 3,
+      "stat": {
+        "感知": 2
+      },
+      "craftable": true,
+      "desc": "兜帽内侧嵌着一圈守卫镜片碎片。戴着它，你看见的东西比旁人多一层。",
+      "affixPool": [
+        "af_runed",
+        "af_lithe",
+        "af_runeward"
+      ],
+      "loreRefs": [
+        "s54",
+        "s114"
+      ]
+    },
+    "arm_lavaglass_plate": {
+      "name": "熔璃鳞甲",
+      "type": "arm",
+      "price": 36000,
+      "tier": 3,
+      "def": 5,
+      "craftable": true,
+      "desc": "熔泪压成的鳞片一片压一片。挨打的时候它不响，只慢慢变红。",
+      "affixPool": [
+        "af_thorns",
+        "af_stout",
+        "af_bulwark"
+      ],
+      "loreRefs": [
+        "s54",
+        "s114"
+      ]
+    },
+    "arm_alloy_buckler": {
+      "name": "星枢合金圆盾",
+      "type": "arm",
+      "price": 38000,
+      "tier": 3,
+      "def": 4,
+      "craftable": true,
+      "desc": "塔墙上剥下来的板，被敲成圆的。它会自己回到原来的弧度。",
+      "affixPool": [
+        "af_bulwark",
+        "af_runeward",
+        "af_aegis"
+      ],
+      "loreRefs": [
+        "s54",
+        "s114"
+      ]
+    },
+    "arm_soulguard": {
+      "name": "魂渣护心",
+      "type": "arm",
+      "price": 400000,
+      "tier": 4,
+      "def": 6,
+      "stat": {
+        "智力": 1
+      },
+      "craftable": true,
+      "desc": "轻得像没有的护心片。刀捅进来会慢那么一瞬——那一瞬它替你疼。",
+      "affixPool": [
+        "af_runed",
+        "af_aegis",
+        "af_runeward"
+      ],
+      "loreRefs": [
+        "s54",
+        "s114"
+      ]
+    },
+    "arm_silent_mantle": {
+      "name": "无声披风",
+      "type": "arm",
+      "price": 410000,
+      "tier": 4,
+      "def": 5,
+      "stat": {
+        "敏捷": 2
+      },
+      "craftable": true,
+      "desc": "用无声铃的钟衣裁的。披着它跑起来，你自己的脚步声会晚半拍才到。",
+      "affixPool": [
+        "af_lithe",
+        "af_swift",
+        "af_aegis"
+      ],
+      "loreRefs": [
+        "s54",
+        "s114"
+      ]
+    },
+    "arm_demonhide": {
+      "name": "魔角皮铠",
+      "type": "arm",
+      "price": 430000,
+      "tier": 4,
+      "def": 7,
+      "craftable": true,
+      "desc": "魔角磨成粉混进皮料里。铠上有纹路，纹路会随你呼吸一张一合。",
+      "affixPool": [
+        "af_stout",
+        "af_thorns",
+        "af_bulwark"
+      ],
+      "loreRefs": [
+        "s54",
+        "s114"
+      ]
+    },
+    "arm_torture_plate": {
+      "name": "刑铁重铠",
+      "type": "arm",
+      "price": 450000,
+      "tier": 4,
+      "def": 8,
+      "craftable": true,
+      "desc": "刑铁打的板甲，穿上的第一件事是学会怎么跪着站起来。重，但不太会坏。",
+      "affixPool": [
+        "af_bulwark",
+        "af_stout",
+        "af_aegis"
+      ],
+      "loreRefs": [
+        "s54",
+        "s114"
+      ]
+    },
+    "arm_voidsalt_shell": {
+      "name": "虚盐甲壳",
+      "type": "arm",
+      "price": 1180000,
+      "tier": 5,
+      "def": 8,
+      "craftable": true,
+      "desc": "虚盐结在甲面上，结成了壳。打在壳上的东西，事后没人说得清去了哪。",
+      "affixPool": [
+        "af_aegis",
+        "af_bulwark",
+        "af_runeward"
+      ],
+      "loreRefs": [
+        "s54",
+        "s114",
+        "s116"
+      ]
+    },
+    "arm_starweave": {
+      "name": "星脉织甲",
+      "type": "arm",
+      "price": 1300000,
+      "tier": 5,
+      "def": 9,
+      "stat": {
+        "感知": 1
+      },
+      "craftable": true,
+      "desc": "整件甲里穿着星脉，明暗跟着你的心跳。它在你受伤之前就已经暗下去了。",
+      "affixPool": [
+        "af_aegis",
+        "af_runed",
+        "af_stout"
+      ],
+      "loreRefs": [
+        "s54",
+        "s114",
+        "s116"
+      ]
+    },
+    "grain_golden": {
+      "name": "金穗麦",
+      "type": "mat",
+      "price": 60,
+      "tier": 1,
+      "quality": "普通",
+      "desc": "中央平原的麦子，穗子沉得压弯了秆。磨出来的粉烤什么都不糊。",
+      "giftTag": "food",
+      "loreRefs": [
+        "s61",
+        "s94"
+      ]
+    },
+    "cheese_soft": {
+      "name": "软酪",
+      "type": "mat",
+      "price": 90,
+      "tier": 1,
+      "quality": "普通",
+      "desc": "牧村用陶罐捂出来的酪，放一天就发酸，酸了更好吃。",
+      "giftTag": "food",
+      "loreRefs": [
+        "s61",
+        "s94"
+      ]
+    },
+    "date_crystal": {
+      "name": "晶枣",
+      "type": "mat",
+      "price": 180,
+      "tier": 1,
+      "quality": "普通",
+      "desc": "沙漠里晒到糖分析出的椰枣，外层结着一层薄壳，咬开是软的。",
+      "giftTag": "food",
+      "loreRefs": [
+        "s61",
+        "s94"
+      ]
+    },
+    "iron_wild": {
+      "name": "荒野铁",
+      "type": "mat",
+      "price": 380,
+      "tier": 2,
+      "quality": "优秀",
+      "desc": "荒野露头的铁矿，含硫重，锻的时候味道不好闻，但刃口咬得住。",
+      "loreRefs": [
+        "s61"
+      ]
+    },
+    "horse_braid": {
+      "name": "马鬃编",
+      "type": "mat",
+      "price": 420,
+      "tier": 2,
+      "quality": "优秀",
+      "desc": "战马的鬃毛编成的绳。荒野人说它能记路——牵它走两遍，第三遍它自己会拐弯。",
+      "giftTag": "trinket",
+      "loreRefs": [
+        "s61"
+      ]
+    },
+    "mushroom_cap": {
+      "name": "伞菌盖",
+      "type": "mat",
+      "price": 400,
+      "tier": 2,
+      "quality": "优秀",
+      "desc": "深渊菌床上摘的伞盖，背光看是半透的。生的有毒，煮透了才香。",
+      "giftTag": "food",
+      "loreRefs": [
+        "s61",
+        "s94"
+      ]
+    },
+    "sea_silk": {
+      "name": "海丝",
+      "type": "mat",
+      "price": 480,
+      "tier": 2,
+      "quality": "优秀",
+      "desc": "东群岛某种海物吐的丝，晾干压平之后就是抄卷轴用的纸。",
+      "loreRefs": [
+        "s61"
+      ]
+    },
+    "herb_mist": {
+      "name": "雾药",
+      "type": "mat",
+      "price": 520,
+      "tier": 2,
+      "quality": "优秀",
+      "desc": "群岛山谷里被雾养大的药草。采药人天不亮进山，回来时衣裳能拧出水。",
+      "giftTag": "herb",
+      "loreRefs": [
+        "s61"
+      ]
+    },
+    "spice_sandgold": {
+      "name": "沙金香",
+      "type": "mat",
+      "price": 640,
+      "tier": 2,
+      "quality": "精良",
+      "desc": "沙子色的香料，一撮就能让整锅肉改味。商邦按钱称它，不按两。",
+      "giftTag": "rare",
+      "loreRefs": [
+        "s61"
+      ]
+    },
+    "pelt_white": {
+      "name": "白狐皮",
+      "type": "mat",
+      "price": 700,
+      "tier": 2,
+      "quality": "精良",
+      "desc": "冻原白狐的皮，雪地里翻半天也未必看得见一张。",
+      "giftTag": "pelt",
+      "loreRefs": [
+        "s61"
+      ]
+    },
+    "salt_abyss": {
+      "name": "深渊矿盐",
+      "type": "mat",
+      "price": 1500,
+      "tier": 3,
+      "quality": "精良",
+      "desc": "从地底盐脉上凿下来的结晶，腌东西腌得极慢，也极透。",
+      "giftTag": "rare",
+      "loreRefs": [
+        "s61",
+        "s94"
+      ]
+    },
+    "frost_iron": {
+      "name": "冻铁矿",
+      "type": "mat",
+      "price": 1800,
+      "tier": 3,
+      "quality": "精良",
+      "desc": "冻土矿脉里挖出来的铁，在冷的地方比在热的地方硬。",
+      "loreRefs": [
+        "s61"
+      ]
+    },
+    "cloud_wheat": {
+      "name": "云麦",
+      "type": "mat",
+      "price": 1900,
+      "tier": 3,
+      "quality": "精良",
+      "desc": "长在浮岛边缘的麦子，穗子轻，风一吹整片田都在动。",
+      "giftTag": "food",
+      "loreRefs": [
+        "s61",
+        "s94"
+      ]
+    },
+    "gem_sunstone": {
+      "name": "日长石",
+      "type": "mat",
+      "price": 2200,
+      "tier": 3,
+      "quality": "精良",
+      "desc": "砂海商邦压舱的宝石，正午拿出来，石头里也有一小片正午。",
+      "giftTag": "gem",
+      "loreRefs": [
+        "s61"
+      ]
+    },
+    "wind_crystal": {
+      "name": "风晶",
+      "type": "mat",
+      "price": 26000,
+      "tier": 4,
+      "quality": "稀有",
+      "desc": "浮岛高空结的风系结晶，握在手里会一直往一个方向偏——那个方向永远有风。",
+      "giftTag": "gem",
+      "loreRefs": [
+        "s61"
+      ]
+    },
+    "food_lamb_chop": {
+      "name": "烤羊排",
+      "type": "use",
+      "price": 180,
+      "tier": 1,
+      "desc": "中央大陆的招牌。金属刀叉摆好，羊排上的油还在响。",
+      "eff": [
+        {
+          "kind": "heal",
+          "power": 15
+        }
+      ],
+      "giftTag": "food",
+      "loreRefs": [
+        "s94",
+        "s61"
+      ]
+    },
+    "food_stew_beef": {
+      "name": "炖牛肉",
+      "type": "use",
+      "price": 420,
+      "tier": 2,
+      "desc": "长桌上的大锅菜，炖到肉自己散开。吃完能接着赶一天路。",
+      "eff": [
+        {
+          "kind": "heal",
+          "power": 40
+        },
+        {
+          "kind": "mp",
+          "power": 10
+        }
+      ],
+      "giftTag": "food",
+      "loreRefs": [
+        "s94",
+        "s61"
+      ]
+    },
+    "food_sea_fish": {
+      "name": "清蒸海鱼",
+      "type": "use",
+      "price": 220,
+      "tier": 1,
+      "desc": "东群岛的清蒸鱼，只放姜与海盐。竹筷夹起来的时候，鱼还在冒白气。",
+      "eff": [
+        {
+          "kind": "heal",
+          "power": 20
+        }
+      ],
+      "giftTag": "food",
+      "loreRefs": [
+        "s94",
+        "s61"
+      ]
+    },
+    "drink_flower_wine": {
+      "name": "花酿",
+      "type": "use",
+      "price": 480,
+      "tier": 2,
+      "desc": "群岛人拿花瓣酿的酒，甜，后劲藏在第三杯之后。",
+      "eff": [
+        {
+          "kind": "mp",
+          "power": 20
+        }
+      ],
+      "giftTag": "food",
+      "loreRefs": [
+        "s94",
+        "s61"
+      ]
+    },
+    "food_spice_roast": {
+      "name": "香料烤肉",
+      "type": "use",
+      "price": 460,
+      "tier": 2,
+      "desc": "砂海商邦的香料抹在整扇肉上烤。吃完之后几个时辰里，手会比脑子快。",
+      "eff": [
+        {
+          "kind": "heal",
+          "power": 35
+        },
+        {
+          "kind": "buff",
+          "status": "fervor",
+          "dur": 24
+        }
+      ],
+      "giftTag": "food",
+      "loreRefs": [
+        "s94",
+        "s61"
+      ]
+    },
+    "drink_wine_desert": {
+      "name": "沙漠葡萄酒",
+      "type": "use",
+      "price": 520,
+      "tier": 2,
+      "desc": "南方沙漠的葡萄在凉季酿的，颜色深得像夜。",
+      "eff": [
+        {
+          "kind": "mp",
+          "power": 18
+        },
+        {
+          "kind": "buff",
+          "status": "swift",
+          "dur": 24
+        }
+      ],
+      "giftTag": "food",
+      "loreRefs": [
+        "s94",
+        "s61"
+      ]
+    },
+    "food_stew_venison": {
+      "name": "炖鹿肉",
+      "type": "use",
+      "price": 500,
+      "tier": 2,
+      "desc": "冻土人家用木碗盛的炖肉，热气一散，窗上的霜就化一层。",
+      "eff": [
+        {
+          "kind": "heal",
+          "power": 45
+        }
+      ],
+      "giftTag": "food",
+      "loreRefs": [
+        "s94",
+        "s61"
+      ]
+    },
+    "drink_ale": {
+      "name": "麦酒",
+      "type": "use",
+      "price": 90,
+      "tier": 1,
+      "desc": "全大陆都喝的酒，以中央帝国的名声最响。便宜，暖，且随处都有。",
+      "eff": [
+        {
+          "kind": "mp",
+          "power": 8
+        }
+      ],
+      "giftTag": "food",
+      "loreRefs": [
+        "s94",
+        "s61"
+      ]
+    },
+    "food_blood_sausage": {
+      "name": "血肠",
+      "type": "use",
+      "price": 150,
+      "tier": 1,
+      "desc": "荒野人拿手抓着吃的血肠，刀刃一划就开。",
+      "eff": [
+        {
+          "kind": "heal",
+          "power": 25
+        }
+      ],
+      "giftTag": "food",
+      "loreRefs": [
+        "s94",
+        "s61"
+      ]
+    },
+    "drink_strong": {
+      "name": "烈酒",
+      "type": "use",
+      "price": 380,
+      "tier": 2,
+      "desc": "冻土与荒野共有的烈酒，喝下去喉咙里像有人擦了一下火石。",
+      "eff": [
+        {
+          "kind": "mp",
+          "power": 12
+        },
+        {
+          "kind": "buff",
+          "status": "fervor",
+          "dur": 12
+        }
+      ],
+      "giftTag": "food",
+      "loreRefs": [
+        "s94",
+        "s61"
+      ]
+    },
+    "food_mushroom_soup": {
+      "name": "菌汤",
+      "type": "use",
+      "price": 440,
+      "tier": 2,
+      "desc": "深渊里唯一会冒热气的东西。石碗端在手里，人就往地上沉了半寸。",
+      "eff": [
+        {
+          "kind": "heal",
+          "power": 30
+        },
+        {
+          "kind": "buff",
+          "status": "bastion",
+          "dur": 20
+        }
+      ],
+      "giftTag": "food",
+      "loreRefs": [
+        "s94",
+        "s61"
+      ]
+    },
+    "drink_star_dew": {
+      "name": "星露",
+      "type": "use",
+      "price": 2400,
+      "tier": 3,
+      "desc": "天空浮岛的特产，只在永夜月酿得成。喝下去的当晚，你会知道自己明天该做什么。",
+      "eff": [
+        {
+          "kind": "mp",
+          "power": 30
+        },
+        {
+          "kind": "buff",
+          "status": "oracle",
+          "dur": 24
+        }
+      ],
+      "giftTag": "rare",
+      "loreRefs": [
+        "s94",
+        "s61"
+      ]
+    },
+    "tome_geo_central": {
+      "name": "中央大陆风土志",
+      "type": "use",
+      "price": 900,
+      "tier": 2,
+      "codexCat": "地理",
+      "desc": "记中央七城的贡赋、道路与集市。写它的人显然走过每一座城门。",
+      "giftTag": "relic",
+      "loreRefs": [
+        "s65",
+        "s61"
+      ]
+    },
+    "tome_geo_north": {
+      "name": "冻土行纪",
+      "type": "use",
+      "price": 900,
+      "tier": 2,
+      "codexCat": "地理",
+      "desc": "一册边角冻裂的行纪。作者在最后一页承认自己没走到最北。",
+      "giftTag": "relic",
+      "loreRefs": [
+        "s68",
+        "s64"
+      ]
+    },
+    "tome_geo_east": {
+      "name": "东群岛海图",
+      "type": "use",
+      "price": 950,
+      "tier": 2,
+      "codexCat": "地理",
+      "desc": "折页的海图，航线是画上去的，暗礁是用针尖戳出来的小孔。",
+      "giftTag": "relic",
+      "loreRefs": [
+        "s66",
+        "s61"
+      ]
+    },
+    "tome_geo_south": {
+      "name": "砂海商路考",
+      "type": "use",
+      "price": 950,
+      "tier": 2,
+      "codexCat": "地理",
+      "desc": "商邦的账房先生写的路书，每一段路都标着水价与护送费。",
+      "giftTag": "relic",
+      "loreRefs": [
+        "s67",
+        "s61"
+      ]
+    },
+    "tome_geo_west": {
+      "name": "荒野行商录",
+      "type": "use",
+      "price": 920,
+      "tier": 2,
+      "codexCat": "地理",
+      "desc": "纸页上沾着干掉的酒渍。记录者把每一处伏击点都写得很仔细。",
+      "giftTag": "relic",
+      "loreRefs": [
+        "s69"
+      ]
+    },
+    "tome_geo_sky": {
+      "name": "浮岛经纬",
+      "type": "use",
+      "price": 1600,
+      "tier": 3,
+      "codexCat": "地理",
+      "desc": "浮岛不是固定的——这本册子只保证记录的那一刻是对的。",
+      "giftTag": "relic",
+      "loreRefs": [
+        "s71"
+      ]
+    },
+    "tome_geo_abyss": {
+      "name": "深渊层志",
+      "type": "use",
+      "price": 1700,
+      "tier": 3,
+      "codexCat": "地理",
+      "desc": "一册地底百层的编号簿，写到最后笔迹越来越潦草。",
+      "giftTag": "relic",
+      "loreRefs": [
+        "s45"
+      ]
+    },
+    "tome_geo_route": {
+      "name": "行路须知",
+      "type": "use",
+      "price": 880,
+      "tier": 2,
+      "codexCat": "地理",
+      "desc": "薄薄一本，讲的全是「什么时候不该上路」。",
+      "giftTag": "relic",
+      "loreRefs": [
+        "s74",
+        "s82"
+      ]
+    },
+    "tome_law": {
+      "name": "律令辑佚",
+      "type": "use",
+      "price": 1800,
+      "tier": 3,
+      "codexCat": "典籍",
+      "desc": "帝国法典的残卷，缺了两章。缺的恰好是最常被引用的那两章。",
+      "giftTag": "relic",
+      "loreRefs": [
+        "s88",
+        "s89"
+      ]
+    },
+    "tome_rites": {
+      "name": "风物志",
+      "type": "use",
+      "price": 1150,
+      "tier": 2,
+      "codexCat": "典籍",
+      "desc": "七大陆的吃穿婚丧都收在一册里。编纂者显然不觉得这些是小事。",
+      "giftTag": "relic",
+      "loreRefs": [
+        "s94",
+        "s96"
+      ]
+    },
+    "tome_money": {
+      "name": "通宝考",
+      "type": "use",
+      "price": 950,
+      "tier": 2,
+      "codexCat": "典籍",
+      "desc": "讲钱的书。第一页就写着：铜是给人用的，魔晶是给法师用的，灵魂结晶不该有人用。",
+      "giftTag": "relic",
+      "loreRefs": [
+        "s58",
+        "s59"
+      ]
+    },
+    "tome_travel": {
+      "name": "旅次杂记",
+      "type": "use",
+      "price": 900,
+      "tier": 2,
+      "codexCat": "典籍",
+      "desc": "讲车马、船期、传讯与传送阵。实用性大于文采。",
+      "giftTag": "relic",
+      "loreRefs": [
+        "s85",
+        "s86"
+      ]
+    },
+    "tome_races": {
+      "name": "十三族源流",
+      "type": "use",
+      "price": 1900,
+      "tier": 3,
+      "codexCat": "典籍",
+      "desc": "十三族各占一章。写精灵的那章最长，写人类的那章最乱。",
+      "giftTag": "relic",
+      "loreRefs": [
+        "s26",
+        "s27"
+      ]
+    },
+    "tome_bestiary": {
+      "name": "魔物生态考",
+      "type": "use",
+      "price": 1750,
+      "tier": 3,
+      "codexCat": "典籍",
+      "desc": "把魔物按来源分成五类，每一类后面都附了一句「勿近」。",
+      "giftTag": "relic",
+      "loreRefs": [
+        "s46",
+        "s52"
+      ]
+    },
+    "tome_mentor": {
+      "name": "师承录",
+      "type": "use",
+      "price": 1650,
+      "tier": 3,
+      "codexCat": "典籍",
+      "desc": "历代入室弟子的名册。翻到某页，你会发现自己认得其中一个名字。",
+      "giftTag": "relic",
+      "loreRefs": [
+        "s99",
+        "s102"
+      ]
+    },
+    "tome_godchosen": {
+      "name": "神选纪年",
+      "type": "use",
+      "price": 4200,
+      "tier": 4,
+      "codexCat": "典籍",
+      "desc": "一百年一册，一册只记一件事：那一年被选中的是谁，后来去了哪。",
+      "giftTag": "relic",
+      "loreRefs": [
+        "s4"
+      ]
+    },
+    "wpn_grain_scythe": {
+      "name": "麦镰",
+      "type": "wpn",
+      "price": 7800,
+      "tier": 1,
+      "atk": 1,
+      "dmg": [
+        1,
+        6
+      ],
+      "craftable": true,
+      "desc": "农具改的兵器，刃口朝内。中央平原上，收麦子和割人用的是同一种弧线。",
+      "affixPool": [
+        "af_sharp",
+        "af_swift",
+        "af_stout"
+      ],
+      "loreRefs": [
+        "s54",
+        "s114"
+      ]
+    },
+    "wpn_island_saber": {
+      "name": "海纹弯刀",
+      "type": "wpn",
+      "price": 16000,
+      "tier": 2,
+      "atk": 2,
+      "dmg": [
+        1,
+        8
+      ],
+      "craftable": true,
+      "desc": "刀身有一道浪形的纹，是淬火时海水留下的。东方群岛的刀都这样冷。",
+      "affixPool": [
+        "af_swift",
+        "af_sharp",
+        "af_lithe"
+      ],
+      "loreRefs": [
+        "s54",
+        "s114"
+      ]
+    },
+    "wpn_wild_axe": {
+      "name": "荒野战斧",
+      "type": "wpn",
+      "price": 32000,
+      "tier": 3,
+      "atk": 3,
+      "dmg": [
+        3,
+        10
+      ],
+      "craftable": true,
+      "desc": "荒野铁打的斧子，粗，重，且从不打磨——磨了就不认主人了。",
+      "affixPool": [
+        "af_heavy",
+        "af_thorns",
+        "af_serrated"
+      ],
+      "loreRefs": [
+        "s54",
+        "s114"
+      ]
+    },
+    "wpn_desert_scimitar": {
+      "name": "砂金弯刀",
+      "type": "wpn",
+      "price": 30000,
+      "tier": 3,
+      "atk": 3,
+      "dmg": [
+        2,
+        10
+      ],
+      "craftable": true,
+      "desc": "商邦护卫的佩刀，刀柄镶着日长石。拔刀时那道光是它的另一半。",
+      "affixPool": [
+        "af_sharp",
+        "af_duelist",
+        "af_swift"
+      ],
+      "loreRefs": [
+        "s54",
+        "s114"
+      ]
+    },
+    "wpn_frost_maul": {
+      "name": "冻铁重锤",
+      "type": "wpn",
+      "price": 34000,
+      "tier": 3,
+      "atk": 3,
+      "dmg": [
+        2,
+        12
+      ],
+      "craftable": true,
+      "desc": "冻铁矿打的重锤。天越冷，它越沉，也越难被格开。",
+      "affixPool": [
+        "af_heavy",
+        "af_stout",
+        "af_bulwark"
+      ],
+      "loreRefs": [
+        "s54",
+        "s114"
+      ]
+    },
+    "wpn_abyss_pick": {
+      "name": "深渊镐刃",
+      "type": "wpn",
+      "price": 415000,
+      "tier": 4,
+      "atk": 4,
+      "dmg": [
+        2,
+        12
+      ],
+      "craftable": true,
+      "desc": "一头是镐，一头是刃。地底人管它叫「两用」，因为他们不肯说到底用在什么上。",
+      "affixPool": [
+        "af_heavy",
+        "af_serrated",
+        "af_thorns"
+      ],
+      "loreRefs": [
+        "s54",
+        "s114",
+        "s116"
+      ]
+    },
+    "wpn_sky_spear": {
+      "name": "浮岛长枪",
+      "type": "wpn",
+      "price": 1230000,
+      "tier": 5,
+      "atk": 5,
+      "dmg": [
+        3,
+        14
+      ],
+      "craftable": true,
+      "desc": "枪尖嵌着风晶。掷出去之后它会自己找回那条最短的线。",
+      "affixPool": [
+        "af_swift",
+        "af_heavy",
+        "af_runed"
+      ],
+      "loreRefs": [
+        "s54",
+        "s114",
+        "s116"
+      ]
+    },
+    "emp_signet": {
+      "name": "帝国关防蜡",
+      "type": "mat",
+      "price": 600,
+      "tier": 2,
+      "quality": "优秀",
+      "desc": "关文房盖印用的封蜡。颜色是帝国规定的朱红，别处调不出来。",
+      "giftTag": "relic",
+      "loreRefs": [
+        "s88",
+        "s61"
+      ]
+    },
+    "guild_patent": {
+      "name": "公会授证",
+      "type": "mat",
+      "price": 800,
+      "tier": 2,
+      "quality": "优秀",
+      "desc": "盖了公会火漆的空白授证。有些门只认这张纸，不认你。",
+      "giftTag": "relic",
+      "loreRefs": [
+        "s23",
+        "s107"
+      ]
+    },
+    "sand_note": {
+      "name": "砂海银票",
+      "type": "mat",
+      "price": 1000,
+      "tier": 2,
+      "quality": "精良",
+      "desc": "十二商会联保的票据。在砂海，一张纸比一袋铜好使。",
+      "giftTag": "gem",
+      "loreRefs": [
+        "s18",
+        "s58"
+      ]
+    },
+    "temple_wisdom_ink": {
+      "name": "智慧殿墨",
+      "type": "mat",
+      "price": 900,
+      "tier": 2,
+      "quality": "优秀",
+      "desc": "智慧神殿抄经用的墨。写下去的字晾干之后比纸更硬。",
+      "giftTag": "relic",
+      "loreRefs": [
+        "s25",
+        "s53"
+      ]
+    },
+    "temple_war_oil": {
+      "name": "战神殿圣油",
+      "type": "mat",
+      "price": 2200,
+      "tier": 3,
+      "quality": "精良",
+      "desc": "战神殿涂在兵器上的油。擦过之后，刀会有一点自己的脾气。",
+      "giftTag": "relic",
+      "loreRefs": [
+        "s53"
+      ]
+    },
+    "frost_oath": {
+      "name": "霜铁誓环",
+      "type": "mat",
+      "price": 2300,
+      "tier": 3,
+      "quality": "精良",
+      "desc": "霜铁王庭授勋用的环。戴上的人许过一个冬天也化不开的诺。",
+      "giftTag": "relic",
+      "loreRefs": [
+        "s61"
+      ]
+    },
+    "temple_life_seed": {
+      "name": "生命殿种",
+      "type": "mat",
+      "price": 2400,
+      "tier": 3,
+      "quality": "精良",
+      "desc": "生命神殿供在祭坛下的种子。三十年没发芽，也没烂。",
+      "giftTag": "herb",
+      "loreRefs": [
+        "s53"
+      ]
+    },
+    "study_relic": {
+      "name": "古研会残件",
+      "type": "mat",
+      "price": 2800,
+      "tier": 3,
+      "quality": "精良",
+      "desc": "古研会封存箱底的一块残件。盒子上写着「未定性，勿通电」。",
+      "giftTag": "relic",
+      "loreRefs": [
+        "s25"
+      ]
+    },
+    "temple_death_bell": {
+      "name": "死亡殿铜铃",
+      "type": "mat",
+      "price": 2600,
+      "tier": 3,
+      "quality": "精良",
+      "desc": "死亡神殿送葬时摇的铃。摇过三次以上的，铃舌都会自己缺一角。",
+      "giftTag": "relic",
+      "loreRefs": [
+        "s53"
+      ]
+    },
+    "shadow_dust": {
+      "name": "掩尘",
+      "type": "mat",
+      "price": 3000,
+      "tier": 3,
+      "quality": "精良",
+      "illegal": true,
+      "desc": "暗影议会的掩尘，撒上去能把人的脸从记忆里抹掉一层。持有即罪。",
+      "giftTag": "rare",
+      "loreRefs": [
+        "s88"
+      ]
+    },
+    "anc_lens": {
+      "name": "古代透镜",
+      "type": "mat",
+      "price": 3200,
+      "tier": 3,
+      "quality": "精良",
+      "desc": "古代造物的眼睛。对着光看，光会在镜片里拐一个不该拐的弯。",
+      "giftTag": "gem",
+      "loreRefs": [
+        "s46",
+        "s48"
+      ]
+    },
+    "anc_battery": {
+      "name": "古代电池",
+      "type": "mat",
+      "price": 4800,
+      "tier": 4,
+      "quality": "稀有",
+      "desc": "七千年了还有余电。谁把它接上什么，它就给什么一口气。",
+      "giftTag": "relic",
+      "loreRefs": [
+        "s48"
+      ]
+    },
+    "anc_rivet": {
+      "name": "古代铆钉",
+      "type": "mat",
+      "price": 3600,
+      "tier": 3,
+      "quality": "精良",
+      "desc": "从古代造物关节上敲下来的铆钉。敲的时候它比铁难对付。",
+      "loreRefs": [
+        "s48"
+      ]
+    },
+    "anc_parchment": {
+      "name": "古代羊皮",
+      "type": "mat",
+      "price": 5200,
+      "tier": 4,
+      "quality": "稀有",
+      "desc": "写满不是字的字的羊皮。火烤过、水泡过，就是不肯烂。",
+      "giftTag": "relic",
+      "loreRefs": [
+        "s46"
+      ]
+    },
+    "anc_core_shard": {
+      "name": "核心碎屑",
+      "type": "mat",
+      "price": 9000,
+      "tier": 4,
+      "quality": "稀有",
+      "desc": "古代守卫动力源崩下的一角，攥在手里会慢慢变温。",
+      "giftTag": "relic",
+      "loreRefs": [
+        "s48"
+      ]
+    },
+    "anc_seal_ring": {
+      "name": "古代封印环",
+      "type": "mat",
+      "price": 12000,
+      "tier": 4,
+      "quality": "稀有",
+      "desc": "环上的纹路首尾相接。看久了会觉得它是活的——它只是一直在转。",
+      "giftTag": "relic",
+      "loreRefs": [
+        "s46"
+      ]
+    },
+    "tower_glass": {
+      "name": "塔窗玻璃",
+      "type": "mat",
+      "price": 4200,
+      "tier": 4,
+      "quality": "稀有",
+      "desc": "星枢塔换下来的旧窗玻璃，映过星海。透光的时候会偏一点点紫。",
+      "giftTag": "gem",
+      "loreRefs": [
+        "s11"
+      ]
+    },
+    "seal_blank": {
+      "name": "空白星符",
+      "type": "mat",
+      "price": 6600,
+      "tier": 4,
+      "quality": "稀有",
+      "desc": "还没刻名的星符胚。无名与连名，差的就是一刀。",
+      "giftTag": "relic",
+      "loreRefs": [
+        "s11"
+      ]
+    },
+    "net_ink": {
+      "name": "网墨",
+      "type": "mat",
+      "price": 5000,
+      "tier": 4,
+      "quality": "稀有",
+      "desc": "墨入符心用的墨。写在纸上是黑的，写在符上是亮的。",
+      "giftTag": "relic",
+      "loreRefs": [
+        "s11"
+      ]
+    },
+    "star_dust": {
+      "name": "星尘",
+      "type": "mat",
+      "price": 15000,
+      "tier": 5,
+      "quality": "传说",
+      "desc": "塔顶积了不知道多少年的一层细灰。它不是灰，它是别人磨掉的名字。",
+      "giftTag": "relic",
+      "loreRefs": [
+        "s11"
+      ]
+    },
+    "poison_viper": {
+      "name": "蝰蛇毒",
+      "type": "use",
+      "price": 380,
+      "tier": 1,
+      "combat": true,
+      "desc": "涂在刃上的一层薄油。见血之后才是它真正醒来的时候。",
+      "eff": [
+        {
+          "kind": "dot",
+          "status": "bleed",
+          "power": 4,
+          "dur": 3
+        }
+      ],
+      "giftTag": "trinket",
+      "loreRefs": [
+        "s53"
+      ]
+    },
+    "poison_sleep": {
+      "name": "眠粉",
+      "type": "use",
+      "price": 700,
+      "tier": 2,
+      "combat": true,
+      "desc": "一把扬出去，对手会先打个哈欠——然后就没有然后了。",
+      "eff": [
+        {
+          "kind": "dot",
+          "status": "stun",
+          "dur": 1,
+          "chance": 0.45
+        }
+      ],
+      "giftTag": "trinket",
+      "loreRefs": [
+        "s53"
+      ]
+    },
+    "poison_frost": {
+      "name": "霜毒",
+      "type": "use",
+      "price": 820,
+      "tier": 2,
+      "combat": true,
+      "desc": "冻原猎手调的药，中了的人会先觉得手不是自己的。",
+      "eff": [
+        {
+          "kind": "dot",
+          "status": "freeze",
+          "dur": 2,
+          "chance": 0.7
+        }
+      ],
+      "giftTag": "trinket",
+      "loreRefs": [
+        "s53"
+      ]
+    },
+    "poison_weaken": {
+      "name": "软筋散",
+      "type": "use",
+      "price": 660,
+      "tier": 2,
+      "combat": true,
+      "desc": "不伤人，只拆人。撒上去之后，对方的甲像忽然大了一号。",
+      "eff": [
+        {
+          "kind": "dot",
+          "status": "vuln",
+          "dur": 3
+        }
+      ],
+      "giftTag": "trinket",
+      "loreRefs": [
+        "s53"
+      ]
+    },
+    "poison_slow": {
+      "name": "滞脉散",
+      "type": "use",
+      "price": 720,
+      "tier": 2,
+      "combat": true,
+      "desc": "药粉落在皮肤上，时间是照常走的，人却慢下来了。",
+      "eff": [
+        {
+          "kind": "dot",
+          "status": "slow",
+          "dur": 3
+        }
+      ],
+      "giftTag": "trinket",
+      "loreRefs": [
+        "s53"
+      ]
+    },
+    "poison_ember": {
+      "name": "火油弹",
+      "type": "use",
+      "price": 480,
+      "tier": 2,
+      "combat": true,
+      "desc": "薄陶瓶装的混合油，砸开就着。地底人拿它对付成群的东西。",
+      "eff": [
+        {
+          "kind": "dot",
+          "status": "burn",
+          "power": 5,
+          "dur": 3
+        }
+      ],
+      "giftTag": "trinket",
+      "loreRefs": [
+        "s53"
+      ]
+    },
+    "poison_dead": {
+      "name": "死息粉",
+      "type": "use",
+      "price": 2200,
+      "tier": 3,
+      "combat": true,
+      "desc": "死亡神殿的配方漏出来的一半。它让人又烧又软，且不肯一次结束。",
+      "eff": [
+        {
+          "kind": "dot",
+          "status": "burn",
+          "power": 4,
+          "dur": 3
+        },
+        {
+          "kind": "dot",
+          "status": "vuln",
+          "dur": 3
+        }
+      ],
+      "giftTag": "rare",
+      "loreRefs": [
+        "s53"
+      ]
+    },
+    "poison_king": {
+      "name": "王之毒",
+      "type": "use",
+      "price": 3400,
+      "tier": 3,
+      "combat": true,
+      "illegal": true,
+      "desc": "帝国明令销毁的配方，第七页。持有即罪——它杀人不用第二下。",
+      "eff": [
+        {
+          "kind": "dot",
+          "status": "burn",
+          "power": 7,
+          "dur": 3
+        },
+        {
+          "kind": "dot",
+          "status": "bleed",
+          "power": 5,
+          "dur": 3
+        }
+      ],
+      "giftTag": "rare",
+      "loreRefs": [
+        "s88"
+      ]
+    },
+    "q_seal_broken": {
+      "name": "断裂的封蜡",
+      "type": "mat",
+      "price": 0,
+      "desc": "断成两半的关防蜡，断面很新。有人急着拆开过什么。",
+      "loreRefs": [
+        "s88"
+      ]
+    },
+    "q_witness_token": {
+      "name": "证人的信物",
+      "type": "mat",
+      "price": 0,
+      "desc": "一枚磨得发亮的旧铜扣。它的主人说过愿意作证。",
+      "loreRefs": [
+        "s92"
+      ]
+    },
+    "q_exile_letter": {
+      "name": "流放文书",
+      "type": "mat",
+      "price": 0,
+      "desc": "墨迹被雨泡过，名字还能认出来。持这份文书的人不许回城。",
+      "loreRefs": [
+        "s89"
+      ]
+    },
+    "q_star_map": {
+      "name": "手绘星图",
+      "type": "mat",
+      "price": 0,
+      "desc": "画在粗布上的星图，有几处被反复描过——那些地方他去过三次以上。",
+      "loreRefs": [
+        "s75"
+      ]
+    },
+    "q_mourner_ring": {
+      "name": "死者的戒指",
+      "type": "mat",
+      "price": 0,
+      "desc": "死亡神殿给亡者戴的素戒。这一枚是好的，人不在了。",
+      "loreRefs": [
+        "s96"
+      ]
+    },
+    "q_heresy_note": {
+      "name": "异端的便笺",
+      "type": "mat",
+      "price": 0,
+      "desc": "半张便笺，写着一句被划掉两遍的话。划掉它的手在抖。",
+      "loreRefs": [
+        "s97"
+      ]
+    },
+    "q_guild_contract": {
+      "name": "未签的契约",
+      "type": "mat",
+      "price": 0,
+      "desc": "公会的空白委托书，只差一个签名。委托内容被留白了。",
+      "loreRefs": [
+        "s23"
+      ]
+    },
+    "q_void_key": {
+      "name": "虚空钥匙",
+      "type": "mat",
+      "price": 0,
+      "desc": "一把没有齿的钥匙。握久了，掌心里会出现一道不属于它的齿痕。",
+      "loreRefs": [
+        "s13"
+      ]
+    },
+    "wpn_emp_blade": {
+      "name": "帝国制式长剑",
+      "type": "wpn",
+      "price": 16000,
+      "tier": 2,
+      "atk": 2,
+      "dmg": [
+        1,
+        8
+      ],
+      "craftable": true,
+      "desc": "圣辉城军械库的编号剑。剑身刻着编号，握柄被三个人磨亮过。",
+      "affixPool": [
+        "af_sharp",
+        "af_stout",
+        "af_bulwark"
+      ],
+      "loreRefs": [
+        "s54",
+        "s114"
+      ]
+    },
+    "wpn_guild_dagger": {
+      "name": "公会配匕",
+      "type": "wpn",
+      "price": 14000,
+      "tier": 2,
+      "atk": 2,
+      "dmg": [
+        1,
+        6
+      ],
+      "stat": {
+        "敏捷": 1
+      },
+      "craftable": true,
+      "desc": "冒险者公会发给正式会员的短匕。刃很薄——它是用来收尾的，不是用来开的。",
+      "affixPool": [
+        "af_sharp",
+        "af_swift",
+        "af_duelist"
+      ],
+      "loreRefs": [
+        "s54",
+        "s114"
+      ]
+    },
+    "wpn_verdant_bow": {
+      "name": "翠冠猎弓",
+      "type": "wpn",
+      "price": 30000,
+      "tier": 3,
+      "atk": 3,
+      "dmg": [
+        2,
+        9
+      ],
+      "stat": {
+        "感知": 1
+      },
+      "craftable": true,
+      "desc": "翠冠议会制式的猎弓，弓臂有树脂味。它射出去的箭，树会记着方向。",
+      "affixPool": [
+        "af_sharp",
+        "af_serrated",
+        "af_lithe"
+      ],
+      "loreRefs": [
+        "s54",
+        "s114"
+      ]
+    },
+    "wpn_frost_axe": {
+      "name": "霜铁战斧",
+      "type": "wpn",
+      "price": 34000,
+      "tier": 3,
+      "atk": 3,
+      "dmg": [
+        2,
+        11
+      ],
+      "craftable": true,
+      "desc": "霜铁王庭的制式战斧。斧面结着一层洗不掉的白，砍下去却从不打滑。",
+      "affixPool": [
+        "af_heavy",
+        "af_stout",
+        "af_thorns"
+      ],
+      "loreRefs": [
+        "s54",
+        "s114"
+      ]
+    },
+    "wpn_sand_saber": {
+      "name": "砂海弯刀",
+      "type": "wpn",
+      "price": 32000,
+      "tier": 3,
+      "atk": 3,
+      "dmg": [
+        2,
+        10
+      ],
+      "craftable": true,
+      "desc": "十二商会护卫的佩刀，刀鞘上压着商号的戳。刀比人可靠，这是商邦的行话。",
+      "affixPool": [
+        "af_sharp",
+        "af_duelist",
+        "af_swift"
+      ],
+      "loreRefs": [
+        "s54",
+        "s114"
+      ]
+    },
+    "wpn_temple_mace": {
+      "name": "神殿权杖",
+      "type": "wpn",
+      "price": 36000,
+      "tier": 3,
+      "atk": 3,
+      "dmg": [
+        2,
+        10
+      ],
+      "stat": {
+        "智力": 1
+      },
+      "craftable": true,
+      "desc": "五殿通用的仪杖，杖头是空的。战神殿往里面灌铅，智慧殿往里面装书。",
+      "affixPool": [
+        "af_runed",
+        "af_runeward",
+        "af_heavy"
+      ],
+      "loreRefs": [
+        "s54",
+        "s114"
+      ]
+    },
+    "wpn_deep_drill": {
+      "name": "掘渊钻矛",
+      "type": "wpn",
+      "price": 420000,
+      "tier": 4,
+      "atk": 4,
+      "dmg": [
+        2,
+        12
+      ],
+      "craftable": true,
+      "desc": "掘渊公会的工具兼兵器。矛尖是旋转的，地底人用它钻进别人的防线。",
+      "affixPool": [
+        "af_heavy",
+        "af_serrated",
+        "af_thorns"
+      ],
+      "loreRefs": [
+        "s54",
+        "s114"
+      ]
+    },
+    "wpn_blood_cleaver": {
+      "name": "血吼劈刀",
+      "type": "wpn",
+      "price": 440000,
+      "tier": 4,
+      "atk": 4,
+      "dmg": [
+        3,
+        12
+      ],
+      "craftable": true,
+      "desc": "血吼王帐的劈刀，刀背厚得能当锤。它砍断过的东西，比它砍过的人多。",
+      "affixPool": [
+        "af_heavy",
+        "af_bulwark",
+        "af_serrated"
+      ],
+      "loreRefs": [
+        "s54",
+        "s114"
+      ]
+    },
+    "wpn_anc_blade": {
+      "name": "古代光刃",
+      "type": "wpn",
+      "price": 470000,
+      "tier": 4,
+      "atk": 4,
+      "dmg": [
+        3,
+        11
+      ],
+      "craftable": true,
+      "desc": "古代守卫手里的那一类。通电之后刃口自己亮起来，亮的地方比铁还硬。",
+      "affixPool": [
+        "af_runed",
+        "af_sharp",
+        "af_aegis"
+      ],
+      "loreRefs": [
+        "s54",
+        "s114",
+        "s48"
+      ]
+    },
+    "wpn_anc_pike": {
+      "name": "古代长戟",
+      "type": "wpn",
+      "price": 490000,
+      "tier": 4,
+      "atk": 5,
+      "dmg": [
+        2,
+        14
+      ],
+      "craftable": true,
+      "desc": "七千年了，戟杆还是直的。它记得自己站在谁的门口。",
+      "affixPool": [
+        "af_heavy",
+        "af_runed",
+        "af_bulwark"
+      ],
+      "loreRefs": [
+        "s54",
+        "s114",
+        "s48"
+      ]
+    },
+    "wpn_shadow_fang": {
+      "name": "暗影獠牙",
+      "type": "wpn",
+      "price": 480000,
+      "tier": 4,
+      "atk": 4,
+      "dmg": [
+        3,
+        10
+      ],
+      "illegal": true,
+      "craftable": true,
+      "desc": "议会的短刃，刃口抹着掩尘。被它划过的人，事后记不清是谁动的手。持有即罪。",
+      "affixPool": [
+        "af_vampiric",
+        "af_duelist",
+        "af_serrated"
+      ],
+      "loreRefs": [
+        "s54",
+        "s88"
+      ]
+    },
+    "wpn_void_scepter": {
+      "name": "虚空权杖",
+      "type": "wpn",
+      "price": 1320000,
+      "tier": 5,
+      "atk": 5,
+      "dmg": [
+        3,
+        14
+      ],
+      "craftable": true,
+      "desc": "杖头嵌着一枚虚空碎片。举起来的时候，周围的火光会朝它偏一点。",
+      "affixPool": [
+        "af_runed",
+        "af_heavy",
+        "af_aegis"
+      ],
+      "loreRefs": [
+        "s54",
+        "s114",
+        "s116"
+      ]
+    },
+    "wpn_forbidden_edge": {
+      "name": "禁纹刃",
+      "type": "wpn",
+      "price": 1350000,
+      "tier": 5,
+      "atk": 6,
+      "dmg": [
+        3,
+        15
+      ],
+      "illegal": true,
+      "craftable": true,
+      "desc": "刃上刻着本该被磨掉的六芒纹。禁令写得很清楚：见者即罪。",
+      "affixPool": [
+        "af_sharp",
+        "af_heavy",
+        "af_runed"
+      ],
+      "loreRefs": [
+        "s54",
+        "s88"
+      ]
+    },
+    "wpn_black_lance": {
+      "name": "无光长枪",
+      "type": "wpn",
+      "price": 1380000,
+      "tier": 5,
+      "atk": 5,
+      "dmg": [
+        2,
+        16
+      ],
+      "illegal": true,
+      "craftable": true,
+      "desc": "枪身吸光，举着它站在火把旁边，那一小块地方是黑的。持有即罪。",
+      "affixPool": [
+        "af_heavy",
+        "af_runed",
+        "af_swift"
+      ],
+      "loreRefs": [
+        "s54",
+        "s88"
+      ]
+    },
+    "soul_jar": {
+      "name": "魂瓶",
+      "type": "mat",
+      "price": 5200,
+      "tier": 4,
+      "quality": "稀有",
+      "illegal": true,
+      "desc": "陶瓶封着符，摇起来有很轻的响。贩卖灵魂在帝国律下是 A 级罪。",
+      "giftTag": "relic",
+      "loreRefs": [
+        "s88"
+      ]
+    },
+    "heretic_icon": {
+      "name": "异端圣像",
+      "type": "mat",
+      "price": 3600,
+      "tier": 3,
+      "quality": "精良",
+      "illegal": true,
+      "desc": "六主神之外的一尊小像，脸被人凿过。神殿见了会当场拿下你。",
+      "giftTag": "relic",
+      "loreRefs": [
+        "s97"
+      ]
+    },
+    "forged_seal": {
+      "name": "伪关防",
+      "type": "mat",
+      "price": 2800,
+      "tier": 3,
+      "quality": "精良",
+      "illegal": true,
+      "desc": "仿得极好的关文房蜡印，只差一个只有真印才有的暗记。",
+      "giftTag": "rare",
+      "loreRefs": [
+        "s88"
+      ]
+    },
+    "drug_forget": {
+      "name": "忘川散",
+      "type": "use",
+      "price": 1800,
+      "tier": 3,
+      "combat": true,
+      "illegal": true,
+      "desc": "黑市的货。让人在一炷香里忘掉自己正在挨打——也忘掉怎么还手。",
+      "eff": [
+        {
+          "kind": "dot",
+          "status": "stun",
+          "dur": 1,
+          "chance": 0.6
+        }
+      ],
+      "giftTag": "rare",
+      "loreRefs": [
+        "s88"
+      ]
+    },
+    "drug_frenzy": {
+      "name": "狂血散",
+      "type": "use",
+      "price": 2000,
+      "tier": 3,
+      "combat": true,
+      "illegal": true,
+      "desc": "服下的人会一直往前冲，直到冲不动为止。议会用它做很多事情。",
+      "eff": [
+        {
+          "kind": "buff",
+          "status": "fervor",
+          "dur": 3
+        },
+        {
+          "kind": "buff",
+          "status": "swift",
+          "dur": 3
+        }
+      ],
+      "giftTag": "rare",
+      "loreRefs": [
+        "s88"
+      ]
+    }
+  }
+}

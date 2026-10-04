@@ -1,7 +1,7 @@
 # COMMAND-EVENT-CONTRACT（命令—事件契约底册）
 
 > V0.2 · 工作项 V2.4 产出（方案 §13/§14/§45/§47）。**本文是底册，不是规范**：
-> 整理自 `tianqiong2/src/world/WorldRuntime.ts`（dispatch / uiAction / sceneAction）
+> 整理自 `tianqiong/src/world/WorldRuntime.ts`（dispatch / uiAction / sceneAction）
 > 与 `src/events/EventSchema.ts`（分级表）在 V0.1 抽取后（引擎 `5531e0f`）的实际接线。
 > 代码以实现为准；发现漂移请先改代码，再同步本册。
 >

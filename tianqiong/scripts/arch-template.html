@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>天穹纪元 2.0 · 架构总览</title>
+<style>
+  :root{
+    --bg:#0a0e13; --panel:#101720; --panel2:#141d28; --line:rgba(255,255,255,.075);
+    --ink:#e7eef6; --ink2:#93a1b1; --ink3:#63707e;
+    --gold:#d9a84e; --cyan:#49c5d6; --violet:#a184dd; --green:#57c08a; --red:#e0605a; --amber:#dfa34a;
+    --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--ink);
+    font:14px/1.6 system-ui,-apple-system,"Segoe UI","Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif}
+  body{background-image:radial-gradient(900px 500px at 12% -10%,rgba(73,197,214,.07),transparent),
+    radial-gradient(700px 420px at 88% -6%,rgba(217,168,78,.06),transparent)}
+  a{color:inherit}
+  .wrap{max-width:1280px;margin:0 auto;padding:28px 22px 80px}
+  header.top{display:flex;flex-direction:column;gap:18px;padding-bottom:18px;border-bottom:1px solid var(--line)}
+  .brand{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+  .brand h1{margin:0;font-size:21px;letter-spacing:.02em;font-weight:650}
+  .brand .sub{color:var(--ink3);font-size:12.5px;font-family:var(--mono)}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:10px}
+  .kpi{background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--line);
+    border-radius:10px;padding:10px 12px}
+  .kpi .n{font-family:var(--mono);font-size:20px;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+  .kpi .l{color:var(--ink3);font-size:11.5px;margin-top:2px}
+  nav.tabs{display:flex;gap:2px;flex-wrap:wrap;border-bottom:1px solid var(--line);margin-top:6px}
+  nav.tabs button{appearance:none;background:none;border:0;color:var(--ink2);font:inherit;font-size:13.5px;
+    padding:9px 14px;cursor:pointer;position:relative;border-radius:8px 8px 0 0}
+  nav.tabs button:hover{color:var(--ink);background:rgba(255,255,255,.03)}
+  nav.tabs button[aria-selected="true"]{color:var(--ink)}
+  nav.tabs button[aria-selected="true"]::after{content:"";position:absolute;left:10px;right:10px;bottom:-1px;height:2px;
+    background:linear-gradient(90deg,var(--gold),var(--cyan));border-radius:2px;transform-origin:left;
+    animation:slide .22s ease}
+  @keyframes slide{from{transform:scaleX(.2);opacity:.4}to{transform:scaleX(1);opacity:1}}
+  main{padding-top:22px}
+  section[hidden]{display:none}
+  h2{font-size:15px;margin:0 0 4px;letter-spacing:.01em}
+  h2 .hint{color:var(--ink3);font-weight:400;font-size:12.5px;margin-left:8px}
+  .lead{color:var(--ink2);font-size:13px;margin:0 0 16px;max-width:88ch}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+  .card+.card{margin-top:14px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media (max-width:900px){.grid2{grid-template-columns:1fr}}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--ink3);font-weight:500;font-size:11.5px;letter-spacing:.04em;text-transform:uppercase}
+  td.mono,.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+  .tag{display:inline-block;padding:1px 7px;border-radius:999px;font-size:11px;border:1px solid var(--line);color:var(--ink2)}
+  .tag.eff{color:var(--green);border-color:rgba(87,192,138,.35)}
+  .tag.pend{color:var(--amber);border-color:rgba(223,163,74,.35)}
+  .tag.int{color:var(--ink3)}
+  .tag.l3{color:var(--red);border-color:rgba(224,96,90,.35)}
+  .tag.l2{color:var(--gold);border-color:rgba(217,168,78,.35)}
+  .tag.l1{color:var(--cyan);border-color:rgba(73,197,214,.3)}
+  .tag.l0{color:var(--ink3)}
+  .flow{display:flex;flex-direction:column;gap:8px}
+  .flow .step{display:flex;align-items:center;gap:12px;background:var(--panel2);border:1px solid var(--line);
+    border-radius:10px;padding:9px 13px}
+  .flow .step .idx{font-family:var(--mono);color:var(--ink3);font-size:11.5px;min-width:22px}
+  .flow .step .t{font-size:13.5px}
+  .flow .step .d{color:var(--ink3);font-size:12px;margin-left:auto;text-align:right;max-width:44ch}
+  .flow .step.hot{border-color:rgba(217,168,78,.4);background:linear-gradient(90deg,rgba(217,168,78,.07),var(--panel2))}
+  .flow .step.cool{border-color:rgba(73,197,214,.3);background:linear-gradient(90deg,rgba(73,197,214,.06),var(--panel2))}
+  .layerrow{display:grid;grid-template-columns:150px 1fr;gap:14px;align-items:start;
+    padding:10px 0;border-bottom:1px solid var(--line)}
+  .layerrow:last-child{border-bottom:0}
+  .layername{font-family:var(--mono);font-size:12.5px}
+  .layername .dep{display:block;color:var(--ink3);font-size:11px;margin-top:2px}
+  .files{display:flex;flex-wrap:wrap;gap:6px}
+  .file{font-family:var(--mono);font-size:11.5px;color:var(--ink2);background:rgba(255,255,255,.03);
+    border:1px solid var(--line);border-radius:6px;padding:2px 7px;cursor:default}
+  .file.big{color:var(--ink)}
+  .matrix{overflow:auto;max-width:100%}
+  .mx{border-collapse:separate;border-spacing:2px;font-size:11px}
+  .mx th{writing-mode:vertical-rl;text-orientation:mixed;height:96px;padding:0 2px 6px;color:var(--ink3);
+    font-weight:400;white-space:nowrap;text-transform:none;letter-spacing:0;font-family:var(--mono)}
+  .mx th.rowh{writing-mode:horizontal-tb;text-align:right;padding:0 8px 0 0;white-space:nowrap;
+    font-family:var(--mono);color:var(--ink2)}
+  .mx td{width:22px;height:22px;border-radius:4px;border:0;padding:0;background:rgba(255,255,255,.028);
+    cursor:pointer;transition:outline-color .12s}
+  .mx td[data-n="1"]{background:rgba(73,197,214,.22)}
+  .mx td[data-n="2"]{background:rgba(73,197,214,.42)}
+  .mx td[data-n="3"]{background:rgba(73,197,214,.62)}
+  .mx td[data-n="4"]{background:rgba(217,168,78,.62)}
+  .mx td.hl{outline:1.5px solid var(--gold);outline-offset:1px}
+  .mx td.dim{opacity:.22}
+  .sysgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(268px,1fr));gap:12px}
+  .sys{background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--line);
+    border-radius:11px;padding:12px 13px;cursor:pointer;transition:border-color .15s,transform .15s}
+  .sys:hover{border-color:rgba(217,168,78,.45);transform:translateY(-1px)}
+  .sys.sel{border-color:var(--gold);box-shadow:0 0 0 1px rgba(217,168,78,.25)}
+  .sys h3{margin:0 0 6px;font-size:13.5px;font-family:var(--mono);display:flex;align-items:center;gap:8px}
+  .sys h3 .v{color:var(--ink3);font-size:10.5px;font-weight:400}
+  .sys .meta{display:flex;gap:10px;flex-wrap:wrap;color:var(--ink3);font-size:11.5px;margin-bottom:8px}
+  .sys .meta b{color:var(--ink2);font-weight:500;font-variant-numeric:tabular-nums}
+  .sys .caps{display:flex;flex-wrap:wrap;gap:4px}
+  .chip{font-family:var(--mono);font-size:10.5px;padding:1px 6px;border-radius:5px;border:1px solid var(--line);color:var(--ink2)}
+  .chip.eff{color:var(--green);border-color:rgba(87,192,138,.3)}
+  .chip.pend{color:var(--amber);border-color:rgba(223,163,74,.3)}
+  .chip.int{color:var(--ink3);opacity:.85}
+  .chip.sub{color:var(--cyan);border-color:rgba(73,197,214,.3)}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;color:var(--ink3);font-size:12px;margin:10px 0 2px}
+  .legend i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:middle}
+  .rev{display:grid;gap:10px}
+  .revitem{border:1px solid var(--line);border-left-width:3px;border-radius:8px;background:var(--panel2);
+    padding:11px 14px}
+  .revitem.p0{border-left-color:var(--red)}
+  .revitem.p1{border-left-color:var(--amber)}
+  .revitem.p2{border-left-color:var(--gold)}
+  .revitem.p3{border-left-color:var(--ink3)}
+  .revitem.fixed{border-left-color:var(--green);background:linear-gradient(90deg,rgba(87,192,138,.06),var(--panel2))}
+  .revitem .st{font-size:11px;padding:1px 7px;border-radius:999px;border:1px solid var(--line);color:var(--ink3)}
+  .revitem.fixed .st{color:var(--green);border-color:rgba(87,192,138,.35)}
+  .revgroup{font-size:12px;color:var(--ink3);letter-spacing:.06em;text-transform:uppercase;
+    margin:18px 0 8px;padding-bottom:6px;border-bottom:1px solid var(--line)}
+  .revgroup:first-child{margin-top:0}
+  .revitem .hd{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+  .revitem .pri{font-family:var(--mono);font-size:11px;padding:1px 7px;border-radius:999px;border:1px solid var(--line)}
+  .revitem .ti{font-size:13.5px}
+  .revitem .loc{font-family:var(--mono);font-size:11px;color:var(--ink3)}
+  .revitem p{margin:6px 0 0;color:var(--ink2);font-size:12.5px}
+  .revitem .fix{color:var(--ink3);font-size:12px;margin-top:4px}
+  .revitem .fix b{color:var(--ink2);font-weight:500}
+  details{border:1px solid var(--line);border-radius:10px;padding:10px 14px;background:var(--panel)}
+  details+details{margin-top:10px}
+  summary{cursor:pointer;font-size:13px;color:var(--ink)}
+  details .body{color:var(--ink2);font-size:12.5px;padding-top:8px}
+  footer{color:var(--ink3);font-size:11.5px;margin-top:34px;padding-top:14px;border-top:1px solid var(--line);
+    display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-family:var(--mono)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <h1>天穹纪元 2.0 · 架构总览</h1>
+      <span class="sub">插件化世界模拟 · 认知三层 · 事件驱动</span>
+    </div>
+    <div class="kpis" id="kpis"></div>
+    <nav class="tabs" id="tabs"></nav>
+  </header>
+
+  <main>
+    <section id="v-flow">
+      <h2>一次世界动作的完整路径<span class="hint">§47 单向闭环：Action ≠ Event，AI 只提议、代码定生死</span></h2>
+      <p class="lead">下面这条链是项目的主动脉。左列是确定性规则（可复现、可测试），右列是概率与推演（可注入随机源、可降级为规则通道）。任何一环失败都返回 null，不做部分猜测。</p>
+      <div class="card"><div class="flow" id="flow"></div></div>
+      <div class="grid2" style="margin-top:14px">
+        <div class="card">
+          <h2>两条总线，分工不混<span class="hint">§5</span></h2>
+          <p class="lead" style="margin-bottom:10px"><b class="mono">bus</b> 是引擎给界面看的信号（渲染 / 浮层 / toast）；<b class="mono">worldBus</b> 是「世界已经发生了什么」的事实传播，可追溯、可推演、可防环。</p>
+          <table><tbody id="buses"></tbody></table>
+        </div>
+        <div class="card">
+          <h2>认知不是世界真相<span class="hint">§8 · 记忆方案 §4/§24</span></h2>
+          <p class="lead" style="margin-bottom:10px">四层严格分开：世界事实、某人感知到的事实、他记得的条目、他由记忆推导出的信念。AI 读后三层，永不读第一层。</p>
+          <table><tbody id="cognition"></tbody></table>
+        </div>
+      </div>
+      <div class="card" style="margin-top:14px">
+        <h2>世界事件分级<span class="hint">§12：分级是默认值，不是天花板</span></h2>
+        <p class="lead">L3 无条件进 AI 推演；L2 里「死/失踪的是有名有姓的人」也升格（ESCALATIONS）；L0 不进世界史，L1 由对应系统自行处理。</p>
+        <table><thead><tr><th>级别</th><th>语义</th><th>事件类型</th></tr></thead><tbody id="levels"></tbody></table>
+      </div>
+    </section>
+
+    <section id="v-layers" hidden>
+      <h2>分层与依赖<span class="hint">eslint 强制的方向：上层可依赖下层，反向立即报错</span></h2>
+      <p class="lead">依赖方向自上而下。<b class="mono">data</b> 是静态世界书与数值配置，<b class="mono">types</b> 是纯契约。中间九层彼此不得反向依赖；<b class="mono">ai</b> 与 <b class="mono">repo</b> 在业务层之上，<b class="mono">store</b>/<b class="mono">ui</b> 在最上层。</p>
+      <div class="card"><div id="layers"></div></div>
+      <div class="card" style="margin-top:14px">
+        <h2>业务系统之间的点对点依赖<span class="hint">§21 的反面教材：这张表越满，事件解耦就越名不副实</span></h2>
+        <p class="lead">行 = 调用方，列 = 被调用方，格子深浅 = import 条数。悬停高亮，点击锁定。</p>
+        <div class="matrix" id="matrix"></div>
+        <div class="legend"><span><i style="background:rgba(73,197,214,.42)"></i>1–3 条</span><span><i style="background:rgba(217,168,78,.62)"></i>4 条以上</span></div>
+      </div>
+      <div class="card" style="margin-top:14px">
+        <h2>跨层依赖热度<span class="hint">哪些单元在依赖谁</span></h2>
+        <table><thead><tr><th>来源</th><th>目标</th><th>条数</th></tr></thead><tbody id="edges"></tbody></table>
+      </div>
+    </section>
+
+    <section id="v-systems" hidden>
+      <h2>系统与能力<span class="hint">§20：声明「我能做什么」，能力分三类</span></h2>
+      <p class="lead">每个系统向世界登记能力。<b style="color:var(--green)">effects</b> 可被后果计划驱动（每条必有处理器）；<b style="color:var(--amber)">pending</b> 是世界后果但执行器尚未接入（Validator 与提示词都看不到它）；<b style="color:var(--ink3)">internal</b> 是玩家操作与战斗裁定，刻意不让 AI 直接驱动。</p>
+      <div class="sysgrid" id="systems"></div>
+      <div class="card" style="margin-top:14px">
+        <h2>事件订阅登记表<span class="hint">§21/§34：靠事件传播，而不是点对点调用</span></h2>
+        <table><thead><tr><th>订阅者</th><th>类型</th><th>事件</th><th>说明</th></tr></thead><tbody id="subs"></tbody></table>
+      </div>
+    </section>
+
+    <section id="v-review" hidden>
+      <h2>代码审查发现<span class="hint" id="revmeta"></span></h2>
+      <p class="lead">审查为只读、以提交态为准，逐条带证据。每条给「为什么是问题」与「最小修复方向」，不给修复代码。</p>
+      <div class="rev" id="review"></div>
+      <div id="revmore"></div>
+    </section>
+  </main>
+
+  <footer>
+    <span id="footleft"></span>
+    <span id="footright"></span>
+  </footer>
+</div>
+
+<script>
+const DATA = __ARCH_DATA__;
+const REVIEW = __REVIEW_DATA__;
+const $ = (s) => document.querySelector(s);
+const el = (tag, cls, html) => { const n = document.createElement(tag); if (cls) n.className = cls; if (html != null) n.innerHTML = html; return n; };
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
+
+const VIEWS = [
+  ['v-flow', '数据流与认知'],
+  ['v-layers', '分层与依赖'],
+  ['v-systems', '系统与能力'],
+  ['v-review', '审查发现'],
+];
+
+/* ---------- KPI ---------- */
+const kpi = (n, l) => '<div class="kpi"><div class="n">' + n + '</div><div class="l">' + l + '</div></div>';
+const totalLines = DATA.units.reduce((a, u) => a + u.lines, 0);
+const totalFiles = DATA.units.reduce((a, u) => a + u.files.length, 0);
+const sysUnit = DATA.units.filter((u) => u.unit.startsWith('systems/'));
+const caps = DATA.systems.reduce((a, s) => a + s.effects.length + s.pending.length + s.internal.length, 0);
+const effs = DATA.systems.reduce((a, s) => a + s.effects.length, 0);
+const pends = DATA.systems.reduce((a, s) => a + s.pending.length, 0);
+const sysEdges = DATA.edges.filter((e) => e.from.startsWith('systems/') && e.to.startsWith('systems/'));
+const sysEdgeSum = sysEdges.reduce((a, e) => a + e.count, 0);
+$('#kpis').innerHTML = [
+  kpi(totalFiles, '源文件（不含测试）'),
+  kpi(totalLines.toLocaleString(), '代码行'),
+  kpi(DATA.units.length, '架构单元'),
+  kpi(sysUnit.length, '业务系统'),
+  kpi(DATA.edges.length, '依赖边'),
+  kpi(caps, '登记能力'),
+  kpi(effs + ' / ' + pends, '可执行 / 待接入'),
+  kpi(sysEdgeSum, '系统↔系统依赖'),
+].join('');
+
+/* ---------- tabs ---------- */
+$('#tabs').innerHTML = VIEWS.map(([id, label], i) =>
+  '<button type="button" role="tab" data-v="' + id + '" aria-selected="' + (i === 0) + '">' + label + '</button>').join('');
+/** 视图切换带 hash：可以直接把某个视图的链接发给别人 */
+function pickView(id) {
+  if (!VIEWS.some(([v]) => v === id)) id = VIEWS[0][0];
+  for (const btn of $('#tabs').querySelectorAll('button')) btn.setAttribute('aria-selected', String(btn.dataset.v === id));
+  for (const [vid] of VIEWS) $('#' + vid).hidden = vid !== id;
+  if (location.hash !== '#' + id) history.replaceState(null, '', '#' + id);
+}
+$('#tabs').addEventListener('click', (ev) => {
+  const b = ev.target.closest('button[data-v]');
+  if (b) pickView(b.dataset.v);
+});
+addEventListener('hashchange', () => pickView(location.hash.slice(1)));
+pickView(location.hash.slice(1));
+
+/* ---------- flow ---------- */
+$('#flow').innerHTML = DATA.flow.map((s, i) =>
+  '<div class="step ' + (s.kind || '') + '"><span class="idx">' + String(i + 1).padStart(2, '0') + '</span>' +
+  '<span class="t">' + esc(s.t) + '</span><span class="d">' + esc(s.d) + '</span></div>').join('');
+$('#buses').innerHTML = DATA.buses.map((b) =>
+  '<tr><td class="mono">' + esc(b.n) + '</td><td>' + esc(b.d) + '</td></tr>').join('');
+$('#cognition').innerHTML = DATA.cognition.map((c) =>
+  '<tr><td class="mono" style="white-space:nowrap">' + esc(c.n) + '</td><td>' + esc(c.d) + '</td></tr>').join('');
+$('#levels').innerHTML = DATA.levels.map((l) =>
+  '<tr><td><span class="tag l' + l.level + '">L' + l.level + '</span></td><td>' + esc(l.d) + '</td>' +
+  '<td class="mono" style="color:var(--ink2)">' + l.types.map(esc).join(' · ') + '</td></tr>').join('');
+
+/* ---------- layers ---------- */
+const lay = DATA.layers;
+$('#layers').innerHTML = lay.map((L) => {
+  const us = DATA.units.filter((u) => L.match.some((m) => u.unit === m || u.unit.startsWith(m + '/')));
+  const files = us.flatMap((u) => u.files);
+  return '<div class="layerrow"><div class="layername">' + esc(L.name) +
+    '<span class="dep">' + esc(L.dep) + '</span></div><div>' +
+    '<div style="color:var(--ink3);font-size:11.5px;margin-bottom:6px" class="mono">' +
+    files.length + ' 文件 · ' + us.reduce((a, u) => a + u.lines, 0).toLocaleString() + ' 行</div>' +
+    '<div class="files">' + files.map((f) => '<span class="file">' + esc(f.split('/').pop()) + '</span>').join('') + '</div>' +
+    '</div></div>';
+}).join('');
+
+/* ---------- matrix ---------- */
+(function matrix() {
+  const units = DATA.units.filter((u) => u.unit.startsWith('systems/')).map((u) => u.unit);
+  const n = (a, b) => DATA.edges.find((e) => e.from === a && e.to === b);
+  const short = (u) => u.replace('systems/', '');
+  let html = '<table class="mx"><thead><tr><th class="rowh"></th>' +
+    units.map((u) => '<th>' + esc(short(u)) + '</th>').join('') + '</tr></thead><tbody>';
+  for (const from of units) {
+    html += '<tr><th class="rowh">' + esc(short(from)) + '</th>';
+    for (const to of units) {
+      if (from === to) { html += '<td style="background:transparent;cursor:default"></td>'; continue; }
+      const e = n(from, to);
+      html += '<td data-n="' + Math.min(4, e ? e.count : 0) + '" data-f="' + esc(from) + '" data-t="' + esc(to) +
+        '" title="' + esc(short(from) + ' → ' + short(to) + (e ? '：' + e.count + ' 条' : '：无')) + '"></td>';
+    }
+    html += '</tr>';
+  }
+  $('#matrix').innerHTML = html + '</tbody></table>';
+  const cells = $('#matrix').querySelectorAll('td[data-n]');
+  let locked = null;
+  const paint = (unit) => cells.forEach((c) => {
+    const on = !unit || c.dataset.f === unit || c.dataset.t === unit;
+    c.classList.toggle('hl', !!unit && on && c.dataset.n !== '0');
+    c.classList.toggle('dim', !!unit && !on);
+  });
+  cells.forEach((c) => {
+    c.addEventListener('mouseenter', () => { if (!locked) paint(c.dataset.f); });
+    c.addEventListener('mouseleave', () => { if (!locked) paint(null); });
+    c.addEventListener('click', () => {
+      locked = locked === c.dataset.f ? null : c.dataset.f;
+      paint(locked);
+      document.querySelectorAll('.sys').forEach((s) => s.classList.toggle('sel', locked && s.dataset.sys === locked));
+    });
+  });
+})();
+
+/* ---------- edges ---------- */
+$('#edges').innerHTML = DATA.edges.slice(0, 26).map((e) =>
+  '<tr><td class="mono">' + esc(e.from) + '</td><td class="mono">' + esc(e.to) + '</td><td class="mono">' + e.count + '</td></tr>').join('');
+
+/* ---------- systems ---------- */
+const depCount = (u, dir) => DATA.edges.filter((e) => (dir === 'out' ? e.from === u : e.to === u)).reduce((a, e) => a + e.count, 0);
+$('#systems').innerHTML = DATA.systems.map((s) => {
+  const u = 'systems/' + s.id;
+  const chip = (list, cls) => list.map((c) => '<span class="chip ' + cls + '">' + esc(c) + '</span>').join('');
+  const subs = (s.subscribes || []).map((t) => '<span class="chip sub">▸ ' + esc(t) + '</span>').join('');
+  const dep = depCount(u, 'out'), inc = depCount(u, 'in');
+  return '<div class="sys" data-sys="' + esc(u) + '"><h3>' + esc(s.id) + ' <span class="v">v' + esc(s.version) + '</span></h3>' +
+    '<div class="meta"><span>出度 <b>' + dep + '</b></span><span>入度 <b>' + inc + '</b></span>' +
+    '<span>订阅 <b>' + (s.subscribes || []).length + '</b></span></div>' +
+    '<div class="caps">' + chip(s.effects, 'eff') + chip(s.pending, 'pend') + chip(s.internal, 'int') + subs + '</div></div>';
+}).join('');
+document.querySelectorAll('.sys').forEach((card) => card.addEventListener('click', () => {
+  const unit = card.dataset.sys, on = !card.classList.contains('sel');
+  document.querySelectorAll('.sys').forEach((c) => c.classList.toggle('sel', on && c === card));
+  document.querySelectorAll('#matrix td[data-n]').forEach((c) => {
+    const hit = on && (c.dataset.f === unit || c.dataset.t === unit);
+    c.classList.toggle('hl', hit && c.dataset.n !== '0');
+    c.classList.toggle('dim', on && !hit);
+  });
+}));
+
+/* ---------- subs ---------- */
+$('#subs').innerHTML = DATA.subs.map((s) =>
+  '<tr><td class="mono">' + esc(s.who) + '</td><td>' + (s.type === '*' ? '<span class="tag">通配</span>' : esc(s.type)) +
+  '</td><td class="mono" style="color:var(--ink2)">' + esc(s.events) + '</td><td style="color:var(--ink3)">' + esc(s.why) + '</td></tr>').join('');
+
+/* ---------- review ---------- */
+$('#revmeta').textContent = REVIEW.meta;
+const card = (r) =>
+  '<div class="revitem ' + r.pri.toLowerCase() + ' ' + (r.state || 'open') + '"><div class="hd">' +
+  '<span class="pri">' + esc(r.pri) + '</span><span class="ti">' + esc(r.t) + '</span>' +
+  (r.state === 'fixed' ? '<span class="st">✓ 本轮已修</span>' : '') +
+  '<span class="loc">' + esc(r.loc) + '</span></div>' +
+  '<p>' + esc(r.why) + '</p>' + (r.fix ? '<div class="fix"><b>最小修复：</b>' + esc(r.fix) + '</div>' : '') + '</div>';
+const group = (label, list) => list.length
+  ? '<div class="revgroup">' + label + ' · ' + list.length + ' 条</div>' + list.map(card).join('')
+  : '';
+$('#review').innerHTML =
+  group('本轮审查已修', REVIEW.items.filter((r) => r.state === 'fixed')) +
+  group('待处理', REVIEW.items.filter((r) => r.state !== 'fixed'));
+$('#revmore').innerHTML = REVIEW.notes.map((n) =>
+  '<details><summary>' + esc(n.t) + '</summary><div class="body">' + n.body.map(esc).join('<br>') + '</div></details>').join('');
+
+$('#footleft').textContent = REVIEW.foot;
+$('#footright').textContent = DATA.stamp;
+</script>
+</body>
+</html>

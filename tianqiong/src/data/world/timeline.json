@@ -1,0 +1,626 @@
+{
+  "_comment": "世界日历（卡 E4 建引擎 / 卡 T4 补内容）：定时与周期事件表。trigger 可组合 month/date/months/year/yearMin/everyDays/everyOffset/once/flag/repAxis，判定见 EventProcessor.evalTrigger；tags 供面板筛选与审计。",
+  "events": [
+    {
+      "id": "fest_newyear",
+      "name": "元日祭：新年祭祀",
+      "trigger": {
+        "month": 0,
+        "date": 1
+      },
+      "recurring": true,
+      "seed": "新芽月的第一日。神殿的钟从卯时敲到午时，家家门前换了新桃符——旧的一年被关在门外。",
+      "loreRef": "s78",
+      "tags": [
+        "festival",
+        "calendar"
+      ],
+      "effects": {
+        "rep": {
+          "temple_life": 3,
+          "empire": 2
+        },
+        "npcAtt": {
+          "adrian": 5
+        },
+        "toast": {
+          "text": "🌸 周期节日：元日祭 · 新岁始",
+          "cls": "gain"
+        },
+        "history": {
+          "result": "元日祭举行 · 全城换符",
+          "imp": 2
+        }
+      }
+    },
+    {
+      "id": "fest_war",
+      "name": "战神祭：阅兵与武斗大会",
+      "trigger": {
+        "month": 4,
+        "date": 15
+      },
+      "recurring": true,
+      "seed": "烈阳月十五。演武场的沙地被踩得发白，军旗与神殿旗并排立着——武斗大会的号角一响，街上的孩子全跑光了。",
+      "loreRef": "s78",
+      "tags": [
+        "festival",
+        "calendar"
+      ],
+      "effects": {
+        "rep": {
+          "temple_life": 4,
+          "empire": 3
+        },
+        "playerRep": {
+          "empire": {
+            "military": 3
+          }
+        },
+        "npcAtt": {
+          "reno": 6,
+          "galon": 4
+        },
+        "toast": {
+          "text": "⚔ 周期节日：战神祭 · 阅兵与武斗",
+          "cls": "gain"
+        },
+        "history": {
+          "result": "战神祭举行 · 武斗大会开赛",
+          "imp": 3
+        }
+      }
+    },
+    {
+      "id": "fest_wisdom",
+      "name": "智慧祭：学院开放日",
+      "trigger": {
+        "month": 8,
+        "date": 10
+      },
+      "recurring": true,
+      "seed": "红叶月初十。学院的院门整日敞开，讲席上争到面红耳赤，末了谁也说服不了谁，便一同去喝酒。",
+      "loreRef": "s78",
+      "tags": [
+        "festival",
+        "calendar"
+      ],
+      "effects": {
+        "rep": {
+          "study": 4,
+          "temple_life": 2
+        },
+        "npcAtt": {
+          "vandel": 6,
+          "tutor_wind": 5
+        },
+        "toast": {
+          "text": "📚 周期节日：智慧祭 · 学术辩论",
+          "cls": "gain"
+        },
+        "history": {
+          "result": "智慧祭举行 · 学院开放日",
+          "imp": 2
+        }
+      }
+    },
+    {
+      "id": "fest_harvest",
+      "name": "丰收祭：农产祭祀与感恩宴",
+      "trigger": {
+        "month": 9,
+        "date": 20
+      },
+      "recurring": true,
+      "seed": "收获月二十。四乡的农人把第一捆麦子抬进神殿，广场摆起长桌——今年的粮价在这一天总会松一松。",
+      "loreRef": "s78",
+      "tags": [
+        "festival",
+        "calendar"
+      ],
+      "effects": {
+        "econ": {
+          "food": 0.85
+        },
+        "rep": {
+          "temple_life": 4,
+          "empire": 3
+        },
+        "npcAtt": {
+          "adrian": 5
+        },
+        "toast": {
+          "text": "🌾 周期节日：丰收祭 · 粮价回落",
+          "cls": "gain"
+        },
+        "history": {
+          "result": "丰收祭举行 · 食粮平价",
+          "imp": 2
+        }
+      }
+    },
+    {
+      "id": "fest_longnight",
+      "name": "永夜祭：跨年倒数与灯会",
+      "trigger": {
+        "month": 11,
+        "date": 30
+      },
+      "recurring": true,
+      "seed": "永夜月最后一夜。圣钟塔熄灯守灵，长街却点起千盏纸灯——地面上是倒数，深巷里是一年一度的销赃盛宴。",
+      "loreRef": "s78",
+      "tags": [
+        "festival",
+        "calendar"
+      ],
+      "effects": {
+        "rep": {
+          "temple_life": 3,
+          "shadow": 4
+        },
+        "spread": {
+          "src": "ash",
+          "topic": "守灵夜，货色管够",
+          "imp": 2
+        },
+        "toast": {
+          "text": "🌑 周期节日：永夜祭 · 暗影趁夜扩张",
+          "cls": "bad"
+        },
+        "history": {
+          "result": "永夜祭 · 暗影议会活跃",
+          "imp": 3
+        }
+      }
+    },
+    {
+      "id": "fest_empire_day",
+      "name": "帝国建国日：开国阅兵",
+      "trigger": {
+        "month": 3,
+        "date": 1
+      },
+      "recurring": true,
+      "seed": "风啸月初一。皇旗自城门巡到广场，甲胄的反光把整条大道照得发亮——帝国的体面全在这半日。",
+      "loreRef": "s78",
+      "tags": [
+        "festival",
+        "calendar"
+      ],
+      "effects": {
+        "rep": {
+          "empire": 5
+        },
+        "playerRep": {
+          "empire": {
+            "military": 4
+          }
+        },
+        "npcAtt": {
+          "reno": 5
+        },
+        "toast": {
+          "text": "🏛 势力节日：帝国建国日 · 皇旗巡境",
+          "cls": "gain"
+        },
+        "history": {
+          "result": "帝国建国日 · 开国阅兵",
+          "imp": 3
+        }
+      }
+    },
+    {
+      "id": "fest_frost",
+      "name": "霜铁大会：冬猎与武斗",
+      "trigger": {
+        "month": 10,
+        "date": 1
+      },
+      "recurring": true,
+      "seed": "寒霜月初一。霜锚堡的猎号自冰原传来，矮人们把最好的酒抬出地窖——冬天开始的日子，得用火与铁来标记。",
+      "loreRef": "s78",
+      "tags": [
+        "festival",
+        "calendar"
+      ],
+      "effects": {
+        "rep": {
+          "frost": 5
+        },
+        "npcAtt": {
+          "brendan": 5
+        },
+        "toast": {
+          "text": "❄ 势力节日：霜铁大会 · 冬猎开锣",
+          "cls": "gain"
+        },
+        "history": {
+          "result": "霜铁大会举行 · 冬猎与武斗",
+          "imp": 2
+        }
+      }
+    },
+    {
+      "id": "fest_verdant",
+      "name": "翠风祭：大贤者讲道",
+      "trigger": {
+        "month": 2,
+        "date": 5
+      },
+      "recurring": true,
+      "seed": "花开月初五。翠风港的树下坐满了人，大贤者的声音不高，却让整片林子的鸟都停了叫——讲完便去植树。",
+      "loreRef": "s78",
+      "tags": [
+        "festival",
+        "calendar"
+      ],
+      "effects": {
+        "rep": {
+          "verdant": 5
+        },
+        "npcAtt": {
+          "tutor_wind": 6
+        },
+        "toast": {
+          "text": "🌿 势力节日：翠风祭 · 大贤者讲道",
+          "cls": "gain"
+        },
+        "history": {
+          "result": "翠风祭举行 · 植树与讲道",
+          "imp": 2
+        }
+      }
+    },
+    {
+      "id": "fest_sand_pact",
+      "name": "砂海商约：跨商会签订",
+      "trigger": {
+        "month": 5,
+        "date": 15
+      },
+      "recurring": true,
+      "seed": "麦金月十五。金砂城的会堂里坐满了人，十二商会的印章在同一张羊皮纸上落下——今年的价钱，今天定。",
+      "loreRef": "s78",
+      "tags": [
+        "festival",
+        "calendar"
+      ],
+      "effects": {
+        "econ": {
+          "spice": 0.92
+        },
+        "rep": {
+          "sand": 5
+        },
+        "playerRep": {
+          "sand": {
+            "trade": 4
+          }
+        },
+        "npcAtt": {
+          "otto": 5
+        },
+        "toast": {
+          "text": "🪙 势力节日：砂海商约 · 商路定价",
+          "cls": "gain"
+        },
+        "history": {
+          "result": "砂海商约签订 · 商路定价",
+          "imp": 3
+        }
+      }
+    },
+    {
+      "id": "fest_blood",
+      "name": "血吼祭：战死者祭祀",
+      "trigger": {
+        "month": 6,
+        "date": 20
+      },
+      "recurring": true,
+      "seed": "雷鸣月二十。血吼城的图腾柱下摆开战骨，萨满的鼓一夜不停——他们不哭，只是把名字一个个喊出来。",
+      "loreRef": "s78",
+      "tags": [
+        "festival",
+        "calendar"
+      ],
+      "effects": {
+        "rep": {
+          "blood": 5
+        },
+        "playerRep": {
+          "blood": {
+            "military": 3
+          }
+        },
+        "toast": {
+          "text": "🩸 势力节日：血吼祭 · 战骨祭祀",
+          "cls": "gain"
+        },
+        "history": {
+          "result": "血吼祭举行 · 战死者受祭",
+          "imp": 2
+        }
+      }
+    },
+    {
+      "id": "fest_deep_rite",
+      "name": "深暗礼赞：地底朝圣",
+      "trigger": {
+        "month": 7,
+        "date": 10
+      },
+      "recurring": true,
+      "seed": "雾隐月初十。掘渊的队伍举着矿灯一路下到主井深处，灯在黑暗里排成一条线——那是他们唯一的朝圣。",
+      "loreRef": "s78",
+      "tags": [
+        "festival",
+        "calendar"
+      ],
+      "effects": {
+        "rep": {
+          "deep": 5
+        },
+        "playerRep": {
+          "deep": {
+            "religion": 3
+          }
+        },
+        "npcAtt": {
+          "tutor_deepwell": 6
+        },
+        "toast": {
+          "text": "🕳 势力节日：深暗礼赞 · 地底朝圣",
+          "cls": "gain"
+        },
+        "history": {
+          "result": "深暗礼赞举行 · 地底朝圣",
+          "imp": 2
+        }
+      }
+    },
+    {
+      "id": "fest_sky_pilgrim",
+      "name": "浮岛巡礼：浮岛迁移日",
+      "trigger": {
+        "month": 8,
+        "date": 25
+      },
+      "recurring": true,
+      "seed": "红叶月廿五。浮岛的阴影从城头缓缓移过，人们抬头——今天的云比往年高，观星台说，这是好年景。",
+      "loreRef": "s78",
+      "tags": [
+        "festival",
+        "calendar"
+      ],
+      "effects": {
+        "rep": {
+          "study": 4
+        },
+        "npcAtt": {
+          "tutor_skycap": 6
+        },
+        "toast": {
+          "text": "☁ 势力节日：浮岛巡礼 · 浮岛迁移",
+          "cls": "gain"
+        },
+        "history": {
+          "result": "浮岛巡礼 · 迁移日",
+          "imp": 2
+        }
+      }
+    },
+    {
+      "id": "fest_spring_plow",
+      "name": "春耕祭：农人祭祀",
+      "trigger": {
+        "month": 1,
+        "date": 15
+      },
+      "recurring": true,
+      "seed": "雨润月十五。农人挑了头一担新土供在田头，柳枝插满田埂——这一天的土气，管一整年的收成。",
+      "loreRef": "s78",
+      "tags": [
+        "festival",
+        "calendar"
+      ],
+      "effects": {
+        "econ": {
+          "food": 0.95
+        },
+        "rep": {
+          "empire": 2
+        },
+        "toast": {
+          "text": "🌱 民间节日：春耕祭 · 春耕起犁",
+          "cls": "gain"
+        },
+        "history": {
+          "result": "春耕祭 · 春耕起犁",
+          "imp": 1
+        }
+      }
+    },
+    {
+      "id": "fest_summer_settle",
+      "name": "夏耘节：商人结算",
+      "trigger": {
+        "month": 6,
+        "date": 10
+      },
+      "recurring": true,
+      "seed": "雷鸣月初十。账房先生们把这半年的流水翻了一遍又一遍，街上的铜钱声比雷声还密。",
+      "loreRef": "s78",
+      "tags": [
+        "festival",
+        "calendar"
+      ],
+      "effects": {
+        "rep": {
+          "sand": 3
+        },
+        "playerRep": {
+          "sand": {
+            "trade": 3
+          }
+        },
+        "toast": {
+          "text": "📖 民间节日：夏耘节 · 半年结算",
+          "cls": "gain"
+        },
+        "history": {
+          "result": "夏耘节 · 商户结算",
+          "imp": 1
+        }
+      }
+    },
+    {
+      "id": "fest_winter_hunt",
+      "name": "冬狩节：猎人节",
+      "trigger": {
+        "month": 10,
+        "date": 15
+      },
+      "recurring": true,
+      "seed": "寒霜月十五。猎户们换了新弓弦，把去年的兽骨挂在门楣上——今冬的第一场猎，得挑最壮的那头。",
+      "loreRef": "s78",
+      "tags": [
+        "festival",
+        "calendar"
+      ],
+      "effects": {
+        "rep": {
+          "guild": 3
+        },
+        "npcAtt": {
+          "galon": 4
+        },
+        "toast": {
+          "text": "🏹 民间节日：冬狩节 · 猎人节",
+          "cls": "gain"
+        },
+        "history": {
+          "result": "冬狩节 · 猎户结队",
+          "imp": 1
+        }
+      }
+    },
+    {
+      "id": "period_guild_week",
+      "name": "公会任务刷新（周一日）",
+      "trigger": {
+        "everyDays": 10,
+        "everyOffset": 1
+      },
+      "recurring": true,
+      "seed": "公会的告示板换上了新的一批羊皮纸——每逢「周一日」，旧委托下架，新委托挂上。",
+      "loreRef": "s79",
+      "tags": [
+        "period",
+        "calendar"
+      ],
+      "effects": {
+        "toast": {
+          "text": "📋 周期事件：公会委托刷新",
+          "cls": ""
+        },
+        "history": {
+          "result": "公会委托刷新",
+          "imp": 1
+        }
+      }
+    },
+    {
+      "id": "period_merchant_month",
+      "name": "商会结算（月末日）",
+      "trigger": {
+        "everyDays": 30
+      },
+      "recurring": true,
+      "seed": "月末。商会封账，各家的算盘响到后半夜——下个月的粮价与料价，就看今夜这本账。",
+      "loreRef": "s79",
+      "tags": [
+        "period",
+        "calendar"
+      ],
+      "effects": {
+        "econ": {
+          "food": 1.02,
+          "forge": 1.02
+        },
+        "rep": {
+          "sand": 2
+        },
+        "toast": {
+          "text": "🧾 周期事件：商会月末结算",
+          "cls": ""
+        },
+        "history": {
+          "result": "商会月末结算",
+          "imp": 1
+        }
+      }
+    },
+    {
+      "id": "period_founding_360",
+      "name": "创世纪念大典（每 360 年）",
+      "trigger": {
+        "everyDays": 360,
+        "everyOffset": 252
+      },
+      "recurring": true,
+      "seed": "三百六十年一大典——神殿的钟楼今日开全钟，连地下深处的掘进者都点了灯。",
+      "loreRef": "s79",
+      "tags": [
+        "period",
+        "history"
+      ],
+      "effects": {
+        "rep": {
+          "temple_life": 5,
+          "empire": 4
+        },
+        "toast": {
+          "text": "🔔 历史节点：创世纪念大典",
+          "cls": "gold"
+        },
+        "history": {
+          "result": "创世纪念大典",
+          "imp": 4
+        }
+      }
+    },
+    {
+      "id": "period_seal_check_1000",
+      "name": "深渊封印检查（每千年）",
+      "trigger": {
+        "year": 1000
+      },
+      "once": false,
+      "recurring": true,
+      "seed": "千年一查。封印的刻线被重新描过一遍，掘渊公会与神殿各留一份拓本——上一次检查已经没人记得了。",
+      "loreRef": "s79",
+      "tags": [
+        "period",
+        "history"
+      ],
+      "effects": {
+        "flags": {
+          "seal_checked": true
+        },
+        "rep": {
+          "deep": 4,
+          "temple_life": 3
+        },
+        "toast": {
+          "text": "🔒 历史节点：深渊封印例行检查",
+          "cls": "gold"
+        },
+        "history": {
+          "result": "深渊封印检查",
+          "imp": 4
+        }
+      }
+    }
+  ]
+}

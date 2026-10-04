@@ -1,0 +1,4222 @@
+{
+  "version": 1,
+  "loreRefs": [
+    "s36",
+    "s83",
+    "s103"
+  ],
+  "stations": [
+    {
+      "id": "forge",
+      "name": "布伦丹的铁匠铺",
+      "loc": "market",
+      "npcId": "brendan",
+      "faction": "guild",
+      "lineage": "生产",
+      "bonus": 1,
+      "unlock": null,
+      "desc": "炉火与铁砧的节奏，是圣辉城最古老的钟。"
+    },
+    {
+      "id": "alchemy",
+      "name": "炼金台",
+      "loc": "guild",
+      "npcId": null,
+      "faction": "study",
+      "lineage": "生产",
+      "bonus": 0,
+      "unlock": {
+        "course": "goldveil_y1"
+      },
+      "desc": "药草与汞液在铜器里低语，金砂商院的账房先生管着钥匙。"
+    },
+    {
+      "id": "inscribe",
+      "name": "铭刻台",
+      "loc": "temple",
+      "npcId": null,
+      "faction": "temple_life",
+      "lineage": "生产",
+      "bonus": 0,
+      "unlock": {
+        "tower": "star1"
+      },
+      "desc": "星枢的纹路只服从懂它的人，神殿把西侧的回廊借了出来。"
+    }
+  ],
+  "recipes": [
+    {
+      "id": "rc_iron_sword",
+      "name": "锻打铁剑",
+      "station": "forge",
+      "tier": 1,
+      "need": {
+        "items": [
+          [
+            "blade_blank",
+            1
+          ],
+          [
+            "scrap_blade",
+            2
+          ]
+        ],
+        "gold": 4480
+      },
+      "out": {
+        "base": "sword_iron",
+        "tier": 1,
+        "luckBias": 0
+      },
+      "ticks": 48,
+      "failRate": 0.15,
+      "skillMin": 0,
+      "seed": "你把剑坯送进炉火，铁在锤下慢慢吐出一口气。"
+    },
+    {
+      "id": "rc_short_blade",
+      "name": "回炉短刃",
+      "station": "forge",
+      "tier": 1,
+      "need": {
+        "items": [
+          [
+            "scrap_blade",
+            3
+          ]
+        ],
+        "gold": 3720
+      },
+      "out": {
+        "base": "blade_short",
+        "tier": 1,
+        "luckBias": 0
+      },
+      "ticks": 36,
+      "failRate": 0.12,
+      "skillMin": 0,
+      "seed": "破铜残刃在坩埚里化成一线钢水，重又凝成短刃。"
+    },
+    {
+      "id": "rc_hunt_knife",
+      "name": "制猎刀",
+      "station": "forge",
+      "tier": 1,
+      "need": {
+        "items": [
+          [
+            "scrap_blade",
+            2
+          ],
+          [
+            "wolf_pelt",
+            1
+          ]
+        ],
+        "gold": 3430
+      },
+      "out": {
+        "base": "knife_hunt",
+        "tier": 1,
+        "luckBias": 0
+      },
+      "ticks": 30,
+      "failRate": 0.1,
+      "skillMin": 0,
+      "seed": "你缠好刀柄上的皮绳，刃口在油石上又亮了一层。"
+    },
+    {
+      "id": "rc_leather_armor",
+      "name": "鞣制硬皮甲",
+      "station": "forge",
+      "tier": 2,
+      "need": {
+        "items": [
+          [
+            "wolf_pelt",
+            3
+          ]
+        ],
+        "gold": 4050
+      },
+      "out": {
+        "base": "armor_leather",
+        "tier": 2,
+        "luckBias": 0
+      },
+      "ticks": 96,
+      "failRate": 0.18,
+      "skillMin": 0,
+      "seed": "硝水的气味在铺子里散开，皮子被撑在木架上慢慢变硬。"
+    },
+    {
+      "id": "rc_oak_shield",
+      "name": "橡木圆盾",
+      "station": "forge",
+      "tier": 2,
+      "need": {
+        "items": [
+          [
+            "wolf_pelt",
+            2
+          ],
+          [
+            "scrap_blade",
+            1
+          ]
+        ],
+        "gold": 4100
+      },
+      "out": {
+        "base": "shield_oak",
+        "tier": 2,
+        "luckBias": 0
+      },
+      "ticks": 120,
+      "failRate": 0.2,
+      "skillMin": 0,
+      "seed": "你给木盾包上铁边，敲上去是沉实的一声闷响。"
+    },
+    {
+      "id": "rc_steel_axe",
+      "name": "精钢战斧",
+      "station": "forge",
+      "tier": 3,
+      "need": {
+        "items": [
+          [
+            "blade_blank",
+            2
+          ],
+          [
+            "scrap_blade",
+            4
+          ],
+          [
+            "venom_gland",
+            1
+          ]
+        ],
+        "gold": 11300
+      },
+      "out": {
+        "base": "axe_steel",
+        "tier": 3,
+        "luckBias": 1
+      },
+      "ticks": 192,
+      "failRate": 0.24,
+      "skillMin": 3,
+      "seed": "斧刃在淬火槽里嘶了一声，矮人的锻法果然不是城里能学的。"
+    },
+    {
+      "id": "rc_chain_mail",
+      "name": "锁子甲",
+      "station": "forge",
+      "tier": 3,
+      "need": {
+        "items": [
+          [
+            "scrap_blade",
+            6
+          ],
+          [
+            "blade_blank",
+            1
+          ]
+        ],
+        "gold": 38160
+      },
+      "out": {
+        "base": "armor_chain",
+        "tier": 3,
+        "luckBias": 1
+      },
+      "ticks": 240,
+      "failRate": 0.25,
+      "skillMin": 3,
+      "seed": "数千枚铁环一枚枚扣合，甲衣在灯下像一片沉默的鳞。"
+    },
+    {
+      "id": "rc_star_blade",
+      "name": "星髓淬刃",
+      "station": "forge",
+      "tier": 4,
+      "need": {
+        "items": [
+          [
+            "star_marrow",
+            2
+          ],
+          [
+            "blade_blank",
+            1
+          ],
+          [
+            "platinum",
+            1
+          ]
+        ],
+        "gold": 0
+      },
+      "out": {
+        "base": "sword_iron",
+        "tier": 4,
+        "luckBias": 3
+      },
+      "ticks": 288,
+      "failRate": 0.25,
+      "skillMin": 6,
+      "needCodex": "s45",
+      "seed": "星髓在淬火槽里炸开一朵冷光，剑身在那一瞬间有了心跳。"
+    },
+    {
+      "id": "rc_starsteel",
+      "name": "星钢长刃",
+      "station": "forge",
+      "tier": 4,
+      "need": {
+        "items": [
+          [
+            "star_marrow",
+            3
+          ],
+          [
+            "star_shard",
+            2
+          ],
+          [
+            "blade_blank",
+            1
+          ]
+        ],
+        "gold": 0
+      },
+      "out": {
+        "base": "blade_starsteel",
+        "tier": 4,
+        "luckBias": 4
+      },
+      "ticks": 336,
+      "failRate": 0.28,
+      "skillMin": 8,
+      "seed": "你把星枢残片按进胚料，钢里便留下了一道怎么擦也擦不掉的星纹。"
+    },
+    {
+      "id": "rc_paste",
+      "name": "熬制药草膏",
+      "station": "alchemy",
+      "tier": 1,
+      "need": {
+        "items": [
+          [
+            "moonherb",
+            2
+          ]
+        ],
+        "gold": 40
+      },
+      "out": {
+        "item": "herb_paste",
+        "qty": 2
+      },
+      "ticks": 24,
+      "failRate": 0.08,
+      "skillMin": 0,
+      "seed": "药草在铜锅里慢慢化开，屋子里全是苦味。"
+    },
+    {
+      "id": "rc_antidote",
+      "name": "调配解毒剂",
+      "station": "alchemy",
+      "tier": 1,
+      "need": {
+        "items": [
+          [
+            "moonherb",
+            1
+          ],
+          [
+            "venom_gland",
+            1
+          ]
+        ],
+        "gold": 80
+      },
+      "out": {
+        "item": "antidote",
+        "qty": 1
+      },
+      "ticks": 36,
+      "failRate": 0.12,
+      "skillMin": 0,
+      "seed": "毒腺被剖开时还在抽动，你把滤液一滴一滴引出来。"
+    },
+    {
+      "id": "rc_holy_water",
+      "name": "祝圣清水",
+      "station": "alchemy",
+      "tier": 1,
+      "need": {
+        "items": [
+          [
+            "moonherb",
+            3
+          ]
+        ],
+        "gold": 150
+      },
+      "out": {
+        "item": "holy_water",
+        "qty": 1
+      },
+      "ticks": 48,
+      "failRate": 0.15,
+      "skillMin": 0,
+      "seed": "月光穿过窗棂落在水面上，你低声念完最后一段祷文。"
+    },
+    {
+      "id": "rc_moon_potion",
+      "name": "月光药剂",
+      "station": "alchemy",
+      "tier": 2,
+      "need": {
+        "items": [
+          [
+            "moonherb",
+            3
+          ],
+          [
+            "holy_water",
+            1
+          ]
+        ],
+        "gold": 250
+      },
+      "out": {
+        "item": "potion_moon",
+        "qty": 1
+      },
+      "ticks": 72,
+      "failRate": 0.2,
+      "skillMin": 0,
+      "seed": "满月甘露滴入瓶底，整瓶药水泛起一层微白的雾。"
+    },
+    {
+      "id": "rc_seal_rune",
+      "name": "摹制封魔符",
+      "station": "alchemy",
+      "tier": 2,
+      "need": {
+        "items": [
+          [
+            "star_shard",
+            1
+          ],
+          [
+            "holy_water",
+            1
+          ]
+        ],
+        "gold": 300
+      },
+      "out": {
+        "item": "seal_rune",
+        "qty": 1
+      },
+      "ticks": 96,
+      "failRate": 0.22,
+      "skillMin": 0,
+      "seed": "符纹收笔的那一瞬，纸上浮起一点凉意，随即隐去。"
+    },
+    {
+      "id": "rc_elixir_batch",
+      "name": "药膏铺量",
+      "station": "alchemy",
+      "tier": 1,
+      "need": {
+        "items": [
+          [
+            "moonherb",
+            4
+          ],
+          [
+            "herb_paste",
+            1
+          ]
+        ],
+        "gold": 120
+      },
+      "out": {
+        "item": "herb_paste",
+        "qty": 4
+      },
+      "ticks": 60,
+      "failRate": 0.1,
+      "skillMin": 0,
+      "seed": "你把熬好的膏分装进四只小陶罐。"
+    },
+    {
+      "id": "rc_marrow_refine",
+      "name": "残片提纯星髓",
+      "station": "alchemy",
+      "tier": 3,
+      "need": {
+        "items": [
+          [
+            "star_shard",
+            2
+          ]
+        ],
+        "gold": 500
+      },
+      "out": {
+        "item": "star_marrow",
+        "qty": 1
+      },
+      "ticks": 120,
+      "failRate": 0.3,
+      "skillMin": 2,
+      "seed": "残片在坩埚里熔成一滴不肯落下的银液。"
+    },
+    {
+      "id": "rc_star_tonic",
+      "name": "星髓补剂",
+      "station": "alchemy",
+      "tier": 3,
+      "need": {
+        "items": [
+          [
+            "star_marrow",
+            1
+          ],
+          [
+            "moonherb",
+            2
+          ]
+        ],
+        "gold": 600
+      },
+      "out": {
+        "item": "potion_moon",
+        "qty": 2
+      },
+      "ticks": 144,
+      "failRate": 0.24,
+      "skillMin": 4,
+      "seed": "星髓化进药液，瓶壁上留下细碎的星尘。"
+    },
+    {
+      "id": "rc_dust_dream",
+      "name": "迷幻粉配制",
+      "station": "alchemy",
+      "tier": 2,
+      "need": {
+        "items": [
+          [
+            "moonherb",
+            3
+          ],
+          [
+            "venom_gland",
+            2
+          ]
+        ],
+        "gold": 200
+      },
+      "out": {
+        "item": "dust_dream",
+        "qty": 1
+      },
+      "ticks": 60,
+      "failRate": 0.25,
+      "skillMin": 0,
+      "seed": "粉末在灯下泛着诡异的紫，你把它刮进皮纸包好。"
+    },
+    {
+      "id": "rc_rune_staff",
+      "name": "铭刻星辉法杖",
+      "station": "inscribe",
+      "tier": 3,
+      "need": {
+        "items": [
+          [
+            "staff_appr",
+            1
+          ],
+          [
+            "star_shard",
+            1
+          ]
+        ],
+        "gold": 90000
+      },
+      "out": {
+        "base": "staff_starforged",
+        "tier": 3,
+        "luckBias": 1
+      },
+      "ticks": 144,
+      "failRate": 0.2,
+      "skillMin": 2,
+      "seed": "杖身一圈圈浮起细小的符文，木纹里透出淡淡的蓝光。"
+    },
+    {
+      "id": "rc_seal_pair",
+      "name": "符纸摹双",
+      "station": "inscribe",
+      "tier": 2,
+      "need": {
+        "items": [
+          [
+            "seal_rune",
+            1
+          ],
+          [
+            "star_shard",
+            1
+          ]
+        ],
+        "gold": 200
+      },
+      "out": {
+        "item": "seal_rune",
+        "qty": 2
+      },
+      "ticks": 96,
+      "failRate": 0.2,
+      "skillMin": 0,
+      "seed": "两张符纸并排铺开，你的笔尖在两处同时落下。"
+    },
+    {
+      "id": "rc_ward_shield",
+      "name": "符纹加护",
+      "station": "inscribe",
+      "tier": 3,
+      "need": {
+        "items": [
+          [
+            "shield_oak",
+            1
+          ],
+          [
+            "star_shard",
+            2
+          ]
+        ],
+        "gold": 0
+      },
+      "out": {
+        "base": "shield_oak",
+        "tier": 4,
+        "luckBias": 2
+      },
+      "ticks": 168,
+      "failRate": 0.22,
+      "skillMin": 4,
+      "seed": "盾面上的符纹收成一个闭环，木料里传出一声低低的回响。"
+    },
+    {
+      "id": "rc_starforged_armor",
+      "name": "星锻重铠",
+      "station": "inscribe",
+      "tier": 4,
+      "need": {
+        "items": [
+          [
+            "armor_chain",
+            1
+          ],
+          [
+            "star_marrow",
+            2
+          ]
+        ],
+        "gold": 0
+      },
+      "out": {
+        "base": "armor_starforged",
+        "tier": 4,
+        "luckBias": 3
+      },
+      "ticks": 288,
+      "failRate": 0.28,
+      "skillMin": 6,
+      "seed": "你在甲片背面逐一敲下星纹，铠甲的重量似乎轻了一分。"
+    },
+    {
+      "id": "rc_void_dagger",
+      "name": "虚空蚀刃",
+      "station": "inscribe",
+      "tier": 4,
+      "need": {
+        "items": [
+          [
+            "dagger_black",
+            1
+          ],
+          [
+            "void_essence",
+            1
+          ]
+        ],
+        "gold": 0
+      },
+      "out": {
+        "base": "dagger_black",
+        "tier": 4,
+        "luckBias": 3
+      },
+      "ticks": 192,
+      "failRate": 0.25,
+      "skillMin": 4,
+      "seed": "虚空精华沾上刃口，匕首的边缘开始吞没周围的火光。"
+    },
+    {
+      "id": "rc_star_blade_finish",
+      "name": "星纹终淬",
+      "station": "inscribe",
+      "tier": 5,
+      "need": {
+        "items": [
+          [
+            "blade_starsteel",
+            1
+          ],
+          [
+            "star_marrow",
+            3
+          ],
+          [
+            "void_essence",
+            1
+          ]
+        ],
+        "gold": 0
+      },
+      "out": {
+        "base": "blade_void",
+        "tier": 5,
+        "luckBias": 6
+      },
+      "ticks": 432,
+      "failRate": 0.3,
+      "skillMin": 10,
+      "needCodex": "s45",
+      "seed": "长刃浸入星髓与虚空调和的水里，整间屋子安静得能听见自己心跳。"
+    },
+    {
+      "_comment": "卡 F2 · §53 材料用途：以下 12 条把 §46–§52 的魔物掉落接进工坊——它们此前只能卖钱。",
+      "id": "rc_slime_salve",
+      "name": "熬制史莱姆膏",
+      "station": "alchemy",
+      "tier": 1,
+      "need": {
+        "items": [
+          [
+            "slime_fluid",
+            3
+          ]
+        ],
+        "gold": 30
+      },
+      "out": {
+        "item": "herb_paste",
+        "qty": 3
+      },
+      "ticks": 36,
+      "failRate": 0.1,
+      "skillMin": 0,
+      "seed": "史莱姆液在铜锅里慢慢凝成胶，掺进碎草就是最便宜的那种伤药。"
+    },
+    {
+      "id": "rc_golem_plate",
+      "name": "魔像皮甲加衬",
+      "station": "forge",
+      "tier": 3,
+      "need": {
+        "items": [
+          [
+            "golem_core",
+            2
+          ],
+          [
+            "armor_leather",
+            1
+          ]
+        ],
+        "gold": 2000
+      },
+      "out": {
+        "base": "armor_leather",
+        "tier": 3,
+        "luckBias": 1
+      },
+      "ticks": 144,
+      "failRate": 0.15,
+      "skillMin": 2,
+      "seed": "你把魔像核心碾成粉，一层层熨进皮甲衬里——甲片从此会自己卸力。"
+    },
+    {
+      "id": "rc_worm_ward",
+      "name": "巨虫甲盾",
+      "station": "forge",
+      "tier": 3,
+      "need": {
+        "items": [
+          [
+            "worm_hide",
+            2
+          ],
+          [
+            "shield_oak",
+            1
+          ]
+        ],
+        "gold": 3000
+      },
+      "out": {
+        "base": "shield_oak",
+        "tier": 3,
+        "luckBias": 1
+      },
+      "ticks": 168,
+      "failRate": 0.18,
+      "skillMin": 3,
+      "seed": "巨虫皮鞣过之后绷在盾面上，敲上去是闷的——它不弹刀，它吃刀。"
+    },
+    {
+      "id": "rc_crystal_weave",
+      "name": "水晶丝锁甲",
+      "station": "forge",
+      "tier": 3,
+      "need": {
+        "items": [
+          [
+            "crystal_silk",
+            4
+          ],
+          [
+            "armor_leather",
+            1
+          ]
+        ],
+        "gold": 4000
+      },
+      "out": {
+        "base": "armor_chain",
+        "tier": 3,
+        "luckBias": 1
+      },
+      "ticks": 192,
+      "failRate": 0.2,
+      "skillMin": 4,
+      "seed": "晶丝穿过铁环的每一道接口，整件甲在灯下泛着细碎的光。"
+    },
+    {
+      "id": "rc_fusion_staff",
+      "name": "融合法杖",
+      "station": "inscribe",
+      "tier": 4,
+      "need": {
+        "items": [
+          [
+            "fusion_core",
+            1
+          ],
+          [
+            "staff_appr",
+            1
+          ]
+        ],
+        "gold": 0
+      },
+      "out": {
+        "base": "staff_appr",
+        "tier": 4,
+        "luckBias": 3
+      },
+      "ticks": 240,
+      "failRate": 0.25,
+      "skillMin": 5,
+      "seed": "融合核被剖成两半嵌进杖头——两股互相排斥的力量在木纹里终于讲和。"
+    },
+    {
+      "id": "rc_wraith_edge",
+      "name": "怨灵之盾",
+      "station": "inscribe",
+      "tier": 4,
+      "need": {
+        "items": [
+          [
+            "wraith_core",
+            1
+          ],
+          [
+            "shield_oak",
+            1
+          ]
+        ],
+        "gold": 0
+      },
+      "out": {
+        "base": "shield_oak",
+        "tier": 5,
+        "luckBias": 3
+      },
+      "ticks": 192,
+      "failRate": 0.25,
+      "skillMin": 5,
+      "seed": "怨灵核心化在盾面上，橡木没有变硬——它开始替持盾的人疼。"
+    },
+    {
+      "id": "rc_ancient_brand",
+      "name": "古代烙印",
+      "station": "inscribe",
+      "tier": 4,
+      "need": {
+        "items": [
+          [
+            "ancient_core",
+            2
+          ],
+          [
+            "armor_chain",
+            1
+          ]
+        ],
+        "gold": 0
+      },
+      "out": {
+        "base": "armor_starforged",
+        "tier": 4,
+        "luckBias": 3
+      },
+      "ticks": 288,
+      "failRate": 0.28,
+      "skillMin": 7,
+      "seed": "古代核心的纹路自己爬上了甲面——七千年了，它还记得该站在哪一边。"
+    },
+    {
+      "id": "rc_demon_axe",
+      "name": "恶魔蚀甲",
+      "station": "inscribe",
+      "tier": 5,
+      "need": {
+        "items": [
+          [
+            "demon_core",
+            1
+          ],
+          [
+            "armor_chain",
+            1
+          ]
+        ],
+        "gold": 0
+      },
+      "out": {
+        "base": "armor_starforged",
+        "tier": 4,
+        "luckBias": 4
+      },
+      "ticks": 336,
+      "failRate": 0.3,
+      "skillMin": 8,
+      "seed": "恶魔核心塞进斧脊，刃口开始渗出暗红的锈——那不是铁锈。"
+    },
+    {
+      "id": "rc_dragon_mail",
+      "name": "合成龙鳞甲",
+      "station": "inscribe",
+      "tier": 5,
+      "need": {
+        "items": [
+          [
+            "synth_dragon_scale",
+            2
+          ],
+          [
+            "armor_chain",
+            1
+          ]
+        ],
+        "gold": 0
+      },
+      "out": {
+        "base": "armor_starforged",
+        "tier": 5,
+        "luckBias": 5
+      },
+      "ticks": 384,
+      "failRate": 0.3,
+      "skillMin": 9,
+      "seed": "龙鳞一片片扣上锁甲——古代文明仿龙而造的东西，穿上却真像长了鳞。"
+    },
+    {
+      "id": "rc_floor_lord_blade",
+      "name": "节主之刃",
+      "station": "inscribe",
+      "tier": 5,
+      "need": {
+        "items": [
+          [
+            "floor_core",
+            2
+          ],
+          [
+            "blade_starsteel",
+            1
+          ]
+        ],
+        "gold": 0
+      },
+      "out": {
+        "base": "blade_starsteel",
+        "tier": 5,
+        "luckBias": 5
+      },
+      "ticks": 384,
+      "failRate": 0.3,
+      "skillMin": 9,
+      "seed": "两枚楼层核心投入坩埚，钢水浮起一层影子——每一层倒下的守关者都在里面。"
+    },
+    {
+      "id": "rc_void_quench",
+      "name": "虚空终淬",
+      "station": "inscribe",
+      "tier": 5,
+      "need": {
+        "items": [
+          [
+            "void_shard",
+            1
+          ],
+          [
+            "blade_void",
+            1
+          ]
+        ],
+        "gold": 0
+      },
+      "out": {
+        "base": "blade_void",
+        "tier": 5,
+        "luckBias": 6
+      },
+      "ticks": 432,
+      "failRate": 0.3,
+      "skillMin": 10,
+      "needCodex": "s45",
+      "seed": "虚空碎片贴着刃身化开——匕首吞掉的光比从前更多了一点。"
+    },
+    {
+      "id": "rc_lord_blade",
+      "name": "领主之刃",
+      "station": "inscribe",
+      "tier": 5,
+      "need": {
+        "items": [
+          [
+            "lord_core",
+            1
+          ],
+          [
+            "blade_void",
+            1
+          ]
+        ],
+        "gold": 0
+      },
+      "out": {
+        "base": "blade_void",
+        "tier": 5,
+        "luckBias": 7
+      },
+      "ticks": 432,
+      "failRate": 0.32,
+      "skillMin": 10,
+      "needCodex": "s45",
+      "seed": "领主核心嵌进杖顶的那一刻，整间铭刻台的法阵同时亮了一下又灭了。"
+    },
+    {
+      "id": "rc_moss_cleaver",
+      "name": "打磨苔纹砍刀",
+      "station": "forge",
+      "tier": 1,
+      "need": {
+        "items": [
+          [
+            "moss_ember",
+            2
+          ],
+          [
+            "scrap_blade",
+            1
+          ]
+        ],
+        "gold": 3000
+      },
+      "out": {
+        "base": "wpn_moss_cleaver",
+        "tier": 1
+      },
+      "ticks": 36,
+      "failRate": 0.08,
+      "skillMin": 0,
+      "seed": "苔绒蹭过刃口，铁上留下一层洗不掉的绿——刀认了这个主人。"
+    },
+    {
+      "id": "rc_ratfang_dirk",
+      "name": "镶嵌鼠牙匕",
+      "station": "forge",
+      "tier": 1,
+      "need": {
+        "items": [
+          [
+            "rat_tooth",
+            2
+          ],
+          [
+            "blade_blank",
+            1
+          ]
+        ],
+        "gold": 3200
+      },
+      "out": {
+        "base": "wpn_ratfang_dirk",
+        "tier": 1
+      },
+      "ticks": 36,
+      "failRate": 0.08,
+      "skillMin": 0,
+      "seed": "牙根磨成刃，短得只能贴身用。布伦丹说：这东西是给不怕死的人做的。"
+    },
+    {
+      "id": "rc_brick_mace",
+      "name": "压制砌道锤",
+      "station": "forge",
+      "tier": 2,
+      "need": {
+        "items": [
+          [
+            "brick_dust",
+            3
+          ],
+          [
+            "iron_vein",
+            2
+          ]
+        ],
+        "gold": 4500
+      },
+      "out": {
+        "base": "wpn_brick_mace",
+        "tier": 2
+      },
+      "ticks": 60,
+      "failRate": 0.12,
+      "skillMin": 1,
+      "seed": "古砖灰混进铁水，锤头冷却时表面浮出一圈旧砌道的纹路。"
+    },
+    {
+      "id": "rc_wormsilk_whip",
+      "name": "搓制虫丝鞭",
+      "station": "forge",
+      "tier": 3,
+      "need": {
+        "items": [
+          [
+            "worm_silk",
+            3
+          ],
+          [
+            "twist_bark",
+            3
+          ],
+          [
+            "armor_leather",
+            1
+          ]
+        ],
+        "gold": 5000
+      },
+      "out": {
+        "base": "wpn_wormsilk_whip",
+        "tier": 3
+      },
+      "ticks": 120,
+      "failRate": 0.18,
+      "skillMin": 3,
+      "seed": "白丝在掌心里自己找直，抽出去的一声比鞭子更细，也更远。"
+    },
+    {
+      "id": "rc_lavaglass_edge",
+      "name": "淬火熔璃长刃",
+      "station": "forge",
+      "tier": 3,
+      "need": {
+        "items": [
+          [
+            "lava_tear",
+            3
+          ],
+          [
+            "iron_vein",
+            2
+          ],
+          [
+            "sword_iron",
+            1
+          ]
+        ],
+        "gold": 6000
+      },
+      "out": {
+        "base": "wpn_lavaglass_edge",
+        "tier": 3
+      },
+      "ticks": 132,
+      "failRate": 0.2,
+      "skillMin": 3,
+      "seed": "熔泪贴在刃口上重新化开，锻台的火有一瞬间不是橙的。"
+    },
+    {
+      "id": "rc_bonelight_staff",
+      "name": "嵌镜骨灯杖",
+      "station": "inscribe",
+      "tier": 2,
+      "need": {
+        "items": [
+          [
+            "bone_coin",
+            3
+          ],
+          [
+            "rune_ash",
+            2
+          ],
+          [
+            "guardian_lens",
+            1
+          ]
+        ],
+        "gold": 3000
+      },
+      "out": {
+        "base": "wpn_bonelight_staff",
+        "tier": 2
+      },
+      "ticks": 72,
+      "failRate": 0.14,
+      "skillMin": 2,
+      "seed": "守卫镜片嵌进杖头，灯亮起来的时候，工坊里的影子全都朝着同一个方向倒。"
+    },
+    {
+      "id": "rc_demonhorn_axe",
+      "name": "缠柄魔角斧",
+      "station": "forge",
+      "tier": 4,
+      "need": {
+        "items": [
+          [
+            "demon_horn",
+            2
+          ],
+          [
+            "hell_sulfur",
+            2
+          ],
+          [
+            "torture_iron",
+            3
+          ],
+          [
+            "armor_chain",
+            1
+          ]
+        ],
+        "gold": 200000
+      },
+      "out": {
+        "base": "wpn_demonhorn_axe",
+        "tier": 4
+      },
+      "ticks": 240,
+      "failRate": 0.28,
+      "skillMin": 6,
+      "seed": "刑铁缠住斧柄的时候，整间铺子安静了一瞬——铁在躲这只手。"
+    },
+    {
+      "id": "rc_starnerve_spear",
+      "name": "穿脉星枪",
+      "station": "forge",
+      "tier": 5,
+      "need": {
+        "items": [
+          [
+            "star_nerve",
+            3
+          ],
+          [
+            "hollow_gear",
+            2
+          ],
+          [
+            "silent_bell",
+            1
+          ],
+          [
+            "armor_chain",
+            1
+          ]
+        ],
+        "gold": 320000
+      },
+      "out": {
+        "base": "wpn_starnerve_spear",
+        "tier": 5
+      },
+      "ticks": 420,
+      "failRate": 0.34,
+      "skillMin": 9,
+      "seed": "星脉穿进枪杆，枪身自己亮了一路。无声铃挂在尾端，摇了一整夜也没响。"
+    },
+    {
+      "id": "rc_voidsalt_saber",
+      "name": "结盐虚刃",
+      "station": "forge",
+      "tier": 5,
+      "need": {
+        "items": [
+          [
+            "void_salt",
+            3
+          ],
+          [
+            "starhub_alloy",
+            2
+          ],
+          [
+            "armor_chain",
+            1
+          ]
+        ],
+        "gold": 300000
+      },
+      "out": {
+        "base": "wpn_voidsalt_saber",
+        "tier": 5
+      },
+      "ticks": 396,
+      "failRate": 0.34,
+      "skillMin": 9,
+      "seed": "虚盐在刀脊上结了一层又一层。锻到最后，你发现自己记不清刀刚才朝哪边。"
+    },
+    {
+      "id": "rc_soulslag_blade",
+      "name": "淬渣魂刃",
+      "station": "inscribe",
+      "tier": 4,
+      "need": {
+        "items": [
+          [
+            "soul_slag",
+            3
+          ],
+          [
+            "abyss_ink",
+            1
+          ],
+          [
+            "blade_starsteel",
+            1
+          ]
+        ],
+        "gold": 0
+      },
+      "out": {
+        "base": "wpn_soulslag_blade",
+        "tier": 4
+      },
+      "ticks": 264,
+      "failRate": 0.26,
+      "skillMin": 6,
+      "seed": "渊墨顺着刃身渗进去，星钢上那道星纹暗了一格——它把光借走了。"
+    },
+    {
+      "id": "rc_salve_ember",
+      "name": "熬余烬膏",
+      "station": "alchemy",
+      "tier": 1,
+      "need": {
+        "items": [
+          [
+            "glow_lichen",
+            2
+          ]
+        ],
+        "gold": 60
+      },
+      "out": {
+        "item": "salve_ember",
+        "qty": 2
+      },
+      "ticks": 24,
+      "failRate": 0.08,
+      "skillMin": 0,
+      "seed": "地衣在铜锅里化成一滩绿，绿得比活着的时候更亮。"
+    },
+    {
+      "id": "rc_antidote_pure",
+      "name": "研净毒散",
+      "station": "alchemy",
+      "tier": 1,
+      "need": {
+        "items": [
+          [
+            "cave_pearl",
+            2
+          ],
+          [
+            "glow_lichen",
+            1
+          ]
+        ],
+        "gold": 120
+      },
+      "out": {
+        "item": "antidote_pure",
+        "qty": 2
+      },
+      "ticks": 30,
+      "failRate": 0.08,
+      "skillMin": 0,
+      "seed": "洞珠一捏就碎，粉末落进水里不沉，浮着转了两圈才化。"
+    },
+    {
+      "id": "rc_oil_flame",
+      "name": "浸引火油",
+      "station": "alchemy",
+      "tier": 2,
+      "need": {
+        "items": [
+          [
+            "moss_ember",
+            2
+          ],
+          [
+            "twist_bark",
+            2
+          ]
+        ],
+        "gold": 100
+      },
+      "out": {
+        "item": "oil_flame",
+        "qty": 2
+      },
+      "ticks": 36,
+      "failRate": 0.12,
+      "skillMin": 1,
+      "seed": "扭纹木皮泡出树脂，混着还没熄的苔芯。瓶子封口时，油面自己跳了一下。"
+    },
+    {
+      "id": "rc_tonic_ironblood",
+      "name": "泡铁血剂",
+      "station": "alchemy",
+      "tier": 2,
+      "need": {
+        "items": [
+          [
+            "iron_vein",
+            2
+          ],
+          [
+            "glow_lichen",
+            1
+          ]
+        ],
+        "gold": 200
+      },
+      "out": {
+        "item": "tonic_ironblood",
+        "qty": 2
+      },
+      "ticks": 48,
+      "failRate": 0.12,
+      "skillMin": 1,
+      "seed": "铁脉碎沉在酒底，一整晚都在冒极细的泡。第二天酒是灰的。"
+    },
+    {
+      "id": "rc_unguent_warm",
+      "name": "熬暖筋油",
+      "station": "alchemy",
+      "tier": 2,
+      "need": {
+        "items": [
+          [
+            "twist_bark",
+            2
+          ],
+          [
+            "glow_lichen",
+            1
+          ]
+        ],
+        "gold": 180
+      },
+      "out": {
+        "item": "unguent_warm",
+        "qty": 2
+      },
+      "ticks": 48,
+      "failRate": 0.12,
+      "skillMin": 1,
+      "seed": "木皮在油里重新拧了一遍，锅底的温度比手上的高。"
+    },
+    {
+      "id": "rc_powder_hemo",
+      "name": "磨断血粉",
+      "station": "alchemy",
+      "tier": 2,
+      "need": {
+        "items": [
+          [
+            "spider_glass",
+            1
+          ],
+          [
+            "bone_coin",
+            1
+          ]
+        ],
+        "gold": 150
+      },
+      "out": {
+        "item": "powder_hemo",
+        "qty": 2
+      },
+      "ticks": 48,
+      "failRate": 0.12,
+      "skillMin": 1,
+      "seed": "殉葬币磨了很久才肯碎。粉是暗红色的，落在案上会自己聚成一小堆。"
+    },
+    {
+      "id": "rc_incense_fervor",
+      "name": "捻锋锐香",
+      "station": "alchemy",
+      "tier": 2,
+      "need": {
+        "items": [
+          [
+            "rune_ash",
+            1
+          ],
+          [
+            "twist_bark",
+            1
+          ]
+        ],
+        "gold": 200
+      },
+      "out": {
+        "item": "incense_fervor",
+        "qty": 2
+      },
+      "ticks": 48,
+      "failRate": 0.12,
+      "skillMin": 1,
+      "seed": "符烬掺进树脂里捻成细条。点燃时烟是斜的，一直指着门口那排刀。"
+    },
+    {
+      "id": "rc_draught_bastion",
+      "name": "兑坚壁饮",
+      "station": "alchemy",
+      "tier": 2,
+      "need": {
+        "items": [
+          [
+            "brick_dust",
+            2
+          ],
+          [
+            "iron_vein",
+            1
+          ]
+        ],
+        "gold": 220
+      },
+      "out": {
+        "item": "draught_bastion",
+        "qty": 2
+      },
+      "ticks": 48,
+      "failRate": 0.12,
+      "skillMin": 1,
+      "seed": "砖灰兑水搅匀，浑得看不见底。喝之前没人不皱眉头。"
+    },
+    {
+      "id": "rc_tea_swift",
+      "name": "焙疾行茶",
+      "station": "alchemy",
+      "tier": 2,
+      "need": {
+        "items": [
+          [
+            "glow_lichen",
+            2
+          ],
+          [
+            "cave_pearl",
+            1
+          ]
+        ],
+        "gold": 160
+      },
+      "out": {
+        "item": "tea_swift",
+        "qty": 2
+      },
+      "ticks": 42,
+      "failRate": 0.12,
+      "skillMin": 1,
+      "seed": "地衣在铁锅里焙出焦边，一屋子人同时觉得时间变慢了——其实是自己快了。"
+    },
+    {
+      "id": "rc_draught_deep",
+      "name": "同煮深脉饮",
+      "station": "alchemy",
+      "tier": 3,
+      "need": {
+        "items": [
+          [
+            "ember_core",
+            1
+          ],
+          [
+            "lava_tear",
+            1
+          ]
+        ],
+        "gold": 900
+      },
+      "out": {
+        "item": "draught_deep",
+        "qty": 1
+      },
+      "ticks": 108,
+      "failRate": 0.18,
+      "skillMin": 3,
+      "seed": "余烬核在熔泪里重新亮起来，锅底的红一直没退，直到药灌进瓶。"
+    },
+    {
+      "id": "rc_ice_splinter",
+      "name": "冻制霜棱弹",
+      "station": "alchemy",
+      "tier": 3,
+      "need": {
+        "items": [
+          [
+            "cave_pearl",
+            2
+          ],
+          [
+            "spider_glass",
+            1
+          ]
+        ],
+        "gold": 500
+      },
+      "out": {
+        "item": "ice_splinter",
+        "qty": 1
+      },
+      "ticks": 96,
+      "failRate": 0.18,
+      "skillMin": 3,
+      "seed": "珠子里冻着一小片冬天。镜片对准它的时候，案上结了薄薄一层白。"
+    },
+    {
+      "id": "rc_salt_clear",
+      "name": "封制涤心盐",
+      "station": "alchemy",
+      "tier": 3,
+      "need": {
+        "items": [
+          [
+            "void_salt",
+            1
+          ],
+          [
+            "seal_wax",
+            1
+          ]
+        ],
+        "gold": 1400
+      },
+      "out": {
+        "item": "salt_clear",
+        "qty": 1
+      },
+      "ticks": 120,
+      "failRate": 0.2,
+      "skillMin": 3,
+      "seed": "虚盐混进封蜡，颜色先变白，再变得像没颜色的那种白。"
+    },
+    {
+      "id": "rc_oil_oracle",
+      "name": "调神启油",
+      "station": "alchemy",
+      "tier": 3,
+      "need": {
+        "items": [
+          [
+            "rune_ash",
+            3
+          ],
+          [
+            "spider_glass",
+            2
+          ]
+        ],
+        "gold": 900
+      },
+      "out": {
+        "item": "oil_oracle",
+        "qty": 1
+      },
+      "ticks": 120,
+      "failRate": 0.2,
+      "skillMin": 3,
+      "seed": "符烬磨到极细，油面上浮出一行谁也没写的字，抹开就没了。"
+    },
+    {
+      "id": "rc_paste_warcry",
+      "name": "拌战吼膏",
+      "station": "alchemy",
+      "tier": 3,
+      "need": {
+        "items": [
+          [
+            "rune_ash",
+            2
+          ],
+          [
+            "seal_wax",
+            1
+          ]
+        ],
+        "gold": 600
+      },
+      "out": {
+        "item": "paste_warcry",
+        "qty": 1
+      },
+      "ticks": 108,
+      "failRate": 0.2,
+      "skillMin": 3,
+      "seed": "蜡在碗里化开时发出一声很低的响——像有人隔着墙清了清嗓子。"
+    },
+    {
+      "id": "rc_incense_ironwall",
+      "name": "焚铁壁香",
+      "station": "alchemy",
+      "tier": 3,
+      "need": {
+        "items": [
+          [
+            "seal_wax",
+            2
+          ],
+          [
+            "brick_dust",
+            2
+          ]
+        ],
+        "gold": 500
+      },
+      "out": {
+        "item": "incense_ironwall",
+        "qty": 1
+      },
+      "ticks": 114,
+      "failRate": 0.2,
+      "skillMin": 3,
+      "seed": "封蜡裹着砖灰慢慢烧，烟沉在离地半尺的地方，一直没散。"
+    },
+    {
+      "id": "rc_knife_web",
+      "name": "开齿割网刀",
+      "station": "forge",
+      "tier": 1,
+      "need": {
+        "items": [
+          [
+            "scrap_blade",
+            1
+          ],
+          [
+            "twist_bark",
+            1
+          ]
+        ],
+        "gold": 60
+      },
+      "out": {
+        "item": "knife_web",
+        "qty": 1
+      },
+      "ticks": 24,
+      "failRate": 0.08,
+      "skillMin": 0,
+      "seed": "刃口一格一格地锉出细齿。布伦丹说：这不算兵器，算门手艺。"
+    },
+    {
+      "id": "rc_piton_iron",
+      "name": "锻铁脉岩钉",
+      "station": "forge",
+      "tier": 1,
+      "need": {
+        "items": [
+          [
+            "iron_vein",
+            1
+          ],
+          [
+            "scrap_blade",
+            2
+          ]
+        ],
+        "gold": 120
+      },
+      "out": {
+        "item": "piton_iron",
+        "qty": 1
+      },
+      "ticks": 30,
+      "failRate": 0.08,
+      "skillMin": 0,
+      "seed": "六枚一束，敲进试石的时候声音很闷——那说明它吃住了。"
+    },
+    {
+      "id": "rc_shears_bone",
+      "name": "熔铸骨剪",
+      "station": "forge",
+      "tier": 2,
+      "need": {
+        "items": [
+          [
+            "bone_coin",
+            2
+          ],
+          [
+            "scrap_blade",
+            1
+          ]
+        ],
+        "gold": 200
+      },
+      "out": {
+        "item": "shears_bone",
+        "qty": 1
+      },
+      "ticks": 48,
+      "failRate": 0.12,
+      "skillMin": 1,
+      "seed": "殉葬币熔开的时候不肯聚成一团，倒像是有别的东西在里面撑着。"
+    },
+    {
+      "id": "rc_hook_grapnel",
+      "name": "打制三爪钩",
+      "station": "forge",
+      "tier": 2,
+      "need": {
+        "items": [
+          [
+            "iron_vein",
+            2
+          ],
+          [
+            "blade_blank",
+            1
+          ]
+        ],
+        "gold": 240
+      },
+      "out": {
+        "item": "hook_grapnel",
+        "qty": 1
+      },
+      "ticks": 54,
+      "failRate": 0.12,
+      "skillMin": 1,
+      "seed": "三个爪往三个方向弯开，挂在梁上试了三次，第三次就再没掉下来。"
+    },
+    {
+      "id": "rc_rope_wormsilk",
+      "name": "搓虫丝绳",
+      "station": "forge",
+      "tier": 2,
+      "need": {
+        "items": [
+          [
+            "worm_silk",
+            2
+          ],
+          [
+            "twist_bark",
+            2
+          ]
+        ],
+        "gold": 300
+      },
+      "out": {
+        "item": "rope_wormsilk",
+        "qty": 1
+      },
+      "ticks": 60,
+      "failRate": 0.12,
+      "skillMin": 1,
+      "seed": "丝在掌心里不肯打结，只能顺着它的性子编。编到三十尺，你手上有了一道白印。"
+    },
+    {
+      "id": "rc_mask_gas",
+      "name": "缝滤烟面罩",
+      "station": "forge",
+      "tier": 2,
+      "need": {
+        "items": [
+          [
+            "twist_bark",
+            3
+          ],
+          [
+            "rune_ash",
+            1
+          ]
+        ],
+        "gold": 380
+      },
+      "out": {
+        "item": "mask_gas",
+        "qty": 1
+      },
+      "ticks": 54,
+      "failRate": 0.14,
+      "skillMin": 1,
+      "seed": "符烬垫在最里层。戴上之后，你自己的呼吸声变得很陌生。"
+    },
+    {
+      "id": "rc_arm_moss_jerkin",
+      "name": "鞣制苔纹皮甲",
+      "station": "forge",
+      "tier": 1,
+      "need": {
+        "items": [
+          [
+            "armor_leather",
+            1
+          ],
+          [
+            "moss_ember",
+            2
+          ],
+          [
+            "twist_bark",
+            2
+          ]
+        ],
+        "gold": 1200
+      },
+      "out": {
+        "base": "arm_moss_jerkin",
+        "tier": 1
+      },
+      "ticks": 72,
+      "failRate": 0.1,
+      "skillMin": 0,
+      "seed": "苔浆刷上皮面，晾了三天。第四天一看，苔还活着。"
+    },
+    {
+      "id": "rc_arm_rat_cloak",
+      "name": "拼缝鼠皮斗篷",
+      "station": "forge",
+      "tier": 1,
+      "need": {
+        "items": [
+          [
+            "wolf_pelt",
+            3
+          ],
+          [
+            "rat_tooth",
+            2
+          ]
+        ],
+        "gold": 1600
+      },
+      "out": {
+        "base": "arm_rat_cloak",
+        "tier": 1
+      },
+      "ticks": 66,
+      "failRate": 0.1,
+      "skillMin": 0,
+      "seed": "一百多张皮拼在一起，缝到最后你自己也分不清哪张是哪张。"
+    },
+    {
+      "id": "rc_arm_glow_cloak",
+      "name": "织荧光斗篷",
+      "station": "forge",
+      "tier": 2,
+      "need": {
+        "items": [
+          [
+            "cloth",
+            1
+          ],
+          [
+            "glow_lichen",
+            3
+          ]
+        ],
+        "gold": 3000
+      },
+      "out": {
+        "base": "arm_glow_cloak",
+        "tier": 2
+      },
+      "ticks": 96,
+      "failRate": 0.14,
+      "skillMin": 1,
+      "seed": "地衣的丝织进布里，整间屋子的灯都可以灭掉了。"
+    },
+    {
+      "id": "rc_arm_seal_gambeson",
+      "name": "夹层封蜡软甲",
+      "station": "forge",
+      "tier": 2,
+      "need": {
+        "items": [
+          [
+            "armor_leather",
+            1
+          ],
+          [
+            "seal_wax",
+            3
+          ]
+        ],
+        "gold": 2800
+      },
+      "out": {
+        "base": "arm_seal_gambeson",
+        "tier": 2
+      },
+      "ticks": 102,
+      "failRate": 0.14,
+      "skillMin": 1,
+      "seed": "蜡化开灌进夹层，冷却之后按上去，它会慢慢地弹回来。"
+    },
+    {
+      "id": "rc_arm_bone_scale",
+      "name": "缝制骨鳞胸甲",
+      "station": "forge",
+      "tier": 2,
+      "need": {
+        "items": [
+          [
+            "armor_leather",
+            1
+          ],
+          [
+            "bone_coin",
+            3
+          ],
+          [
+            "worm_silk",
+            1
+          ]
+        ],
+        "gold": 3000
+      },
+      "out": {
+        "base": "arm_bone_scale",
+        "tier": 2
+      },
+      "ticks": 114,
+      "failRate": 0.14,
+      "skillMin": 1,
+      "seed": "骨片一片压一片，缝线走的是虫丝。穿上它走路会响，那是骨在互相打招呼。"
+    },
+    {
+      "id": "rc_arm_brick_aegis",
+      "name": "压实砌道盾",
+      "station": "forge",
+      "tier": 2,
+      "need": {
+        "items": [
+          [
+            "shield_oak",
+            1
+          ],
+          [
+            "brick_dust",
+            3
+          ],
+          [
+            "iron_vein",
+            2
+          ]
+        ],
+        "gold": 3200
+      },
+      "out": {
+        "base": "arm_brick_aegis",
+        "tier": 2
+      },
+      "ticks": 108,
+      "failRate": 0.14,
+      "skillMin": 1,
+      "seed": "砖灰掺进铆钉孔里，盾面浮出一圈旧砌道的缝。"
+    },
+    {
+      "id": "rc_arm_lavaglass_plate",
+      "name": "压制熔璃鳞甲",
+      "station": "forge",
+      "tier": 3,
+      "need": {
+        "items": [
+          [
+            "armor_chain",
+            1
+          ],
+          [
+            "lava_tear",
+            3
+          ],
+          [
+            "ember_core",
+            1
+          ]
+        ],
+        "gold": 5000
+      },
+      "out": {
+        "base": "arm_lavaglass_plate",
+        "tier": 3
+      },
+      "ticks": 156,
+      "failRate": 0.2,
+      "skillMin": 3,
+      "seed": "熔泪压成鳞片，一片压一片。压到第七片，铁砧自己烫得站不住手。"
+    },
+    {
+      "id": "rc_arm_alloy_buckler",
+      "name": "敲制合金圆盾",
+      "station": "forge",
+      "tier": 3,
+      "need": {
+        "items": [
+          [
+            "shield_oak",
+            1
+          ],
+          [
+            "starhub_alloy",
+            2
+          ]
+        ],
+        "gold": 6500
+      },
+      "out": {
+        "base": "arm_alloy_buckler",
+        "tier": 3
+      },
+      "ticks": 150,
+      "failRate": 0.2,
+      "skillMin": 3,
+      "seed": "合金板敲成圆的以后，自己又慢慢往回退了一点——它在记自己原来的形状。"
+    },
+    {
+      "id": "rc_arm_demonhide",
+      "name": "揉制魔角皮铠",
+      "station": "forge",
+      "tier": 4,
+      "need": {
+        "items": [
+          [
+            "armor_chain",
+            1
+          ],
+          [
+            "demon_horn",
+            2
+          ],
+          [
+            "torture_iron",
+            2
+          ]
+        ],
+        "gold": 80000
+      },
+      "out": {
+        "base": "arm_demonhide",
+        "tier": 4
+      },
+      "ticks": 276,
+      "failRate": 0.28,
+      "skillMin": 6,
+      "seed": "魔角粉混进皮料，铠上的纹路随你呼吸一张一合——它以为自己是活的。"
+    },
+    {
+      "id": "rc_arm_torture_plate",
+      "name": "铆接刑铁重铠",
+      "station": "forge",
+      "tier": 4,
+      "need": {
+        "items": [
+          [
+            "armor_chain",
+            1
+          ],
+          [
+            "torture_iron",
+            4
+          ]
+        ],
+        "gold": 100000
+      },
+      "out": {
+        "base": "arm_torture_plate",
+        "tier": 4
+      },
+      "ticks": 300,
+      "failRate": 0.28,
+      "skillMin": 6,
+      "seed": "刑铁铆上去的时候，整间铺子的铁器同时发出了一声很低的响。"
+    },
+    {
+      "id": "rc_arm_voidsalt_shell",
+      "name": "结壳虚盐甲",
+      "station": "forge",
+      "tier": 5,
+      "need": {
+        "items": [
+          [
+            "armor_chain",
+            1
+          ],
+          [
+            "void_salt",
+            3
+          ],
+          [
+            "starhub_alloy",
+            2
+          ]
+        ],
+        "gold": 260000
+      },
+      "out": {
+        "base": "arm_voidsalt_shell",
+        "tier": 5
+      },
+      "ticks": 408,
+      "failRate": 0.34,
+      "skillMin": 9,
+      "seed": "虚盐一层层结上去，结到后来，你自己也记不清甲原来有多厚。"
+    },
+    {
+      "id": "rc_arm_starweave",
+      "name": "穿脉织甲",
+      "station": "forge",
+      "tier": 5,
+      "need": {
+        "items": [
+          [
+            "armor_chain",
+            1
+          ],
+          [
+            "star_nerve",
+            3
+          ],
+          [
+            "silent_bell",
+            1
+          ]
+        ],
+        "gold": 240000
+      },
+      "out": {
+        "base": "arm_starweave",
+        "tier": 5
+      },
+      "ticks": 432,
+      "failRate": 0.34,
+      "skillMin": 9,
+      "seed": "星脉穿进甲里，明暗跟着你的心跳走。织到最后一针，它先你一步暗了下去。"
+    },
+    {
+      "id": "rc_lamp_moss",
+      "name": "封制苔灯",
+      "station": "alchemy",
+      "tier": 1,
+      "need": {
+        "items": [
+          [
+            "moss_ember",
+            2
+          ],
+          [
+            "glow_lichen",
+            1
+          ]
+        ],
+        "gold": 80
+      },
+      "out": {
+        "item": "lamp_moss",
+        "qty": 1
+      },
+      "ticks": 24,
+      "failRate": 0.08,
+      "skillMin": 0,
+      "seed": "鳔壳封口的时候，里面的苔忽然亮了一下，像是知道自己要被带走了。"
+    },
+    {
+      "id": "rc_jar_glow",
+      "name": "兑地衣瓶",
+      "station": "alchemy",
+      "tier": 1,
+      "need": {
+        "items": [
+          [
+            "glow_lichen",
+            2
+          ],
+          [
+            "cave_pearl",
+            1
+          ]
+        ],
+        "gold": 90
+      },
+      "out": {
+        "item": "jar_glow",
+        "qty": 1
+      },
+      "ticks": 24,
+      "failRate": 0.08,
+      "skillMin": 0,
+      "seed": "摇匀之后，瓶子里的光是会走的——你把它放倒，光就贴在下面那面。"
+    },
+    {
+      "id": "rc_stone_warm",
+      "name": "压暖石",
+      "station": "alchemy",
+      "tier": 1,
+      "need": {
+        "items": [
+          [
+            "ember_core",
+            1
+          ],
+          [
+            "brick_dust",
+            1
+          ]
+        ],
+        "gold": 260
+      },
+      "out": {
+        "item": "stone_warm",
+        "qty": 1
+      },
+      "ticks": 42,
+      "failRate": 0.1,
+      "skillMin": 0,
+      "seed": "余烬核的碎渣混着砖灰压实。成品揣进怀里，一整夜都没凉。"
+    },
+    {
+      "id": "rc_pouch_spore",
+      "name": "装孢子袋",
+      "station": "alchemy",
+      "tier": 2,
+      "need": {
+        "items": [
+          [
+            "glow_lichen",
+            2
+          ],
+          [
+            "spider_glass",
+            1
+          ]
+        ],
+        "gold": 220
+      },
+      "out": {
+        "item": "pouch_spore",
+        "qty": 1
+      },
+      "ticks": 48,
+      "failRate": 0.12,
+      "skillMin": 1,
+      "seed": "孢子装进袋里还在吃灰，袋壁越来越亮，袋里的空气越来越清。"
+    },
+    {
+      "id": "rc_bladder_deep",
+      "name": "缝深潜气囊",
+      "station": "alchemy",
+      "tier": 3,
+      "need": {
+        "items": [
+          [
+            "worm_silk",
+            2
+          ],
+          [
+            "void_salt",
+            1
+          ]
+        ],
+        "gold": 600
+      },
+      "out": {
+        "item": "bladder_deep",
+        "qty": 1
+      },
+      "ticks": 120,
+      "failRate": 0.18,
+      "skillMin": 3,
+      "seed": "气囊灌满的时候没有鼓起来——虚盐吃掉了那部分体积，空气还在，只是不占地方。"
+    },
+    {
+      "id": "rc_tal_purge",
+      "name": "朱书净身符",
+      "station": "alchemy",
+      "tier": 3,
+      "need": {
+        "items": [
+          [
+            "void_salt",
+            1
+          ],
+          [
+            "seal_wax",
+            2
+          ]
+        ],
+        "gold": 900
+      },
+      "out": {
+        "item": "tal_purge",
+        "qty": 1
+      },
+      "ticks": 126,
+      "failRate": 0.2,
+      "skillMin": 3,
+      "seed": "符成的时候整张纸从里往外烧了一遍，却没焦。"
+    },
+    {
+      "id": "rc_charm_ward",
+      "name": "祝圣驱邪护符",
+      "station": "inscribe",
+      "tier": 2,
+      "need": {
+        "items": [
+          [
+            "holy_water",
+            1
+          ],
+          [
+            "rune_ash",
+            1
+          ]
+        ],
+        "gold": 420
+      },
+      "out": {
+        "item": "charm_ward",
+        "qty": 1
+      },
+      "ticks": 72,
+      "failRate": 0.14,
+      "skillMin": 2,
+      "seed": "祷文刻到一半的时候，铁片自己烫了一下——它认下了后半句。"
+    },
+    {
+      "id": "rc_compass_vein",
+      "name": "调地脉罗盘",
+      "station": "inscribe",
+      "tier": 2,
+      "need": {
+        "items": [
+          [
+            "starhub_alloy",
+            1
+          ],
+          [
+            "iron_vein",
+            2
+          ]
+        ],
+        "gold": 400
+      },
+      "out": {
+        "item": "compass_vein",
+        "qty": 1
+      },
+      "ticks": 78,
+      "failRate": 0.14,
+      "skillMin": 2,
+      "seed": "指针装上去先是乱转，转够了才停下来，指着脚下。"
+    },
+    {
+      "id": "rc_lens_detect",
+      "name": "磨辨伪镜",
+      "station": "inscribe",
+      "tier": 2,
+      "need": {
+        "items": [
+          [
+            "spider_glass",
+            2
+          ],
+          [
+            "seal_wax",
+            1
+          ]
+        ],
+        "gold": 460
+      },
+      "out": {
+        "item": "lens_detect",
+        "qty": 1
+      },
+      "ticks": 84,
+      "failRate": 0.16,
+      "skillMin": 2,
+      "seed": "镜片磨到第三遍，你在里面看见工坊的墙眨了一下眼。"
+    },
+    {
+      "id": "rc_bell_still",
+      "name": "拆静音铃",
+      "station": "inscribe",
+      "tier": 3,
+      "need": {
+        "items": [
+          [
+            "seal_wax",
+            2
+          ],
+          [
+            "rune_ash",
+            2
+          ]
+        ],
+        "gold": 700
+      },
+      "out": {
+        "item": "bell_still",
+        "qty": 1
+      },
+      "ticks": 132,
+      "failRate": 0.2,
+      "skillMin": 3,
+      "seed": "内胆取出来的时候，整间铭刻台安静了半刻——它把声音留在了铃壳里。"
+    },
+    {
+      "id": "rc_lantern_star",
+      "name": "焊星纹提灯",
+      "station": "inscribe",
+      "tier": 3,
+      "need": {
+        "items": [
+          [
+            "starhub_alloy",
+            2
+          ],
+          [
+            "glow_lichen",
+            2
+          ]
+        ],
+        "gold": 800
+      },
+      "out": {
+        "item": "lantern_star",
+        "qty": 1
+      },
+      "ticks": 144,
+      "failRate": 0.2,
+      "skillMin": 3,
+      "seed": "灯罩焊好之后，光出来是一圈一圈的。你把灯举高，墙上那些刻痕自己浮了起来。"
+    },
+    {
+      "id": "rc_veil_abyss",
+      "name": "染渊墨披巾",
+      "station": "inscribe",
+      "tier": 3,
+      "need": {
+        "items": [
+          [
+            "abyss_ink",
+            1
+          ],
+          [
+            "worm_silk",
+            2
+          ]
+        ],
+        "gold": 900
+      },
+      "out": {
+        "item": "veil_abyss",
+        "qty": 1
+      },
+      "ticks": 138,
+      "failRate": 0.2,
+      "skillMin": 3,
+      "seed": "渊墨渗进布里，颜色先是变深，再变得像是把周围的深都吸了一点过来。"
+    },
+    {
+      "id": "rc_plate_guard",
+      "name": "磨守卫残片",
+      "station": "inscribe",
+      "tier": 3,
+      "need": {
+        "items": [
+          [
+            "guardian_lens",
+            1
+          ],
+          [
+            "seal_wax",
+            2
+          ]
+        ],
+        "gold": 700
+      },
+      "out": {
+        "item": "plate_guard",
+        "qty": 1
+      },
+      "ticks": 126,
+      "failRate": 0.2,
+      "skillMin": 3,
+      "seed": "镜片崩下的一角磨圆了。磨的时候它一直想恢复原来的角度。"
+    },
+    {
+      "id": "rc_tal_ember",
+      "name": "朱书引火符",
+      "station": "inscribe",
+      "tier": 1,
+      "need": {
+        "items": [
+          [
+            "holy_water",
+            1
+          ],
+          [
+            "rune_ash",
+            1
+          ]
+        ],
+        "gold": 60
+      },
+      "out": {
+        "item": "tal_ember",
+        "qty": 2
+      },
+      "ticks": 24,
+      "failRate": 0.08,
+      "skillMin": 0,
+      "seed": "半个火字写上去，剩下半个是纸自己烧出来的。"
+    },
+    {
+      "id": "rc_tal_bind",
+      "name": "朱书缚地符",
+      "station": "inscribe",
+      "tier": 2,
+      "need": {
+        "items": [
+          [
+            "rune_ash",
+            2
+          ],
+          [
+            "twist_bark",
+            1
+          ]
+        ],
+        "gold": 180
+      },
+      "out": {
+        "item": "tal_bind",
+        "qty": 2
+      },
+      "ticks": 54,
+      "failRate": 0.12,
+      "skillMin": 2,
+      "seed": "写到最后一笔，笔尖被纸咬住了半瞬。"
+    },
+    {
+      "id": "rc_tal_flame",
+      "name": "朱书灼炎符",
+      "station": "inscribe",
+      "tier": 2,
+      "need": {
+        "items": [
+          [
+            "moss_ember",
+            2
+          ],
+          [
+            "rune_ash",
+            2
+          ]
+        ],
+        "gold": 220
+      },
+      "out": {
+        "item": "tal_flame",
+        "qty": 2
+      },
+      "ticks": 60,
+      "failRate": 0.14,
+      "skillMin": 2,
+      "seed": "还在燃着的苔芯被碾进墨里。这一批符的边角都是焦的，但烧不起来。"
+    },
+    {
+      "id": "rc_tal_frost",
+      "name": "朱书缚霜符",
+      "station": "inscribe",
+      "tier": 2,
+      "need": {
+        "items": [
+          [
+            "cave_pearl",
+            2
+          ],
+          [
+            "rune_ash",
+            2
+          ]
+        ],
+        "gold": 240
+      },
+      "out": {
+        "item": "tal_frost",
+        "qty": 2
+      },
+      "ticks": 60,
+      "failRate": 0.14,
+      "skillMin": 2,
+      "seed": "洞珠研进墨里，砚台表面结了一层薄白。写完最后一张，墨又化开了。"
+    },
+    {
+      "id": "rc_tal_edge",
+      "name": "朱书锐金符",
+      "station": "inscribe",
+      "tier": 2,
+      "need": {
+        "items": [
+          [
+            "iron_vein",
+            2
+          ],
+          [
+            "rune_ash",
+            2
+          ]
+        ],
+        "gold": 240
+      },
+      "out": {
+        "item": "tal_edge",
+        "qty": 2
+      },
+      "ticks": 60,
+      "failRate": 0.14,
+      "skillMin": 2,
+      "seed": "铁脉碎的星点磨进墨里。符纸的边变得很利，割了你一次。"
+    },
+    {
+      "id": "rc_tal_bulwark",
+      "name": "朱书磐石符",
+      "station": "inscribe",
+      "tier": 2,
+      "need": {
+        "items": [
+          [
+            "brick_dust",
+            2
+          ],
+          [
+            "rune_ash",
+            2
+          ]
+        ],
+        "gold": 240
+      },
+      "out": {
+        "item": "tal_bulwark",
+        "qty": 2
+      },
+      "ticks": 60,
+      "failRate": 0.14,
+      "skillMin": 2,
+      "seed": "古砖灰调的墨写出来的字是方的，方到纸的两角都翘了。"
+    },
+    {
+      "id": "rc_tal_haste",
+      "name": "朱书风足符",
+      "station": "inscribe",
+      "tier": 2,
+      "need": {
+        "items": [
+          [
+            "glow_lichen",
+            2
+          ],
+          [
+            "rune_ash",
+            2
+          ]
+        ],
+        "gold": 200
+      },
+      "out": {
+        "item": "tal_haste",
+        "qty": 2
+      },
+      "ticks": 54,
+      "failRate": 0.12,
+      "skillMin": 2,
+      "seed": "符纸晾在窗边，一直朝后飘。你按住它，它就在你手底下抖。"
+    },
+    {
+      "id": "rc_tal_twin",
+      "name": "朱书双纹符",
+      "station": "inscribe",
+      "tier": 3,
+      "need": {
+        "items": [
+          [
+            "seal_wax",
+            2
+          ],
+          [
+            "rune_ash",
+            3
+          ]
+        ],
+        "gold": 1000
+      },
+      "out": {
+        "item": "tal_twin",
+        "qty": 1
+      },
+      "ticks": 144,
+      "failRate": 0.22,
+      "skillMin": 3,
+      "seed": "一张纸正反两面各写一道。翻面的时候你屏住了呼吸——怕吹花，也怕它先亮。"
+    },
+    {
+      "id": "rc_arm_ember_gauntlet",
+      "name": "嵌烬护手",
+      "station": "inscribe",
+      "tier": 2,
+      "need": {
+        "items": [
+          [
+            "armor_leather",
+            1
+          ],
+          [
+            "ember_core",
+            2
+          ]
+        ],
+        "gold": 2500
+      },
+      "out": {
+        "base": "arm_ember_gauntlet",
+        "tier": 2
+      },
+      "ticks": 108,
+      "failRate": 0.16,
+      "skillMin": 2,
+      "seed": "碎渣一颗颗嵌进指节。握拳的时候，指缝漏出的光是红的。"
+    },
+    {
+      "id": "rc_arm_crystal_ward",
+      "name": "编水晶丝护壁",
+      "station": "inscribe",
+      "tier": 3,
+      "need": {
+        "items": [
+          [
+            "armor_leather",
+            1
+          ],
+          [
+            "spider_glass",
+            3
+          ]
+        ],
+        "gold": 6000
+      },
+      "out": {
+        "base": "arm_crystal_ward",
+        "tier": 3
+      },
+      "ticks": 162,
+      "failRate": 0.2,
+      "skillMin": 3,
+      "seed": "水晶丝编到第七层，光打上去已经散成了很多小块。据说它会替主人先碎一次。"
+    },
+    {
+      "id": "rc_arm_lens_hood",
+      "name": "缝镜片兜帽",
+      "station": "inscribe",
+      "tier": 3,
+      "need": {
+        "items": [
+          [
+            "cloth",
+            1
+          ],
+          [
+            "guardian_lens",
+            1
+          ]
+        ],
+        "gold": 7000
+      },
+      "out": {
+        "base": "arm_lens_hood",
+        "tier": 3
+      },
+      "ticks": 168,
+      "failRate": 0.22,
+      "skillMin": 3,
+      "seed": "碎片排成一圈缝进帽檐。戴上之后，你看见的东西比旁人多一层。"
+    },
+    {
+      "id": "rc_arm_wormsilk_robe",
+      "name": "织虫丝长袍",
+      "station": "inscribe",
+      "tier": 3,
+      "need": {
+        "items": [
+          [
+            "cloth",
+            1
+          ],
+          [
+            "worm_silk",
+            3
+          ]
+        ],
+        "gold": 5000
+      },
+      "out": {
+        "base": "arm_wormsilk_robe",
+        "tier": 3
+      },
+      "ticks": 156,
+      "failRate": 0.2,
+      "skillMin": 3,
+      "seed": "整件袍子没有一道缝——丝自己长在了一起。你试着抬袖，它比你先动。"
+    },
+    {
+      "id": "rc_arm_soulguard",
+      "name": "淬渣护心",
+      "station": "inscribe",
+      "tier": 4,
+      "need": {
+        "items": [
+          [
+            "armor_chain",
+            1
+          ],
+          [
+            "soul_slag",
+            3
+          ],
+          [
+            "abyss_ink",
+            1
+          ]
+        ],
+        "gold": 60000
+      },
+      "out": {
+        "base": "arm_soulguard",
+        "tier": 4
+      },
+      "ticks": 288,
+      "failRate": 0.28,
+      "skillMin": 6,
+      "seed": "魂渣压成的护心片轻得像没有。你的手穿过去一次，第二次它才接住。"
+    },
+    {
+      "id": "rc_arm_silent_mantle",
+      "name": "裁无声披风",
+      "station": "inscribe",
+      "tier": 4,
+      "need": {
+        "items": [
+          [
+            "armor_chain",
+            1
+          ],
+          [
+            "silent_bell",
+            1
+          ],
+          [
+            "worm_silk",
+            3
+          ]
+        ],
+        "gold": 60000
+      },
+      "out": {
+        "base": "arm_silent_mantle",
+        "tier": 4
+      },
+      "ticks": 294,
+      "failRate": 0.28,
+      "skillMin": 6,
+      "seed": "钟衣裁开之后，布面上没有声音，只有一层压着的安静。"
+    },
+    {
+      "id": "rc_food_lamb_chop",
+      "name": "炙烤羊排",
+      "station": "alchemy",
+      "tier": 1,
+      "need": {
+        "items": [
+          [
+            "rabbit_meat",
+            2
+          ],
+          [
+            "salt_abyss",
+            1
+          ]
+        ],
+        "gold": 60
+      },
+      "out": {
+        "item": "food_lamb_chop",
+        "qty": 2
+      },
+      "ticks": 24,
+      "failRate": 0.08,
+      "skillMin": 0,
+      "seed": "铁架上的油滴进火里，一响一响。切肉的刀是金属的，因为中央大陆讲究这个。"
+    },
+    {
+      "id": "rc_food_stew_beef",
+      "name": "慢炖牛肉",
+      "station": "alchemy",
+      "tier": 2,
+      "need": {
+        "items": [
+          [
+            "rabbit_meat",
+            3
+          ],
+          [
+            "spice_sandgold",
+            1
+          ]
+        ],
+        "gold": 140
+      },
+      "out": {
+        "item": "food_stew_beef",
+        "qty": 1
+      },
+      "ticks": 48,
+      "failRate": 0.1,
+      "skillMin": 1,
+      "seed": "砂金香一下锅，整间屋子的味道就换了主人。"
+    },
+    {
+      "id": "rc_food_sea_fish",
+      "name": "清蒸海鱼",
+      "station": "alchemy",
+      "tier": 1,
+      "need": {
+        "items": [
+          [
+            "herb_mist",
+            1
+          ],
+          [
+            "salt_abyss",
+            1
+          ]
+        ],
+        "gold": 80
+      },
+      "out": {
+        "item": "food_sea_fish",
+        "qty": 1
+      },
+      "ticks": 30,
+      "failRate": 0.1,
+      "skillMin": 0,
+      "seed": "只放姜与矿盐。掀开锅盖那一下，白气里带着海。"
+    },
+    {
+      "id": "rc_drink_flower_wine",
+      "name": "酿花酒",
+      "station": "alchemy",
+      "tier": 2,
+      "need": {
+        "items": [
+          [
+            "herb_mist",
+            2
+          ],
+          [
+            "grain_golden",
+            2
+          ]
+        ],
+        "gold": 180
+      },
+      "out": {
+        "item": "drink_flower_wine",
+        "qty": 1
+      },
+      "ticks": 54,
+      "failRate": 0.12,
+      "skillMin": 1,
+      "seed": "花瓣沉在坛底，第三天开始往上浮。浮完了就可以封坛。"
+    },
+    {
+      "id": "rc_food_spice_roast",
+      "name": "香料烤肉",
+      "station": "alchemy",
+      "tier": 2,
+      "need": {
+        "items": [
+          [
+            "rabbit_meat",
+            3
+          ],
+          [
+            "spice_sandgold",
+            2
+          ]
+        ],
+        "gold": 160
+      },
+      "out": {
+        "item": "food_spice_roast",
+        "qty": 1
+      },
+      "ticks": 48,
+      "failRate": 0.12,
+      "skillMin": 1,
+      "seed": "整扇肉抹满香料架上火。烤到一半你就明白了：手比脑子快，是先闻到的。"
+    },
+    {
+      "id": "rc_drink_wine_desert",
+      "name": "酿沙漠葡萄酒",
+      "station": "alchemy",
+      "tier": 2,
+      "need": {
+        "items": [
+          [
+            "date_crystal",
+            3
+          ],
+          [
+            "spice_sandgold",
+            1
+          ]
+        ],
+        "gold": 200
+      },
+      "out": {
+        "item": "drink_wine_desert",
+        "qty": 1
+      },
+      "ticks": 60,
+      "failRate": 0.12,
+      "skillMin": 1,
+      "seed": "晶枣的糖分先化开，颜色再一点点沉下去，沉成夜里那种深。"
+    },
+    {
+      "id": "rc_food_stew_venison",
+      "name": "木碗炖肉",
+      "station": "alchemy",
+      "tier": 2,
+      "need": {
+        "items": [
+          [
+            "rabbit_meat",
+            4
+          ],
+          [
+            "cheese_soft",
+            1
+          ]
+        ],
+        "gold": 180
+      },
+      "out": {
+        "item": "food_stew_venison",
+        "qty": 1
+      },
+      "ticks": 54,
+      "failRate": 0.12,
+      "skillMin": 1,
+      "seed": "酪一勺下去，汤就浑了，也厚了。窗上的霜化了一层。"
+    },
+    {
+      "id": "rc_drink_ale",
+      "name": "酿麦酒",
+      "station": "alchemy",
+      "tier": 1,
+      "need": {
+        "items": [
+          [
+            "grain_golden",
+            3
+          ]
+        ],
+        "gold": 30
+      },
+      "out": {
+        "item": "drink_ale",
+        "qty": 2
+      },
+      "ticks": 36,
+      "failRate": 0.08,
+      "skillMin": 0,
+      "seed": "麦子泡开、发甜、起沫。这活计全大陆都会做，但帝国做得最好。"
+    },
+    {
+      "id": "rc_food_blood_sausage",
+      "name": "灌血肠",
+      "station": "alchemy",
+      "tier": 1,
+      "need": {
+        "items": [
+          [
+            "rabbit_meat",
+            2
+          ],
+          [
+            "salt_abyss",
+            1
+          ]
+        ],
+        "gold": 50
+      },
+      "out": {
+        "item": "food_blood_sausage",
+        "qty": 2
+      },
+      "ticks": 30,
+      "failRate": 0.1,
+      "skillMin": 0,
+      "seed": "灌好的肠摆在案上，荒野人拿手抓着吃——刀刃一划就开。"
+    },
+    {
+      "id": "rc_drink_strong",
+      "name": "蒸馏烈酒",
+      "station": "alchemy",
+      "tier": 2,
+      "need": {
+        "items": [
+          [
+            "grain_golden",
+            4
+          ]
+        ],
+        "gold": 120
+      },
+      "out": {
+        "item": "drink_strong",
+        "qty": 2
+      },
+      "ticks": 60,
+      "failRate": 0.14,
+      "skillMin": 1,
+      "seed": "第一次蒸出来的酒倒掉，第二次留着。第三次？没人舍得倒掉第三次。"
+    },
+    {
+      "id": "rc_food_mushroom_soup",
+      "name": "熬菌汤",
+      "station": "alchemy",
+      "tier": 2,
+      "need": {
+        "items": [
+          [
+            "mushroom_cap",
+            3
+          ],
+          [
+            "salt_abyss",
+            1
+          ]
+        ],
+        "gold": 160
+      },
+      "out": {
+        "item": "food_mushroom_soup",
+        "qty": 1
+      },
+      "ticks": 54,
+      "failRate": 0.12,
+      "skillMin": 1,
+      "seed": "生的伞盖有毒，煮透才香。这中间隔着半个时辰和一条命。"
+    },
+    {
+      "id": "rc_drink_star_dew",
+      "name": "接星露",
+      "station": "alchemy",
+      "tier": 3,
+      "need": {
+        "items": [
+          [
+            "cloud_wheat",
+            2
+          ],
+          [
+            "wind_crystal",
+            1
+          ]
+        ],
+        "gold": 900
+      },
+      "out": {
+        "item": "drink_star_dew",
+        "qty": 1
+      },
+      "ticks": 132,
+      "failRate": 0.2,
+      "skillMin": 3,
+      "seed": "风晶立在碗中央，露水绕着它结。只在永夜月结得成，别的时候它只是水。"
+    },
+    {
+      "id": "rc_wpn_grain_scythe",
+      "name": "改刃麦镰",
+      "station": "forge",
+      "tier": 1,
+      "need": {
+        "items": [
+          [
+            "iron_wild",
+            2
+          ],
+          [
+            "grain_golden",
+            2
+          ]
+        ],
+        "gold": 1200
+      },
+      "out": {
+        "base": "wpn_grain_scythe",
+        "tier": 1
+      },
+      "ticks": 60,
+      "failRate": 0.1,
+      "skillMin": 0,
+      "seed": "镰原先是收麦子的。改刃的时候布伦丹叹了口气，但手没停。"
+    },
+    {
+      "id": "rc_wpn_island_saber",
+      "name": "淬海纹弯刀",
+      "station": "forge",
+      "tier": 2,
+      "need": {
+        "items": [
+          [
+            "sea_silk",
+            2
+          ],
+          [
+            "iron_wild",
+            2
+          ]
+        ],
+        "gold": 3000
+      },
+      "out": {
+        "base": "wpn_island_saber",
+        "tier": 2
+      },
+      "ticks": 108,
+      "failRate": 0.14,
+      "skillMin": 1,
+      "seed": "刀身入水的那一下，海纹就定住了——以后它一直是冷的那种冷。"
+    },
+    {
+      "id": "rc_wpn_wild_axe",
+      "name": "缠皮战斧",
+      "station": "forge",
+      "tier": 3,
+      "need": {
+        "items": [
+          [
+            "iron_wild",
+            4
+          ],
+          [
+            "horse_braid",
+            2
+          ],
+          [
+            "pelt_white",
+            1
+          ]
+        ],
+        "gold": 6000
+      },
+      "out": {
+        "base": "wpn_wild_axe",
+        "tier": 3
+      },
+      "ticks": 156,
+      "failRate": 0.2,
+      "skillMin": 3,
+      "seed": "马鬃编缠柄、白狐皮垫手。荒野的斧子从不打磨——磨了就不认主人。"
+    },
+    {
+      "id": "rc_wpn_desert_scimitar",
+      "name": "镶石砂金刀",
+      "station": "forge",
+      "tier": 3,
+      "need": {
+        "items": [
+          [
+            "gem_sunstone",
+            1
+          ],
+          [
+            "iron_wild",
+            3
+          ]
+        ],
+        "gold": 4000
+      },
+      "out": {
+        "base": "wpn_desert_scimitar",
+        "tier": 3
+      },
+      "ticks": 150,
+      "failRate": 0.2,
+      "skillMin": 3,
+      "seed": "日长石嵌进刀柄，正午拔刀的时候，那道光是它的另一半。"
+    },
+    {
+      "id": "rc_wpn_frost_maul",
+      "name": "锻冻铁重锤",
+      "station": "forge",
+      "tier": 3,
+      "need": {
+        "items": [
+          [
+            "frost_iron",
+            3
+          ],
+          [
+            "iron_wild",
+            2
+          ]
+        ],
+        "gold": 5000
+      },
+      "out": {
+        "base": "wpn_frost_maul",
+        "tier": 3
+      },
+      "ticks": 162,
+      "failRate": 0.2,
+      "skillMin": 3,
+      "seed": "冻铁在炉里不肯变软，只能一遍遍砸。锤成的时候，整间铺子比外头还冷。"
+    },
+    {
+      "id": "rc_wpn_abyss_pick",
+      "name": "铆接深渊镐刃",
+      "station": "forge",
+      "tier": 4,
+      "need": {
+        "items": [
+          [
+            "salt_abyss",
+            2
+          ],
+          [
+            "iron_wild",
+            4
+          ],
+          [
+            "armor_chain",
+            1
+          ]
+        ],
+        "gold": 60000
+      },
+      "out": {
+        "base": "wpn_abyss_pick",
+        "tier": 4
+      },
+      "ticks": 276,
+      "failRate": 0.28,
+      "skillMin": 6,
+      "seed": "一头镐一头刃。地底人管它叫「两用」，因为在下面，挖与砍常常是同一件事。"
+    },
+    {
+      "id": "rc_wpn_sky_spear",
+      "name": "嵌晶长枪",
+      "station": "inscribe",
+      "tier": 5,
+      "need": {
+        "items": [
+          [
+            "wind_crystal",
+            2
+          ],
+          [
+            "cloud_wheat",
+            1
+          ],
+          [
+            "armor_chain",
+            1
+          ]
+        ],
+        "gold": 200000
+      },
+      "out": {
+        "base": "wpn_sky_spear",
+        "tier": 5
+      },
+      "ticks": 408,
+      "failRate": 0.34,
+      "skillMin": 9,
+      "seed": "风晶嵌进枪尖，它开始长年指着同一个方向。你试着转了它一下——它自己转回来了。"
+    },
+    {
+      "id": "rc_poison_viper",
+      "name": "萃取蝰蛇毒",
+      "station": "alchemy",
+      "tier": 1,
+      "need": {
+        "items": [
+          [
+            "venom_gland",
+            2
+          ],
+          [
+            "herb_mist",
+            1
+          ]
+        ],
+        "gold": 120
+      },
+      "out": {
+        "item": "poison_viper",
+        "qty": 2
+      },
+      "ticks": 36,
+      "failRate": 0.1,
+      "skillMin": 0,
+      "seed": "毒腺挤出来的浆液先是清的，见了空气才慢慢变黄。"
+    },
+    {
+      "id": "rc_poison_ember",
+      "name": "调火油弹",
+      "station": "alchemy",
+      "tier": 2,
+      "need": {
+        "items": [
+          [
+            "moss_ember",
+            2
+          ],
+          [
+            "hell_sulfur",
+            1
+          ]
+        ],
+        "gold": 240
+      },
+      "out": {
+        "item": "poison_ember",
+        "qty": 2
+      },
+      "ticks": 54,
+      "failRate": 0.14,
+      "skillMin": 1,
+      "seed": "硫磺混进还在燃的苔芯，灌瓶时瓶身烫得拿不住。"
+    },
+    {
+      "id": "rc_poison_sleep",
+      "name": "研眠粉",
+      "station": "alchemy",
+      "tier": 2,
+      "need": {
+        "items": [
+          [
+            "dust_dream",
+            1
+          ],
+          [
+            "moonherb",
+            2
+          ]
+        ],
+        "gold": 300
+      },
+      "out": {
+        "item": "poison_sleep",
+        "qty": 2
+      },
+      "ticks": 60,
+      "failRate": 0.14,
+      "skillMin": 1,
+      "seed": "研到一半你就困了。把手上的活停了半个时辰才继续。"
+    },
+    {
+      "id": "rc_poison_weaken",
+      "name": "配软筋散",
+      "station": "alchemy",
+      "tier": 2,
+      "need": {
+        "items": [
+          [
+            "venom_gland",
+            2
+          ],
+          [
+            "brick_dust",
+            1
+          ]
+        ],
+        "gold": 220
+      },
+      "out": {
+        "item": "poison_weaken",
+        "qty": 2
+      },
+      "ticks": 54,
+      "failRate": 0.14,
+      "skillMin": 1,
+      "seed": "砖灰把毒液吸成干粉。成品不伤人，只拆人。"
+    },
+    {
+      "id": "rc_poison_slow",
+      "name": "调滞脉散",
+      "station": "alchemy",
+      "tier": 2,
+      "need": {
+        "items": [
+          [
+            "venom_gland",
+            2
+          ],
+          [
+            "twist_bark",
+            2
+          ]
+        ],
+        "gold": 260
+      },
+      "out": {
+        "item": "poison_slow",
+        "qty": 2
+      },
+      "ticks": 60,
+      "failRate": 0.14,
+      "skillMin": 1,
+      "seed": "木皮的树脂裹住毒粉。撒出去的时候，风都像慢了半拍。"
+    },
+    {
+      "id": "rc_poison_frost",
+      "name": "冻制霜毒",
+      "station": "alchemy",
+      "tier": 2,
+      "need": {
+        "items": [
+          [
+            "cave_pearl",
+            2
+          ],
+          [
+            "venom_gland",
+            1
+          ]
+        ],
+        "gold": 280
+      },
+      "out": {
+        "item": "poison_frost",
+        "qty": 2
+      },
+      "ticks": 60,
+      "failRate": 0.14,
+      "skillMin": 1,
+      "seed": "洞珠的寒气锁住毒性。成品摸上去是凉的，闻起来是甜的。"
+    },
+    {
+      "id": "rc_poison_dead",
+      "name": "抄制死息粉",
+      "station": "alchemy",
+      "tier": 3,
+      "need": {
+        "items": [
+          [
+            "temple_death_bell",
+            1
+          ],
+          [
+            "venom_gland",
+            3
+          ]
+        ],
+        "gold": 900
+      },
+      "out": {
+        "item": "poison_dead",
+        "qty": 1
+      },
+      "ticks": 132,
+      "failRate": 0.22,
+      "skillMin": 3,
+      "seed": "铃铛熔进药里的时候响了一声——不该响的那一声。"
+    },
+    {
+      "id": "rc_poison_king",
+      "name": "合王之毒",
+      "station": "alchemy",
+      "tier": 3,
+      "need": {
+        "items": [
+          [
+            "soul_jar",
+            1
+          ],
+          [
+            "poison_dead",
+            1
+          ]
+        ],
+        "gold": 1600
+      },
+      "out": {
+        "item": "poison_king",
+        "qty": 1
+      },
+      "ticks": 168,
+      "failRate": 0.28,
+      "skillMin": 4,
+      "seed": "魂瓶开盖的一瞬，屋里所有的火苗同时矮了一截。"
+    },
+    {
+      "id": "rc_drug_forget",
+      "name": "熬忘川散",
+      "station": "alchemy",
+      "tier": 3,
+      "need": {
+        "items": [
+          [
+            "soul_jar",
+            1
+          ],
+          [
+            "dust_dream",
+            2
+          ]
+        ],
+        "gold": 1200
+      },
+      "out": {
+        "item": "drug_forget",
+        "qty": 1
+      },
+      "ticks": 144,
+      "failRate": 0.24,
+      "skillMin": 3,
+      "seed": "熬到最后一步，你忘了自己刚才往锅里放过什么。"
+    },
+    {
+      "id": "rc_drug_frenzy",
+      "name": "拌狂血散",
+      "station": "alchemy",
+      "tier": 3,
+      "need": {
+        "items": [
+          [
+            "heretic_icon",
+            1
+          ],
+          [
+            "dust_dream",
+            2
+          ]
+        ],
+        "gold": 1400
+      },
+      "out": {
+        "item": "drug_frenzy",
+        "qty": 1
+      },
+      "ticks": 150,
+      "failRate": 0.26,
+      "skillMin": 3,
+      "seed": "圣像被碾碎掺进粉里。拌的时候，你听见很轻的一声咬牙。"
+    },
+    {
+      "id": "rc_wpn_emp_blade",
+      "name": "装配制式长剑",
+      "station": "forge",
+      "tier": 2,
+      "need": {
+        "items": [
+          [
+            "emp_signet",
+            1
+          ],
+          [
+            "iron_wild",
+            3
+          ]
+        ],
+        "gold": 4000
+      },
+      "out": {
+        "base": "wpn_emp_blade",
+        "tier": 2
+      },
+      "ticks": 108,
+      "failRate": 0.14,
+      "skillMin": 1,
+      "seed": "关防蜡压在剑柄的编号上——这把剑从此有了出处。"
+    },
+    {
+      "id": "rc_wpn_guild_dagger",
+      "name": "开刃公会配匕",
+      "station": "forge",
+      "tier": 2,
+      "need": {
+        "items": [
+          [
+            "guild_patent",
+            1
+          ],
+          [
+            "iron_wild",
+            2
+          ]
+        ],
+        "gold": 3500
+      },
+      "out": {
+        "base": "wpn_guild_dagger",
+        "tier": 2
+      },
+      "ticks": 102,
+      "failRate": 0.14,
+      "skillMin": 1,
+      "seed": "授证上的火漆被割下一角，贴在匕首鞘内侧——收尾的活计要有人认。"
+    },
+    {
+      "id": "rc_wpn_verdant_bow",
+      "name": "上弦翠冠猎弓",
+      "station": "forge",
+      "tier": 3,
+      "need": {
+        "items": [
+          [
+            "temple_life_seed",
+            1
+          ],
+          [
+            "horse_braid",
+            2
+          ],
+          [
+            "iron_wild",
+            2
+          ]
+        ],
+        "gold": 6000
+      },
+      "out": {
+        "base": "wpn_verdant_bow",
+        "tier": 3
+      },
+      "ticks": 156,
+      "failRate": 0.2,
+      "skillMin": 3,
+      "seed": "弓臂抹了种子的油。上弦的时候，木头自己往回弹了半寸。"
+    },
+    {
+      "id": "rc_wpn_frost_axe",
+      "name": "锻霜铁战斧",
+      "station": "forge",
+      "tier": 3,
+      "need": {
+        "items": [
+          [
+            "frost_oath",
+            1
+          ],
+          [
+            "frost_iron",
+            3
+          ]
+        ],
+        "gold": 7000
+      },
+      "out": {
+        "base": "wpn_frost_axe",
+        "tier": 3
+      },
+      "ticks": 162,
+      "failRate": 0.2,
+      "skillMin": 3,
+      "seed": "誓环熔进斧柄。斧子出炉时是白的，过了一夜还是白的。"
+    },
+    {
+      "id": "rc_wpn_sand_saber",
+      "name": "压戳砂海弯刀",
+      "station": "forge",
+      "tier": 3,
+      "need": {
+        "items": [
+          [
+            "sand_note",
+            1
+          ],
+          [
+            "gem_sunstone",
+            1
+          ],
+          [
+            "iron_wild",
+            3
+          ]
+        ],
+        "gold": 6500
+      },
+      "out": {
+        "base": "wpn_sand_saber",
+        "tier": 3
+      },
+      "ticks": 156,
+      "failRate": 0.2,
+      "skillMin": 3,
+      "seed": "银票压在刀鞘上做戳。商邦的刀不比人可靠，但比人便宜。"
+    },
+    {
+      "id": "rc_wpn_temple_mace",
+      "name": "封祷神殿权杖",
+      "station": "inscribe",
+      "tier": 3,
+      "need": {
+        "items": [
+          [
+            "temple_wisdom_ink",
+            1
+          ],
+          [
+            "temple_war_oil",
+            1
+          ],
+          [
+            "iron_wild",
+            3
+          ]
+        ],
+        "gold": 7500
+      },
+      "out": {
+        "base": "wpn_temple_mace",
+        "tier": 3
+      },
+      "ticks": 168,
+      "failRate": 0.2,
+      "skillMin": 3,
+      "seed": "两个神殿的东西用在同一根杖上。它们没打架——它们互相让了一步。"
+    },
+    {
+      "id": "rc_wpn_deep_drill",
+      "name": "铆接掘渊钻矛",
+      "station": "forge",
+      "tier": 4,
+      "need": {
+        "items": [
+          [
+            "study_relic",
+            1
+          ],
+          [
+            "anc_rivet",
+            2
+          ],
+          [
+            "armor_chain",
+            1
+          ]
+        ],
+        "gold": 80000
+      },
+      "out": {
+        "base": "wpn_deep_drill",
+        "tier": 4
+      },
+      "ticks": 276,
+      "failRate": 0.28,
+      "skillMin": 6,
+      "seed": "古研会的残件被拆开装进矛尖。装完它转起来了——没人给它通电。"
+    },
+    {
+      "id": "rc_wpn_blood_cleaver",
+      "name": "重锻血吼劈刀",
+      "station": "forge",
+      "tier": 4,
+      "need": {
+        "items": [
+          [
+            "temple_death_bell",
+            1
+          ],
+          [
+            "torture_iron",
+            3
+          ],
+          [
+            "armor_chain",
+            1
+          ]
+        ],
+        "gold": 85000
+      },
+      "out": {
+        "base": "wpn_blood_cleaver",
+        "tier": 4
+      },
+      "ticks": 288,
+      "failRate": 0.28,
+      "skillMin": 6,
+      "seed": "铜铃熔在刀背里。挥起来的时候，会有一声很闷的响。"
+    },
+    {
+      "id": "rc_wpn_anc_blade",
+      "name": "接续古代光刃",
+      "station": "inscribe",
+      "tier": 4,
+      "need": {
+        "items": [
+          [
+            "anc_lens",
+            1
+          ],
+          [
+            "anc_battery",
+            1
+          ],
+          [
+            "armor_chain",
+            1
+          ]
+        ],
+        "gold": 90000
+      },
+      "out": {
+        "base": "wpn_anc_blade",
+        "tier": 4
+      },
+      "ticks": 300,
+      "failRate": 0.3,
+      "skillMin": 6,
+      "seed": "电池接上的一瞬，刃口自己亮了一线，又灭了。它在等一个口令。"
+    },
+    {
+      "id": "rc_wpn_anc_pike",
+      "name": "校准古代长戟",
+      "station": "inscribe",
+      "tier": 4,
+      "need": {
+        "items": [
+          [
+            "anc_parchment",
+            1
+          ],
+          [
+            "anc_seal_ring",
+            1
+          ],
+          [
+            "armor_chain",
+            1
+          ]
+        ],
+        "gold": 95000
+      },
+      "out": {
+        "base": "wpn_anc_pike",
+        "tier": 4
+      },
+      "ticks": 312,
+      "failRate": 0.3,
+      "skillMin": 6,
+      "seed": "羊皮上的字对着戟杆的刻痕。它们对上了——七千年之后仍然对得上。"
+    },
+    {
+      "id": "rc_wpn_shadow_fang",
+      "name": "淬掩尘短刃",
+      "station": "inscribe",
+      "tier": 4,
+      "need": {
+        "items": [
+          [
+            "shadow_dust",
+            1
+          ],
+          [
+            "soul_slag",
+            2
+          ],
+          [
+            "armor_chain",
+            1
+          ]
+        ],
+        "gold": 88000
+      },
+      "out": {
+        "base": "wpn_shadow_fang",
+        "tier": 4
+      },
+      "ticks": 282,
+      "failRate": 0.3,
+      "skillMin": 6,
+      "seed": "掩尘抹上刃口，整把刀在你手里淡了一下。你赶紧把它放下。"
+    },
+    {
+      "id": "rc_wpn_void_scepter",
+      "name": "嵌空虚空权杖",
+      "station": "inscribe",
+      "tier": 5,
+      "need": {
+        "items": [
+          [
+            "tower_glass",
+            1
+          ],
+          [
+            "net_ink",
+            1
+          ],
+          [
+            "void_salt",
+            2
+          ],
+          [
+            "armor_chain",
+            1
+          ]
+        ],
+        "gold": 280000
+      },
+      "out": {
+        "base": "wpn_void_scepter",
+        "tier": 5
+      },
+      "ticks": 408,
+      "failRate": 0.34,
+      "skillMin": 9,
+      "seed": "塔窗玻璃嵌进杖头。举起来的时候，屋里的火苗全都朝它偏了一点。"
+    },
+    {
+      "id": "rc_wpn_forbidden_edge",
+      "name": "重刻禁纹刃",
+      "station": "inscribe",
+      "tier": 5,
+      "need": {
+        "items": [
+          [
+            "star_dust",
+            1
+          ],
+          [
+            "anc_core_shard",
+            2
+          ],
+          [
+            "armor_chain",
+            1
+          ]
+        ],
+        "gold": 300000
+      },
+      "out": {
+        "base": "wpn_forbidden_edge",
+        "tier": 5
+      },
+      "ticks": 420,
+      "failRate": 0.36,
+      "skillMin": 9,
+      "seed": "六芒纹一笔一笔刻回去。刻到最后一笔，工坊外有人在敲门。"
+    },
+    {
+      "id": "rc_wpn_black_lance",
+      "name": "封墨无光长枪",
+      "station": "inscribe",
+      "tier": 5,
+      "need": {
+        "items": [
+          [
+            "seal_blank",
+            1
+          ],
+          [
+            "star_dust",
+            1
+          ],
+          [
+            "forged_seal",
+            1
+          ],
+          [
+            "armor_chain",
+            1
+          ]
+        ],
+        "gold": 320000
+      },
+      "out": {
+        "base": "wpn_black_lance",
+        "tier": 5
+      },
+      "ticks": 432,
+      "failRate": 0.36,
+      "skillMin": 9,
+      "seed": "空白星符没有刻名，直接熔进枪身。枪成之后，它吸走了半间屋子的光。"
+    }
+  ],
+  "illegalRecipes": [
+    "rc_dust_dream",
+    "rc_void_dagger"
+  ]
+}

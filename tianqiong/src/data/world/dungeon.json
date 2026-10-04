@@ -1,0 +1,2829 @@
+{
+  "version": 1,
+  "loreRefs": [
+    "s45",
+    "s46",
+    "s62",
+    "s13"
+  ],
+  "themes": {
+    "shallow": {
+      "id": "shallow",
+      "name": "浅层 · 苔岩洞窟",
+      "range": [
+        1,
+        20
+      ],
+      "dcBase": 9,
+      "tier": 1,
+      "corruption": 0,
+      "monsters": [
+        "goblin",
+        "bat",
+        "rabbit",
+        "wolf",
+        "slime",
+        "golem",
+        "mutation_beast",
+        "twisted_plant"
+      ],
+      "traps": [
+        "pit",
+        "rockfall",
+        "poison_needle",
+        "webbing"
+      ],
+      "loot": [
+        "bread",
+        "herb_paste",
+        "moonherb",
+        "rabbit_meat",
+        "wolf_pelt"
+      ],
+      "desc": "湿滑岩壁与苔藓荧光，哥布林与洞窟蝠群在暗处窥伺——冒险者的第一课。"
+    },
+    "mid": {
+      "id": "mid",
+      "name": "中层 · 古代砌道",
+      "range": [
+        21,
+        50
+      ],
+      "dcBase": 13,
+      "tier": 2,
+      "corruption": 0,
+      "monsters": [
+        "spider",
+        "skeleton",
+        "bandit",
+        "crystal_spider",
+        "fusion_beast",
+        "undead_knight",
+        "wraith_mage"
+      ],
+      "traps": [
+        "rockfall",
+        "poison_needle",
+        "gas",
+        "rune_blast"
+      ],
+      "loot": [
+        "herb_paste",
+        "potion_moon",
+        "moonherb",
+        "venom_gland",
+        "scrap_blade"
+      ],
+      "desc": "古代文明的砌道从碎石中露出棱角，岩甲蛛与骷髅兵守着无人记得的走廊。"
+    },
+    "deep": {
+      "id": "deep",
+      "name": "深层 · 地脉熔窟",
+      "range": [
+        51,
+        80
+      ],
+      "dcBase": 17,
+      "tier": 3,
+      "corruption": 1,
+      "monsters": [
+        "skeleton",
+        "bandit",
+        "ghoul",
+        "worm",
+        "undead_knight",
+        "wraith_mage",
+        "ancient_guard",
+        "synth_dragon"
+      ],
+      "traps": [
+        "gas",
+        "rune_blast",
+        "rockfall",
+        "guillotine"
+      ],
+      "loot": [
+        "potion_moon",
+        "antidote",
+        "holy_water",
+        "blade_blank",
+        "star_shard"
+      ],
+      "desc": "地脉的热气从裂缝里涌上来，尸鬼祭司的祭坛一座接一座——这里已经不是活人的地界。"
+    },
+    "deepest": {
+      "id": "deepest",
+      "name": "最深 · 星矿断层",
+      "range": [
+        81,
+        99
+      ],
+      "dcBase": 21,
+      "tier": 4,
+      "corruption": 1,
+      "monsters": [
+        "ghoul",
+        "templar",
+        "ancient_guard",
+        "synth_dragon",
+        "abyss_demon",
+        "void_walker"
+      ],
+      "traps": [
+        "rune_blast",
+        "guillotine",
+        "gas"
+      ],
+      "loot": [
+        "potion_moon",
+        "holy_water",
+        "star_shard",
+        "dust_dream",
+        "platinum",
+        "blade_blank"
+      ],
+      "desc": "星髓在断层里泛着冷光，古代英灵的残影仍在巡行——它们不认活人，只认星枢的印记。"
+    },
+    "abyss": {
+      "id": "abyss",
+      "name": "深渊 · 魔界裂隙",
+      "range": [
+        100,
+        100
+      ],
+      "dcBase": 26,
+      "tier": 5,
+      "corruption": 1,
+      "monsters": [
+        "abyss_spawn",
+        "demon_lord",
+        "void_walker"
+      ],
+      "traps": [
+        "rune_blast",
+        "guillotine"
+      ],
+      "loot": [
+        "void_essence",
+        "star_marrow",
+        "seal_rune",
+        "platinum"
+      ],
+      "desc": "魔界之门开了一线。空气本身在腐烂，裂隙另一侧的东西正在回望你。"
+    }
+  },
+  "traps": [
+    {
+      "id": "pit",
+      "tags": [
+        "light",
+        "rope"
+      ],
+      "name": "陷坑",
+      "stat": "敏捷",
+      "dcMod": 0,
+      "dmgPct": 8,
+      "seed": "脚下的石板忽然塌了半边——你下意识地抓住岩棱。"
+    },
+    {
+      "id": "rockfall",
+      "tags": [
+        "light",
+        "rope"
+      ],
+      "name": "落石",
+      "stat": "敏捷",
+      "dcMod": -1,
+      "dmgPct": 12,
+      "seed": "头顶传来碎石摩擦声，接着是整片岩层倾泻而下。"
+    },
+    {
+      "id": "poison_needle",
+      "tags": [
+        "light",
+        "detect"
+      ],
+      "name": "毒针",
+      "stat": "感知",
+      "dcMod": 1,
+      "dmgPct": 6,
+      "seed": "壁龛里一枚细针无声弹出，针尖泛着暗绿。"
+    },
+    {
+      "id": "webbing",
+      "tags": [
+        "blade"
+      ],
+      "name": "蛛网缠足",
+      "stat": "力量",
+      "dcMod": 0,
+      "dmgPct": 5,
+      "seed": "黏稠的白网缠住脚踝，越挣越紧。"
+    },
+    {
+      "id": "gas",
+      "tags": [
+        "breathe"
+      ],
+      "name": "地脉毒气",
+      "stat": "体质",
+      "dcMod": 2,
+      "dmgPct": 14,
+      "seed": "一股甜腥的气味从裂缝里漫出来，喉咙立刻发紧。"
+    },
+    {
+      "id": "rune_blast",
+      "tags": [
+        "detect",
+        "ward"
+      ],
+      "name": "古代符爆",
+      "stat": "智力",
+      "dcMod": 2,
+      "dmgPct": 16,
+      "seed": "地上的六芒星纹忽然亮起，符文在你眼前炸开。"
+    },
+    {
+      "id": "guillotine",
+      "tags": [
+        "light",
+        "rope"
+      ],
+      "name": "断头石闸",
+      "stat": "敏捷",
+      "dcMod": 2,
+      "dmgPct": 20,
+      "seed": "走廊尽头传来石闸滑落的闷响——它开始动了。"
+    }
+  ],
+  "floors": [
+    {
+      "id": 1,
+      "name": "苔痕入口",
+      "theme": "shallow",
+      "monsters": [
+        "goblin",
+        "rabbit",
+        "slime",
+        "twisted_plant"
+      ],
+      "traps": [
+        "pit"
+      ],
+      "loot": [
+        "moonherb",
+        "bread"
+      ,
+        "twist_bark"],
+      "loreRef": "s45",
+      "seed": "湿滑岩壁与苔藓荧光，哥布林与洞窟蝠群在暗处窥伺——冒险者的第一课。（苔痕入口）"
+    },
+    {
+      "id": 2,
+      "name": "湿骨甬道",
+      "theme": "shallow",
+      "monsters": [
+        "bat",
+        "slime",
+        "twisted_plant"
+      ],
+      "traps": [
+        "poison_needle"
+      ],
+      "loot": [
+        "herb_paste"
+      ,
+        "cave_pearl",
+        "rat_tooth"],
+      "loreRef": "s45",
+      "seed": "湿滑岩壁与苔藓荧光，哥布林与洞窟蝠群在暗处窥伺——冒险者的第一课。（湿骨甬道）"
+    },
+    {
+      "id": 3,
+      "name": "倒悬蝠巢",
+      "theme": "shallow",
+      "monsters": [
+        "bat",
+        "goblin",
+        "slime",
+        "twisted_plant"
+      ],
+      "traps": [
+        "webbing"
+      ],
+      "loot": [
+        "wolf_pelt",
+        "rabbit_meat"
+      ,
+        "moss_ember",
+        "glow_lichen"],
+      "loreRef": "s45",
+      "seed": "湿滑岩壁与苔藓荧光，哥布林与洞窟蝠群在暗处窥伺——冒险者的第一课。（倒悬蝠巢）"
+    },
+    {
+      "id": 4,
+      "name": "断刃坑",
+      "theme": "shallow",
+      "monsters": [
+        "goblin",
+        "rabbit",
+        "slime",
+        "twisted_plant"
+      ],
+      "traps": [
+        "rockfall"
+      ],
+      "loot": [
+        "bread",
+        "moonherb"
+      ,
+        "twist_bark"],
+      "loreRef": "s45",
+      "seed": "湿滑岩壁与苔藓荧光，哥布林与洞窟蝠群在暗处窥伺——冒险者的第一课。（断刃坑）"
+    },
+    {
+      "id": 5,
+      "name": "萤苔阶",
+      "theme": "shallow",
+      "monsters": [
+        "rabbit",
+        "wolf",
+        "slime",
+        "twisted_plant"
+      ],
+      "traps": [
+        "pit"
+      ],
+      "loot": [
+        "bread",
+        "wolf_pelt"
+      ,
+        "cave_pearl",
+        "rat_tooth"],
+      "loreRef": "s45",
+      "seed": "湿滑岩壁与苔藓荧光，哥布林与洞窟蝠群在暗处窥伺——冒险者的第一课。（萤苔阶）"
+    },
+    {
+      "id": 6,
+      "name": "塌方回廊",
+      "theme": "shallow",
+      "monsters": [
+        "goblin",
+        "slime",
+        "golem",
+        "mutation_beast",
+        "twisted_plant"
+      ],
+      "traps": [
+        "rockfall"
+      ],
+      "loot": [
+        "wolf_pelt",
+        "herb_paste"
+      ,
+        "moss_ember",
+        "glow_lichen"],
+      "loreRef": "s45",
+      "seed": "湿滑岩壁与苔藓荧光，哥布林与洞窟蝠群在暗处窥伺——冒险者的第一课。（塌方回廊）"
+    },
+    {
+      "id": 7,
+      "name": "硝石池",
+      "theme": "shallow",
+      "monsters": [
+        "bat",
+        "goblin",
+        "slime",
+        "golem",
+        "mutation_beast",
+        "twisted_plant"
+      ],
+      "traps": [
+        "gas"
+      ],
+      "loot": [
+        "bread",
+        "moonherb"
+      ,
+        "twist_bark"],
+      "loreRef": "s45",
+      "seed": "湿滑岩壁与苔藓荧光，哥布林与洞窟蝠群在暗处窥伺——冒险者的第一课。（硝石池）"
+    },
+    {
+      "id": 8,
+      "name": "弃矿车辙",
+      "theme": "shallow",
+      "monsters": [
+        "rabbit",
+        "goblin",
+        "slime",
+        "golem",
+        "mutation_beast",
+        "twisted_plant"
+      ],
+      "traps": [
+        "rockfall"
+      ],
+      "loot": [
+        "moonherb"
+      ,
+        "cave_pearl",
+        "rat_tooth"],
+      "loreRef": "s45",
+      "seed": "湿滑岩壁与苔藓荧光，哥布林与洞窟蝠群在暗处窥伺——冒险者的第一课。（弃矿车辙）"
+    },
+    {
+      "id": 9,
+      "name": "蛛网天井",
+      "theme": "shallow",
+      "monsters": [
+        "spider",
+        "slime",
+        "golem",
+        "mutation_beast",
+        "twisted_plant"
+      ],
+      "traps": [
+        "webbing"
+      ],
+      "loot": [
+        "wolf_pelt",
+        "rabbit_meat"
+      ,
+        "moss_ember",
+        "glow_lichen"],
+      "loreRef": "s45",
+      "seed": "湿滑岩壁与苔藓荧光，哥布林与洞窟蝠群在暗处窥伺——冒险者的第一课。（蛛网天井）"
+    },
+    {
+      "id": 10,
+      "name": "碎颅岩厅",
+      "theme": "shallow",
+      "monsters": [
+        "goblin",
+        "ghoul",
+        "slime",
+        "golem",
+        "mutation_beast",
+        "twisted_plant"
+      ],
+      "traps": [
+        "rockfall"
+      ],
+      "loot": [
+        "herb_paste",
+        "bread",
+        "floor_core"
+      ,
+        "twist_bark"],
+      "boss": {
+        "mid": "ghoul",
+        "name": "尸鬼祭司",
+        "hp": 50,
+        "ac": 13,
+        "reward": {
+          "gold": [
+            120,
+            200
+          ],
+          "item": "star_shard"
+        }
+      },
+      "loreRef": "s45",
+      "seed": "湿滑岩壁与苔藓荧光，哥布林与洞窟蝠群在暗处窥伺——冒险者的第一课。（碎颅岩厅）"
+    },
+    {
+      "id": 11,
+      "name": "地下暗渠",
+      "theme": "shallow",
+      "monsters": [
+        "bat",
+        "spider",
+        "slime",
+        "golem",
+        "mutation_beast",
+        "twisted_plant"
+      ],
+      "traps": [
+        "pit"
+      ],
+      "loot": [
+        "rabbit_meat",
+        "moonherb"
+      ,
+        "cave_pearl",
+        "rat_tooth"],
+      "loreRef": "s45",
+      "seed": "湿滑岩壁与苔藓荧光，哥布林与洞窟蝠群在暗处窥伺——冒险者的第一课。（地下暗渠）"
+    },
+    {
+      "id": 12,
+      "name": "白垩裂隙",
+      "theme": "shallow",
+      "monsters": [
+        "goblin",
+        "wolf",
+        "slime",
+        "golem",
+        "mutation_beast",
+        "twisted_plant"
+      ],
+      "traps": [
+        "rockfall"
+      ],
+      "loot": [
+        "herb_paste",
+        "bread"
+      ,
+        "moss_ember",
+        "glow_lichen"],
+      "loreRef": "s45",
+      "seed": "湿滑岩壁与苔藓荧光，哥布林与洞窟蝠群在暗处窥伺——冒险者的第一课。（白垩裂隙）"
+    },
+    {
+      "id": 13,
+      "name": "火把尽处",
+      "theme": "shallow",
+      "monsters": [
+        "bat",
+        "slime",
+        "golem",
+        "mutation_beast",
+        "twisted_plant"
+      ],
+      "traps": [
+        "webbing"
+      ],
+      "loot": [
+        "wolf_pelt",
+        "herb_paste"
+      ,
+        "twist_bark"],
+      "loreRef": "s45",
+      "seed": "湿滑岩壁与苔藓荧光，哥布林与洞窟蝠群在暗处窥伺——冒险者的第一课。（火把尽处）"
+    },
+    {
+      "id": 14,
+      "name": "腐水潭",
+      "theme": "shallow",
+      "monsters": [
+        "spider",
+        "rabbit",
+        "slime",
+        "golem",
+        "mutation_beast",
+        "twisted_plant"
+      ],
+      "traps": [
+        "gas"
+      ],
+      "loot": [
+        "herb_paste",
+        "moonherb"
+      ,
+        "cave_pearl",
+        "rat_tooth"],
+      "loreRef": "s45",
+      "seed": "湿滑岩壁与苔藓荧光，哥布林与洞窟蝠群在暗处窥伺——冒险者的第一课。（腐水潭）"
+    },
+    {
+      "id": 15,
+      "name": "骨堆回音",
+      "theme": "shallow",
+      "monsters": [
+        "goblin",
+        "spider",
+        "slime",
+        "golem",
+        "mutation_beast",
+        "twisted_plant"
+      ],
+      "traps": [
+        "poison_needle"
+      ],
+      "loot": [
+        "wolf_pelt",
+        "herb_paste"
+      ,
+        "moss_ember",
+        "glow_lichen"],
+      "loreRef": "s45",
+      "seed": "湿滑岩壁与苔藓荧光，哥布林与洞窟蝠群在暗处窥伺——冒险者的第一课。（骨堆回音）"
+    },
+    {
+      "id": 16,
+      "name": "幽蓝石笋",
+      "theme": "shallow",
+      "monsters": [
+        "bat",
+        "spider",
+        "slime",
+        "golem",
+        "mutation_beast",
+        "twisted_plant"
+      ],
+      "traps": [
+        "rockfall"
+      ],
+      "loot": [
+        "bread",
+        "rabbit_meat"
+      ,
+        "twist_bark"],
+      "loreRef": "s45",
+      "seed": "湿滑岩壁与苔藓荧光，哥布林与洞窟蝠群在暗处窥伺——冒险者的第一课。（幽蓝石笋）"
+    },
+    {
+      "id": 17,
+      "name": "石桥残段",
+      "theme": "shallow",
+      "monsters": [
+        "wolf",
+        "slime",
+        "golem",
+        "mutation_beast",
+        "twisted_plant"
+      ],
+      "traps": [
+        "pit"
+      ],
+      "loot": [
+        "herb_paste"
+      ,
+        "cave_pearl",
+        "rat_tooth"],
+      "loreRef": "s45",
+      "seed": "湿滑岩壁与苔藓荧光，哥布林与洞窟蝠群在暗处窥伺——冒险者的第一课。（石桥残段）"
+    },
+    {
+      "id": 18,
+      "name": "旧哨所",
+      "theme": "shallow",
+      "monsters": [
+        "goblin",
+        "bat",
+        "slime",
+        "golem",
+        "mutation_beast",
+        "twisted_plant"
+      ],
+      "traps": [
+        "poison_needle"
+      ],
+      "loot": [
+        "herb_paste"
+      ,
+        "moss_ember",
+        "glow_lichen"],
+      "loreRef": "s45",
+      "seed": "湿滑岩壁与苔藓荧光，哥布林与洞窟蝠群在暗处窥伺——冒险者的第一课。（旧哨所）"
+    },
+    {
+      "id": 19,
+      "name": "地脉断层",
+      "theme": "shallow",
+      "monsters": [
+        "spider",
+        "wolf",
+        "slime",
+        "golem",
+        "mutation_beast",
+        "twisted_plant"
+      ],
+      "traps": [
+        "rockfall"
+      ],
+      "loot": [
+        "rabbit_meat",
+        "wolf_pelt"
+      ,
+        "twist_bark"],
+      "loreRef": "s45",
+      "seed": "湿滑岩壁与苔藓荧光，哥布林与洞窟蝠群在暗处窥伺——冒险者的第一课。（地脉断层）"
+    },
+    {
+      "id": 20,
+      "name": "古代砌道门",
+      "theme": "shallow",
+      "monsters": [
+        "goblin",
+        "spider",
+        "skeleton",
+        "slime",
+        "golem",
+        "mutation_beast",
+        "twisted_plant"
+      ],
+      "traps": [
+        "rune_blast"
+      ],
+      "loot": [
+        "moonherb",
+        "bread",
+        "floor_core"
+      ,
+        "cave_pearl",
+        "rat_tooth"],
+      "boss": {
+        "mid": "skeleton",
+        "name": "骷髅统领",
+        "hp": 66,
+        "ac": 14,
+        "reward": {
+          "gold": [
+            180,
+            300
+          ],
+          "item": "blade_blank"
+        }
+      },
+      "loreRef": "s45",
+      "seed": "湿滑岩壁与苔藓荧光，哥布林与洞窟蝠群在暗处窥伺——冒险者的第一课。（古代砌道门）"
+    },
+    {
+      "id": 21,
+      "name": "青铜回廊",
+      "theme": "mid",
+      "monsters": [
+        "spider",
+        "crystal_spider",
+        "fusion_beast",
+        "golem",
+        "mutation_beast"
+      ],
+      "traps": [
+        "poison_needle"
+      ],
+      "loot": [
+        "venom_gland",
+        "herb_paste"
+      ,
+        "brick_dust",
+        "rune_ash"],
+      "loreRef": "s45",
+      "seed": "古代文明的砌道从碎石中露出棱角，岩甲蛛与骷髅兵守着无人记得的走廊。（青铜回廊）"
+    },
+    {
+      "id": 22,
+      "name": "断裂圆厅",
+      "theme": "mid",
+      "monsters": [
+        "spider",
+        "crystal_spider",
+        "fusion_beast",
+        "golem",
+        "mutation_beast"
+      ],
+      "traps": [
+        "rune_blast"
+      ],
+      "loot": [
+        "herb_paste",
+        "potion_moon"
+      ,
+        "bone_coin"],
+      "loreRef": "s45",
+      "seed": "古代文明的砌道从碎石中露出棱角，岩甲蛛与骷髅兵守着无人记得的走廊。（断裂圆厅）"
+    },
+    {
+      "id": 23,
+      "name": "沉钟前庭",
+      "theme": "mid",
+      "monsters": [
+        "spider",
+        "crystal_spider",
+        "fusion_beast",
+        "golem",
+        "mutation_beast"
+      ],
+      "traps": [
+        "rockfall"
+      ],
+      "loot": [
+        "scrap_blade",
+        "venom_gland"
+      ,
+        "iron_vein",
+        "spider_glass"],
+      "loreRef": "s45",
+      "seed": "古代文明的砌道从碎石中露出棱角，岩甲蛛与骷髅兵守着无人记得的走廊。（沉钟前庭）"
+    },
+    {
+      "id": 24,
+      "name": "铭文石阶",
+      "theme": "mid",
+      "monsters": [
+        "skeleton",
+        "spider",
+        "crystal_spider",
+        "fusion_beast",
+        "golem",
+        "mutation_beast"
+      ],
+      "traps": [
+        "rockfall"
+      ],
+      "loot": [
+        "potion_moon"
+      ,
+        "brick_dust",
+        "rune_ash"],
+      "loreRef": "s45",
+      "seed": "古代文明的砌道从碎石中露出棱角，岩甲蛛与骷髅兵守着无人记得的走廊。（铭文石阶）"
+    },
+    {
+      "id": 25,
+      "name": "干涸拱桥",
+      "theme": "mid",
+      "monsters": [
+        "skeleton",
+        "spider",
+        "crystal_spider",
+        "fusion_beast",
+        "golem",
+        "mutation_beast"
+      ],
+      "traps": [
+        "rune_blast"
+      ],
+      "loot": [
+        "herb_paste",
+        "scrap_blade"
+      ,
+        "bone_coin"],
+      "loreRef": "s45",
+      "seed": "古代文明的砌道从碎石中露出棱角，岩甲蛛与骷髅兵守着无人记得的走廊。（干涸拱桥）"
+    },
+    {
+      "id": 26,
+      "name": "霜蚀甬道",
+      "theme": "mid",
+      "monsters": [
+        "spider",
+        "crystal_spider",
+        "fusion_beast",
+        "golem",
+        "mutation_beast"
+      ],
+      "traps": [
+        "poison_needle"
+      ],
+      "loot": [
+        "potion_moon",
+        "herb_paste"
+      ,
+        "iron_vein",
+        "spider_glass"],
+      "loreRef": "s45",
+      "seed": "古代文明的砌道从碎石中露出棱角，岩甲蛛与骷髅兵守着无人记得的走廊。（霜蚀甬道）"
+    },
+    {
+      "id": 27,
+      "name": "铁锈井道",
+      "theme": "mid",
+      "monsters": [
+        "bandit",
+        "crystal_spider",
+        "fusion_beast",
+        "golem",
+        "mutation_beast"
+      ],
+      "traps": [
+        "gas"
+      ],
+      "loot": [
+        "scrap_blade",
+        "potion_moon"
+      ,
+        "brick_dust",
+        "rune_ash"],
+      "loreRef": "s45",
+      "seed": "古代文明的砌道从碎石中露出棱角，岩甲蛛与骷髅兵守着无人记得的走廊。（铁锈井道）"
+    },
+    {
+      "id": 28,
+      "name": "虚空石室",
+      "theme": "mid",
+      "monsters": [
+        "spider",
+        "skeleton",
+        "crystal_spider",
+        "fusion_beast",
+        "golem",
+        "mutation_beast"
+      ],
+      "traps": [
+        "poison_needle"
+      ],
+      "loot": [
+        "venom_gland"
+      ,
+        "bone_coin"],
+      "loreRef": "s45",
+      "seed": "古代文明的砌道从碎石中露出棱角，岩甲蛛与骷髅兵守着无人记得的走廊。（虚空石室）"
+    },
+    {
+      "id": 29,
+      "name": "石纹长廊",
+      "theme": "mid",
+      "monsters": [
+        "skeleton",
+        "spider",
+        "crystal_spider",
+        "fusion_beast",
+        "golem",
+        "mutation_beast"
+      ],
+      "traps": [
+        "poison_needle"
+      ],
+      "loot": [
+        "scrap_blade",
+        "potion_moon"
+      ,
+        "iron_vein",
+        "spider_glass"],
+      "loreRef": "s45",
+      "seed": "古代文明的砌道从碎石中露出棱角，岩甲蛛与骷髅兵守着无人记得的走廊。（石纹长廊）"
+    },
+    {
+      "id": 30,
+      "name": "苔封地宫",
+      "theme": "mid",
+      "monsters": [
+        "skeleton",
+        "templar",
+        "crystal_spider",
+        "fusion_beast",
+        "golem",
+        "mutation_beast"
+      ],
+      "traps": [
+        "rune_blast"
+      ],
+      "loot": [
+        "potion_moon",
+        "floor_core"
+      ,
+        "brick_dust",
+        "rune_ash"],
+      "boss": {
+        "mid": "templar",
+        "name": "古代英灵·守门者",
+        "hp": 85,
+        "ac": 14,
+        "reward": {
+          "gold": [
+            260,
+            420
+          ],
+          "item": "holy_water"
+        }
+      },
+      "loreRef": "s45",
+      "seed": "古代文明的砌道从碎石中露出棱角，岩甲蛛与骷髅兵守着无人记得的走廊。（苔封地宫）"
+    },
+    {
+      "id": 31,
+      "name": "青铜地宫",
+      "theme": "mid",
+      "monsters": [
+        "skeleton",
+        "crystal_spider",
+        "fusion_beast",
+        "golem",
+        "mutation_beast"
+      ],
+      "traps": [
+        "gas"
+      ],
+      "loot": [
+        "moonherb"
+      ,
+        "bone_coin"],
+      "loreRef": "s45",
+      "seed": "古代文明的砌道从碎石中露出棱角，岩甲蛛与骷髅兵守着无人记得的走廊。（青铜地宫）"
+    },
+    {
+      "id": 32,
+      "name": "断裂回廊",
+      "theme": "mid",
+      "monsters": [
+        "spider",
+        "bandit",
+        "crystal_spider",
+        "fusion_beast",
+        "golem",
+        "mutation_beast"
+      ],
+      "traps": [
+        "gas"
+      ],
+      "loot": [
+        "potion_moon",
+        "moonherb"
+      ,
+        "iron_vein",
+        "spider_glass"],
+      "loreRef": "s45",
+      "seed": "古代文明的砌道从碎石中露出棱角，岩甲蛛与骷髅兵守着无人记得的走廊。（断裂回廊）"
+    },
+    {
+      "id": 33,
+      "name": "沉钟圆厅",
+      "theme": "mid",
+      "monsters": [
+        "spider",
+        "crystal_spider",
+        "fusion_beast",
+        "golem",
+        "mutation_beast"
+      ],
+      "traps": [
+        "poison_needle"
+      ],
+      "loot": [
+        "moonherb",
+        "potion_moon"
+      ,
+        "brick_dust",
+        "rune_ash"],
+      "loreRef": "s45",
+      "seed": "古代文明的砌道从碎石中露出棱角，岩甲蛛与骷髅兵守着无人记得的走廊。（沉钟圆厅）"
+    },
+    {
+      "id": 34,
+      "name": "铭文前庭",
+      "theme": "mid",
+      "monsters": [
+        "skeleton",
+        "crystal_spider",
+        "fusion_beast",
+        "golem",
+        "mutation_beast"
+      ],
+      "traps": [
+        "gas"
+      ],
+      "loot": [
+        "potion_moon",
+        "herb_paste"
+      ,
+        "bone_coin"],
+      "loreRef": "s45",
+      "seed": "古代文明的砌道从碎石中露出棱角，岩甲蛛与骷髅兵守着无人记得的走廊。（铭文前庭）"
+    },
+    {
+      "id": 35,
+      "name": "干涸石阶",
+      "theme": "mid",
+      "monsters": [
+        "spider",
+        "bandit",
+        "crystal_spider",
+        "fusion_beast",
+        "golem",
+        "mutation_beast"
+      ],
+      "traps": [
+        "rune_blast"
+      ],
+      "loot": [
+        "herb_paste",
+        "scrap_blade"
+      ,
+        "iron_vein",
+        "spider_glass"],
+      "loreRef": "s45",
+      "seed": "古代文明的砌道从碎石中露出棱角，岩甲蛛与骷髅兵守着无人记得的走廊。（干涸石阶）"
+    },
+    {
+      "id": 36,
+      "name": "霜蚀拱桥",
+      "theme": "mid",
+      "monsters": [
+        "bandit",
+        "crystal_spider",
+        "fusion_beast",
+        "golem",
+        "mutation_beast"
+      ],
+      "traps": [
+        "rune_blast"
+      ],
+      "loot": [
+        "potion_moon",
+        "scrap_blade"
+      ,
+        "brick_dust",
+        "rune_ash"],
+      "loreRef": "s45",
+      "seed": "古代文明的砌道从碎石中露出棱角，岩甲蛛与骷髅兵守着无人记得的走廊。（霜蚀拱桥）"
+    },
+    {
+      "id": 37,
+      "name": "铁锈甬道",
+      "theme": "mid",
+      "monsters": [
+        "bandit",
+        "crystal_spider",
+        "fusion_beast",
+        "golem",
+        "mutation_beast"
+      ],
+      "traps": [
+        "gas"
+      ],
+      "loot": [
+        "moonherb",
+        "scrap_blade"
+      ,
+        "bone_coin"],
+      "loreRef": "s45",
+      "seed": "古代文明的砌道从碎石中露出棱角，岩甲蛛与骷髅兵守着无人记得的走廊。（铁锈甬道）"
+    },
+    {
+      "id": 38,
+      "name": "虚空井道",
+      "theme": "mid",
+      "monsters": [
+        "skeleton",
+        "crystal_spider",
+        "fusion_beast",
+        "golem",
+        "mutation_beast"
+      ],
+      "traps": [
+        "rockfall"
+      ],
+      "loot": [
+        "potion_moon",
+        "scrap_blade"
+      ,
+        "iron_vein",
+        "spider_glass"],
+      "loreRef": "s45",
+      "seed": "古代文明的砌道从碎石中露出棱角，岩甲蛛与骷髅兵守着无人记得的走廊。（虚空井道）"
+    },
+    {
+      "id": 39,
+      "name": "石纹石室",
+      "theme": "mid",
+      "monsters": [
+        "skeleton",
+        "bandit",
+        "crystal_spider",
+        "fusion_beast",
+        "golem",
+        "mutation_beast"
+      ],
+      "traps": [
+        "rune_blast"
+      ],
+      "loot": [
+        "herb_paste"
+      ,
+        "brick_dust",
+        "rune_ash"],
+      "loreRef": "s45",
+      "seed": "古代文明的砌道从碎石中露出棱角，岩甲蛛与骷髅兵守着无人记得的走廊。（石纹石室）"
+    },
+    {
+      "id": 40,
+      "name": "苔封长廊",
+      "theme": "mid",
+      "monsters": [
+        "bandit",
+        "crystal_spider",
+        "fusion_beast",
+        "golem",
+        "mutation_beast"
+      ],
+      "traps": [
+        "poison_needle"
+      ],
+      "loot": [
+        "venom_gland",
+        "scrap_blade",
+        "floor_core"
+      ,
+        "bone_coin"],
+      "boss": {
+        "mid": "bandit",
+        "name": "劫掠者头目",
+        "hp": 108,
+        "ac": 15,
+        "reward": {
+          "gold": [
+            340,
+            520
+          ],
+          "item": "dagger_black"
+        }
+      },
+      "loreRef": "s45",
+      "seed": "古代文明的砌道从碎石中露出棱角，岩甲蛛与骷髅兵守着无人记得的走廊。（苔封长廊）"
+    },
+    {
+      "id": 41,
+      "name": "青铜长廊",
+      "theme": "mid",
+      "monsters": [
+        "spider",
+        "undead_knight",
+        "wraith_mage",
+        "worm",
+        "fusion_beast"
+      ],
+      "traps": [
+        "rune_blast"
+      ],
+      "loot": [
+        "potion_moon"
+      ,
+        "iron_vein",
+        "spider_glass"],
+      "loreRef": "s45",
+      "seed": "古代文明的砌道从碎石中露出棱角，岩甲蛛与骷髅兵守着无人记得的走廊。（青铜长廊）"
+    },
+    {
+      "id": 42,
+      "name": "断裂地宫",
+      "theme": "mid",
+      "monsters": [
+        "skeleton",
+        "undead_knight",
+        "wraith_mage",
+        "worm",
+        "fusion_beast"
+      ],
+      "traps": [
+        "rockfall"
+      ],
+      "loot": [
+        "venom_gland",
+        "potion_moon"
+      ,
+        "brick_dust",
+        "rune_ash"],
+      "loreRef": "s45",
+      "seed": "古代文明的砌道从碎石中露出棱角，岩甲蛛与骷髅兵守着无人记得的走廊。（断裂地宫）"
+    },
+    {
+      "id": 43,
+      "name": "沉钟回廊",
+      "theme": "mid",
+      "monsters": [
+        "skeleton",
+        "undead_knight",
+        "wraith_mage",
+        "worm",
+        "fusion_beast"
+      ],
+      "traps": [
+        "rune_blast"
+      ],
+      "loot": [
+        "scrap_blade"
+      ,
+        "bone_coin"],
+      "loreRef": "s45",
+      "seed": "古代文明的砌道从碎石中露出棱角，岩甲蛛与骷髅兵守着无人记得的走廊。（沉钟回廊）"
+    },
+    {
+      "id": 44,
+      "name": "铭文圆厅",
+      "theme": "mid",
+      "monsters": [
+        "bandit",
+        "undead_knight",
+        "wraith_mage",
+        "worm",
+        "fusion_beast"
+      ],
+      "traps": [
+        "gas"
+      ],
+      "loot": [
+        "moonherb",
+        "herb_paste"
+      ,
+        "iron_vein",
+        "spider_glass"],
+      "loreRef": "s45",
+      "seed": "古代文明的砌道从碎石中露出棱角，岩甲蛛与骷髅兵守着无人记得的走廊。（铭文圆厅）"
+    },
+    {
+      "id": 45,
+      "name": "干涸前庭",
+      "theme": "mid",
+      "monsters": [
+        "bandit",
+        "spider",
+        "undead_knight",
+        "wraith_mage",
+        "worm",
+        "fusion_beast"
+      ],
+      "traps": [
+        "gas"
+      ],
+      "loot": [
+        "herb_paste"
+      ,
+        "brick_dust",
+        "rune_ash"],
+      "loreRef": "s45",
+      "seed": "古代文明的砌道从碎石中露出棱角，岩甲蛛与骷髅兵守着无人记得的走廊。（干涸前庭）"
+    },
+    {
+      "id": 46,
+      "name": "霜蚀石阶",
+      "theme": "mid",
+      "monsters": [
+        "bandit",
+        "spider",
+        "undead_knight",
+        "wraith_mage",
+        "worm",
+        "fusion_beast"
+      ],
+      "traps": [
+        "poison_needle"
+      ],
+      "loot": [
+        "potion_moon",
+        "scrap_blade"
+      ,
+        "bone_coin"],
+      "loreRef": "s45",
+      "seed": "古代文明的砌道从碎石中露出棱角，岩甲蛛与骷髅兵守着无人记得的走廊。（霜蚀石阶）"
+    },
+    {
+      "id": 47,
+      "name": "铁锈拱桥",
+      "theme": "mid",
+      "monsters": [
+        "skeleton",
+        "spider",
+        "undead_knight",
+        "wraith_mage",
+        "worm",
+        "fusion_beast"
+      ],
+      "traps": [
+        "rockfall"
+      ],
+      "loot": [
+        "scrap_blade",
+        "venom_gland"
+      ,
+        "iron_vein",
+        "spider_glass"],
+      "loreRef": "s45",
+      "seed": "古代文明的砌道从碎石中露出棱角，岩甲蛛与骷髅兵守着无人记得的走廊。（铁锈拱桥）"
+    },
+    {
+      "id": 48,
+      "name": "虚空甬道",
+      "theme": "mid",
+      "monsters": [
+        "spider",
+        "undead_knight",
+        "wraith_mage",
+        "worm",
+        "fusion_beast"
+      ],
+      "traps": [
+        "rockfall"
+      ],
+      "loot": [
+        "herb_paste",
+        "moonherb"
+      ,
+        "brick_dust",
+        "rune_ash"],
+      "loreRef": "s45",
+      "seed": "古代文明的砌道从碎石中露出棱角，岩甲蛛与骷髅兵守着无人记得的走廊。（虚空甬道）"
+    },
+    {
+      "id": 49,
+      "name": "石纹井道",
+      "theme": "mid",
+      "monsters": [
+        "skeleton",
+        "undead_knight",
+        "wraith_mage",
+        "worm",
+        "fusion_beast"
+      ],
+      "traps": [
+        "gas"
+      ],
+      "loot": [
+        "venom_gland",
+        "moonherb"
+      ,
+        "bone_coin"],
+      "loreRef": "s45",
+      "seed": "古代文明的砌道从碎石中露出棱角，岩甲蛛与骷髅兵守着无人记得的走廊。（石纹井道）"
+    },
+    {
+      "id": 50,
+      "name": "苔封石室",
+      "theme": "mid",
+      "monsters": [
+        "spider",
+        "bandit",
+        "ghoul",
+        "undead_knight",
+        "wraith_mage",
+        "worm",
+        "fusion_beast"
+      ],
+      "traps": [
+        "rockfall"
+      ],
+      "loot": [
+        "scrap_blade",
+        "moonherb",
+        "floor_core"
+      ,
+        "iron_vein",
+        "spider_glass"],
+      "boss": {
+        "mid": "ghoul",
+        "name": "地脉尸王",
+        "hp": 135,
+        "ac": 15,
+        "reward": {
+          "gold": [
+            420,
+            640
+          ],
+          "item": "star_shard"
+        }
+      },
+      "loreRef": "s45",
+      "seed": "古代文明的砌道从碎石中露出棱角，岩甲蛛与骷髅兵守着无人记得的走廊。（苔封石室）"
+    },
+    {
+      "id": 51,
+      "name": "熔渣熔窟",
+      "theme": "deep",
+      "monsters": [
+        "bandit",
+        "ghoul",
+        "undead_knight",
+        "wraith_mage",
+        "worm",
+        "fusion_beast"
+      ],
+      "traps": [
+        "gas"
+      ],
+      "loot": [
+        "potion_moon",
+        "star_shard"
+      ,
+        "lava_tear",
+        "starhub_alloy",
+        "mushroom_cap"],
+      "loreRef": "s46",
+      "seed": "地脉的热气从裂缝里涌上来，尸鬼祭司的祭坛一座接一座——这里已经不是活人的地界。（熔渣熔窟）"
+    },
+    {
+      "id": 52,
+      "name": "地火断崖",
+      "theme": "deep",
+      "monsters": [
+        "skeleton",
+        "undead_knight",
+        "wraith_mage",
+        "worm",
+        "fusion_beast"
+      ],
+      "traps": [
+        "rune_blast"
+      ],
+      "loot": [
+        "holy_water",
+        "potion_moon"
+      ,
+        "ember_core",
+        "salt_abyss"],
+      "loreRef": "s46",
+      "seed": "地脉的热气从裂缝里涌上来，尸鬼祭司的祭坛一座接一座——这里已经不是活人的地界。（地火断崖）"
+    },
+    {
+      "id": 53,
+      "name": "岩浆火口",
+      "theme": "deep",
+      "monsters": [
+        "bandit",
+        "ghoul",
+        "undead_knight",
+        "wraith_mage",
+        "worm",
+        "fusion_beast"
+      ],
+      "traps": [
+        "guillotine"
+      ],
+      "loot": [
+        "blade_blank",
+        "potion_moon"
+      ,
+        "worm_silk",
+        "seal_wax",
+        "mushroom_cap"],
+      "loreRef": "s46",
+      "seed": "地脉的热气从裂缝里涌上来，尸鬼祭司的祭坛一座接一座——这里已经不是活人的地界。（岩浆火口）"
+    },
+    {
+      "id": 54,
+      "name": "黑铁裂隙",
+      "theme": "deep",
+      "monsters": [
+        "ghoul",
+        "undead_knight",
+        "wraith_mage",
+        "worm",
+        "fusion_beast"
+      ],
+      "traps": [
+        "rockfall"
+      ],
+      "loot": [
+        "antidote"
+      ,
+        "lava_tear",
+        "starhub_alloy",
+        "salt_abyss"],
+      "loreRef": "s46",
+      "seed": "地脉的热气从裂缝里涌上来，尸鬼祭司的祭坛一座接一座——这里已经不是活人的地界。（黑铁裂隙）"
+    },
+    {
+      "id": 55,
+      "name": "灼痕熔池",
+      "theme": "deep",
+      "monsters": [
+        "skeleton",
+        "undead_knight",
+        "wraith_mage",
+        "worm",
+        "fusion_beast"
+      ],
+      "traps": [
+        "guillotine"
+      ],
+      "loot": [
+        "star_shard",
+        "antidote"
+      ,
+        "ember_core",
+        "mushroom_cap"],
+      "loreRef": "s46",
+      "seed": "地脉的热气从裂缝里涌上来，尸鬼祭司的祭坛一座接一座——这里已经不是活人的地界。（灼痕熔池）"
+    },
+    {
+      "id": 56,
+      "name": "硫磺暗河",
+      "theme": "deep",
+      "monsters": [
+        "bandit",
+        "undead_knight",
+        "wraith_mage",
+        "worm",
+        "fusion_beast"
+      ],
+      "traps": [
+        "gas"
+      ],
+      "loot": [
+        "star_shard",
+        "blade_blank"
+      ,
+        "worm_silk",
+        "seal_wax",
+        "salt_abyss"],
+      "loreRef": "s46",
+      "seed": "地脉的热气从裂缝里涌上来，尸鬼祭司的祭坛一座接一座——这里已经不是活人的地界。（硫磺暗河）"
+    },
+    {
+      "id": 57,
+      "name": "赤砂深渊道",
+      "theme": "deep",
+      "monsters": [
+        "skeleton",
+        "undead_knight",
+        "wraith_mage",
+        "worm",
+        "fusion_beast"
+      ],
+      "traps": [
+        "rune_blast"
+      ],
+      "loot": [
+        "potion_moon",
+        "antidote"
+      ,
+        "lava_tear",
+        "starhub_alloy",
+        "mushroom_cap"],
+      "loreRef": "s46",
+      "seed": "地脉的热气从裂缝里涌上来，尸鬼祭司的祭坛一座接一座——这里已经不是活人的地界。（赤砂深渊道）"
+    },
+    {
+      "id": 58,
+      "name": "熔炉熔洞",
+      "theme": "deep",
+      "monsters": [
+        "skeleton",
+        "undead_knight",
+        "wraith_mage",
+        "worm",
+        "fusion_beast"
+      ],
+      "traps": [
+        "rockfall"
+      ],
+      "loot": [
+        "blade_blank",
+        "holy_water"
+      ,
+        "ember_core",
+        "salt_abyss"],
+      "loreRef": "s46",
+      "seed": "地脉的热气从裂缝里涌上来，尸鬼祭司的祭坛一座接一座——这里已经不是活人的地界。（熔炉熔洞）"
+    },
+    {
+      "id": 59,
+      "name": "焦岩矿床",
+      "theme": "deep",
+      "monsters": [
+        "ghoul",
+        "undead_knight",
+        "wraith_mage",
+        "worm",
+        "fusion_beast"
+      ],
+      "traps": [
+        "rune_blast"
+      ],
+      "loot": [
+        "antidote",
+        "star_shard"
+      ,
+        "worm_silk",
+        "seal_wax",
+        "mushroom_cap"],
+      "loreRef": "s46",
+      "seed": "地脉的热气从裂缝里涌上来，尸鬼祭司的祭坛一座接一座——这里已经不是活人的地界。（焦岩矿床）"
+    },
+    {
+      "id": 60,
+      "name": "沸腾石殿",
+      "theme": "deep",
+      "monsters": [
+        "skeleton",
+        "templar",
+        "undead_knight",
+        "wraith_mage",
+        "worm",
+        "fusion_beast"
+      ],
+      "traps": [
+        "gas"
+      ],
+      "loot": [
+        "star_shard",
+        "blade_blank",
+        "floor_core"
+      ,
+        "lava_tear",
+        "starhub_alloy",
+        "salt_abyss"],
+      "boss": {
+        "mid": "templar",
+        "name": "星枢古代守卫",
+        "hp": 166,
+        "ac": 16,
+        "reward": {
+          "gold": [
+            500,
+            760
+          ],
+          "item": "dust_dream"
+        }
+      },
+      "loreRef": "s46",
+      "seed": "地脉的热气从裂缝里涌上来，尸鬼祭司的祭坛一座接一座——这里已经不是活人的地界。（沸腾石殿）"
+    },
+    {
+      "id": 61,
+      "name": "熔渣石殿",
+      "theme": "deep",
+      "monsters": [
+        "bandit",
+        "ancient_guard",
+        "synth_dragon",
+        "undead_knight",
+        "worm"
+      ],
+      "traps": [
+        "rockfall"
+      ],
+      "loot": [
+        "blade_blank"
+      ,
+        "ember_core",
+        "mushroom_cap"],
+      "loreRef": "s46",
+      "seed": "地脉的热气从裂缝里涌上来，尸鬼祭司的祭坛一座接一座——这里已经不是活人的地界。（熔渣石殿）"
+    },
+    {
+      "id": 62,
+      "name": "地火熔窟",
+      "theme": "deep",
+      "monsters": [
+        "bandit",
+        "ghoul",
+        "ancient_guard",
+        "synth_dragon",
+        "undead_knight",
+        "worm"
+      ],
+      "traps": [
+        "guillotine"
+      ],
+      "loot": [
+        "blade_blank"
+      ,
+        "worm_silk",
+        "seal_wax",
+        "salt_abyss"],
+      "loreRef": "s46",
+      "seed": "地脉的热气从裂缝里涌上来，尸鬼祭司的祭坛一座接一座——这里已经不是活人的地界。（地火熔窟）"
+    },
+    {
+      "id": 63,
+      "name": "岩浆断崖",
+      "theme": "deep",
+      "monsters": [
+        "bandit",
+        "ancient_guard",
+        "synth_dragon",
+        "undead_knight",
+        "worm"
+      ],
+      "traps": [
+        "rockfall"
+      ],
+      "loot": [
+        "antidote",
+        "blade_blank"
+      ,
+        "lava_tear",
+        "starhub_alloy",
+        "mushroom_cap"],
+      "loreRef": "s46",
+      "seed": "地脉的热气从裂缝里涌上来，尸鬼祭司的祭坛一座接一座——这里已经不是活人的地界。（岩浆断崖）"
+    },
+    {
+      "id": 64,
+      "name": "黑铁火口",
+      "theme": "deep",
+      "monsters": [
+        "bandit",
+        "ghoul",
+        "ancient_guard",
+        "synth_dragon",
+        "undead_knight",
+        "worm"
+      ],
+      "traps": [
+        "rockfall"
+      ],
+      "loot": [
+        "antidote",
+        "blade_blank"
+      ,
+        "ember_core",
+        "salt_abyss"],
+      "loreRef": "s46",
+      "seed": "地脉的热气从裂缝里涌上来，尸鬼祭司的祭坛一座接一座——这里已经不是活人的地界。（黑铁火口）"
+    },
+    {
+      "id": 65,
+      "name": "灼痕裂隙",
+      "theme": "deep",
+      "monsters": [
+        "bandit",
+        "skeleton",
+        "ancient_guard",
+        "synth_dragon",
+        "undead_knight",
+        "worm"
+      ],
+      "traps": [
+        "guillotine"
+      ],
+      "loot": [
+        "star_shard",
+        "antidote"
+      ,
+        "worm_silk",
+        "seal_wax",
+        "mushroom_cap"],
+      "loreRef": "s46",
+      "seed": "地脉的热气从裂缝里涌上来，尸鬼祭司的祭坛一座接一座——这里已经不是活人的地界。（灼痕裂隙）"
+    },
+    {
+      "id": 66,
+      "name": "硫磺熔池",
+      "theme": "deep",
+      "monsters": [
+        "skeleton",
+        "ancient_guard",
+        "synth_dragon",
+        "undead_knight",
+        "worm"
+      ],
+      "traps": [
+        "rune_blast"
+      ],
+      "loot": [
+        "antidote",
+        "potion_moon"
+      ,
+        "lava_tear",
+        "starhub_alloy",
+        "salt_abyss"],
+      "loreRef": "s46",
+      "seed": "地脉的热气从裂缝里涌上来，尸鬼祭司的祭坛一座接一座——这里已经不是活人的地界。（硫磺熔池）"
+    },
+    {
+      "id": 67,
+      "name": "赤砂暗河",
+      "theme": "deep",
+      "monsters": [
+        "ghoul",
+        "ancient_guard",
+        "synth_dragon",
+        "undead_knight",
+        "worm"
+      ],
+      "traps": [
+        "gas"
+      ],
+      "loot": [
+        "antidote",
+        "holy_water"
+      ,
+        "ember_core",
+        "mushroom_cap"],
+      "loreRef": "s46",
+      "seed": "地脉的热气从裂缝里涌上来，尸鬼祭司的祭坛一座接一座——这里已经不是活人的地界。（赤砂暗河）"
+    },
+    {
+      "id": 68,
+      "name": "熔炉深渊道",
+      "theme": "deep",
+      "monsters": [
+        "skeleton",
+        "ancient_guard",
+        "synth_dragon",
+        "undead_knight",
+        "worm"
+      ],
+      "traps": [
+        "guillotine"
+      ],
+      "loot": [
+        "potion_moon",
+        "holy_water"
+      ,
+        "worm_silk",
+        "seal_wax",
+        "salt_abyss"],
+      "loreRef": "s46",
+      "seed": "地脉的热气从裂缝里涌上来，尸鬼祭司的祭坛一座接一座——这里已经不是活人的地界。（熔炉深渊道）"
+    },
+    {
+      "id": 69,
+      "name": "焦岩熔洞",
+      "theme": "deep",
+      "monsters": [
+        "ghoul",
+        "ancient_guard",
+        "synth_dragon",
+        "undead_knight",
+        "worm"
+      ],
+      "traps": [
+        "guillotine"
+      ],
+      "loot": [
+        "antidote",
+        "holy_water"
+      ,
+        "lava_tear",
+        "starhub_alloy",
+        "mushroom_cap"],
+      "loreRef": "s46",
+      "seed": "地脉的热气从裂缝里涌上来，尸鬼祭司的祭坛一座接一座——这里已经不是活人的地界。（焦岩熔洞）"
+    },
+    {
+      "id": 70,
+      "name": "沸腾矿床",
+      "theme": "deep",
+      "monsters": [
+        "ghoul",
+        "skeleton",
+        "abyss_spawn",
+        "ancient_guard",
+        "synth_dragon",
+        "undead_knight",
+        "worm"
+      ],
+      "traps": [
+        "gas"
+      ],
+      "loot": [
+        "blade_blank",
+        "holy_water",
+        "floor_core"
+      ,
+        "ember_core",
+        "salt_abyss"],
+      "boss": {
+        "mid": "abyss_spawn",
+        "name": "深渊行者",
+        "hp": 200,
+        "ac": 16,
+        "reward": {
+          "gold": [
+            600,
+            900
+          ],
+          "item": "star_marrow"
+        }
+      },
+      "loreRef": "s46",
+      "seed": "地脉的热气从裂缝里涌上来，尸鬼祭司的祭坛一座接一座——这里已经不是活人的地界。（沸腾矿床）"
+    },
+    {
+      "id": 71,
+      "name": "熔渣矿床",
+      "theme": "deep",
+      "monsters": [
+        "skeleton",
+        "ancient_guard",
+        "synth_dragon",
+        "undead_knight",
+        "worm"
+      ],
+      "traps": [
+        "rockfall"
+      ],
+      "loot": [
+        "star_shard"
+      ,
+        "worm_silk",
+        "seal_wax",
+        "mushroom_cap"],
+      "loreRef": "s46",
+      "seed": "地脉的热气从裂缝里涌上来，尸鬼祭司的祭坛一座接一座——这里已经不是活人的地界。（熔渣矿床）"
+    },
+    {
+      "id": 72,
+      "name": "地火石殿",
+      "theme": "deep",
+      "monsters": [
+        "bandit",
+        "skeleton",
+        "ancient_guard",
+        "synth_dragon",
+        "undead_knight",
+        "worm"
+      ],
+      "traps": [
+        "rune_blast"
+      ],
+      "loot": [
+        "blade_blank"
+      ,
+        "lava_tear",
+        "starhub_alloy",
+        "salt_abyss"],
+      "loreRef": "s46",
+      "seed": "地脉的热气从裂缝里涌上来，尸鬼祭司的祭坛一座接一座——这里已经不是活人的地界。（地火石殿）"
+    },
+    {
+      "id": 73,
+      "name": "岩浆熔窟",
+      "theme": "deep",
+      "monsters": [
+        "bandit",
+        "ancient_guard",
+        "synth_dragon",
+        "undead_knight",
+        "worm"
+      ],
+      "traps": [
+        "guillotine"
+      ],
+      "loot": [
+        "antidote"
+      ,
+        "ember_core",
+        "mushroom_cap"],
+      "loreRef": "s46",
+      "seed": "地脉的热气从裂缝里涌上来，尸鬼祭司的祭坛一座接一座——这里已经不是活人的地界。（岩浆熔窟）"
+    },
+    {
+      "id": 74,
+      "name": "黑铁断崖",
+      "theme": "deep",
+      "monsters": [
+        "skeleton",
+        "ancient_guard",
+        "synth_dragon",
+        "undead_knight",
+        "worm"
+      ],
+      "traps": [
+        "rune_blast"
+      ],
+      "loot": [
+        "antidote",
+        "potion_moon"
+      ,
+        "worm_silk",
+        "seal_wax",
+        "salt_abyss"],
+      "loreRef": "s46",
+      "seed": "地脉的热气从裂缝里涌上来，尸鬼祭司的祭坛一座接一座——这里已经不是活人的地界。（黑铁断崖）"
+    },
+    {
+      "id": 75,
+      "name": "灼痕火口",
+      "theme": "deep",
+      "monsters": [
+        "skeleton",
+        "ancient_guard",
+        "synth_dragon",
+        "undead_knight",
+        "worm"
+      ],
+      "traps": [
+        "rune_blast"
+      ],
+      "loot": [
+        "holy_water",
+        "antidote"
+      ,
+        "lava_tear",
+        "starhub_alloy",
+        "mushroom_cap"],
+      "loreRef": "s46",
+      "seed": "地脉的热气从裂缝里涌上来，尸鬼祭司的祭坛一座接一座——这里已经不是活人的地界。（灼痕火口）"
+    },
+    {
+      "id": 76,
+      "name": "硫磺裂隙",
+      "theme": "deep",
+      "monsters": [
+        "ghoul",
+        "ancient_guard",
+        "synth_dragon",
+        "undead_knight",
+        "worm"
+      ],
+      "traps": [
+        "rockfall"
+      ],
+      "loot": [
+        "blade_blank",
+        "potion_moon"
+      ,
+        "ember_core",
+        "salt_abyss"],
+      "loreRef": "s46",
+      "seed": "地脉的热气从裂缝里涌上来，尸鬼祭司的祭坛一座接一座——这里已经不是活人的地界。（硫磺裂隙）"
+    },
+    {
+      "id": 77,
+      "name": "赤砂熔池",
+      "theme": "deep",
+      "monsters": [
+        "ghoul",
+        "ancient_guard",
+        "synth_dragon",
+        "undead_knight",
+        "worm"
+      ],
+      "traps": [
+        "gas"
+      ],
+      "loot": [
+        "star_shard"
+      ,
+        "worm_silk",
+        "seal_wax",
+        "mushroom_cap"],
+      "loreRef": "s46",
+      "seed": "地脉的热气从裂缝里涌上来，尸鬼祭司的祭坛一座接一座——这里已经不是活人的地界。（赤砂熔池）"
+    },
+    {
+      "id": 78,
+      "name": "熔炉暗河",
+      "theme": "deep",
+      "monsters": [
+        "skeleton",
+        "bandit",
+        "ancient_guard",
+        "synth_dragon",
+        "undead_knight",
+        "worm"
+      ],
+      "traps": [
+        "gas"
+      ],
+      "loot": [
+        "blade_blank",
+        "antidote"
+      ,
+        "lava_tear",
+        "starhub_alloy",
+        "salt_abyss"],
+      "loreRef": "s46",
+      "seed": "地脉的热气从裂缝里涌上来，尸鬼祭司的祭坛一座接一座——这里已经不是活人的地界。（熔炉暗河）"
+    },
+    {
+      "id": 79,
+      "name": "焦岩深渊道",
+      "theme": "deep",
+      "monsters": [
+        "ghoul",
+        "ancient_guard",
+        "synth_dragon",
+        "undead_knight",
+        "worm"
+      ],
+      "traps": [
+        "gas"
+      ],
+      "loot": [
+        "antidote",
+        "star_shard"
+      ,
+        "ember_core",
+        "mushroom_cap"],
+      "loreRef": "s46",
+      "seed": "地脉的热气从裂缝里涌上来，尸鬼祭司的祭坛一座接一座——这里已经不是活人的地界。（焦岩深渊道）"
+    },
+    {
+      "id": 80,
+      "name": "沸腾熔洞",
+      "theme": "deep",
+      "monsters": [
+        "bandit",
+        "abyss_spawn",
+        "ancient_guard",
+        "synth_dragon",
+        "undead_knight",
+        "worm"
+      ],
+      "traps": [
+        "gas"
+      ],
+      "loot": [
+        "antidote",
+        "blade_blank",
+        "floor_core"
+      ,
+        "worm_silk",
+        "seal_wax",
+        "salt_abyss"],
+      "boss": {
+        "mid": "abyss_spawn",
+        "name": "裂隙看门者",
+        "hp": 238,
+        "ac": 17,
+        "reward": {
+          "gold": [
+            700,
+            1050
+          ],
+          "item": "seal_rune"
+        }
+      },
+      "loreRef": "s46",
+      "seed": "地脉的热气从裂缝里涌上来，尸鬼祭司的祭坛一座接一座——这里已经不是活人的地界。（沸腾熔洞）"
+    },
+    {
+      "id": 81,
+      "name": "星尘星矿脉",
+      "theme": "deepest",
+      "monsters": [
+        "ghoul",
+        "abyss_demon",
+        "void_walker",
+        "ancient_guard",
+        "synth_dragon"
+      ],
+      "traps": [
+        "guillotine"
+      ],
+      "loot": [
+        "holy_water",
+        "blade_blank"
+      ,
+        "demon_horn",
+        "torture_iron",
+        "anc_parchment"],
+      "loreRef": "s13",
+      "seed": "星髓在断层里泛着冷光，古代英灵的残影仍在巡行——它们不认活人，只认星枢的印记。（星尘星矿脉）"
+    },
+    {
+      "id": 82,
+      "name": "陨铁星核廊",
+      "theme": "deepest",
+      "monsters": [
+        "ghoul",
+        "templar",
+        "abyss_demon",
+        "void_walker",
+        "ancient_guard",
+        "synth_dragon"
+      ],
+      "traps": [
+        "rune_blast"
+      ],
+      "loot": [
+        "holy_water",
+        "platinum"
+      ,
+        "soul_slag",
+        "hollow_gear",
+        "anc_core_shard"],
+      "loreRef": "s13",
+      "seed": "星髓在断层里泛着冷光，古代英灵的残影仍在巡行——它们不认活人，只认星枢的印记。（陨铁星核廊）"
+    },
+    {
+      "id": 83,
+      "name": "星髓星轨桥",
+      "theme": "deepest",
+      "monsters": [
+        "templar",
+        "abyss_demon",
+        "void_walker",
+        "ancient_guard",
+        "synth_dragon"
+      ],
+      "traps": [
+        "gas"
+      ],
+      "loot": [
+        "potion_moon"
+      ,
+        "hell_sulfur",
+        "guardian_lens",
+        "anc_seal_ring"],
+      "loreRef": "s13",
+      "seed": "星髓在断层里泛着冷光，古代英灵的残影仍在巡行——它们不认活人，只认星枢的印记。（星髓星轨桥）"
+    },
+    {
+      "id": 84,
+      "name": "断层星纹台",
+      "theme": "deepest",
+      "monsters": [
+        "templar",
+        "ghoul",
+        "abyss_demon",
+        "void_walker",
+        "ancient_guard",
+        "synth_dragon"
+      ],
+      "traps": [
+        "gas"
+      ],
+      "loot": [
+        "potion_moon",
+        "platinum"
+      ,
+        "demon_horn",
+        "torture_iron",
+        "anc_lens"],
+      "loreRef": "s13",
+      "seed": "星髓在断层里泛着冷光，古代英灵的残影仍在巡行——它们不认活人，只认星枢的印记。（断层星纹台）"
+    },
+    {
+      "id": 85,
+      "name": "古星陨坑",
+      "theme": "deepest",
+      "monsters": [
+        "ghoul",
+        "abyss_demon",
+        "void_walker",
+        "ancient_guard",
+        "synth_dragon"
+      ],
+      "traps": [
+        "rune_blast"
+      ],
+      "loot": [
+        "blade_blank"
+      ,
+        "soul_slag",
+        "hollow_gear",
+        "anc_battery"],
+      "loreRef": "s13",
+      "seed": "星髓在断层里泛着冷光，古代英灵的残影仍在巡行——它们不认活人，只认星枢的印记。（古星陨坑）"
+    },
+    {
+      "id": 86,
+      "name": "星辉星辉殿",
+      "theme": "deepest",
+      "monsters": [
+        "ghoul",
+        "abyss_demon",
+        "void_walker",
+        "ancient_guard",
+        "synth_dragon"
+      ],
+      "traps": [
+        "gas"
+      ],
+      "loot": [
+        "star_shard",
+        "dust_dream"
+      ,
+        "hell_sulfur",
+        "guardian_lens",
+        "anc_rivet"],
+      "loreRef": "s13",
+      "seed": "星髓在断层里泛着冷光，古代英灵的残影仍在巡行——它们不认活人，只认星枢的印记。（星辉星辉殿）"
+    },
+    {
+      "id": 87,
+      "name": "沉星星髓井",
+      "theme": "deepest",
+      "monsters": [
+        "templar",
+        "ghoul",
+        "abyss_demon",
+        "void_walker",
+        "ancient_guard",
+        "synth_dragon"
+      ],
+      "traps": [
+        "rune_blast"
+      ],
+      "loot": [
+        "blade_blank",
+        "holy_water"
+      ,
+        "demon_horn",
+        "torture_iron",
+        "anc_parchment"],
+      "loreRef": "s13",
+      "seed": "星髓在断层里泛着冷光，古代英灵的残影仍在巡行——它们不认活人，只认星枢的印记。（沉星星髓井）"
+    },
+    {
+      "id": 88,
+      "name": "星轨沉星阶",
+      "theme": "deepest",
+      "monsters": [
+        "ghoul",
+        "abyss_demon",
+        "void_walker",
+        "ancient_guard",
+        "synth_dragon"
+      ],
+      "traps": [
+        "gas"
+      ],
+      "loot": [
+        "holy_water",
+        "blade_blank"
+      ,
+        "soul_slag",
+        "hollow_gear",
+        "anc_core_shard"],
+      "loreRef": "s13",
+      "seed": "星髓在断层里泛着冷光，古代英灵的残影仍在巡行——它们不认活人，只认星枢的印记。（星轨沉星阶）"
+    },
+    {
+      "id": 89,
+      "name": "裂隙星穹厅",
+      "theme": "deepest",
+      "monsters": [
+        "templar",
+        "abyss_demon",
+        "void_walker",
+        "ancient_guard",
+        "synth_dragon"
+      ],
+      "traps": [
+        "guillotine"
+      ],
+      "loot": [
+        "platinum",
+        "dust_dream"
+      ,
+        "hell_sulfur",
+        "guardian_lens",
+        "anc_seal_ring"],
+      "loreRef": "s13",
+      "seed": "星髓在断层里泛着冷光，古代英灵的残影仍在巡行——它们不认活人，只认星枢的印记。（裂隙星穹厅）"
+    },
+    {
+      "id": 90,
+      "name": "星尘星纹台",
+      "theme": "deepest",
+      "monsters": [
+        "templar",
+        "ghoul",
+        "abyss_demon",
+        "void_walker",
+        "ancient_guard",
+        "synth_dragon"
+      ],
+      "traps": [
+        "gas"
+      ],
+      "loot": [
+        "blade_blank",
+        "potion_moon",
+        "floor_core"
+      ,
+        "demon_horn",
+        "torture_iron",
+        "tome_geo_abyss",
+        "anc_lens"],
+      "boss": {
+        "mid": "templar",
+        "name": "古代英灵·末席",
+        "hp": 280,
+        "ac": 18,
+        "reward": {
+          "gold": [
+            820,
+            1200
+          ],
+          "item": "platinum"
+        }
+      },
+      "loreRef": "s13",
+      "seed": "星髓在断层里泛着冷光，古代英灵的残影仍在巡行——它们不认活人，只认星枢的印记。（星尘星纹台）"
+    },
+    {
+      "id": 91,
+      "name": "陨铁陨坑",
+      "theme": "deepest",
+      "monsters": [
+        "templar",
+        "abyss_demon",
+        "void_walker",
+        "ancient_guard",
+        "synth_dragon"
+      ],
+      "traps": [
+        "rune_blast"
+      ],
+      "loot": [
+        "potion_moon",
+        "blade_blank"
+      ,
+        "soul_slag",
+        "hollow_gear",
+        "tome_geo_abyss",
+        "anc_battery"],
+      "loreRef": "s13",
+      "seed": "星髓在断层里泛着冷光，古代英灵的残影仍在巡行——它们不认活人，只认星枢的印记。（陨铁陨坑）"
+    },
+    {
+      "id": 92,
+      "name": "星髓星辉殿",
+      "theme": "deepest",
+      "monsters": [
+        "templar",
+        "abyss_demon",
+        "void_walker",
+        "ancient_guard",
+        "synth_dragon"
+      ],
+      "traps": [
+        "gas"
+      ],
+      "loot": [
+        "blade_blank"
+      ,
+        "hell_sulfur",
+        "guardian_lens",
+        "tome_geo_abyss",
+        "anc_rivet"],
+      "loreRef": "s13",
+      "seed": "星髓在断层里泛着冷光，古代英灵的残影仍在巡行——它们不认活人，只认星枢的印记。（星髓星辉殿）"
+    },
+    {
+      "id": 93,
+      "name": "断层星髓井",
+      "theme": "deepest",
+      "monsters": [
+        "templar",
+        "abyss_demon",
+        "void_walker",
+        "ancient_guard",
+        "synth_dragon"
+      ],
+      "traps": [
+        "rune_blast"
+      ],
+      "loot": [
+        "dust_dream",
+        "star_shard"
+      ,
+        "demon_horn",
+        "torture_iron",
+        "tome_geo_abyss",
+        "anc_parchment"],
+      "loreRef": "s13",
+      "seed": "星髓在断层里泛着冷光，古代英灵的残影仍在巡行——它们不认活人，只认星枢的印记。（断层星髓井）"
+    },
+    {
+      "id": 94,
+      "name": "古星沉星阶",
+      "theme": "deepest",
+      "monsters": [
+        "ghoul",
+        "abyss_demon",
+        "void_walker",
+        "ancient_guard",
+        "synth_dragon"
+      ],
+      "traps": [
+        "guillotine"
+      ],
+      "loot": [
+        "holy_water",
+        "blade_blank"
+      ,
+        "soul_slag",
+        "hollow_gear",
+        "tome_geo_abyss",
+        "anc_core_shard"],
+      "loreRef": "s13",
+      "seed": "星髓在断层里泛着冷光，古代英灵的残影仍在巡行——它们不认活人，只认星枢的印记。（古星沉星阶）"
+    },
+    {
+      "id": 95,
+      "name": "星辉星穹厅",
+      "theme": "deepest",
+      "monsters": [
+        "templar",
+        "abyss_demon",
+        "void_walker",
+        "ancient_guard",
+        "synth_dragon"
+      ],
+      "traps": [
+        "gas"
+      ],
+      "loot": [
+        "blade_blank",
+        "star_shard"
+      ,
+        "hell_sulfur",
+        "guardian_lens",
+        "tome_geo_abyss",
+        "anc_seal_ring",
+        "q_void_key"],
+      "loreRef": "s13",
+      "seed": "星髓在断层里泛着冷光，古代英灵的残影仍在巡行——它们不认活人，只认星枢的印记。（星辉星穹厅）"
+    },
+    {
+      "id": 96,
+      "name": "沉星星矿脉",
+      "theme": "deepest",
+      "monsters": [
+        "templar",
+        "abyss_demon",
+        "void_walker",
+        "ancient_guard",
+        "synth_dragon"
+      ],
+      "traps": [
+        "rune_blast"
+      ],
+      "loot": [
+        "dust_dream",
+        "blade_blank"
+      ,
+        "demon_horn",
+        "torture_iron",
+        "tome_geo_abyss",
+        "anc_lens",
+        "q_void_key"],
+      "loreRef": "s13",
+      "seed": "星髓在断层里泛着冷光，古代英灵的残影仍在巡行——它们不认活人，只认星枢的印记。（沉星星矿脉）"
+    },
+    {
+      "id": 97,
+      "name": "星轨星核廊",
+      "theme": "deepest",
+      "monsters": [
+        "templar",
+        "abyss_demon",
+        "void_walker",
+        "ancient_guard",
+        "synth_dragon"
+      ],
+      "traps": [
+        "gas"
+      ],
+      "loot": [
+        "holy_water"
+      ,
+        "soul_slag",
+        "hollow_gear",
+        "tome_geo_abyss",
+        "anc_battery",
+        "q_void_key"],
+      "loreRef": "s13",
+      "seed": "星髓在断层里泛着冷光，古代英灵的残影仍在巡行——它们不认活人，只认星枢的印记。（星轨星核廊）"
+    },
+    {
+      "id": 98,
+      "name": "裂隙星轨桥",
+      "theme": "deepest",
+      "monsters": [
+        "templar",
+        "abyss_demon",
+        "void_walker",
+        "ancient_guard",
+        "synth_dragon"
+      ],
+      "traps": [
+        "rune_blast"
+      ],
+      "loot": [
+        "blade_blank",
+        "potion_moon"
+      ,
+        "hell_sulfur",
+        "guardian_lens",
+        "tome_geo_abyss",
+        "anc_rivet",
+        "q_void_key"],
+      "loreRef": "s13",
+      "seed": "星髓在断层里泛着冷光，古代英灵的残影仍在巡行——它们不认活人，只认星枢的印记。（裂隙星轨桥）"
+    },
+    {
+      "id": 99,
+      "name": "星尘星髓井",
+      "theme": "deepest",
+      "monsters": [
+        "ghoul",
+        "abyss_demon",
+        "void_walker",
+        "ancient_guard",
+        "synth_dragon"
+      ],
+      "traps": [
+        "gas"
+      ],
+      "loot": [
+        "holy_water"
+      ,
+        "demon_horn",
+        "torture_iron",
+        "tome_geo_abyss",
+        "anc_parchment",
+        "q_void_key"],
+      "loreRef": "s13",
+      "seed": "星髓在断层里泛着冷光，古代英灵的残影仍在巡行——它们不认活人，只认星枢的印记。（星尘星髓井）"
+    },
+    {
+      "id": 100,
+      "name": "魔界裂隙·星渊之门",
+      "theme": "abyss",
+      "monsters": [
+        "abyss_spawn",
+        "demon_lord"
+      ],
+      "traps": [
+        "rune_blast"
+      ],
+      "loot": [
+        "void_essence",
+        "floor_core"
+      ,
+        "abyss_ink",
+        "void_salt",
+        "star_nerve",
+        "silent_bell",
+        "tome_geo_abyss",
+        "anc_core_shard",
+        "q_void_key"],
+      "boss": {
+        "mid": "abyss_spawn",
+        "name": "魔界守门者·星渊之影",
+        "hp": 330,
+        "ac": 19,
+        "reward": {
+          "gold": [
+            1200,
+            2000
+          ],
+          "item": "void_essence"
+        }
+      },
+      "loreRef": "s13",
+      "seed": "魔界之门开了一线。空气本身在腐烂，裂隙另一侧的东西正在回望你。（魔界裂隙·星渊之门）"
+    }
+  ],
+  "entries": [
+    {
+      "id": "entry_cave",
+      "locId": "cave",
+      "name": "浅层洞窟·一层",
+      "startFloor": 1,
+      "unlockFloor": 1,
+      "desc": "枯藤后的洞口——地下城网络最浅的一层。"
+    },
+    {
+      "id": "entry_cave2",
+      "locId": "cave2",
+      "name": "浅层洞窟·二层",
+      "startFloor": 21,
+      "unlockFloor": 21,
+      "desc": "断裂下陷的岩层，古代砌道的残迹从这里开始。"
+    },
+    {
+      "id": "entry_cave3",
+      "locId": "cave3",
+      "name": "浅层洞窟·三层",
+      "startFloor": 51,
+      "unlockFloor": 51,
+      "desc": "地下河与地脉熔窟相通，越往下，活人的气味越淡。"
+    },
+    {
+      "id": "entry_abyss",
+      "locId": "deepwell",
+      "name": "星渊之门",
+      "startFloor": 81,
+      "unlockFloor": 81,
+      "require": "flag.leak_3",
+      "desc": "星渊魔气侵蚀成患后，六塔之底裂开的一条直通最深处的路。入口就在星枢六塔——地下深渊的深井城（§9）。"
+    }
+  ],
+  "rules": {
+    "retreatTicks": 2,
+    "corruptionFrom": 81,
+    "corruptionHpPct": 0.04,
+    "corruptionFlag": "dungeon_corruption",
+    "bossEvery": 10,
+    "encounter": {
+      "monster": 0.55,
+      "trap": 0.15,
+      "loot": 0.2,
+      "npc": 0.07,
+      "none": 0.03
+    },
+    "firstClear": {
+      "gold": [
+        320,
+        1280
+      ],
+      "exp": 20
+    },
+    "lootGold": {
+      "shallow": [
+        80,
+        320
+      ],
+      "mid": [
+        320,
+        960
+      ],
+      "deep": [
+        960,
+        2400
+      ],
+      "deepest": [
+        2400,
+        5600
+      ],
+      "abyss": [
+        5600,
+        12000
+      ]
+    },
+    "abyssFloor": 100,
+    "abyssChainFlag": "dungeon_abyss_reached"
+  }
+}

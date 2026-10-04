@@ -1,0 +1,185 @@
+/* ============================================================
+   天穹纪元 2.0 · 系统面板（方案 D「印玺权柄」落地）
+   ------------------------------------------------------------
+   设计定稿：outputs/系统设置-5方案/方案D-印玺权柄.html（已用户选定）。
+   本文件是定稿的产品化移植，先例与 chat.css / shell.css 相同——
+   **新文件承载新观感，不碰冻结的 app.css**，也不改其它面板共用的
+   shell.css 区块原语。
+
+   控件即器物：开关是「落印」（金印盖下），分段是「度量衡滑签」，
+   超时是「印石刻度」，Key 是「封缄」，重置世界是「火漆按压」
+   （按住 1.2 秒蜡色漫过封印才生效，松手即回）。
+   所有类名带 .sysd- 前缀，只服务 SysPanel；令牌全部取自
+   shell.css 的 :root（--gold / --star / --crimson …），不引入新色。
+   ============================================================ */
+
+.sysd{max-width:1120px;margin:0 auto;width:100%}
+.sysd-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
+.sysd-wide{grid-column:1/-1}
+
+/* ---------- 案卷（dossier）----------
+   与其它页面同款「雾玻璃」：chronicle 卡 / hud-card 的配方
+   （#111a2b 底 + 半透明 + blur saturate），绘卷从卡后透上来；
+   focus-within 时边框提亮——正在编辑哪一卷，哪一卷亮。 */
+.sysd-dossier{border:1px solid #22304d99;border-radius:6px;
+  background:linear-gradient(180deg,#131c31dd,#101728d4); /* blur(12px) 撤掉（性能收口），透明度补到 87%/83% */
+  min-width:0;
+  opacity:0;transform:translateY(8px);animation:sysd-rise .24s cubic-bezier(.22,1,.36,1) both;
+  transition:border-color .25s cubic-bezier(.23,1,.32,1)}
+.sysd-dossier:focus-within{border-color:var(--line2)}
+/* 入场与全站统一切换同档：换页本身就是 PanelOverlay 的 180ms 轻淡入（高频动作，
+   规格只做最轻一档），案卷只在其上叠 40ms 步进的微浮现——读起来是同一次切换，
+   不再是每次进系统页都重播的第二场演出（定稿的 0.5s 六连阶梯据此降档）。 */
+.sysd-dossier:nth-child(1){animation-delay:.02s}.sysd-dossier:nth-child(2){animation-delay:.06s}
+.sysd-dossier:nth-child(3){animation-delay:.1s}.sysd-dossier:nth-child(4){animation-delay:.14s}
+.sysd-dossier:nth-child(5){animation-delay:.18s}.sysd-dossier:nth-child(6){animation-delay:.22s}
+@keyframes sysd-rise{to{opacity:1;transform:none}}
+.sysd-dt{display:flex;align-items:center;gap:10px;padding:13px 16px 11px;border-bottom:1px solid #ffffff0d}
+.sysd-dg{width:26px;height:26px;flex:none;border:1px solid var(--line2);border-radius:3px;
+  display:inline-flex;align-items:center;justify-content:center;
+  font-family:var(--serif);font-size:13px;color:var(--ink2)}
+.sysd-dt b{font-family:var(--serif);font-size:14.5px;font-weight:400;letter-spacing:.2em;color:var(--gold2)}
+.sysd-dt small{font-size:10px;color:var(--ink3);letter-spacing:.12em;margin-left:auto;text-align:right}
+.sysd-db{padding:6px 16px 16px}
+
+/* ---------- 案卷内行 ---------- */
+.sysd-dr{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px dashed #ffffff0c;min-width:0}
+.sysd-dr:last-child{border-bottom:none}
+.sysd-dr>.lb{flex:1;min-width:0;font-size:12.5px;color:var(--ink2);letter-spacing:.03em}
+.sysd-dr>.lb small{display:block;font-size:10.5px;color:var(--ink3);margin-top:2px;line-height:1.7}
+.sysd-dr.tall{align-items:flex-start}
+.sysd-dr.tall>.lb{padding-top:11px}
+.sysd-dr.full{flex-direction:column;align-items:stretch;gap:8px}
+.sysd-dr.full>.lb{flex:none;padding-top:0}
+.sysd-dr.end{border-bottom:none;padding-top:14px}
+.sysd-note{font-size:10.5px;color:var(--ink3);line-height:1.8;letter-spacing:.02em;margin:2px 0 8px}
+
+/* ---------- 印玺开关：落印 ---------- */
+.sysd-seal{position:relative;flex:none;width:44px;height:44px;border:1px solid var(--line2);border-radius:5px;
+  background:#0f1626cc;font-family:var(--serif);font-size:19px;color:var(--ink3);padding:0;line-height:1;
+  transition:border-color .22s cubic-bezier(.23,1,.32,1),color .22s,box-shadow .22s,background .22s}
+.sysd-seal.on{border-color:var(--gold);color:var(--gold2);background:#c8a96314;
+  box-shadow:0 0 0 4px #c8a96310,0 0 22px #c8a9632e}
+.sysd-seal.stamp{animation:sysd-stampIn .18s cubic-bezier(.23,1,.32,1)}
+@keyframes sysd-stampIn{0%{transform:scale(1.14);filter:blur(1px)}100%{transform:scale(1);filter:none}}
+
+/* ---------- 度量衡滑签：金签滑动 ---------- */
+.sysd-gauge{position:relative;display:inline-flex;border:1px solid var(--line);border-radius:6px;
+  background:#10172888;overflow:hidden;flex:none}
+.sysd-gauge-token{position:absolute;top:0;bottom:0;left:0;border-radius:4px;background:#c8a9631f;
+  border:1px solid #c8a96355;pointer-events:none;
+  transition:transform .25s cubic-bezier(.23,1,.32,1),width .25s cubic-bezier(.23,1,.32,1);
+  will-change:transform}
+.sysd-gauge-b{position:relative;padding:9px 16px;font-size:11.5px;letter-spacing:.08em;color:var(--ink3);
+  transition:color .2s}
+.sysd-gauge-b+.sysd-gauge-b{border-left:1px solid var(--line)}
+.sysd-gauge-b:hover{color:var(--ink2)}
+.sysd-gauge-b.on{color:var(--gold2)}
+
+/* ---------- 印石刻度（range） ---------- */
+.sysd-range{-webkit-appearance:none;appearance:none;width:100%;max-width:300px;height:20px;
+  background:transparent;cursor:pointer;padding:0;flex:none}
+.sysd-range::-webkit-slider-runnable-track{height:2px;border-radius:2px;background:var(--sysd-track,#2c3b5e)}
+.sysd-range::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;margin-top:-5.5px;
+  background:var(--gold2);transform:rotate(45deg);border:1px solid var(--gold);
+  box-shadow:0 0 10px #efd69b55;transition:box-shadow .2s}
+.sysd-range:hover::-webkit-slider-thumb{box-shadow:0 0 16px #efd69b88}
+.sysd-range::-moz-range-track{height:2px;border-radius:2px;background:var(--sysd-track,#2c3b5e)}
+.sysd-range::-moz-range-thumb{width:13px;height:13px;background:var(--gold2);border:1px solid var(--gold);
+  border-radius:0;transform:rotate(45deg);box-shadow:0 0 10px #efd69b55}
+.sysd-range:focus-visible{outline:2px solid #7fd0d866;outline-offset:4px;border-radius:2px}
+
+/* ---------- 文本域与封缄 ---------- */
+.sysd-field{position:relative;display:flex;align-items:center;width:100%}
+.sysd-field input[type=text],.sysd-field input[type=password],
+.sysd input[type=text],.sysd input[type=password],.sysd input[type=number],
+.sysd input:not([type]),.sysd textarea{
+  width:100%;padding:11px 13px;border:1px solid var(--line2);border-radius:5px;background:#121a2ccc;
+  color:var(--ink);font-size:12.5px;font-family:var(--mono);letter-spacing:.03em;
+  transition:border-color .2s,box-shadow .2s;min-width:0}
+.sysd textarea{font-family:var(--sans);line-height:1.8;resize:vertical}
+.sysd input:focus,.sysd textarea:focus{outline:none;border-color:var(--star);box-shadow:0 0 0 3px #7fd0d81f}
+.sysd input:disabled{opacity:.55}
+.sysd input::placeholder,.sysd textarea::placeholder{color:#5f6b80}
+.sysd-field input{padding-right:46px}
+.sysd-wax-x{position:absolute;right:5px;width:28px;height:28px;border:1px solid transparent;border-radius:3px;
+  color:var(--ink3);font-family:var(--serif);font-size:12px;padding:0;line-height:1;transition:.2s}
+.sysd-wax-x:hover{color:var(--gold2);border-color:var(--gold)}
+
+/* ---------- 器物按钮 ---------- */
+.sysd-btn{padding:11px 20px;border:1px solid #c8a96366;border-radius:5px;font-family:var(--serif);
+  font-size:13px;letter-spacing:.16em;color:var(--gold2);background:#c8a9630d;
+  transition:.22s cubic-bezier(.23,1,.32,1)}
+.sysd-btn:hover{background:#c8a96322;box-shadow:0 0 20px #c8a9632b}
+.sysd-btn.ghost{border-color:var(--line2);color:var(--ink2);background:#131b2daa}
+.sysd-btn.ghost:hover{border-color:var(--star);color:var(--star);box-shadow:0 0 16px #7fd0d81f}
+.sysd-btn:disabled{opacity:.55;pointer-events:none}
+.sysd-btnrow{display:flex;gap:8px;flex-wrap:wrap}
+
+/* ---------- 火漆按压（危险操作）：按住 1.2s 蜡满即发，松手即回 ---------- */
+.sysd-wax{position:relative;overflow:hidden;padding:12px 20px;border:1px solid #d1716a66;border-radius:5px;
+  font-family:var(--serif);font-size:12.5px;letter-spacing:.14em;color:var(--crimson);background:#d1716a08;
+  touch-action:none;-webkit-user-select:none;user-select:none;
+  transition:border-color .2s,background .2s}
+.sysd-wax-fill{position:absolute;inset:0;background:linear-gradient(90deg,#d1716a3d,#d1716a55);
+  clip-path:inset(0 100% 0 0);transition:clip-path 200ms cubic-bezier(.23,1,.32,1);pointer-events:none}
+.sysd-wax.holding .sysd-wax-fill{transition:clip-path 1.2s linear;clip-path:inset(0 0 0 0)}
+.sysd-wax.done{border-color:var(--crimson);background:#d1716a2e;color:var(--ink)}
+
+/* ---------- 状态印 ---------- */
+.sysd-state{flex:none;min-width:34px;height:34px;padding:0 10px;border:1px solid var(--jade);border-radius:4px;
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  font-family:var(--serif);font-size:13px;color:var(--jade);background:#6fc7a40f;box-shadow:0 0 14px #6fc7a41f}
+.sysd-state small{font-family:var(--mono);font-size:10px;letter-spacing:.04em}
+.sysd-state.off{border-color:var(--line2);color:var(--ink3);background:none;box-shadow:none}
+
+/* ---------- 笺（分层 / 嵌入 / 预览 / 指南）----------
+   玻璃卡内再垫一层淡底：长文 pre 直接坐在半透明卡上会被绘卷亮部干扰 */
+.sysd-line{border:1px dashed var(--line);border-radius:5px;padding:10px 12px;
+  background:#0b11209e;
+  font-size:11px;line-height:2;color:var(--ink2);min-width:0}
+.sysd-line b{font-family:var(--serif);font-weight:400;letter-spacing:.12em;color:var(--star);
+  display:block;margin-bottom:3px;font-size:11.5px}
+.sysd-line pre{white-space:pre-wrap;overflow-wrap:anywhere;max-width:100%;font-family:inherit;margin:0}
+.sysd-line .m{color:var(--ink3);font-family:var(--mono);font-size:10.5px}
+
+/* 嵌入条目（可编辑笺） */
+.sysd-embed{border:1px dashed var(--line);border-radius:5px;padding:9px 10px;
+  background:#0b11208f;min-width:0}
+.sysd-embed-hd{display:flex;align-items:center;gap:8px;margin-bottom:7px;flex-wrap:wrap}
+.sysd-embed-hd input[type=checkbox]{width:15px;height:15px;accent-color:var(--star);flex:none;margin:0}
+.sysd-embed-name{flex:1;min-width:120px;padding:7px 10px!important;font-family:var(--sans)!important}
+.sysd-embed-w{flex:none;display:inline-flex;align-items:center;gap:6px;font-size:10.5px;color:var(--ink3);letter-spacing:.08em}
+.sysd-embed-w input{width:56px;padding:7px 8px!important}
+.sysd-embed-x,.sysd-opt-x{flex:none;width:26px;height:26px;border:1px solid transparent;border-radius:3px;
+  color:var(--ink3);font-size:14px;padding:0;line-height:1;transition:.2s}
+.sysd-embed-x:hover,.sysd-opt-x:hover{color:var(--crimson);border-color:#d1716a55}
+.sysd-embed textarea{margin-top:2px}
+.sysd-chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+.sysd-chips button{padding:5px 10px;border:1px solid var(--line);border-radius:4px;background:#10172888;
+  font-size:10.5px;letter-spacing:.05em;color:var(--ink3);transition:.18s}
+.sysd-chips button:hover{color:var(--ink2);border-color:var(--line2)}
+.sysd-chips button.on{color:var(--gold2);border-color:#c8a96366;background:#c8a96316}
+
+/* 剧情推进选项行 */
+.sysd-opt{display:flex;gap:6px;align-items:center;min-width:0}
+.sysd-opt-label{flex:none;width:104px;padding:9px 10px!important;font-family:var(--sans)!important}
+.sysd-opt-text{flex:1;padding:9px 10px!important;font-family:var(--sans)!important}
+
+/* ---------- 窄屏 ---------- */
+@media(max-width:720px){
+  .sysd-grid{grid-template-columns:1fr;gap:14px}
+  .sysd-dr{flex-wrap:wrap}
+  .sysd-dr>.lb{flex-basis:100%}
+  .sysd-dr.tall>.lb{padding-top:0}
+  .sysd-opt{flex-wrap:wrap}
+  .sysd-opt-label{width:100%}
+  .sysd-opt-text{flex-basis:calc(100% - 32px)}
+}
+@media(prefers-reduced-motion:reduce){
+  .sysd-dossier{animation:none;opacity:1;transform:none;transition:none}
+  .sysd-seal.stamp{animation:none}
+  .sysd-gauge-token{transition:none}
+  .sysd-wax .sysd-wax-fill,.sysd-wax.holding .sysd-wax-fill{transition:none}
+  .sysd-btn,.sysd-wax,.sysd-seal,.sysd-wax-x,.sysd-chips button{transition-duration:.01ms}
+}

@@ -1,0 +1,1771 @@
+{
+  "meta": {
+    "empire": {
+      "name": "圣辉帝国",
+      "ideology": "秩序·圣辉",
+      "continent": "中央大陆"
+    },
+    "guild": {
+      "name": "冒险者公会",
+      "ideology": "契约·委托",
+      "continent": "跨大陆"
+    },
+    "shadow": {
+      "name": "暗影议会",
+      "ideology": "隐秘·逐利",
+      "continent": "地下"
+    },
+    "study": {
+      "name": "古代技术研究会",
+      "ideology": "求知·复原",
+      "continent": "中央大陆"
+    },
+    "frost": {
+      "name": "霜铁王庭",
+      "ideology": "氏族·锻造",
+      "continent": "北方冻土"
+    },
+    "verdant": {
+      "name": "翠冠议会",
+      "ideology": "传统·魔法",
+      "continent": "东方群岛"
+    },
+    "sand": {
+      "name": "砂海商邦",
+      "ideology": "贸易·契约",
+      "continent": "南方沙漠"
+    },
+    "blood": {
+      "name": "血吼王帐",
+      "ideology": "荣誉·战争",
+      "continent": "西方荒野"
+    },
+    "deep": {
+      "name": "掘渊公会",
+      "ideology": "深挖·守密",
+      "continent": "地下深渊"
+    },
+    "temple_war": {
+      "name": "战争神殿",
+      "ideology": "战争·誓约",
+      "continent": "中央大陆"
+    },
+    "temple_wisdom": {
+      "name": "智慧神殿",
+      "ideology": "智慧·真知",
+      "continent": "中央大陆"
+    },
+    "temple_life": {
+      "name": "生命神殿",
+      "ideology": "生命·慈悲",
+      "continent": "中央大陆"
+    },
+    "temple_death": {
+      "name": "死亡神殿",
+      "ideology": "死亡·轮回",
+      "continent": "地下深渊"
+    },
+    "temple_chaos": {
+      "name": "混沌神殿",
+      "ideology": "混沌·归墟",
+      "continent": "南方沙漠"
+    }
+  },
+  "axes": [
+    "attitude",
+    "trust",
+    "hostility",
+    "trade",
+    "military",
+    "religion",
+    "intelligence"
+  ],
+  "matrix": {
+    "empire": {
+      "guild": {
+        "attitude": 25,
+        "trust": 15,
+        "hostility": 0,
+        "trade": 30,
+        "military": 20,
+        "religion": 0,
+        "intelligence": 0
+      },
+      "shadow": {
+        "attitude": -55,
+        "trust": -60,
+        "hostility": 65,
+        "trade": 5,
+        "military": -40,
+        "religion": -30,
+        "intelligence": -50
+      },
+      "study": {
+        "attitude": 10,
+        "trust": 20,
+        "hostility": 0,
+        "trade": 15,
+        "military": 0,
+        "religion": -20,
+        "intelligence": 40
+      },
+      "frost": {
+        "attitude": 30,
+        "trust": 20,
+        "hostility": 0,
+        "trade": 45,
+        "military": 10,
+        "religion": 0,
+        "intelligence": 5
+      },
+      "verdant": {
+        "attitude": 10,
+        "trust": 5,
+        "hostility": 0,
+        "trade": 20,
+        "military": 0,
+        "religion": -10,
+        "intelligence": 0
+      },
+      "sand": {
+        "attitude": 20,
+        "trust": 10,
+        "hostility": 0,
+        "trade": 40,
+        "military": 0,
+        "religion": 0,
+        "intelligence": 5
+      },
+      "blood": {
+        "attitude": -40,
+        "trust": -30,
+        "hostility": 55,
+        "trade": 5,
+        "military": -50,
+        "religion": 0,
+        "intelligence": -10
+      },
+      "deep": {
+        "attitude": -10,
+        "trust": -15,
+        "hostility": 20,
+        "trade": 15,
+        "military": -10,
+        "religion": 0,
+        "intelligence": -5
+      },
+      "temple_war": {
+        "attitude": 50,
+        "trust": 45,
+        "hostility": -10,
+        "trade": 20,
+        "military": 40,
+        "religion": 50,
+        "intelligence": 0
+      },
+      "temple_wisdom": {
+        "attitude": 45,
+        "trust": 35,
+        "hostility": -10,
+        "trade": 20,
+        "military": 10,
+        "religion": 45,
+        "intelligence": 35
+      },
+      "temple_life": {
+        "attitude": 50,
+        "trust": 40,
+        "hostility": -10,
+        "trade": 20,
+        "military": 10,
+        "religion": 55,
+        "intelligence": 0
+      },
+      "temple_death": {
+        "attitude": 25,
+        "trust": 20,
+        "hostility": 0,
+        "trade": 20,
+        "military": 10,
+        "religion": 15,
+        "intelligence": 0
+      },
+      "temple_chaos": {
+        "attitude": -25,
+        "trust": -25,
+        "hostility": 35,
+        "trade": 20,
+        "military": 10,
+        "religion": -30,
+        "intelligence": 0
+      }
+    },
+    "guild": {
+      "empire": {
+        "attitude": 25,
+        "trust": 20,
+        "hostility": 0,
+        "trade": 35,
+        "military": 10,
+        "religion": 0,
+        "intelligence": 5
+      },
+      "shadow": {
+        "attitude": -20,
+        "trust": -35,
+        "hostility": 25,
+        "trade": 40,
+        "military": -15,
+        "religion": 0,
+        "intelligence": 10
+      },
+      "study": {
+        "attitude": 10,
+        "trust": 15,
+        "hostility": 0,
+        "trade": 20,
+        "military": 0,
+        "religion": 0,
+        "intelligence": 25
+      },
+      "frost": {
+        "attitude": 20,
+        "trust": 15,
+        "hostility": 0,
+        "trade": 30,
+        "military": 5,
+        "religion": 0,
+        "intelligence": 5
+      },
+      "verdant": {
+        "attitude": 5,
+        "trust": 5,
+        "hostility": 0,
+        "trade": 15,
+        "military": 0,
+        "religion": 0,
+        "intelligence": 5
+      },
+      "sand": {
+        "attitude": 25,
+        "trust": 15,
+        "hostility": 0,
+        "trade": 45,
+        "military": 0,
+        "religion": 0,
+        "intelligence": 10
+      },
+      "blood": {
+        "attitude": -10,
+        "trust": -5,
+        "hostility": 15,
+        "trade": 10,
+        "military": -10,
+        "religion": 0,
+        "intelligence": 0
+      },
+      "deep": {
+        "attitude": 0,
+        "trust": 0,
+        "hostility": 5,
+        "trade": 20,
+        "military": 0,
+        "religion": 0,
+        "intelligence": 10
+      },
+      "temple_war": {
+        "attitude": 15,
+        "trust": 15,
+        "hostility": 0,
+        "trade": 10,
+        "military": 0,
+        "religion": 5,
+        "intelligence": 5
+      },
+      "temple_wisdom": {
+        "attitude": 15,
+        "trust": 15,
+        "hostility": 0,
+        "trade": 10,
+        "military": 0,
+        "religion": 5,
+        "intelligence": 5
+      },
+      "temple_life": {
+        "attitude": 25,
+        "trust": 20,
+        "hostility": 0,
+        "trade": 10,
+        "military": 0,
+        "religion": 15,
+        "intelligence": 5
+      },
+      "temple_death": {
+        "attitude": 15,
+        "trust": 15,
+        "hostility": 0,
+        "trade": 10,
+        "military": 0,
+        "religion": 5,
+        "intelligence": 5
+      },
+      "temple_chaos": {
+        "attitude": 15,
+        "trust": 15,
+        "hostility": 0,
+        "trade": 10,
+        "military": 0,
+        "religion": 5,
+        "intelligence": 5
+      }
+    },
+    "shadow": {
+      "empire": {
+        "attitude": -50,
+        "trust": -60,
+        "hostility": 60,
+        "trade": 10,
+        "military": -45,
+        "religion": -30,
+        "intelligence": -55
+      },
+      "guild": {
+        "attitude": -10,
+        "trust": -30,
+        "hostility": 20,
+        "trade": 45,
+        "military": -10,
+        "religion": 0,
+        "intelligence": 15
+      },
+      "study": {
+        "attitude": 5,
+        "trust": 0,
+        "hostility": 0,
+        "trade": 25,
+        "military": 0,
+        "religion": 0,
+        "intelligence": 30
+      },
+      "frost": {
+        "attitude": -10,
+        "trust": -15,
+        "hostility": 15,
+        "trade": 20,
+        "military": 0,
+        "religion": 0,
+        "intelligence": 5
+      },
+      "verdant": {
+        "attitude": -10,
+        "trust": -20,
+        "hostility": 20,
+        "trade": 5,
+        "military": 0,
+        "religion": 0,
+        "intelligence": 10
+      },
+      "sand": {
+        "attitude": 15,
+        "trust": -20,
+        "hostility": 5,
+        "trade": 50,
+        "military": 0,
+        "religion": 0,
+        "intelligence": 20
+      },
+      "blood": {
+        "attitude": 5,
+        "trust": -10,
+        "hostility": 10,
+        "trade": 15,
+        "military": 5,
+        "religion": 0,
+        "intelligence": 5
+      },
+      "deep": {
+        "attitude": 10,
+        "trust": -15,
+        "hostility": 5,
+        "trade": 35,
+        "military": 0,
+        "religion": 0,
+        "intelligence": 25
+      },
+      "temple_war": {
+        "attitude": -55,
+        "trust": -60,
+        "hostility": 65,
+        "trade": -10,
+        "military": -35,
+        "religion": -60,
+        "intelligence": -45
+      },
+      "temple_wisdom": {
+        "attitude": -55,
+        "trust": -60,
+        "hostility": 65,
+        "trade": -10,
+        "military": -35,
+        "religion": -60,
+        "intelligence": -45
+      },
+      "temple_life": {
+        "attitude": -55,
+        "trust": -60,
+        "hostility": 65,
+        "trade": -10,
+        "military": -35,
+        "religion": -60,
+        "intelligence": -45
+      },
+      "temple_death": {
+        "attitude": -30,
+        "trust": -30,
+        "hostility": 40,
+        "trade": -10,
+        "military": -35,
+        "religion": -30,
+        "intelligence": -45
+      },
+      "temple_chaos": {
+        "attitude": 15,
+        "trust": 10,
+        "hostility": 0,
+        "trade": -10,
+        "military": -35,
+        "religion": 15,
+        "intelligence": -45
+      }
+    },
+    "study": {
+      "empire": {
+        "attitude": 5,
+        "trust": 15,
+        "hostility": 0,
+        "trade": 10,
+        "military": 0,
+        "religion": -15,
+        "intelligence": 35
+      },
+      "guild": {
+        "attitude": 10,
+        "trust": 15,
+        "hostility": 0,
+        "trade": 20,
+        "military": 0,
+        "religion": 0,
+        "intelligence": 20
+      },
+      "shadow": {
+        "attitude": 0,
+        "trust": 5,
+        "hostility": 5,
+        "trade": 25,
+        "military": 0,
+        "religion": 0,
+        "intelligence": 30
+      },
+      "frost": {
+        "attitude": 15,
+        "trust": 15,
+        "hostility": 0,
+        "trade": 20,
+        "military": 0,
+        "religion": 0,
+        "intelligence": 25
+      },
+      "verdant": {
+        "attitude": 5,
+        "trust": 10,
+        "hostility": 0,
+        "trade": 10,
+        "military": 0,
+        "religion": -5,
+        "intelligence": 15
+      },
+      "sand": {
+        "attitude": 10,
+        "trust": 10,
+        "hostility": 0,
+        "trade": 25,
+        "military": 0,
+        "religion": 0,
+        "intelligence": 20
+      },
+      "blood": {
+        "attitude": -5,
+        "trust": 0,
+        "hostility": 5,
+        "trade": 5,
+        "military": 0,
+        "religion": 0,
+        "intelligence": 5
+      },
+      "deep": {
+        "attitude": 10,
+        "trust": 5,
+        "hostility": 0,
+        "trade": 15,
+        "military": 0,
+        "religion": 0,
+        "intelligence": 30
+      },
+      "temple_war": {
+        "attitude": -10,
+        "trust": -5,
+        "hostility": 5,
+        "trade": 0,
+        "military": 0,
+        "religion": -30,
+        "intelligence": -10
+      },
+      "temple_wisdom": {
+        "attitude": 30,
+        "trust": 30,
+        "hostility": -20,
+        "trade": 0,
+        "military": 0,
+        "religion": 25,
+        "intelligence": 35
+      },
+      "temple_life": {
+        "attitude": -10,
+        "trust": -5,
+        "hostility": 5,
+        "trade": 0,
+        "military": 0,
+        "religion": -30,
+        "intelligence": -10
+      },
+      "temple_death": {
+        "attitude": -10,
+        "trust": -5,
+        "hostility": 5,
+        "trade": 0,
+        "military": 0,
+        "religion": -30,
+        "intelligence": -10
+      },
+      "temple_chaos": {
+        "attitude": -30,
+        "trust": -25,
+        "hostility": 25,
+        "trade": 0,
+        "military": 0,
+        "religion": -50,
+        "intelligence": -10
+      }
+    },
+    "frost": {
+      "empire": {
+        "attitude": 30,
+        "trust": 20,
+        "hostility": 0,
+        "trade": 45,
+        "military": 10,
+        "religion": 0,
+        "intelligence": 5
+      },
+      "guild": {
+        "attitude": 20,
+        "trust": 15,
+        "hostility": 0,
+        "trade": 30,
+        "military": 5,
+        "religion": 0,
+        "intelligence": 5
+      },
+      "shadow": {
+        "attitude": -10,
+        "trust": -15,
+        "hostility": 15,
+        "trade": 20,
+        "military": 0,
+        "religion": 0,
+        "intelligence": 5
+      },
+      "study": {
+        "attitude": 15,
+        "trust": 15,
+        "hostility": 0,
+        "trade": 20,
+        "military": 0,
+        "religion": 0,
+        "intelligence": 25
+      },
+      "verdant": {
+        "attitude": 0,
+        "trust": 5,
+        "hostility": 5,
+        "trade": 10,
+        "military": 0,
+        "religion": 0,
+        "intelligence": 0
+      },
+      "sand": {
+        "attitude": 15,
+        "trust": 10,
+        "hostility": 0,
+        "trade": 35,
+        "military": 0,
+        "religion": 0,
+        "intelligence": 0
+      },
+      "blood": {
+        "attitude": -35,
+        "trust": -30,
+        "hostility": 50,
+        "trade": 0,
+        "military": -40,
+        "religion": 0,
+        "intelligence": 0
+      },
+      "deep": {
+        "attitude": 35,
+        "trust": 30,
+        "hostility": -10,
+        "trade": 25,
+        "military": 0,
+        "religion": 0,
+        "intelligence": 10
+      },
+      "temple_war": {
+        "attitude": 5,
+        "trust": 5,
+        "hostility": 0,
+        "trade": 10,
+        "military": 0,
+        "religion": 10,
+        "intelligence": 0
+      },
+      "temple_wisdom": {
+        "attitude": 5,
+        "trust": 5,
+        "hostility": 0,
+        "trade": 10,
+        "military": 0,
+        "religion": 10,
+        "intelligence": 0
+      },
+      "temple_life": {
+        "attitude": 5,
+        "trust": 5,
+        "hostility": 0,
+        "trade": 10,
+        "military": 0,
+        "religion": 10,
+        "intelligence": 0
+      },
+      "temple_death": {
+        "attitude": 5,
+        "trust": 5,
+        "hostility": 0,
+        "trade": 10,
+        "military": 0,
+        "religion": 10,
+        "intelligence": 0
+      },
+      "temple_chaos": {
+        "attitude": 5,
+        "trust": 5,
+        "hostility": 0,
+        "trade": 10,
+        "military": 0,
+        "religion": 10,
+        "intelligence": 0
+      }
+    },
+    "verdant": {
+      "empire": {
+        "attitude": 10,
+        "trust": 5,
+        "hostility": 0,
+        "trade": 20,
+        "military": 0,
+        "religion": -10,
+        "intelligence": 0
+      },
+      "guild": {
+        "attitude": 5,
+        "trust": 5,
+        "hostility": 0,
+        "trade": 15,
+        "military": 0,
+        "religion": 0,
+        "intelligence": 5
+      },
+      "shadow": {
+        "attitude": -10,
+        "trust": -20,
+        "hostility": 20,
+        "trade": 5,
+        "military": 0,
+        "religion": 0,
+        "intelligence": 10
+      },
+      "study": {
+        "attitude": 5,
+        "trust": 10,
+        "hostility": 0,
+        "trade": 10,
+        "military": 0,
+        "religion": -5,
+        "intelligence": 15
+      },
+      "frost": {
+        "attitude": 0,
+        "trust": 5,
+        "hostility": 5,
+        "trade": 10,
+        "military": 0,
+        "religion": 0,
+        "intelligence": 0
+      },
+      "sand": {
+        "attitude": 10,
+        "trust": 5,
+        "hostility": 0,
+        "trade": 25,
+        "military": 0,
+        "religion": 0,
+        "intelligence": 0
+      },
+      "blood": {
+        "attitude": -50,
+        "trust": -45,
+        "hostility": 70,
+        "trade": -10,
+        "military": -55,
+        "religion": 0,
+        "intelligence": -10
+      },
+      "deep": {
+        "attitude": -25,
+        "trust": -20,
+        "hostility": 35,
+        "trade": 0,
+        "military": -20,
+        "religion": 0,
+        "intelligence": 0
+      },
+      "temple_war": {
+        "attitude": -20,
+        "trust": -10,
+        "hostility": 15,
+        "trade": 5,
+        "military": 0,
+        "religion": -40,
+        "intelligence": -10
+      },
+      "temple_wisdom": {
+        "attitude": 0,
+        "trust": -10,
+        "hostility": 5,
+        "trade": 5,
+        "military": 0,
+        "religion": 0,
+        "intelligence": -10
+      },
+      "temple_life": {
+        "attitude": -5,
+        "trust": -10,
+        "hostility": 5,
+        "trade": 5,
+        "military": 0,
+        "religion": -10,
+        "intelligence": -10
+      },
+      "temple_death": {
+        "attitude": -20,
+        "trust": -10,
+        "hostility": 15,
+        "trade": 5,
+        "military": 0,
+        "religion": -40,
+        "intelligence": -10
+      },
+      "temple_chaos": {
+        "attitude": -20,
+        "trust": -10,
+        "hostility": 15,
+        "trade": 5,
+        "military": 0,
+        "religion": -40,
+        "intelligence": -10
+      }
+    },
+    "sand": {
+      "empire": {
+        "attitude": 20,
+        "trust": 10,
+        "hostility": 0,
+        "trade": 40,
+        "military": 0,
+        "religion": 0,
+        "intelligence": 5
+      },
+      "guild": {
+        "attitude": 25,
+        "trust": 15,
+        "hostility": 0,
+        "trade": 45,
+        "military": 0,
+        "religion": 0,
+        "intelligence": 10
+      },
+      "shadow": {
+        "attitude": 15,
+        "trust": -20,
+        "hostility": 5,
+        "trade": 50,
+        "military": 0,
+        "religion": 0,
+        "intelligence": 20
+      },
+      "study": {
+        "attitude": 10,
+        "trust": 10,
+        "hostility": 0,
+        "trade": 25,
+        "military": 0,
+        "religion": 0,
+        "intelligence": 20
+      },
+      "frost": {
+        "attitude": 15,
+        "trust": 10,
+        "hostility": 0,
+        "trade": 35,
+        "military": 0,
+        "religion": 0,
+        "intelligence": 0
+      },
+      "verdant": {
+        "attitude": 10,
+        "trust": 5,
+        "hostility": 0,
+        "trade": 25,
+        "military": 0,
+        "religion": 0,
+        "intelligence": 0
+      },
+      "blood": {
+        "attitude": 0,
+        "trust": -5,
+        "hostility": 10,
+        "trade": 15,
+        "military": -5,
+        "religion": 0,
+        "intelligence": 0
+      },
+      "deep": {
+        "attitude": 5,
+        "trust": 0,
+        "hostility": 5,
+        "trade": 30,
+        "military": 0,
+        "religion": 0,
+        "intelligence": 10
+      },
+      "temple_war": {
+        "attitude": -5,
+        "trust": 0,
+        "hostility": 5,
+        "trade": 10,
+        "military": 0,
+        "religion": -10,
+        "intelligence": 0
+      },
+      "temple_wisdom": {
+        "attitude": -5,
+        "trust": 0,
+        "hostility": 5,
+        "trade": 10,
+        "military": 0,
+        "religion": -10,
+        "intelligence": 0
+      },
+      "temple_life": {
+        "attitude": -5,
+        "trust": 0,
+        "hostility": 5,
+        "trade": 10,
+        "military": 0,
+        "religion": -10,
+        "intelligence": 0
+      },
+      "temple_death": {
+        "attitude": -5,
+        "trust": 0,
+        "hostility": 5,
+        "trade": 10,
+        "military": 0,
+        "religion": -10,
+        "intelligence": 0
+      },
+      "temple_chaos": {
+        "attitude": 10,
+        "trust": 5,
+        "hostility": 0,
+        "trade": 10,
+        "military": 0,
+        "religion": 10,
+        "intelligence": 0
+      }
+    },
+    "blood": {
+      "empire": {
+        "attitude": -40,
+        "trust": -30,
+        "hostility": 55,
+        "trade": 5,
+        "military": -50,
+        "religion": 0,
+        "intelligence": -10
+      },
+      "guild": {
+        "attitude": -10,
+        "trust": -5,
+        "hostility": 15,
+        "trade": 10,
+        "military": -10,
+        "religion": 0,
+        "intelligence": 0
+      },
+      "shadow": {
+        "attitude": 5,
+        "trust": -10,
+        "hostility": 10,
+        "trade": 15,
+        "military": 5,
+        "religion": 0,
+        "intelligence": 5
+      },
+      "study": {
+        "attitude": -5,
+        "trust": 0,
+        "hostility": 5,
+        "trade": 5,
+        "military": 0,
+        "religion": 0,
+        "intelligence": 5
+      },
+      "frost": {
+        "attitude": -35,
+        "trust": -30,
+        "hostility": 50,
+        "trade": 0,
+        "military": -40,
+        "religion": 0,
+        "intelligence": 0
+      },
+      "verdant": {
+        "attitude": -50,
+        "trust": -45,
+        "hostility": 70,
+        "trade": -10,
+        "military": -55,
+        "religion": 0,
+        "intelligence": -10
+      },
+      "sand": {
+        "attitude": 0,
+        "trust": -5,
+        "hostility": 10,
+        "trade": 15,
+        "military": -5,
+        "religion": 0,
+        "intelligence": 0
+      },
+      "deep": {
+        "attitude": 0,
+        "trust": -5,
+        "hostility": 10,
+        "trade": 5,
+        "military": -5,
+        "religion": 0,
+        "intelligence": 0
+      },
+      "temple_war": {
+        "attitude": 20,
+        "trust": 10,
+        "hostility": 5,
+        "trade": 0,
+        "military": 0,
+        "religion": 25,
+        "intelligence": 0
+      },
+      "temple_wisdom": {
+        "attitude": -30,
+        "trust": -20,
+        "hostility": 40,
+        "trade": 0,
+        "military": -20,
+        "religion": -25,
+        "intelligence": 0
+      },
+      "temple_life": {
+        "attitude": -30,
+        "trust": -20,
+        "hostility": 40,
+        "trade": 0,
+        "military": -20,
+        "religion": -25,
+        "intelligence": 0
+      },
+      "temple_death": {
+        "attitude": -30,
+        "trust": -20,
+        "hostility": 40,
+        "trade": 0,
+        "military": -20,
+        "religion": -25,
+        "intelligence": 0
+      },
+      "temple_chaos": {
+        "attitude": -30,
+        "trust": -20,
+        "hostility": 40,
+        "trade": 0,
+        "military": -20,
+        "religion": -25,
+        "intelligence": 0
+      }
+    },
+    "deep": {
+      "empire": {
+        "attitude": -10,
+        "trust": -15,
+        "hostility": 20,
+        "trade": 15,
+        "military": -10,
+        "religion": 0,
+        "intelligence": -5
+      },
+      "guild": {
+        "attitude": 0,
+        "trust": 0,
+        "hostility": 5,
+        "trade": 20,
+        "military": 0,
+        "religion": 0,
+        "intelligence": 10
+      },
+      "shadow": {
+        "attitude": 10,
+        "trust": -15,
+        "hostility": 5,
+        "trade": 35,
+        "military": 0,
+        "religion": 0,
+        "intelligence": 25
+      },
+      "study": {
+        "attitude": 10,
+        "trust": 5,
+        "hostility": 0,
+        "trade": 15,
+        "military": 0,
+        "religion": 0,
+        "intelligence": 30
+      },
+      "frost": {
+        "attitude": 35,
+        "trust": 30,
+        "hostility": -10,
+        "trade": 25,
+        "military": 0,
+        "religion": 0,
+        "intelligence": 10
+      },
+      "verdant": {
+        "attitude": -25,
+        "trust": -20,
+        "hostility": 35,
+        "trade": 0,
+        "military": -20,
+        "religion": 0,
+        "intelligence": 0
+      },
+      "sand": {
+        "attitude": 5,
+        "trust": 0,
+        "hostility": 5,
+        "trade": 30,
+        "military": 0,
+        "religion": 0,
+        "intelligence": 10
+      },
+      "blood": {
+        "attitude": 0,
+        "trust": -5,
+        "hostility": 10,
+        "trade": 5,
+        "military": -5,
+        "religion": 0,
+        "intelligence": 0
+      },
+      "temple_war": {
+        "attitude": -20,
+        "trust": -15,
+        "hostility": 25,
+        "trade": 0,
+        "military": -10,
+        "religion": -20,
+        "intelligence": -5
+      },
+      "temple_wisdom": {
+        "attitude": -20,
+        "trust": -15,
+        "hostility": 25,
+        "trade": 0,
+        "military": -10,
+        "religion": -20,
+        "intelligence": -5
+      },
+      "temple_life": {
+        "attitude": -20,
+        "trust": -15,
+        "hostility": 25,
+        "trade": 0,
+        "military": -10,
+        "religion": -20,
+        "intelligence": -5
+      },
+      "temple_death": {
+        "attitude": 0,
+        "trust": 0,
+        "hostility": 5,
+        "trade": 0,
+        "military": -10,
+        "religion": 5,
+        "intelligence": -5
+      },
+      "temple_chaos": {
+        "attitude": -20,
+        "trust": -15,
+        "hostility": 25,
+        "trade": 0,
+        "military": -10,
+        "religion": -20,
+        "intelligence": -5
+      }
+    },
+    "temple_war": {
+      "empire": {
+        "attitude": 55,
+        "trust": 45,
+        "hostility": -10,
+        "trade": 15,
+        "military": 45,
+        "religion": 50,
+        "intelligence": -10
+      },
+      "guild": {
+        "attitude": 15,
+        "trust": 5,
+        "hostility": 0,
+        "trade": 10,
+        "military": 20,
+        "religion": 10,
+        "intelligence": 0
+      },
+      "shadow": {
+        "attitude": -60,
+        "trust": -55,
+        "hostility": 70,
+        "trade": -20,
+        "military": -30,
+        "religion": -65,
+        "intelligence": -40
+      },
+      "study": {
+        "attitude": -15,
+        "trust": -10,
+        "hostility": 10,
+        "trade": 0,
+        "military": 0,
+        "religion": -35,
+        "intelligence": -20
+      },
+      "frost": {
+        "attitude": 5,
+        "trust": 5,
+        "hostility": 0,
+        "trade": 10,
+        "military": 0,
+        "religion": 10,
+        "intelligence": 0
+      },
+      "verdant": {
+        "attitude": -20,
+        "trust": -10,
+        "hostility": 15,
+        "trade": 5,
+        "military": 0,
+        "religion": -40,
+        "intelligence": -10
+      },
+      "sand": {
+        "attitude": -5,
+        "trust": 0,
+        "hostility": 5,
+        "trade": 10,
+        "military": 0,
+        "religion": -10,
+        "intelligence": 0
+      },
+      "blood": {
+        "attitude": 15,
+        "trust": 5,
+        "hostility": 10,
+        "trade": 0,
+        "military": -5,
+        "religion": 20,
+        "intelligence": 0
+      },
+      "deep": {
+        "attitude": -20,
+        "trust": -15,
+        "hostility": 25,
+        "trade": 0,
+        "military": -10,
+        "religion": -20,
+        "intelligence": -5
+      },
+      "temple_wisdom": {
+        "attitude": 5,
+        "trust": 0,
+        "hostility": 0,
+        "trade": 0,
+        "military": 0,
+        "religion": -5,
+        "intelligence": 0
+      },
+      "temple_life": {
+        "attitude": -10,
+        "trust": -5,
+        "hostility": 10,
+        "trade": 0,
+        "military": 0,
+        "religion": -25,
+        "intelligence": 0
+      },
+      "temple_death": {
+        "attitude": -5,
+        "trust": 0,
+        "hostility": 5,
+        "trade": 0,
+        "military": 0,
+        "religion": -20,
+        "intelligence": 0
+      },
+      "temple_chaos": {
+        "attitude": -25,
+        "trust": -20,
+        "hostility": 35,
+        "trade": 0,
+        "military": 0,
+        "religion": -45,
+        "intelligence": 0
+      }
+    },
+    "temple_wisdom": {
+      "empire": {
+        "attitude": 45,
+        "trust": 35,
+        "hostility": -10,
+        "trade": 15,
+        "military": 0,
+        "religion": 45,
+        "intelligence": 30
+      },
+      "guild": {
+        "attitude": 20,
+        "trust": 15,
+        "hostility": 0,
+        "trade": 10,
+        "military": 5,
+        "religion": 5,
+        "intelligence": 15
+      },
+      "shadow": {
+        "attitude": -60,
+        "trust": -55,
+        "hostility": 70,
+        "trade": -20,
+        "military": -30,
+        "religion": -65,
+        "intelligence": -40
+      },
+      "study": {
+        "attitude": 25,
+        "trust": 30,
+        "hostility": -20,
+        "trade": 0,
+        "military": 0,
+        "religion": 25,
+        "intelligence": 40
+      },
+      "frost": {
+        "attitude": 5,
+        "trust": 5,
+        "hostility": 0,
+        "trade": 10,
+        "military": 0,
+        "religion": 10,
+        "intelligence": 0
+      },
+      "verdant": {
+        "attitude": -5,
+        "trust": -10,
+        "hostility": 0,
+        "trade": 5,
+        "military": 0,
+        "religion": 5,
+        "intelligence": -10
+      },
+      "sand": {
+        "attitude": -5,
+        "trust": 0,
+        "hostility": 5,
+        "trade": 10,
+        "military": 0,
+        "religion": -10,
+        "intelligence": 0
+      },
+      "blood": {
+        "attitude": -30,
+        "trust": -20,
+        "hostility": 40,
+        "trade": 0,
+        "military": -20,
+        "religion": -25,
+        "intelligence": 0
+      },
+      "deep": {
+        "attitude": -20,
+        "trust": -15,
+        "hostility": 25,
+        "trade": 0,
+        "military": -10,
+        "religion": -20,
+        "intelligence": -5
+      },
+      "temple_war": {
+        "attitude": 5,
+        "trust": 0,
+        "hostility": 0,
+        "trade": 0,
+        "military": 0,
+        "religion": -5,
+        "intelligence": 0
+      },
+      "temple_life": {
+        "attitude": 20,
+        "trust": 15,
+        "hostility": -10,
+        "trade": 0,
+        "military": 0,
+        "religion": 20,
+        "intelligence": 0
+      },
+      "temple_death": {
+        "attitude": 0,
+        "trust": -5,
+        "hostility": 10,
+        "trade": 0,
+        "military": 0,
+        "religion": -15,
+        "intelligence": 0
+      },
+      "temple_chaos": {
+        "attitude": -30,
+        "trust": -30,
+        "hostility": 40,
+        "trade": 0,
+        "military": 0,
+        "religion": -55,
+        "intelligence": 0
+      }
+    },
+    "temple_life": {
+      "empire": {
+        "attitude": 50,
+        "trust": 40,
+        "hostility": -10,
+        "trade": 15,
+        "military": 0,
+        "religion": 55,
+        "intelligence": -10
+      },
+      "guild": {
+        "attitude": 25,
+        "trust": 20,
+        "hostility": 0,
+        "trade": 10,
+        "military": 5,
+        "religion": 15,
+        "intelligence": 0
+      },
+      "shadow": {
+        "attitude": -60,
+        "trust": -55,
+        "hostility": 70,
+        "trade": -20,
+        "military": -30,
+        "religion": -65,
+        "intelligence": -40
+      },
+      "study": {
+        "attitude": -15,
+        "trust": -10,
+        "hostility": 10,
+        "trade": 0,
+        "military": 0,
+        "religion": -35,
+        "intelligence": -20
+      },
+      "frost": {
+        "attitude": 5,
+        "trust": 5,
+        "hostility": 0,
+        "trade": 10,
+        "military": 0,
+        "religion": 10,
+        "intelligence": 0
+      },
+      "verdant": {
+        "attitude": -5,
+        "trust": -10,
+        "hostility": 0,
+        "trade": 5,
+        "military": 0,
+        "religion": -10,
+        "intelligence": -10
+      },
+      "sand": {
+        "attitude": -5,
+        "trust": 0,
+        "hostility": 5,
+        "trade": 10,
+        "military": 0,
+        "religion": -10,
+        "intelligence": 0
+      },
+      "blood": {
+        "attitude": -30,
+        "trust": -20,
+        "hostility": 40,
+        "trade": 0,
+        "military": -20,
+        "religion": -25,
+        "intelligence": 0
+      },
+      "deep": {
+        "attitude": -20,
+        "trust": -15,
+        "hostility": 25,
+        "trade": 0,
+        "military": -10,
+        "religion": -20,
+        "intelligence": -5
+      },
+      "temple_war": {
+        "attitude": -5,
+        "trust": 0,
+        "hostility": 5,
+        "trade": 0,
+        "military": 0,
+        "religion": -25,
+        "intelligence": 0
+      },
+      "temple_wisdom": {
+        "attitude": 20,
+        "trust": 15,
+        "hostility": -10,
+        "trade": 0,
+        "military": 0,
+        "religion": 20,
+        "intelligence": 0
+      },
+      "temple_death": {
+        "attitude": -10,
+        "trust": -20,
+        "hostility": 20,
+        "trade": 0,
+        "military": 0,
+        "religion": -60,
+        "intelligence": 0
+      },
+      "temple_chaos": {
+        "attitude": -30,
+        "trust": -25,
+        "hostility": 45,
+        "trade": 0,
+        "military": 0,
+        "religion": -60,
+        "intelligence": 0
+      }
+    },
+    "temple_death": {
+      "empire": {
+        "attitude": 25,
+        "trust": 20,
+        "hostility": 0,
+        "trade": 15,
+        "military": 0,
+        "religion": 15,
+        "intelligence": -10
+      },
+      "guild": {
+        "attitude": 10,
+        "trust": 5,
+        "hostility": 0,
+        "trade": 10,
+        "military": 5,
+        "religion": 10,
+        "intelligence": 0
+      },
+      "shadow": {
+        "attitude": -30,
+        "trust": -30,
+        "hostility": 40,
+        "trade": -20,
+        "military": -30,
+        "religion": -35,
+        "intelligence": -40
+      },
+      "study": {
+        "attitude": -15,
+        "trust": -10,
+        "hostility": 10,
+        "trade": 0,
+        "military": 0,
+        "religion": -35,
+        "intelligence": -20
+      },
+      "frost": {
+        "attitude": 5,
+        "trust": 5,
+        "hostility": 0,
+        "trade": 10,
+        "military": 0,
+        "religion": 10,
+        "intelligence": 0
+      },
+      "verdant": {
+        "attitude": -20,
+        "trust": -10,
+        "hostility": 15,
+        "trade": 5,
+        "military": 0,
+        "religion": -40,
+        "intelligence": -10
+      },
+      "sand": {
+        "attitude": -5,
+        "trust": 0,
+        "hostility": 5,
+        "trade": 10,
+        "military": 0,
+        "religion": -10,
+        "intelligence": 0
+      },
+      "blood": {
+        "attitude": -30,
+        "trust": -20,
+        "hostility": 40,
+        "trade": 0,
+        "military": -20,
+        "religion": -25,
+        "intelligence": 0
+      },
+      "deep": {
+        "attitude": -5,
+        "trust": -5,
+        "hostility": 10,
+        "trade": 0,
+        "military": -10,
+        "religion": 0,
+        "intelligence": -5
+      },
+      "temple_war": {
+        "attitude": -5,
+        "trust": 0,
+        "hostility": 5,
+        "trade": 0,
+        "military": 0,
+        "religion": -20,
+        "intelligence": 0
+      },
+      "temple_wisdom": {
+        "attitude": 0,
+        "trust": -5,
+        "hostility": 10,
+        "trade": 0,
+        "military": 0,
+        "religion": -15,
+        "intelligence": 0
+      },
+      "temple_life": {
+        "attitude": -10,
+        "trust": -20,
+        "hostility": 20,
+        "trade": 0,
+        "military": 0,
+        "religion": -60,
+        "intelligence": 0
+      },
+      "temple_chaos": {
+        "attitude": -20,
+        "trust": -15,
+        "hostility": 30,
+        "trade": 0,
+        "military": 0,
+        "religion": -45,
+        "intelligence": 0
+      }
+    },
+    "temple_chaos": {
+      "empire": {
+        "attitude": -25,
+        "trust": -25,
+        "hostility": 35,
+        "trade": 15,
+        "military": 0,
+        "religion": -30,
+        "intelligence": -10
+      },
+      "guild": {
+        "attitude": 0,
+        "trust": 0,
+        "hostility": 0,
+        "trade": 10,
+        "military": 5,
+        "religion": -5,
+        "intelligence": 0
+      },
+      "shadow": {
+        "attitude": 15,
+        "trust": 10,
+        "hostility": 0,
+        "trade": -20,
+        "military": -30,
+        "religion": 10,
+        "intelligence": 10
+      },
+      "study": {
+        "attitude": -30,
+        "trust": -25,
+        "hostility": 25,
+        "trade": 0,
+        "military": 0,
+        "religion": -50,
+        "intelligence": -20
+      },
+      "frost": {
+        "attitude": 5,
+        "trust": 5,
+        "hostility": 0,
+        "trade": 10,
+        "military": 0,
+        "religion": 10,
+        "intelligence": 0
+      },
+      "verdant": {
+        "attitude": -20,
+        "trust": -10,
+        "hostility": 15,
+        "trade": 5,
+        "military": 0,
+        "religion": -40,
+        "intelligence": -10
+      },
+      "sand": {
+        "attitude": 10,
+        "trust": 5,
+        "hostility": 0,
+        "trade": 10,
+        "military": 0,
+        "religion": 10,
+        "intelligence": 0
+      },
+      "blood": {
+        "attitude": -30,
+        "trust": -20,
+        "hostility": 40,
+        "trade": 0,
+        "military": -20,
+        "religion": -25,
+        "intelligence": 0
+      },
+      "deep": {
+        "attitude": -20,
+        "trust": -15,
+        "hostility": 25,
+        "trade": 0,
+        "military": -10,
+        "religion": -20,
+        "intelligence": -5
+      },
+      "temple_war": {
+        "attitude": -20,
+        "trust": -15,
+        "hostility": 30,
+        "trade": 0,
+        "military": 0,
+        "religion": -40,
+        "intelligence": 0
+      },
+      "temple_wisdom": {
+        "attitude": -30,
+        "trust": -25,
+        "hostility": 35,
+        "trade": 0,
+        "military": 0,
+        "religion": -50,
+        "intelligence": 0
+      },
+      "temple_life": {
+        "attitude": -25,
+        "trust": -20,
+        "hostility": 40,
+        "trade": 0,
+        "military": 0,
+        "religion": -55,
+        "intelligence": 0
+      },
+      "temple_death": {
+        "attitude": -20,
+        "trust": -15,
+        "hostility": 30,
+        "trade": 0,
+        "military": 0,
+        "religion": -45,
+        "intelligence": 0
+      }
+    }
+  },
+  "groups": {
+    "pantheon": {
+      "note": "万神殿五殿。拆自原「圣辉神殿」单条——五殿共尊万神殿，教义与属地各异。",
+      "members": [
+        "temple_war",
+        "temple_wisdom",
+        "temple_life",
+        "temple_death",
+        "temple_chaos"
+      ],
+      "deity": {
+        "temple_war": "war",
+        "temple_wisdom": "wisdom",
+        "temple_life": "life",
+        "temple_death": "death",
+        "temple_chaos": "chaos"
+      },
+      "expand": "新增神殿：meta 加 name/ideology/continent，matrix 会自动为它填满（本脚本重跑即可）；若已成数据，照五殿现成条目补一组 to/from 覆盖。"
+    }
+  }
+}

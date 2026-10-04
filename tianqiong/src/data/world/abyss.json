@@ -1,0 +1,15 @@
+{
+  "leakLevels": [
+    { "id": 0, "name": "封印完好", "desc": "星渊之门沉眠，地脉安稳。" },
+    { "id": 1, "name": "渗漏", "desc": "黑气沿地脉渗出，星符偶有发烫。" },
+    { "id": 2, "name": "涌动", "desc": "六塔回廊夜半有低语，守塔人开始轮班值守。" },
+    { "id": 3, "name": "侵蚀", "desc": "深井城外围的植被卷曲发黑，裂隙隐现。" },
+    { "id": 4, "name": "喷发", "desc": "黑气凝成实体，深渊魔物在塔基游荡。" },
+    { "id": 5, "name": "裂隙", "desc": "魔界之门开了一线——星渊已至危机临界。" }
+  ],
+  "dailyLeakChance": { "base": 0.02, "active": 0.06, "sealedRelief": 0.15 },
+  "probe": { "costTicks": 8, "combatChance": 0.5, "marrowChance": 0.35 },
+  "seal": { "needItem": "seal_rune", "leakCut": 1, "rep": { "temple_life": 10, "study": 8 }, "minLeak": 3 },
+  "openAtLeak": 1,
+  "crisisAtLeak": 3
+}

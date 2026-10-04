@@ -1,0 +1,187 @@
+{
+ "version": 1,
+ "loreRefs": [
+  "s4",
+  "s5",
+  "s3"
+ ],
+ "canon": "每100年一次；每神殿每百年3名；海选（每殿取100人）→预选（每殿取10人）→正赛（每殿3名候补）→神战定座次；612年首届，预选与正赛可移于星枢五塔·星斗台跨大陆举办（§4）",
+ "cycle": 100,
+ "currentCycle": 612,
+ "startDay": 1,
+ "modelNote": "具名候选为「你知道名字的那些人」的抽样（fieldSize 为 canon 名义人数）；海选走门槛制，预选及以后走名次制。",
+ "temples": [
+  {
+   "id": "war",
+   "name": "战争神殿",
+   "deity": "war",
+   "faction": "temple",
+   "path": [
+    "信仰者",
+    "神恩骑士",
+    "圣战使徒",
+    "【神之右臂】"
+   ]
+  },
+  {
+   "id": "wisdom",
+   "name": "智慧神殿",
+   "deity": "wisdom",
+   "faction": "study",
+   "path": [
+    "信仰者",
+    "神谕祭司",
+    "启示先知",
+    "【真理之眼】"
+   ]
+  },
+  {
+   "id": "life",
+   "name": "生命神殿",
+   "deity": "life",
+   "faction": "temple",
+   "path": [
+    "信仰者",
+    "神愈圣女",
+    "救赎天使",
+    "【神之悲悯】"
+   ]
+  },
+  {
+   "id": "death",
+   "name": "死亡神殿",
+   "deity": "death",
+   "faction": "shadow",
+   "path": [
+    "信仰者",
+    "终焉使者",
+    "轮回看守",
+    "【冥河渡者】"
+   ]
+  },
+  {
+   "id": "chaos",
+   "name": "混沌神殿",
+   "deity": "chaos",
+   "faction": "guild",
+   "path": [
+    "信仰者",
+    "狂信者",
+    "末日先驱",
+    "【神罚执行者】"
+   ]
+  }
+ ],
+ "stages": [
+  {
+   "id": "海选",
+   "quota": 100,
+   "fieldSize": 100,
+   "duration": 30,
+   "mode": "threshold",
+   "cut": 30,
+   "desc": "各殿于七大陆设坛，凡有意者皆可报名。取合格者百人。",
+   "loc": "plaza",
+   "locName": "圣辉城 · 中央广场",
+   "task": "任意一段历练皆可计入：地下城的层数、神殿的香火、你在世间的名声。"
+  },
+  {
+   "id": "预选",
+   "quota": 10,
+   "fieldSize": 100,
+   "duration": 60,
+   "mode": "rank",
+   "desc": "百人聚于星枢五塔·星斗台，众生以星符观战。取十人。",
+   "loc": "star5",
+   "locName": "星枢五塔 · 星斗台（跨大陆 · 星符可观战）",
+   "task": "星斗台的公开竞技与地下城深层的战绩共计入评分。"
+  },
+  {
+   "id": "正赛",
+   "quota": 3,
+   "fieldSize": 10,
+   "duration": 90,
+   "mode": "rank",
+   "desc": "十人下探地下城深层，各殿只留三名候补。",
+   "loc": "dungeon_deep",
+   "locName": "地下城深层 · 地渊",
+   "task": "正赛在深层举行——层志越深，评分越高。"
+  },
+  {
+   "id": "神战",
+   "quota": 1,
+   "fieldSize": 3,
+   "duration": 30,
+   "mode": "rank",
+   "desc": "三名候补于星斗台定座次，胜者为首。",
+   "loc": "star5",
+   "locName": "星枢五塔 · 星斗台（跨大陆 · 星符可观战）",
+   "task": "神战无伤，唯以投影相搏——但座次一旦定下，百年不改。"
+  },
+  {
+   "id": "候补",
+   "quota": 3,
+   "fieldSize": 3,
+   "duration": -1,
+   "mode": "final",
+   "desc": "座次已定。前三名受封候补神，静待神界空缺。",
+   "loc": "star5",
+   "locName": "星枢五塔 · 星斗台（跨大陆 · 星符可观战）",
+   "task": "候补级 → 侍神级（100年+功绩）→ 神官级（千年+神迹）→ 从神级 → 主神级。"
+  }
+ ],
+ "rewards": {
+  "rank1": {
+   "label": "候补神 · 神选魁首",
+   "lifespan": 800
+  },
+  "rank2_3": {
+   "label": "候补神",
+   "lifespan": 500
+  },
+  "rank4_8": {
+   "label": "神选者",
+   "lifespan": 300
+  },
+  "rank9_16": {
+   "label": "神选者",
+   "lifespan": 200
+  },
+  "rank17_50": {
+   "label": "入殿者",
+   "lifespan": 100
+  },
+  "rank51_100": {
+   "label": "入殿者",
+   "lifespan": 50
+  }
+ },
+ "enroll": {
+  "minLevel": 3,
+  "minFavor": 20,
+  "costGold": 100,
+  "windowStages": [
+   "海选",
+   "预选"
+  ]
+ },
+ "score": {
+  "base": 20,
+  "perDungeonFloor": 0.5,
+  "perRep": 0.2,
+  "perFavor": 0.5,
+  "perTrialFloor": 0.2,
+  "luckMax": 8
+ },
+ "chain": {
+  "announceEvent": "theoselect_announce",
+  "stageEndEvent": "theoselect_stage_end",
+  "finalEvent": "theoselect_ascend"
+ },
+ "spectate": {
+  "costStarcoin": 10,
+  "repGain": 2,
+  "arenaWinsNeeded": 0
+ },
+ "fallbackUnlockDay": 180
+}

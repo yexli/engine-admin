@@ -1,0 +1,17 @@
+/* ============================================================
+   通讯·写信浮层（卡 K3-UI）与见闻录回显折叠（UX-001）组件样式
+   —— 独立文件，不触碰冻结的 app.css 原型规则；全部沿用既有令牌
+   （bg2/line2/gold2/crimson/ink3），零新增主色。与 chat.css 同一先例。
+   ============================================================ */
+.comm-in{display:flex;flex-direction:column;gap:4px}
+.comm-in textarea{width:100%;box-sizing:border-box;resize:vertical;min-height:72px;padding:11px 14px;
+  border:1px solid var(--line2);border-radius:10px;background:var(--bg2);font-size:13.5px;line-height:1.8;
+  color:var(--ink);font-family:var(--serif)}
+.comm-in textarea::placeholder{color:var(--ink3)}
+.comm-in textarea:focus{outline:none;border-color:var(--star);box-shadow:0 0 0 3px #8ea1f51f}
+/* —— 见闻录回显折叠（UX-001）：超长「＞ 玩家原话」先收成一行，点按展开。
+   样式退到最淡：它是索引不是正文，不与叙事抢排版。 —— */
+.nar-p.echo{text-indent:0;cursor:pointer}
+.nar-p.echo .echo-more{border:none;background:none;padding:0 2px;font-size:11px;letter-spacing:.06em;
+  color:var(--ink3);font-family:var(--sans);cursor:pointer;white-space:nowrap}
+.nar-p.echo:hover .echo-more{color:var(--gold2)}

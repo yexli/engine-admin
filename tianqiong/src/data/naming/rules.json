@@ -1,0 +1,846 @@
+{
+  "tiers": {
+    "common": 0.7,
+    "rare": 0.25,
+    "legend": 0.05
+  },
+  "fallbackRace": "human",
+  "alias": {
+    "人类": "human",
+    "精灵": "elf",
+    "矮人": "dwarf",
+    "兽人": "orc",
+    "半兽人": "halforc",
+    "地精": "gnome",
+    "不死族": "undead",
+    "血族": "vampire",
+    "元素裔": "elemental",
+    "翼族": "avariel",
+    "巨人": "giant",
+    "龙族": "dragon",
+    "魔族": "demon"
+  },
+  "limits": {
+    "minLen": 2,
+    "maxLen": 32,
+    "nameAttempts": 32,
+    "batchAttemptFactor": 40
+  },
+  "lore": {
+    "separators": [
+      "·",
+      "・"
+    ],
+    "quotes": [
+      [
+        "「",
+        "」"
+      ]
+    ],
+    "minLen": 2,
+    "maxLen": 4,
+    "fallbackRace": "human"
+  },
+  "races": {
+    "human": {
+      "styleNote": "名+父名，如「奥兰多·铁手」",
+      "formula": "{given}·{patronym}",
+      "slots": {
+        "given": [
+          "male",
+          "female"
+        ],
+        "clan": [
+          "clan"
+        ],
+        "epithet": [
+          "epithet"
+        ],
+        "prefix": [
+          "prefix"
+        ],
+        "suffix": [
+          "suffix"
+        ],
+        "patronym": [
+          "epithet"
+        ]
+      },
+      "patterns": [
+        "{given}·{patronym}",
+        "{given}·{clan}",
+        "{given}·{clan}·{patronym}",
+        "{prefix}{given}·{clan}·{patronym}",
+        "{prefix}{given}·{patronym}"
+      ],
+      "tierPatterns": {
+        "common": [
+          "{given}·{patronym}",
+          "{given}·{clan}"
+        ],
+        "rare": [
+          "{given}·{clan}·{patronym}"
+        ],
+        "legend": [
+          "{prefix}{given}·{clan}·{patronym}",
+          "{prefix}{given}·{patronym}"
+        ]
+      },
+      "gender": {
+        "optional": true,
+        "male": "male",
+        "female": "female"
+      },
+      "style": {
+        "charset": "·丝之乔人伊伍伦佐克兰冠冬刃利加匠卡卢印双发古嗓圣埃塔塞壕多夜大奥娅娜子守安尔尤尼巢巧巴布帝库庭康弓影德心快戈手托拉文断斯旗明星晓晨暗暮格森楠橡欧水永沉泉洁洛海港湖灰烛烬焰牙特独狮狼猎玄玛玫环珀珂琥琳瑰瓦疤白盾眼石破碧穗米红纳维缪罗翠翼老腕舌艾苍莉莎莱菲蒂蒙蔷蕾薇血袍誓语诺谷贝费赛辉达里金钟钥铁铜银锁锤长阿雷霜青静面风马高鸦鹰麦黎黑黛龙",
+        "sample": "奥兰多·铁手"
+      }
+    },
+    "elf": {
+      "styleNote": "多音节流音，如「艾露维·晨叶」",
+      "formula": "{prefix}{suffix}·{clan}",
+      "slots": {
+        "given": [
+          "male",
+          "female"
+        ],
+        "clan": [
+          "clan"
+        ],
+        "epithet": [
+          "epithet"
+        ],
+        "prefix": [
+          "prefix"
+        ],
+        "suffix": [
+          "suffix"
+        ]
+      },
+      "patterns": [
+        "{prefix}{suffix}·{clan}",
+        "{given}·{clan}",
+        "{given}·{clan}·{epithet}",
+        "{prefix}{suffix}·{clan}·{epithet}"
+      ],
+      "tierPatterns": {
+        "common": [
+          "{prefix}{suffix}·{clan}"
+        ],
+        "rare": [
+          "{given}·{clan}",
+          "{given}·{clan}·{epithet}"
+        ],
+        "legend": [
+          "{prefix}{suffix}·{clan}·{epithet}"
+        ]
+      },
+      "gender": {
+        "optional": true,
+        "male": "male",
+        "female": "female"
+      },
+      "style": {
+        "charset": "·丝中之云亚人伊使兰凡匠华卫友叶司咏喉埃塞夜奈奥娅娜宁守安客希幽弥弦影心忒思手星晨暮曦月朝朵松林栖桠桦梦歌水汐泉波清温火烟玉琳瑞瑟白瞳碧祭秋篱米索织维缇羽翠者耶艾芬芮花芷苍荇药莉莱莺萝萤落蕊蕾薇行观语诺轨辉迪逐采里银长间雅雨雪霜露静风鹿",
+        "sample": "艾露维·晨叶"
+      }
+    },
+    "dwarf": {
+      "styleNote": "坚辅音+氏族，如「布伦丹·铁砧」",
+      "formula": "{given}·{clan}{epithet}",
+      "slots": {
+        "given": [
+          "male",
+          "female"
+        ],
+        "clan": [
+          "clan"
+        ],
+        "epithet": [
+          "epithet"
+        ],
+        "prefix": [
+          "prefix"
+        ],
+        "suffix": [
+          "suffix"
+        ]
+      },
+      "patterns": [
+        "{given}·{clan}{epithet}",
+        "{given}·{clan}",
+        "{given}·{clan}{epithet}·{suffix}",
+        "{prefix}{given}·{clan}{epithet}·{suffix}"
+      ],
+      "tierPatterns": {
+        "common": [
+          "{given}·{clan}{epithet}",
+          "{given}·{clan}"
+        ],
+        "rare": [
+          "{given}·{clan}{epithet}·{suffix}"
+        ],
+        "legend": [
+          "{prefix}{given}·{clan}{epithet}·{suffix}"
+        ]
+      },
+      "gender": {
+        "optional": true,
+        "male": "male",
+        "female": "female"
+      },
+      "style": {
+        "charset": "·丁丈丹伦克兰兹冠冰凿加匠卡古因圣地大契姆娅娜宁守定寒尊尔山岗岩巡工布德心恩手托拉拳掘摩斧斯曜杜林格桦深火灰炉熔特玄环瑞白盾眼石矿砂砧破硬磐祖秘约纹罗老者肩脉脊臂花莉誓语贤赤足里重金钉钢铁铜铠银铸锤锻镐长雷霜青面须额骨高髯魂魄黑齿",
+        "sample": "布伦丹·铁砧"
+      }
+    },
+    "orc": {
+      "styleNote": "喉音+战号，如「格罗姆·碎颅」",
+      "formula": "{given}·{epithet}",
+      "slots": {
+        "given": [
+          "male",
+          "female"
+        ],
+        "clan": [
+          "clan"
+        ],
+        "epithet": [
+          "epithet"
+        ],
+        "prefix": [
+          "prefix"
+        ],
+        "suffix": [
+          "suffix"
+        ]
+      },
+      "patterns": [
+        "{given}·{epithet}",
+        "{given}·{clan}·{epithet}",
+        "{prefix}{given}·{clan}·{epithet}",
+        "{given}·{clan}·{epithet}·{suffix}"
+      ],
+      "tierPatterns": {
+        "common": [
+          "{given}·{epithet}"
+        ],
+        "rare": [
+          "{given}·{clan}·{epithet}",
+          "{prefix}{given}·{clan}·{epithet}"
+        ],
+        "legend": [
+          "{given}·{clan}·{epithet}·{suffix}"
+        ]
+      },
+      "gender": {
+        "optional": true,
+        "male": "male",
+        "female": "female"
+      },
+      "style": {
+        "charset": "·什仇克兹军凶剥卡原古吼咆咬哮喉嗥嚎土城塔大契姆尔屠山岩巨布怒恩戈战扎托拉拳撕斧斩断暴林格洛火焚焦牙狂狼猎猛猪玛疤痕皮盟盾石破碎祖祭红约罗胸脊腕荒莎血裂裔角誓赤赫踏蹄野钢铁锤雷霜颅颚饮首骨骷骸髅鲁黑齿龙",
+        "sample": "格罗姆·碎颅"
+      }
+    },
+    "halforc": {
+      "styleNote": "多随兽人战号",
+      "formula": "{given}·{epithet}",
+      "slots": {
+        "given": [
+          "male",
+          "female"
+        ],
+        "clan": [
+          "clan"
+        ],
+        "epithet": [
+          "epithet"
+        ],
+        "prefix": [
+          "prefix"
+        ],
+        "suffix": [
+          "suffix"
+        ]
+      },
+      "patterns": [
+        "{given}·{epithet}",
+        "{prefix}{given}·{epithet}",
+        "{given}·{clan}·{epithet}",
+        "{given}·{clan}·{epithet}·{suffix}"
+      ],
+      "tierPatterns": {
+        "common": [
+          "{given}·{epithet}"
+        ],
+        "rare": [
+          "{given}·{clan}·{epithet}",
+          "{prefix}{given}·{epithet}"
+        ],
+        "legend": [
+          "{given}·{clan}·{epithet}·{suffix}"
+        ]
+      },
+      "gender": {
+        "optional": true,
+        "male": "male",
+        "female": "female"
+      },
+      "style": {
+        "charset": "·丘井亡什伤伦克兰刃加卡双古喉塔墙头契姆娅娜孤尔屋岗巨布废性恩戈扎托拉拳掌撕斧斩断旗无旧暗暴月根格桥残沙洛流混港火灯灰烟焚牙狂狗独狼猎玛琳疤盐盟目盾石破硬碎约罗肘腕苦荒莎血裂誓赤赫路踏蹄野铁锈雨面颅风饮首骨鲁黑",
+        "sample": "格伦·碎骨"
+      }
+    },
+    "gnome": {
+      "styleNote": "短促商名，如「奥托·金秤」",
+      "formula": "{given}·{epithet}",
+      "slots": {
+        "given": [
+          "male",
+          "female"
+        ],
+        "clan": [
+          "clan"
+        ],
+        "epithet": [
+          "epithet"
+        ],
+        "prefix": [
+          "prefix"
+        ],
+        "suffix": [
+          "suffix"
+        ]
+      },
+      "patterns": [
+        "{given}·{epithet}",
+        "{given}·{clan}",
+        "{given}·{clan}·{epithet}",
+        "{prefix}{given}·{clan}"
+      ],
+      "tierPatterns": {
+        "common": [
+          "{given}·{epithet}"
+        ],
+        "rare": [
+          "{given}·{clan}",
+          "{prefix}{given}·{clan}"
+        ],
+        "legend": [
+          "{given}·{clan}·{epithet}"
+        ]
+      },
+      "gender": {
+        "optional": true,
+        "male": "male",
+        "female": "female"
+      },
+      "style": {
+        "charset": "·书亮价伪佐克兹准券匣单卡卢印压咪商囊图圆基塔壶多大契奥妮姆娅娜实小尖巧巴布帕干庄德快戈成托抬押抽拉拾掌探提摊明杜栈格比水沙泉泽滑灵珠琪皮盘盟短砂票秤稳筹算簿米粮精约细结维老芬莉莫蒂薄薇藏行衡袋裁讨记识诺谈账货赊走跑路车轻辙辨还遗邦里金钱铁铃铜铢银铺锁锡锱队驼验齐",
+        "sample": "奥托·金秤"
+      }
+    },
+    "undead": {
+      "styleNote": "多已遗忘旧名，以代号行世",
+      "formula": "{given}",
+      "slots": {
+        "given": [
+          "male",
+          "female"
+        ],
+        "clan": [
+          "clan"
+        ],
+        "epithet": [
+          "epithet"
+        ],
+        "prefix": [
+          "prefix"
+        ],
+        "suffix": [
+          "suffix"
+        ]
+      },
+      "patterns": [
+        "{given}",
+        "{prefix}{given}",
+        "{given}·{clan}",
+        "{given}·{clan}·{epithet}"
+      ],
+      "tierPatterns": {
+        "common": [
+          "{given}"
+        ],
+        "rare": [
+          "{given}·{clan}",
+          "{prefix}{given}"
+        ],
+        "legend": [
+          "{given}·{clan}·{epithet}"
+        ]
+      },
+      "gender": {
+        "optional": true,
+        "male": "male",
+        "female": "female"
+      },
+      "style": {
+        "charset": "·丧之井亡人余冢冷刃叹名响哑坟垣塔墓声壳守寂寒尸幽庭弦归影徊徘心忆忘念悼憾拾掘收断无旧暗暮月朽枯梦棺歌止死殇残殿水沼深渊渠渡灯灰点烛烬熄璃瓷痕白瞳碑穴空窖窟章篱约纱缄羽者苔荒蕊蚀蛾蝶袍被言誓语逝遗针钟铃锈镜门闩陵雪霜静颈颜香骨骸鸦默",
+        "sample": "余烬·寒冢·被遗忘者"
+      }
+    },
+    "vampire": {
+      "styleNote": "古贵族式名讳",
+      "formula": "{given}·德·{clan}",
+      "slots": {
+        "given": [
+          "male",
+          "female"
+        ],
+        "clan": [
+          "clan"
+        ],
+        "epithet": [
+          "epithet"
+        ],
+        "prefix": [
+          "prefix"
+        ],
+        "suffix": [
+          "suffix"
+        ]
+      },
+      "patterns": [
+        "{given}·{clan}",
+        "{given}·德·{clan}",
+        "{prefix}{given}·德·{clan}",
+        "{given}·德·{clan}·{epithet}"
+      ],
+      "tierPatterns": {
+        "common": [
+          "{given}·{clan}"
+        ],
+        "rare": [
+          "{given}·德·{clan}",
+          "{prefix}{given}·德·{clan}"
+        ],
+        "legend": [
+          "{given}·德·{clan}·{epithet}"
+        ]
+      },
+      "gender": {
+        "optional": true,
+        "male": "male",
+        "female": "female"
+      },
+      "style": {
+        "charset": "·丁下不中主丽之乌亚伊伏伦伯侯克公兰内冕冷刃利加劳匠卡卢古吻哈圣坦埃堡塔塞墓多夜契奥娅娜安客寒尊尔尤尼巡巴布希席幽庭康影德恩托拉文斯旧昂昼普暗暮月杯格梦棺樽河洛深灰烛爵牙特玛珀珂琪琳瑟瓦瓷白眠瞳石米红纱纳维绶罗羽者色艾芙苍莉莎莱莺菲蒂蒙蔷蕾薇蜜血袍裔西誓访诺赤迪里钟银长阿隐雷露静颈饮马骨高魅鸦黑默黛",
+        "sample": "卡蜜拉·德·诺瓦"
+      }
+    },
+    "elemental": {
+      "styleNote": "以元素为名，如「焰心」「霜语」",
+      "formula": "{prefix}{suffix}",
+      "slots": {
+        "given": [
+          "male",
+          "female"
+        ],
+        "clan": [
+          "clan"
+        ],
+        "epithet": [
+          "epithet"
+        ],
+        "prefix": [
+          "prefix"
+        ],
+        "suffix": [
+          "suffix"
+        ]
+      },
+      "patterns": [
+        "{prefix}{suffix}",
+        "{given}",
+        "{given}·{clan}",
+        "{prefix}{suffix}·{clan}",
+        "{given}·{clan}·{epithet}"
+      ],
+      "tierPatterns": {
+        "common": [
+          "{prefix}{suffix}"
+        ],
+        "rare": [
+          "{given}·{clan}",
+          "{prefix}{suffix}·{clan}"
+        ],
+        "legend": [
+          "{given}·{clan}·{epithet}"
+        ]
+      },
+      "gender": {
+        "optional": true,
+        "male": "male",
+        "female": "female"
+      },
+      "style": {
+        "charset": "·云余光冠冰冻凝刃化印原台听唤地守尘尽岚岩岭川巢底引弦影御循心息披掌摘星暗曜曦月极梦歌汐池沉泉波泪浪海涌渊湾漠潮灵炉炎烬焚焰熔燃眼瞳砂硫磐穹纹结羽翼者脉脊落蚀血誓语谷踏轨采野雪雷霜韵风骨魂鸣",
+        "sample": "焰心"
+      }
+    },
+    "avariel": {
+      "styleNote": "风与云之意象",
+      "formula": "{given}·{clan}",
+      "slots": {
+        "given": [
+          "male",
+          "female"
+        ],
+        "clan": [
+          "clan"
+        ],
+        "epithet": [
+          "epithet"
+        ],
+        "prefix": [
+          "prefix"
+        ],
+        "suffix": [
+          "suffix"
+        ]
+      },
+      "patterns": [
+        "{given}·{clan}",
+        "{prefix}{given}·{clan}",
+        "{given}·{clan}·{epithet}",
+        "{prefix}{given}·{clan}·{epithet}"
+      ],
+      "tierPatterns": {
+        "common": [
+          "{given}·{clan}"
+        ],
+        "rare": [
+          "{prefix}{given}·{clan}",
+          "{given}·{clan}·{epithet}"
+        ],
+        "legend": [
+          "{prefix}{given}·{clan}·{epithet}"
+        ]
+      },
+      "gender": {
+        "optional": true,
+        "male": "male",
+        "female": "female"
+      },
+      "style": {
+        "charset": "·上之云凌台哨塔天守客岚崖巅巡巢广引御披拾星月望林栈梢梯歌池港疾痕白破穹空笛纱羽翎翔翼者脊舞苍蓝行衣袖裳语谣踏轻远迹逐铃长门阶隼雪霄霜青音风飓飞驭骑高鸢鸣",
+        "sample": "翔云·云巢"
+      }
+    },
+    "giant": {
+      "styleNote": "单音如山名",
+      "formula": "{given}·{clan}",
+      "slots": {
+        "given": [
+          "male",
+          "female"
+        ],
+        "clan": [
+          "clan"
+        ],
+        "epithet": [
+          "epithet"
+        ],
+        "prefix": [
+          "prefix"
+        ],
+        "suffix": [
+          "suffix"
+        ]
+      },
+      "patterns": [
+        "{given}·{clan}",
+        "{given}·{clan}·{epithet}",
+        "{prefix}{given}·{clan}·{epithet}"
+      ],
+      "tierPatterns": {
+        "common": [
+          "{given}·{clan}"
+        ],
+        "rare": [
+          "{given}·{clan}·{epithet}"
+        ],
+        "legend": [
+          "{prefix}{given}·{clan}·{epithet}"
+        ]
+      },
+      "gender": {
+        "optional": true,
+        "male": "male",
+        "female": "female"
+      },
+      "style": {
+        "charset": "·万不之云仞冰千卧厚古喉土地基墙大天孤守寒屏履山屹岁岐岑岚岩岫岬岭岳峋峥峦峰峻崇崖崚崛嵘嵴嶂嶙巅巍川巨座御扛承拊拾摩撑擎断星月杉松柏柱根桦梁榕槐永沉泉洪流海深玄环白石础硕磊磐移稳穹立罡老肩脉脊臂芷苍苓苔荇荒荞菡菱蓟蔓蕈蕖蕙蕤蕨藤蘅观谷负赤足踏躯载远重钧铁镇长雄雪霜青顶饮骨高黑",
+        "sample": "磐·霜脊"
+      }
+    },
+    "dragon": {
+      "styleNote": "古语真名，不可轻呼",
+      "formula": "{given}·{clan}",
+      "slots": {
+        "given": [
+          "male",
+          "female"
+        ],
+        "clan": [
+          "clan"
+        ],
+        "epithet": [
+          "epithet"
+        ],
+        "prefix": [
+          "prefix"
+        ],
+        "suffix": [
+          "suffix"
+        ]
+      },
+      "patterns": [
+        "{given}·{clan}",
+        "{prefix}{suffix}·{clan}",
+        "{given}·{clan}·{epithet}",
+        "{prefix}{suffix}·{clan}·{epithet}"
+      ],
+      "tierPatterns": {
+        "common": [
+          "{given}·{clan}"
+        ],
+        "rare": [
+          "{prefix}{suffix}·{clan}"
+        ],
+        "legend": [
+          "{given}·{clan}·{epithet}",
+          "{prefix}{suffix}·{clan}·{epithet}"
+        ]
+      },
+      "gender": {
+        "optional": true,
+        "male": "male",
+        "female": "female"
+      },
+      "style": {
+        "charset": "·万上世主之云伊众传修光克兰兹冕冰华卡印古吐喉因图地夜大天奥娅娜守安尔山岩幽影德心忆忒恒息拉斯日时星曜曼月望格永泽洪流深渊潮火炎焰熔爪牙玄玉王玛珀珂珞琉琪瑞瑟瓦生电界登白瞳穹空紫纳缪翼者脊苍萨蒂蒙见誓证语赤轨轮辉都金鉴铁铜银长阿雷霆霜青骨鳞黑龙",
+        "sample": "阿兹拉·金鳞"
+      }
+    },
+    "demon": {
+      "styleNote": "深渊语名",
+      "formula": "{given}·{clan}",
+      "slots": {
+        "given": [
+          "male",
+          "female"
+        ],
+        "clan": [
+          "clan"
+        ],
+        "epithet": [
+          "epithet"
+        ],
+        "prefix": [
+          "prefix"
+        ],
+        "suffix": [
+          "suffix"
+        ]
+      },
+      "patterns": [
+        "{given}·{clan}",
+        "{prefix}{suffix}·{clan}",
+        "{given}·{clan}·{epithet}",
+        "{given}{suffix}·{clan}·{epithet}",
+        "{prefix}{suffix}·{clan}·{epithet}"
+      ],
+      "tierPatterns": {
+        "common": [
+          "{given}·{clan}"
+        ],
+        "rare": [
+          "{prefix}{suffix}·{clan}",
+          "{given}·{clan}·{epithet}"
+        ],
+        "legend": [
+          "{given}{suffix}·{clan}·{epithet}",
+          "{prefix}{suffix}·{clan}·{epithet}"
+        ]
+      },
+      "gender": {
+        "optional": true,
+        "male": "male",
+        "female": "female"
+      },
+      "style": {
+        "charset": "·世丝低余使修克兹加卡原名咒噬因土壑夺契姆姬娜守尔尼崖巴影德心恩惑拉斯暗月格毒沉河沼泽洛深渊渠潮火灰烬焚焦焰熔特狱玛珀瓦硫祖约缚罗者苏苦荒莫菲萨蒂蒙蚀蛊血裂言誓语诱谷贡赫达迦都铁阿骨魂黑",
+        "sample": "阿兹莫·熔渊"
+      }
+    }
+  },
+  "dimensions": {
+    "place": {
+      "formula": "{region}{feature}",
+      "patterns": [
+        "{region}{feature}",
+        "{region}{typecity}",
+        "{region}{typetown}",
+        "{prefix}{region}{typecity}",
+        "{region}{typeplace}",
+        "{feature}{typetown}"
+      ],
+      "tierPatterns": {
+        "common": [
+          "{region}{typetown}",
+          "{feature}{typetown}"
+        ],
+        "rare": [
+          "{region}{typecity}",
+          "{region}{typeplace}"
+        ],
+        "legend": [
+          "{prefix}{region}{typecity}",
+          "{prefix}{feature}{typeplace}"
+        ]
+      },
+      "lex": [
+        "place"
+      ]
+    },
+    "org": {
+      "formula": "{concept}{guild}",
+      "patterns": [
+        "{concept}{guild}",
+        "{concept}{commerce}",
+        "{deity}神殿",
+        "{deity}神殿·{branch}",
+        "{explore}公会",
+        "{region}{polity}"
+      ],
+      "tierPatterns": {
+        "common": [
+          "{concept}{commerce}",
+          "{explore}公会"
+        ],
+        "rare": [
+          "{concept}{guild}",
+          "{deity}神殿"
+        ],
+        "legend": [
+          "{deity}神殿·{branch}",
+          "{region}{polity}"
+        ]
+      },
+      "lex": [
+        "org",
+        "place"
+      ]
+    },
+    "item": {
+      "formula": "{material}{weapon}",
+      "patterns": [
+        "{material}{weapon}",
+        "{material}{armor}",
+        "{trait}{weapon}",
+        "{trait}{armor}",
+        "{deityName}之{power}·{weapon}"
+      ],
+      "tierPatterns": {
+        "common": [
+          "{material}{weapon}",
+          "{material}{armor}"
+        ],
+        "rare": [
+          "{trait}{weapon}",
+          "{trait}{armor}"
+        ],
+        "legend": [
+          "{deityName}之{power}·{weapon}"
+        ]
+      },
+      "lex": [
+        "item"
+      ]
+    },
+    "monster": {
+      "formula": "{base}{role}",
+      "patterns": [
+        "{base}{role}",
+        "{elite}{base}",
+        "{base}{boss}",
+        "{disaster}{base}",
+        "{divine}{base}"
+      ],
+      "tierPatterns": {
+        "common": [
+          "{base}{role}"
+        ],
+        "rare": [
+          "{elite}{base}",
+          "{base}{boss}"
+        ],
+        "legend": [
+          "{disaster}{base}",
+          "{divine}{base}"
+        ]
+      },
+      "lex": [
+        "monster"
+      ]
+    },
+    "floor": {
+      "formula": "{name}",
+      "patterns": [
+        "{name}"
+      ],
+      "tierPatterns": {
+        "common": [
+          "{name}"
+        ],
+        "rare": [
+          "{name}"
+        ],
+        "legend": [
+          "{name}"
+        ]
+      },
+      "lex": [
+        "floor"
+      ]
+    },
+    "skill": {
+      "formula": "{mod}{noun}",
+      "patterns": [
+        "{mod}{noun}",
+        "{relicEra}{relicFunc}{relicKind}",
+        "{secretTrait}{secretKind}",
+        "{trialConcept}{trialCarrier}"
+      ],
+      "tierPatterns": {
+        "common": [
+          "{mod}{noun}"
+        ],
+        "rare": [
+          "{trialConcept}{trialCarrier}",
+          "{secretTrait}{secretKind}"
+        ],
+        "legend": [
+          "{relicEra}{relicFunc}{relicKind}"
+        ]
+      },
+      "lex": [
+        "skill",
+        "byLineage"
+      ]
+    }
+  },
+  "_g1Comment": "卡 G1：dimensions 是六维命名（地区/组织/装备/魔物/地下城层/技能遗迹）的公式与槽位；lex 指出该维度在 lexicon.json 中优先查哪几张表，查不到再退回「槽位名同名表」。"
+}

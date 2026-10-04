@@ -15,7 +15,7 @@
 import { createRequire } from "node:module";
 
 /* 根目录 scripts/ 无 node_modules 链接——按仓库约定直引引擎 dist
-   （需先 cd world-engine && pnpm build；tianqiong2 走 file: 依赖则免） */
+   （需先 cd world-engine && pnpm build；tianqiong 走 file: 依赖则免） */
 const require = createRequire(import.meta.url);
 const { createWorldRegistry } = require("../world-engine/dist/index.js");
 const { startWorldServer } = require("../world-engine/dist/http/server.js");

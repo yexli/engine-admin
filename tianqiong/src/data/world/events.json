@@ -1,0 +1,251 @@
+{
+  "events": [
+    {
+      "id": "notice",
+      "name": "城门张榜：百年神选将于秋后启幕",
+      "trigger": { "dayMin": 1, "shichen": 10 },
+      "seed": "城门贴出新告示：百年神选，秋后启幕。围观人群议论纷纷。",
+      "loreRef": "s80"
+    },
+    {
+      "id": "caravan_evt",
+      "name": "商队被袭：奥托的药材队在城郊遭洗劫",
+      "trigger": { "dayMin": 2 },
+      "seed": "坏消息像野火传遍全城：砂海行商奥托的商队在城郊被劫，整批药材被掳走。东市药价当天就涨了起来。",
+      "loreRef": "s85",
+      "effects": {
+        "econ": { "herb": 1.5 },
+        "flags": { "caravan_evt": true },
+        "npcAtt": { "otto": -5 },
+        "spread": { "src": "otto", "topic": "商队在城郊被劫，药材失窃", "imp": 3 },
+        "toast": { "text": "⚑ 世界事件：商队被袭 · 药材涨价五成", "cls": "bad" },
+        "history": { "result": "东市药材涨价五成", "imp": 3 }
+      }
+    },
+    {
+      "id": "shadow_opportunism",
+      "name": "暗影议会趁乱扩线：深巷销赃增多",
+      "trigger": { "afterEvent": "caravan_evt", "dayMin": 3 },
+      "seed": "商队被袭的乱局里，深巷的销赃生意悄悄兴旺起来。有城卫在盘问，也有人选择在暗处数钱。",
+      "effects": {
+        "rep": { "shadow": 6, "empire": -3 },
+        "playerRep": { "shadow": { "hostility": -5 } },
+        "spread": { "src": "ash", "topic": "这批来路不明的药材，价钱好说", "imp": 2 },
+        "history": { "result": "暗影议会扩张 · 帝国威望微降", "imp": 2 }
+      }
+    },
+    {
+      "id": "rite",
+      "name": "神殿月祭筹备开始",
+      "trigger": { "dayMin": 3 },
+      "seed": "神殿开始筹备月祭，艾德里安神官在集市与神殿之间来回奔忙。",
+      "effects": { "npcAtt": { "adrian": 3 } }
+    },
+    {
+      "id": "sweep",
+      "name": "城卫队全城缉查（风声渐紧）",
+      "trigger": { "dayMin": 4 },
+      "seed": "街面上的城卫多了一倍——听说在查商队被劫的案子。",
+      "effects": {
+        "flags": { "sweep": true },
+        "rep": { "empire": 2 },
+        "history": { "result": "城卫缉查升级", "imp": 2 }
+      },
+      "condWanted": { "extra": "你在岗哨通缉画像上被认出的风险升高。" }
+    },
+    {
+      "id": "bard",
+      "name": "游吟诗人之夜：赛琳娜将在「银鸥」献唱",
+      "trigger": { "dayMin": 5 },
+      "seed": "酒馆贴出告示：今晚赛琳娜在「银鸥」献唱新曲《星枢谣》。",
+      "effects": { "npcAtt": { "selina": 4 } }
+    },
+    {
+      "id": "shadow_pact",
+      "name": "暗影议会的招揽：他们决定信你一次",
+      "trigger": { "repAxis": { "faction": "shadow", "axis": "trust", "min": 30 } },
+      "seed": "深巷的兜帽人第一次摘下了帽子。「灰烬」向你伸出手：『议会记住每一份人情。从今天起，你的货，我们包销。』——黑市对你敞开。",
+      "effects": {
+        "flags": { "shadow_ally": true },
+        "rep": { "shadow": 6 },
+        "playerRep": { "shadow": { "trade": 15 } },
+        "history": { "result": "成为暗影议会的自己人 · 黑市准入", "imp": 3 }
+      }
+    },
+    {
+      "id": "imperial_manhunt",
+      "name": "全城海捕：帝国把你的画像贴满了城门",
+      "trigger": { "repAxis": { "faction": "empire", "axis": "hostility", "min": 50 } },
+      "seed": "一夜之间，通缉画像从岗哨蔓延到每一面墙。城卫接到死命令：见到你，先拿下再说。你在圣辉城的每一步都走在刀尖上。",
+      "effects": {
+        "flags": { "manhunt": true },
+        "playerRep": { "empire": { "trust": -15 } },
+        "history": { "result": "帝国敌意失控 · 全城海捕", "imp": 4 }
+      }
+    },
+    {
+      "id": "heresy_trial",
+      "name": "异端审判：神殿正式将你逐出圣光",
+      "trigger": { "repAxis": { "faction": "temple_life", "axis": "religion", "max": -30 } },
+      "seed": "神殿的钟敲得又急又沉。艾德里安当众宣读：『你的名字已从圣光名册上划去。』自此，神殿不再为你疗伤，圣水对你形同陌路。",
+      "effects": {
+        "flags": { "heretic": true },
+        "playerRep": { "temple_life": { "hostility": 20 } },
+        "history": { "result": "被神殿逐出 · 圣职服务关闭", "imp": 4 }
+      }
+    },
+    {
+      "id": "shadow_contract",
+      "name": "暗影的契约：一单只赚不赔的买卖",
+      "trigger": { "afterEvent": "shadow_pact" },
+      "seed": "「灰烬」推来一份没有名字的契约：替议会走一趟私货，酬金是你半年也挣不到的数。接了，就再没有回头路。",
+      "effects": {
+        "flags": { "shadow_contract": true },
+        "rep": { "shadow": 5, "empire": -4 },
+        "playerRep": { "shadow": { "trust": 5, "trade": 10 } },
+        "history": { "result": "接下暗影契约 · 黑市渠道全开", "imp": 3 }
+      }
+    },
+    {
+      "id": "bounty_cry",
+      "name": "赏金令：你的头颅有了价码",
+      "trigger": { "afterEvent": "imperial_manhunt" },
+      "seed": "告示栏最上层换成了你的画像，底下压着一串赏金数字。连佣兵都动了心——如今想害你的，不再只有官府。",
+      "effects": {
+        "flags": { "bounty": true },
+        "playerRep": { "empire": { "hostility": 10 } },
+        "rep": { "empire": -5 },
+        "spread": { "src": "reno", "topic": "赏金令已发，见者上报", "imp": 3 },
+        "history": { "result": "悬赏通缉 · 人人可取你首级", "imp": 4 }
+      }
+    },
+    {
+      "id": "army_split",
+      "name": "军中分裂：袍泽开始站队",
+      "trigger": { "afterEvent": "imperial_manhunt", "repAxis": { "faction": "empire", "axis": "military", "min": 50 } },
+      "seed": "你的军功高得让一些人坐不住了，而帝国的通缉还挂在城门上。老兵们不再与你对视——同一座营里，已经有人把你当敌人。军功与帝国敌意并存，终究只能保住一边。",
+      "effects": {
+        "playerRep": { "empire": { "military": -20 } },
+        "flags": { "army_split": true },
+        "spread": { "src": "reno", "topic": "营里分了帮派，那位的名字没人敢提", "imp": 3 },
+        "history": { "result": "军中分裂 · 军功折损", "imp": 4 }
+      }
+    },
+    {
+      "id": "inquisitor_eyes",
+      "name": "审判官的眼睛：圣殿盯上了你",
+      "trigger": { "afterEvent": "heresy_trial" },
+      "seed": "两名披灰袍的审判官住进了神殿偏院，逢人便打听你的下落。圣辉城对你而言，越来越像一座牢笼。",
+      "effects": {
+        "flags": { "inquisited": true },
+        "playerRep": { "temple_life": { "hostility": 10, "intelligence": -5 } },
+        "rep": { "temple_life": -4 },
+        "history": { "result": "审判官入驻 · 神殿持续追猎", "imp": 4 }
+      }
+    },
+    {
+      "id": "star_decree",
+      "name": "星谕：一道借星网传遍七大陆的告示",
+      "trigger": { "flag": "star_decree" },
+      "seed": "七座星环法阵同时亮起，星谕的铭文悬于阵心——有人借星枢七塔之权，把一句话送进了七大陆所有人的视野。",
+      "effects": {
+        "playerRep": { "guild": { "trust": 2 } },
+        "spread": { "src": "mia", "topic": "星谕！星环法阵亮了，快去看！", "imp": 2 },
+        "history": { "result": "星谕发布 · 全大陆皆见", "imp": 2 }
+      }
+    },
+    {
+      "id": "abyss_leak_1",
+      "name": "星渊渗漏：深井城的地脉第一次泛出黑气",
+      "trigger": { "dayMin": 30 },
+      "seed": "星枢六塔的方向，深夜里泛起一线肉眼几乎不可见的黑雾。守塔人说是「地脉潮气」——可潮气不会让星符发烫。",
+      "loreRef": "s13",
+      "effects": {
+        "flags": { "leak_1": true },
+        "playerRep": { "study": { "intelligence": 3 } },
+        "spread": { "src": "vandel", "topic": "星枢方向的黑气——那不是潮气", "imp": 3 },
+        "history": { "result": "星渊渗漏 · 魔气初现", "imp": 3 }
+      }
+    },
+    {
+      "id": "abyss_probe",
+      "name": "古研会深入调查：范德尔们连夜出发了",
+      "trigger": { "afterEvent": "abyss_leak_1", "repAxis": { "faction": "study", "axis": "intelligence", "min": 1 } },
+      "seed": "古代技术研究会封锁了六塔的一层回廊。范德尔的旧书摊三天没出摊——有人说，他们带着星纹古符下去了。",
+      "effects": {
+        "flags": { "abyss_probe": true },
+        "frel": [
+          { "a": "study", "b": "shadow", "axis": "hostility", "dv": 20 },
+          { "a": "shadow", "b": "study", "axis": "hostility", "dv": 15 }
+        ],
+        "spread": { "src": "ash", "topic": "古研会盯上星渊了——他们的东西值大钱", "imp": 3 },
+        "history": { "result": "古研会介入 · study↔shadow 敌意激化", "imp": 3 }
+      }
+    },
+    {
+      "id": "abyss_crisis",
+      "name": "星渊裂隙：魔界之门在六塔深处开了一线",
+      "trigger": { "afterEvent": "abyss_probe", "flag": "leak_3" },
+      "seed": "封印松动到了极限。六塔最深处，一道细如发丝的裂隙里，传出了不属于这个世界的呼吸声。圣辉城的星符在同一刻齐齐震颤。",
+      "loreRef": "s13",
+      "effects": {
+        "flags": { "abyss_crisis": true, "star6_unlocked": true },
+        "rep": { "temple_life": 5, "empire": 3 },
+        "playerRep": { "temple_life": { "trust": 5 } },
+        "spread": { "src": "adrian", "topic": "星渊裂隙已开——愿圣光庇佑我们", "imp": 4 },
+        "history": { "result": "星渊裂隙 · 全城戒备 · 封印星渊任务开启", "imp": 5 }
+      }
+    },
+    {
+      "id": "city_siege_alarm",
+      "name": "城防告急：星渊乱象引来匪帮叩关",
+      "trigger": { "afterEvent": "abyss_crisis" },
+      "seed": "星渊裂隙的震动传到了地面。接连三夜，匪帮循着乱象摸到城下，城头的火把整宿没熄。雷诺在告示栏贴了新的征召令：凡能退敌者，记军功。",
+      "effects": {
+        "flags": { "city_siege": true },
+        "toast": { "text": "⚔ 城防告急 · 击退匪类可记军功", "cls": "bad" },
+        "spread": { "src": "reno", "topic": "匪帮叩关，城头整宿点着火把", "imp": 3 },
+        "history": { "result": "城防告急 · 军功可记", "imp": 4 }
+      }
+    },
+    {
+      "id": "theoselect_announce",
+      "name": "百年神选启幕：五座神殿同时设坛",
+      "trigger": { "flag": "theoselect_open" },
+      "seed": "五座神殿在同一天设坛。坛前的名册比人还高，星枢的告示栏换上了新的羊皮纸——第 612 届百年神选，自今日启幕。",
+      "loreRef": "s4",
+      "effects": {
+        "flags": { "theoselect_announced": true },
+        "rep": { "temple_life": 2 },
+        "playerRep": { "temple_life": { "religion": 3 } },
+        "spread": { "src": "adrian", "topic": "神选启幕了——五座神殿都在设坛", "imp": 4 },
+        "history": { "result": "第 612 届百年神选启幕", "imp": 4 }
+      }
+    },
+    {
+      "id": "theoselect_stage_end",
+      "name": "神选阶段结算：名册又薄了一叠",
+      "trigger": { "manual": true },
+      "seed": "神殿的执事把名册翻过一页，念出留下的名字。落选的人沉默着退到坛外——按规矩，他们要等下一个百年。",
+      "loreRef": "s4",
+      "effects": {
+        "spread": { "src": "galon", "topic": "神选的名册又薄了一叠", "imp": 3 },
+        "history": { "result": "百年神选 · 阶段结算", "imp": 3 }
+      }
+    },
+    {
+      "id": "theoselect_ascend",
+      "name": "神战落幕：星斗台心受封候补神",
+      "trigger": { "manual": true, "notFlag": "theoselect_final_done" },
+      "seed": "星斗台的投影散去，只留一人立在台心。神殿的执事捧出刻着神名的石板——候补神的名册上，添了一行新的字。",
+      "loreRef": "s4",
+      "effects": {
+        "flags": { "theoselect_final_done": true },
+        "rep": { "temple_life": 5 },
+        "playerRep": { "temple_life": { "religion": 8, "trust": 5 } },
+        "spread": { "src": "selina", "topic": "神选定座次了——新添了一位候补神", "imp": 5 },
+        "history": { "result": "百年神选定座次 · 候补神受封", "imp": 5 }
+      }
+    }
+  ]
+}

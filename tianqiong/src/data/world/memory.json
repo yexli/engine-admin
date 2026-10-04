@@ -1,0 +1,116 @@
+{
+  "_comment": "Memory Engine 数值配置（方案 §7/§8/§9/§16/§22/§35）。数值一律配置化，代码不得硬编码。",
+  "confidence": {
+    "direct_observation": 1.0,
+    "conversation": 0.8,
+    "received_information": 0.6,
+    "quest": 0.7,
+    "document": 0.75,
+    "combat": 0.9,
+    "system_generated": 0.85,
+    "rumor": 0.3,
+    "inference": 0.1,
+    "default": 0.5
+  },
+  "importance": {
+    "chat": 0.1,
+    "gift": 0.4,
+    "crime": 0.7,
+    "quest": 0.5,
+    "combat": 0.4,
+    "rescued": 0.85,
+    "kin_killed": 0.95,
+    "death": 0.9,
+    "default": 0.3
+  },
+  "decay": {
+    "chat": 0.1,
+    "event": 0.03,
+    "important": 0.005,
+    "life_changing": 0.0
+  },
+  "propagation": {
+    "perStep": 0.8,
+    "minConfidence": 0.15,
+    "importanceFalloff": 0.9
+  },
+  "retrieval": {
+    "weights": {
+      "semantic": 0.3,
+      "keyword": 0.1,
+      "recency": 0.1,
+      "importance": 0.2,
+      "confidence": 0.1,
+      "entityMatch": 0.1,
+      "relationship": 0.1
+    },
+    "profiles": {
+      "npc_dialogue": { "topK": 8, "includeRecent": true, "includeRumor": true, "minImportance": 0.05 },
+      "world_reasoner": { "topK": 12, "includeRecent": true, "includeRumor": true, "minImportance": 0.1 },
+      "quest": { "topK": 6, "includeRecent": true, "includeRumor": false, "minImportance": 0.15 }
+    }
+  },
+  "reinforcement": { "gain": 0.15 },
+  "beliefActions": {
+    "_comment": "§23 信念 → 行动的映射表（卡 J2 填表）。命题三段来自事件事实：subject=actor，predicate=事件类型，object=target。每条 action 必须是 plugins/systems.ts 里登记为 effects 的能力——白名单是唯一裁判，写错会被 Validator 直接拒。",
+    "_shape": {
+      "predicate": "命题的谓词，等于事件类型，如 crime_committed",
+      "targetFrom": "作用对象：self(默认)=相信者本人 / subject / object / player",
+      "rules": [
+        {
+          "match": { "subject": "player", "predicate": "crime_committed", "minConfidence": 0.6 },
+          "action": "行动名（由 WorldExecutor 的处理器落地，如 start_investigation）",
+          "params": {},
+          "targetFrom": "self",
+          "once": true
+        }
+      ]
+    },
+    "_design": "三条取舍：① 只填**确定性后果**（立案/冷淡/传谣），语义模糊的一律留给 AI 通道——否则同一件事会被规则与模型各产生一次后果；② minConfidence 用「亲历」档以上（0.5+），传闻（0.3）不该直接驱动行动；③ once 全开，同一条信念不反复引发同一动作。",
+    "rules": [
+      {
+        "match": { "subject": "player", "predicate": "crime_committed", "minConfidence": 0.6 },
+        "action": "start_investigation",
+        "params": { "actor": "empire" },
+        "targetFrom": "self",
+        "once": true
+      },
+      {
+        "match": { "subject": "player", "predicate": "crime_committed", "minConfidence": 0.5 },
+        "action": "change_relationship",
+        "params": { "delta": -8 },
+        "targetFrom": "self",
+        "once": true
+      },
+      {
+        "match": { "predicate": "crime_committed", "minConfidence": 0.5 },
+        "action": "spread_rumor",
+        "params": { "topic": "有人做了见不得光的事", "imp": 2 },
+        "targetFrom": "self",
+        "once": true
+      },
+      {
+        "match": { "subject": "player", "predicate": "kin_killed", "minConfidence": 0.5 },
+        "action": "change_relationship",
+        "params": { "delta": -20 },
+        "targetFrom": "self",
+        "once": true
+      },
+      {
+        "match": { "predicate": "rescued", "minConfidence": 0.7 },
+        "action": "befriend",
+        "params": { "delta": 10 },
+        "targetFrom": "self",
+        "once": true
+      },
+      {
+        "match": { "predicate": "helped", "minConfidence": 0.6 },
+        "action": "change_relationship",
+        "params": { "delta": 6 },
+        "targetFrom": "self",
+        "once": true
+      }
+    ]
+  },
+  "caps": { "perOwner": 80, "contextTokens": 900, "charsPerToken": 1.6 }
+}

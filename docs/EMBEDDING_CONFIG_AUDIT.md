@@ -84,7 +84,7 @@ Memory engine.recallScored：向量分 cosine×0.2 并入；失败/null → 纯�
      router/modules/memory.ts:47-56（仅 meta 改名）；
    - 数据：platform/data/memory/embedding-config.json（迁移后改名封存）；
    - 文档：DEPLOY.md:112-114（EMBEDDINGS_* env）、ADMIN-API-MAPPING.md:142,163。
-7. **tianqiong2 自带一套 embedding**（embeddingCompat.ts 等）——独立应用内部实现，
+7. **tianqiong 自带一套 embedding**（embeddingCompat.ts 等）——独立应用内部实现，
    不经平台、不属于本治理范围（方案边界：平台侧双源）。
 
 ## 三、唯一真相源判定（Step 2 结论）

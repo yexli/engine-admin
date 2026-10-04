@@ -1,0 +1,108 @@
+{
+  "_comment": "Context Budget 配置（《NPC 分级与 Context Budget 最终方案》§9/§10）。数值一律配置化，代码不得硬编码。",
+  "_howto": "Profile 由 worldImportance(0-4) × LOD(L0-L2) 查矩阵得出；最终预算 = min(场景上限, Profile 上限)。改数值只改本文件。",
+  "profiles": {
+    "minimal": {
+      "tokens": 300,
+      "memoryTopK": 2,
+      "relationMax": 2,
+      "eventKnowledge": 2
+    },
+    "low": {
+      "tokens": 500,
+      "memoryTopK": 4,
+      "relationMax": 3,
+      "eventKnowledge": 3
+    },
+    "medium": {
+      "tokens": 700,
+      "memoryTopK": 6,
+      "relationMax": 5,
+      "eventKnowledge": 4
+    },
+    "high": {
+      "tokens": 900,
+      "memoryTopK": 8,
+      "relationMax": 8,
+      "eventKnowledge": 6
+    },
+    "maximum": {
+      "tokens": 1200,
+      "memoryTopK": 12,
+      "relationMax": 12,
+      "eventKnowledge": 8
+    }
+  },
+  "_matrixNote": "行=worldImportance 0..4，列=LOD L0/L1/L2。原则：LOD 决定当前关联，World Importance 决定不能低到什么程度——世界级 NPC 即使未被触及也不会掉到 minimal；背景 NPC 即使当下相关也拿不到 world 级容量。",
+  "matrix": {
+    "0": {
+      "L0": "medium",
+      "L1": "low",
+      "L2": "minimal"
+    },
+    "1": {
+      "L0": "high",
+      "L1": "medium",
+      "L2": "low"
+    },
+    "2": {
+      "L0": "high",
+      "L1": "medium",
+      "L2": "medium"
+    },
+    "3": {
+      "L0": "maximum",
+      "L1": "high",
+      "L2": "medium"
+    },
+    "4": {
+      "L0": "maximum",
+      "L1": "high",
+      "L2": "high"
+    }
+  },
+  "_sceneNote": "场景上限沿用既有三档，缺省 world_reasoner。最终预算 = min(场景上限, Profile 上限)——既避免一刀切，也不推翻现有场景差异。",
+  "sceneTokens": {
+    "npc_dialogue": 900,
+    "world_reasoner": 1200,
+    "quest": 900
+  },
+  "_personaNote": "人设块（personaBlock）的字数上限，按 AI 通道细分。《NPC 立体化》P1 之前 lore 七项全库 0 条进入 prompt——人物志看得见、AI 看不见；现在按「立体五要素」顺序填充到该上限，超限时从尾部整段丢弃（不切句子），所以排序靠后的字段先让位。0 = 不限制。",
+  "personaChars": {
+    "chat": 300,
+    "greet": 240,
+    "decide": 200
+  },
+  "_personaCharsByProfileNote": "人设块的**档位**上限（C 卡）。P1 只按通道分，于是神祇与报童在 prompt 里拿到同样长的人设；档位并进来后取 min(通道, 档位)——一个报童不会因为「在聊天通道」就拿到 300 字传记。",
+  "personaCharsByProfile": {
+    "minimal": 120,
+    "low": 180,
+    "medium": 240,
+    "high": 320,
+    "maximum": 400
+  },
+  "_budgetNote": "对话预算账本（C 卡 · 《NPC 立体化与深入对话方案》§4.1(c)）。五块共享同一个场景上限：人设 / 记忆 / canon / 立场+关系+历史 / 预留。charsPerToken 与 memory.json.caps 同源（1.6 字/token）。此前记忆块吃满整个场景预算，人设与 canon 只能分剩下的零头——账本把这件事变成一处可配置的数字，core 与 AI 适配器共用同一份。",
+  "budget": {
+    "charsPerToken": 1.6,
+    "shares": {
+      "persona": 0.35,
+      "memory": 0.25,
+      "canon": 0.15,
+      "relations": 0.2,
+      "reserve": 0.05
+    }
+  },
+  "_narrativeNote": "叙事编织（weave）通道的上下文预算。它每做一件事走一次，是「每一步都像在写小说」的落点：比推演通道轻，但必须保证前后衔接。recapChars/recapPassages 是前情（最近已写正文，越近越完整），eventMax/eventChars 是近因（条数与字数），factsChars 是事实区字数，recap* 是章级归档。超限一律**整条丢弃**，不切句子。",
+  "narrative": {
+    "recapChars": 480,
+    "recapPassages": 2,
+    "eventMax": 4,
+    "eventChars": 240,
+    "factsChars": 500,
+    "_recapNote": "章级归档：recapArchive 段正文压成一条摘要；recapKeep 摘要保留条数；recapSummaryPassages 一次压几段；recapInContext 最多几条进上下文。跨天时即使不满也归档一次，让章边界与天对齐。",
+    "recapArchive": 4,
+    "recapSummaryPassages": 4,
+    "recapKeep": 8,
+    "recapInContext": 3
+  }
+}

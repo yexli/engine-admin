@@ -1,0 +1,1679 @@
+{
+  "npcs": {
+    "lita": {
+      "name": "莉安",
+      "lore": {
+        "keywords": ["莉安", "银鸥酒馆", "老板娘", "圣辉城", "老乔", "丈夫的债"],
+        "identity": "圣辉城银鸥酒馆的老板娘，店是她丈夫留下的，也是她一个人撑着的。",
+        "appearance": "四十上下，袖口永远卷着小臂，围裙上有经年的汤渍；算账时手指敲得比嘴还快。",
+        "personality": "语速快、话里带刺，先算账再谈人情；对熟客不算账，对生人先算账。",
+        "abilities": "记账、掌勺、听人说话；酒馆里三十年的闲话都在她耳朵里过了一遍。",
+        "past": "丈夫早亡，店是拿他留下的债顶下来的；那晚打更的是她男人，他见过北门那件事。",
+        "flaw": "她不肯说自己家里的事；被追问丈夫就转回店里的账——「老乔的旧账」是她唯一会松口的地方。",
+        "belongings": "丈夫留下的旧账本、柜台下的一把短刀、店门口那块磨得发亮的招牌。"
+      },
+      "gender": "female",
+      "title": "「银鸥」老板娘",
+      "race": "人类",
+      "sv": "莉",
+      "color": "#b4695f",
+      "hours": [
+        4,
+        12
+      ],
+      "loc": "tavern",
+      "goal": "把酒馆经营下去，还了丈夫留下的债",
+      "interest": "熟客与稳定进项",
+      "bottomLine": "不许人在店里赖账或动手",
+      "rels": {
+        "joe": {
+          "type": "creditor",
+          "val": -40
+        },
+        "galon": {
+          "type": "friend",
+          "val": 25
+        }
+      },
+      "schedule": [
+        {
+          "from": 0,
+          "to": 3,
+          "loc": "market",
+          "act": "清早采买"
+        },
+        {
+          "from": 3,
+          "to": 12,
+          "loc": "tavern",
+          "act": "操持酒馆、煮汤待客"
+        }
+      ],
+      "greet": {
+        "cold": "……喝什么？说完就付钱。",
+        "neutral": "来啦？找地方坐，今天炖了羊肉。",
+        "warm": "哟，{name}！老位置给你留着，羊肉汤管够。"
+      },
+      "topics": [
+        {
+          "l": "酒馆生意"
+        },
+        {
+          "l": "城里的风声"
+        },
+        {
+          "l": "老乔的旧账",
+          "tier": "warm"
+        }
+      ],
+      "likes": [
+        "food",
+        "pelt"
+      ],
+      "reciprocate": [
+        "bread"
+      ],
+      "intimacyGate": {
+        "quest": "q_debt",
+        "gifts": 2,
+        "chats": 8,
+        "desc": "还了债，就是自己人"
+      },
+      "voice": "语速快，话里带刺，先算账再谈人情",
+      "priority": [
+        "店里的生意",
+        "欠账的人",
+        "老主顾的情分"
+      ],
+      "refuseStyle": "stout",
+      "worldImportance": 2
+    },
+    "galon": {
+      "name": "戈林",
+      "lore": {
+        "keywords": ["戈林", "冒险者公会", "接待人", "退役剑士", "圣辉城"],
+        "identity": "圣辉城冒险者公会的接待人，退役剑士，负责招收新人、张贴委托。",
+        "appearance": "肩背宽厚、左手虎口有旧茧；站着的时候习惯把重心放在后脚。",
+        "personality": "公事公办、短句，爱用「规矩」两个字；对肯练的人有耐心，对耍滑头的人没有。",
+        "abilities": "军中剑术、教新人站桩与基础招法；能一眼看出谁腕子没劲。",
+        "past": "在边境打过仗，学的是「怎么活着回来」；退役后进公会做了接待人。",
+        "flaw": "他不谈退役的原因，只回「伤了」；手里留着一份公会内部的抄件，谁都不给看。",
+        "belongings": "一把不开刃的旧剑、一本记满划痕的委托册、压在匣底的一份抄件。"
+      },
+      "title": "公会接待人·退役剑士",
+      "race": "人类",
+      "sv": "戈",
+      "color": "#3b4a8f",
+      "hours": [
+        4,
+        11
+      ],
+      "loc": "guild",
+      "goal": "把公会的招牌擦亮，让新人活过第一年",
+      "interest": "任务完成率、公会声望",
+      "bottomLine": "不接明显送死的委托",
+      "schedule": [
+        {
+          "from": 0,
+          "to": 3,
+          "loc": "plaza",
+          "act": "晨练剑术"
+        },
+        {
+          "from": 3,
+          "to": 12,
+          "loc": "guild",
+          "act": "接待冒险者、张贴委托"
+        }
+      ],
+      "greet": {
+        "cold": "……有事？",
+        "neutral": "任务交了？没交就快去。",
+        "warm": "{name}啊，来，正好有事想拜托你。"
+      },
+      "faction": "guild",
+      "topics": [
+        {
+          "l": "公会委托"
+        },
+        {
+          "l": "剑术修行"
+        },
+        {
+          "l": "公会的内情",
+          "tier": "warm"
+        }
+      ],
+      "likes": [
+        "pelt",
+        "gem"
+      ],
+      "reciprocate": [
+        "antidote"
+      ],
+      "intimacyGate": {
+        "quest": "q_rabbit",
+        "gifts": 2,
+        "chats": 8
+      },
+      "voice": "公事公办，短句，常用\"规矩\"两字",
+      "priority": [
+        "公会的招牌",
+        "新人的命",
+        "委托的成色"
+      ],
+      "refuseStyle": "direct",
+      "worldImportance": 2
+    },
+    "selina": {
+      "name": "赛琳娜",
+      "lore": {
+        "keywords": ["赛琳娜", "游吟诗人", "情报贩子", "圣辉城", "银鸥酒馆"],
+        "identity": "银鸥酒馆常驻的游吟诗人，暗地里以卖情报为副业，价钱按「有没有人愿付」算。",
+        "appearance": "披着褪色的琴袋，指尖有弦痕；笑的时候先看对方的钱包，再看对方的眼睛。",
+        "personality": "半唱半说、话头留半截，爱用价格打比方；对生人不唱真歌。",
+        "abilities": "琴艺、听风辨人、把市井传闻与真实消息分开称重。",
+        "past": "走过七大陆中的四处，攒钱是为了写一首真正的史诗；那七首真歌里有一首从不唱给生人。",
+        "flaw": "她出卖过一份本来答应保密的名单——这事她从不提，但每次有人问起「讲过的秘密」她都不接话。",
+        "belongings": "一把修补过三次的琴、一本记着价格的暗册、一枚别人寄放的信物。"
+      },
+      "title": "游吟诗人·情报贩子",
+      "race": "精灵",
+      "sv": "赛",
+      "color": "#8a6abf",
+      "hours": [
+        10,
+        12
+      ],
+      "loc": "tavern",
+      "goal": "攒够钱游历七大陆，写一首真正的史诗",
+      "interest": "消息、故事、酒馆气氛",
+      "bottomLine": "不出卖讲过的秘密",
+      "schedule": [
+        {
+          "from": 0,
+          "to": 2,
+          "loc": "plaza",
+          "act": "替人写诗换几个铜板"
+        },
+        {
+          "from": 2,
+          "to": 12,
+          "loc": "tavern",
+          "act": "卖唱、打探情报"
+        }
+      ],
+      "greet": {
+        "cold": "（琴声停了半拍）……我不认识你。",
+        "neutral": "要听歌，还是要听“别的”？价格不一样哦。",
+        "warm": "哎呀，老主顾！今天第一支歌为你而唱。"
+      },
+      "topics": [
+        {
+          "l": "诗歌与歌谣"
+        },
+        {
+          "l": "城里的传闻"
+        },
+        {
+          "l": "「报童的信」",
+          "tier": "warm"
+        }
+      ],
+      "likes": [
+        "trinket",
+        "relic"
+      ],
+      "dislikes": [
+        "rare"
+      ],
+      "reciprocate": [
+        "potion_moon"
+      ],
+      "intimacyGate": {
+        "quest": "q_letter",
+        "gifts": 2,
+        "chats": 8
+      },
+      "voice": "半唱半说，话头留半截，爱用价格打比方",
+      "priority": [
+        "消息的价码",
+        "自己的秘密",
+        "好故事的尾巴"
+      ],
+      "refuseStyle": "smooth",
+      "worldImportance": 2
+    },
+    "brendan": {
+      "name": "布伦丹",
+      "lore": {
+        "keywords": ["布伦丹", "铁匠铺", "矮人", "东市", "霜铁", "剑坯"],
+        "identity": "东市铁匠铺的主人，矮人，来自霜锚堡；此生想打出一把「能进博物馆」的剑。",
+        "appearance": "矮壮、络腮胡用皮绳扎着，左手小指缺了半节；说话时锤子从不停。",
+        "personality": "嗓门大、边说边敲、不绕弯；骂人像淬火，夸人也像淬火。",
+        "abilities": "锻造、辨钢、看火候；对霜铁「认人」的脾气了如指掌。",
+        "past": "十四岁跟着运矿车离开霜锚堡；去年收到信说父亲把炉子熄了，他没回去。",
+        "flaw": "被偷的那块霜铁剑坯上有他留的记号——他没告诉过任何人记号在哪，也没打算报官。",
+        "belongings": "一把用了三十年的锤子、父亲寄来的最后一封信、坯料架上一块空着的位置。"
+      },
+      "gender": "male",
+      "title": "铁匠铺主·矮人",
+      "race": "矮人",
+      "sv": "布",
+      "color": "#8a5a3c",
+      "hours": [
+        4,
+        10
+      ],
+      "loc": "market",
+      "goal": "打出此生最好的一把剑",
+      "interest": "钢料、订单、公会的军械生意",
+      "bottomLine": "不给赖账的人赊铁",
+      "schedule": [
+        {
+          "from": 0,
+          "to": 3,
+          "loc": "temple",
+          "act": "为神殿锻补器物"
+        },
+        {
+          "from": 3,
+          "to": 10,
+          "loc": "market",
+          "act": "打铁、看铺子"
+        },
+        {
+          "from": 10,
+          "to": 12,
+          "loc": "plaza",
+          "act": "送修好的刀剑"
+        }
+      ],
+      "greet": {
+        "cold": "（打铁声重了几分）……自己看，别乱摸。",
+        "neutral": "买什么？铁器都在架子上。",
+        "warm": "哈，{name}！上好的钢料刚到，给你留着呢。"
+      },
+      "faction": "frost",
+      "topics": [
+        {
+          "l": "铁器与生意"
+        },
+        {
+          "l": "故乡霜铁"
+        },
+        {
+          "l": "被偷的剑坯",
+          "tier": "warm"
+        }
+      ],
+      "likes": [
+        "pelt",
+        "gem"
+      ],
+      "reciprocate": [
+        "scrap_blade"
+      ],
+      "intimacyGate": {
+        "quest": "q_theft",
+        "gifts": 2,
+        "chats": 8
+      },
+      "voice": "嗓门大，边说边敲手里的东西，不绕弯",
+      "priority": [
+        "炉上的活",
+        "钢料",
+        "谁欠他钱"
+      ],
+      "refuseStyle": "direct",
+      "worldImportance": 2
+    },
+    "adrian": {
+      "name": "艾德里安",
+      "lore": {
+        "keywords": ["艾德里安", "生命神殿", "神官", "圣辉城", "月祭", "明灯"],
+        "identity": "圣辉城生命神殿的神官，主持月祭筹备与日常祷告、治疗。",
+        "appearance": "长袍洗得发白，袖口有灯油渍；说话时习惯把手拢在身前。",
+        "personality": "语气缓、爱引祷词与圣典、从不提高声；对权贵与贫民一视同仁。",
+        "abilities": "神殿医术（基础治疗与伤口处理）、仪典主持、灯油火候的讲究。",
+        "past": "在神殿供职二十年，做过上百次祷告；评议会旧档里见过一页不该存在的记录。",
+        "flaw": "他知道那页纸写的是什么，却从不承认记得更多；被问到就把话引回祷词。",
+        "belongings": "一本翻旧的祈祷书、一串长明灯灯芯、夹在书里的半页抄录。"
+      },
+      "title": "圣辉神殿神官",
+      "race": "人类",
+      "sv": "艾",
+      "color": "#c9a227",
+      "hours": [
+        3,
+        11
+      ],
+      "loc": "temple",
+      "goal": "筹备月祭，安抚城东的瘟疫恐慌",
+      "interest": "信仰、穷苦人、神殿声望",
+      "bottomLine": "不违背圣光行邪术",
+      "schedule": [
+        {
+          "from": 0,
+          "to": 3,
+          "loc": "temple",
+          "act": "守夜值守、为亡者诵念"
+        },
+        {
+          "from": 3,
+          "to": 11,
+          "loc": "temple",
+          "act": "主理神殿、为人祷告疗伤"
+        },
+        {
+          "from": 11,
+          "to": 12,
+          "loc": "market",
+          "act": "探望病人、分发圣水"
+        }
+      ],
+      "greet": {
+        "cold": "……愿圣光照拂你。",
+        "neutral": "愿圣光抚平你的疲惫。需要祷告，还是治疗？",
+        "warm": "{name}，圣光与你同在。祭坛前的长明烛刚换过。"
+      },
+      "faction": "temple",
+      "topics": [
+        {
+          "l": "月祭筹备"
+        },
+        {
+          "l": "祝福与祷告"
+        },
+        {
+          "l": "神学与星枢",
+          "tier": "warm"
+        }
+      ],
+      "likes": [
+        "herb",
+        "relic"
+      ],
+      "dislikes": [
+        "rare"
+      ],
+      "reciprocate": [
+        "holy_water"
+      ],
+      "intimacyGate": {
+        "quest": "q_holy",
+        "gifts": 2,
+        "chats": 8
+      },
+      "voice": "语气缓，爱引祷词与圣典，从不提高声",
+      "priority": [
+        "教义",
+        "受苦的人",
+        "神殿的体面"
+      ],
+      "refuseStyle": "principled",
+      "worldImportance": 2
+    },
+    "ash": {
+      "name": "「灰烬」",
+      "lore": {
+        "keywords": ["灰烬", "黑市", "深巷", "不死族", "货摊"],
+        "identity": "深巷黑市里摆摊的无名者，不死族出身；只认来路不问姓名，守着三条不成文的规矩。",
+        "appearance": "常年压着兜帽，露出来的手背皮肤发青；走路没有脚步声。",
+        "personality": "声音压得极低、一句一顿、不说多余的字；被问到就沉默，沉默即是回答。",
+        "abilities": "辨货、认人、在巷子里无声穿行；对「过路的手」一类的门路极熟。",
+        "past": "他自己也记不清在这条巷子里待了多久；上个月他退回了那块霜铁剑坯，并对来人留了一句警告。",
+        "flaw": "「不做告密者」是他唯一的底线——但第四条规矩他从不说出口，也没人听过。",
+        "belongings": "一盘见不得光的货、一把称重用的旧秤、袖中记着账的硬纸片。"
+      },
+      "title": "深巷里的无名者",
+      "race": "不死族",
+      "sv": "烬",
+      "color": "#4a4453",
+      "hours": [
+        10,
+        12
+      ],
+      "loc": "alley",
+      "goal": "在黑市攒够“存在感”，不被遗忘吞噬",
+      "interest": "禁货、消息、暗影议会的庇护",
+      "bottomLine": "不做告密者",
+      "rels": {
+        "reno": {
+          "type": "enemy",
+          "val": -50
+        },
+        "selina": {
+          "type": "court",
+          "val": 15
+        }
+      },
+      "schedule": [
+        {
+          "from": 0,
+          "to": 2,
+          "loc": "plaza",
+          "act": "无声地穿过夜色，收发暗账"
+        },
+        {
+          "from": 2,
+          "to": 10,
+          "loc": "alley",
+          "act": "在白日的暗处蛰伏，清点这一夜的账"
+        },
+        {
+          "from": 10,
+          "to": 12,
+          "loc": "alley",
+          "act": "守着见不得光的货摊"
+        }
+      ],
+      "greet": {
+        "cold": "……",
+        "neutral": "深巷里能遇到你，算你胆子不小。想买什么？",
+        "warm": "稀客。最近有好东西，就等你这样的识货人。"
+      },
+      "faction": "shadow",
+      "topics": [
+        {
+          "l": "黑市的规矩"
+        },
+        {
+          "l": "近来的风声"
+        },
+        {
+          "l": "销赃的门路",
+          "tier": "warm"
+        }
+      ],
+      "likes": [
+        "rare",
+        "gem"
+      ],
+      "dislikes": [
+        "relic"
+      ],
+      "reciprocate": [
+        "venom_gland"
+      ],
+      "intimacyGate": {
+        "gifts": 4,
+        "chats": 12,
+        "desc": "阴影里的人，话要一句句换"
+      },
+      "voice": "声音压得极低，一句一顿，不说多余的字",
+      "priority": [
+        "不被看见",
+        "货的成色",
+        "议会的规矩"
+      ],
+      "refuseStyle": "cold",
+      "worldImportance": 2
+    },
+    "mia": {
+      "name": "米露",
+      "lore": {
+        "keywords": ["米露", "报童", "广场", "东市", "弟弟的病", "送信"],
+        "identity": "圣辉城广场上的报童，兼做跑腿与送信；挣的钱是为了弟弟的药钱。",
+        "appearance": "个子瘦小、跑起来风一样，报纸卷得比她的胳膊还紧；眼睛很亮。",
+        "personality": "语速快、爱用「我跟你讲」起头、句尾上扬；对生人先要一个铜板再开口。",
+        "abilities": "认路、送信、卖消息；能从半栏小字里看出真正的新闻。",
+        "past": "母亲早亡，与弟弟相依；这个月跑了三趟西边，收信的院子门口没有牌，院里晾着白布。",
+        "flaw": "她送的不是信，是名单——这件事她只说过一次；被问到下一趟什么时候走，她会说不知道。",
+        "belongings": "一沓攒起来的旧报、一个装了三个铜板的布袋、藏在鞋底的一张没写完的纸。"
+      },
+      "title": "广场上的报童",
+      "race": "人类",
+      "sv": "米",
+      "color": "#c47a4a",
+      "hours": [
+        4,
+        10
+      ],
+      "loc": "plaza",
+      "goal": "挣够弟弟的医药钱，攒够就去看海",
+      "interest": "消息、铜板、大人物的赏识",
+      "bottomLine": "不卖害人的假消息",
+      "schedule": [
+        {
+          "from": 0,
+          "to": 4,
+          "loc": "tavern",
+          "act": "蜷在酒馆角落睡下"
+        },
+        {
+          "from": 4,
+          "to": 10,
+          "loc": "plaza",
+          "act": "送报、卖消息"
+        },
+        {
+          "from": 10,
+          "to": 12,
+          "loc": "tavern",
+          "act": "听故事、传口信换口热汤"
+        }
+      ],
+      "greet": {
+        "cold": "（躲开了你的视线）",
+        "neutral": "要打听事儿吗？一个铜板一条消息！",
+        "warm": "{name}最照顾我生意啦！今天也要送信吗？"
+      },
+      "topics": [
+        {
+          "l": "报纸头条"
+        },
+        {
+          "l": "东市的热闹"
+        },
+        {
+          "l": "弟弟的病",
+          "tier": "warm"
+        },
+        {
+          "l": "给谁送信",
+          "tier": "warm"
+        }
+      ],
+      "likes": [
+        "food",
+        "trinket"
+      ],
+      "reciprocate": [
+        "bread"
+      ],
+      "intimacyGate": {
+        "quest": "q_letter",
+        "gifts": 2,
+        "chats": 8
+      },
+      "voice": "语速快，爱用\"我跟你讲\"起头，句尾上扬",
+      "priority": [
+        "弟弟的药钱",
+        "新消息",
+        "不看人下菜碟"
+      ],
+      "refuseStyle": "smooth",
+      "worldImportance": 1
+    },
+    "reno": {
+      "name": "雷诺",
+      "lore": {
+        "keywords": ["雷诺", "城卫队", "队长", "城门", "通缉", "商队劫案"],
+        "identity": "圣辉城城卫队队长，守城门、盘查出入、张贴通缉。",
+        "appearance": "甲胄擦得发亮，袖口却总有磨白；站在城门下像一根钉进去的桩。",
+        "personality": "咬字清楚、先说身份再讲事、习惯性重复对方的话；对规矩的信任大过对人。",
+        "abilities": "巡查、盘查、看人；能从走路姿势里认出常走夜路的人。",
+        "past": "父亲也是城卫；他从巡夜队员做到队长，查过一桩查到一半被叫停的商队劫案。",
+        "flaw": "他抽屉里压着一张按规定该贴、却一直没贴出去的画像；被问到就说「等消息」。",
+        "belongings": "一把磨薄的腰刀、一本翻烂的条例册、抽屉里那卷没贴的画像。"
+      },
+      "gender": "male",
+      "title": "城卫队队长",
+      "race": "人类",
+      "sv": "雷",
+      "color": "#5c5a7d",
+      "hours": [
+        4,
+        12
+      ],
+      "loc": "gate",
+      "goal": "查清商队被劫的案子，守住城里的太平",
+      "interest": "治安、通缉令、暗影议会的动向",
+      "bottomLine": "不容当街行凶",
+      "rels": {
+        "ash": {
+          "type": "enemy",
+          "val": -50
+        },
+        "galon": {
+          "type": "friend",
+          "val": 15
+        },
+        "otto": {
+          "type": "court",
+          "val": 12
+        }
+      },
+      "schedule": [
+        {
+          "from": 0,
+          "to": 3,
+          "loc": "plaza",
+          "act": "巡夜"
+        },
+        {
+          "from": 3,
+          "to": 12,
+          "loc": "gate",
+          "act": "守城门、盘查出入"
+        }
+      ],
+      "greet": {
+        "cold": "（目光锁定了你）……站住。我们谈谈。",
+        "neutral": "城卫队执勤。遵纪守法，圣辉城欢迎你。",
+        "warm": "又是你啊。城里最近不太平，机灵点。"
+      },
+      "faction": "empire",
+      "topics": [
+        {
+          "l": "法令与条例"
+        },
+        {
+          "l": "通缉画像"
+        },
+        {
+          "l": "案底与赎罪",
+          "tier": "warm"
+        }
+      ],
+      "likes": [
+        "pelt"
+      ],
+      "dislikes": [
+        "rare"
+      ],
+      "intimacyGate": {
+        "gifts": 3,
+        "chats": 10,
+        "desc": "执法者也盼有人听他把话说完"
+      },
+      "voice": "咬字清楚，先说身份再讲事，习惯性重复对方的话",
+      "priority": [
+        "法令",
+        "城里的太平",
+        "手下的弟兄"
+      ],
+      "refuseStyle": "principled",
+      "worldImportance": 2
+    },
+    "vandel": {
+      "name": "范德尔",
+      "lore": {
+        "keywords": ["范德尔", "古代技术研究会", "学者", "星枢", "祭坛残片"],
+        "identity": "古代技术研究会学者，在市场守旧书摊，六年测算七塔的间距关系。",
+        "appearance": "长衫上沾着墨与灰，袖口别着两支笔；说话时手指总在空气中比划刻度。",
+        "personality": "一句话里塞三个术语，说到兴头会自己打断自己；对同行的「捷径」嗤之以鼻。",
+        "abilities": "古物测量、星轨盘解读、文献比对；能看出井壁纹路与星轨盘是同一套刻度。",
+        "past": "算过六年的塔间距离，误差压到千分之二点七；祭坛残片出过三次价，三次被人压下去。",
+        "flaw": "他已经把残片拼起来了——而他摆摊不是为了卖书，是在等人；这件事他没写进任何论文。",
+        "belongings": "一卷画满刻度的草图、三块来历不同的星轨残片、一本「还没写完」的论文稿。"
+      },
+      "title": "古研会学者",
+      "race": "人类",
+      "sv": "范",
+      "color": "#3f7d5f",
+      "hours": [
+        5,
+        10
+      ],
+      "loc": "market",
+      "goal": "复原星枢、证明古代技术研究会不是疯子的集会",
+      "interest": "古代造物、星矿、残片",
+      "bottomLine": "不为学术牺牲无辜性命",
+      "schedule": [
+        {
+          "from": 0,
+          "to": 5,
+          "loc": "temple",
+          "act": "就着长明灯抄录残卷"
+        },
+        {
+          "from": 5,
+          "to": 10,
+          "loc": "market",
+          "act": "守着旧书摊、翻检文献"
+        },
+        {
+          "from": 10,
+          "to": 12,
+          "loc": "temple",
+          "act": "借阅神殿典籍比对"
+        }
+      ],
+      "greet": {
+        "cold": "（头也不抬地翻着书）",
+        "neutral": "哦，客人。随便看，别折页角。",
+        "warm": "{name}！快来，我又想到一个关于星枢的推论！"
+      },
+      "faction": "study",
+      "topics": [
+        {
+          "l": "星枢七塔"
+        },
+        {
+          "l": "古代造物"
+        },
+        {
+          "l": "祭坛残片",
+          "tier": "warm"
+        }
+      ],
+      "likes": [
+        "relic",
+        "rare",
+        "gem"
+      ],
+      "dislikes": [
+        "food"
+      ],
+      "reciprocate": [
+        "potion_moon"
+      ],
+      "intimacyGate": {
+        "quest": "q_shard",
+        "gifts": 2,
+        "chats": 8
+      },
+      "voice": "一句话里塞三个术语，说到兴头上会自己打断自己",
+      "priority": [
+        "推论的完整性",
+        "古代造物的下落",
+        "书页的完整"
+      ],
+      "refuseStyle": "rational",
+      "worldImportance": 2
+    },
+    "otto": {
+      "name": "奥托",
+      "lore": {
+        "keywords": ["奥托", "砂海行商", "地精", "药材", "被劫的货", "商会"],
+        "identity": "往来砂海与圣辉城的地精行商，常年经营药材；三车药材在旧驿道上被劫。",
+        "appearance": "围巾裹到鼻子，耳朵尖从帽檐下探出来；手上有算盘磨出的硬块。",
+        "personality": "先把价钱报出来再谈别的，句尾爱带「唉」；对生人客气，对熟客更客气。",
+        "abilities": "算价、识路、辨药材成色；知道一条地图上没有的旧驿道。",
+        "past": "祖上三代跑驼队，商会限他十五日内还账；被劫那晚，劫匪只搬走了药材，布匹与铜器一动没动。",
+        "flaw": "他不肯承认自己在怀疑谁——被追问就重复「我要货不要人」。",
+        "belongings": "一副缺了两颗珠的算盘、一只补过的水囊、被劫货物的清单。"
+      },
+      "title": "砂海行商",
+      "race": "地精",
+      "sv": "奥",
+      "color": "#a4843c",
+      "hours": [
+        4,
+        10
+      ],
+      "loc": "market",
+      "needFlag": "caravan_evt",
+      "goal": "追回被劫的药材，还上欠商会的账",
+      "interest": "药材价、旅伴、劫案的真相",
+      "bottomLine": "不再轻信‘熟路’",
+      "rels": {
+        "galon": {
+          "type": "court",
+          "val": 20
+        },
+        "lita": {
+          "type": "friend",
+          "val": 15
+        }
+      },
+      "schedule": [
+        {
+          "from": 0,
+          "to": 4,
+          "loc": "market",
+          "act": "在库房里清点药材"
+        },
+        {
+          "from": 4,
+          "to": 10,
+          "loc": "market",
+          "act": "摆摊卖药（涨价中）"
+        },
+        {
+          "from": 10,
+          "to": 12,
+          "loc": "guild",
+          "act": "悬赏打听劫匪下落"
+        }
+      ],
+      "greet": {
+        "cold": "……我认得你。走开。",
+        "neutral": "要买药吗？唉，价格的事说来话长。",
+        "warm": "恩人！看上什么拿什么，给你打八折！"
+      },
+      "faction": "verdant",
+      "topics": [
+        {
+          "l": "药价与民生"
+        },
+        {
+          "l": "商队的路线"
+        },
+        {
+          "l": "被劫的货",
+          "tier": "warm"
+        }
+      ],
+      "likes": [
+        "herb",
+        "food"
+      ],
+      "reciprocate": [
+        "herb_paste"
+      ],
+      "intimacyGate": {
+        "quest": "q_caravan",
+        "gifts": 2,
+        "chats": 8
+      },
+      "voice": "先把价钱报出来，再谈别的；句尾爱带\"唉\"",
+      "priority": [
+        "还账",
+        "货的安全",
+        "不再信\"熟路\""
+      ],
+      "refuseStyle": "smooth",
+      "worldImportance": 1
+    },
+    "joe": {
+      "name": "老乔",
+      "lore": {
+        "keywords": ["老乔", "醉汉", "欠账", "海燕号", "守城战"],
+        "identity": "银鸥酒馆的常客，欠着三百铜板；从前与海燕号有关，儿子死于一场守城战。",
+        "appearance": "衣襟上永远有酒渍，胡子打结；坐姿塌着，偶尔坐直时眼神会忽然清明。",
+        "personality": "含混、说着说着绕回旧事、一句能拖很长；说到儿子会埋头喝酒。",
+        "abilities": "旧时行船的手艺、修缆打结；还记得当年城防的换岗时刻。",
+        "past": "海燕号那晚下了船的有十九双鞋，甲板上剩下一双——是他儿子的；他说儿子不会水。",
+        "flaw": "守城第三天北门是自己开的，而他知道那天早上谁从北门骑马出去过——名字他绝不说。",
+        "belongings": "一件当掉又赎回来的旧怀表、一只缺口的酒碗、衣袋里一张泡烂的旧海图。"
+      },
+      "gender": "male",
+      "title": "欠账的醉汉",
+      "race": "人类",
+      "sv": "乔",
+      "color": "#8a8069",
+      "hours": [
+        8,
+        12
+      ],
+      "loc": "tavern",
+      "goal": "忘掉战死的儿子——只要今晚还能醉",
+      "interest": "酒、旧事、没人催债",
+      "bottomLine": "别抢他的酒",
+      "rels": {
+        "lita": {
+          "type": "debtor",
+          "val": -35
+        }
+      },
+      "schedule": [
+        {
+          "from": 0,
+          "to": 2,
+          "loc": "alley",
+          "act": "深夜晃到巷口吹风"
+        },
+        {
+          "from": 2,
+          "to": 8,
+          "loc": "plaza",
+          "act": "在广场的长椅上打盹"
+        },
+        {
+          "from": 8,
+          "to": 12,
+          "loc": "tavern",
+          "act": "窝在角落买醉"
+        }
+      ],
+      "greet": {
+        "cold": "（醉眼朦胧地瞪着你）",
+        "neutral": "嗝……你谁啊？坐。",
+        "warm": "{name}！你是个好人，好人呐……嗝。"
+      },
+      "topics": [
+        {
+          "l": "麦酒"
+        },
+        {
+          "l": "海燕号的当年"
+        },
+        {
+          "l": "战争旧事",
+          "tier": "warm"
+        }
+      ],
+      "likes": [
+        "food"
+      ],
+      "dislikes": [
+        "herb"
+      ],
+      "intimacyGate": {
+        "gifts": 3,
+        "chats": 10,
+        "desc": "陪他醉过一场，才算朋友"
+      },
+      "voice": "含混，说着说着就绕回旧事，一句能拖很长",
+      "priority": [
+        "手里的酒",
+        "不提儿子",
+        "不被人催"
+      ],
+      "refuseStyle": "stout",
+      "worldImportance": 1
+    },
+    "tutor_wind": {
+      "name": "雅拉·风吟",
+      "lore": {
+        "keywords": ["雅拉·风吟", "翠风学园", "讲师", "时空褶皱", "推荐名额"],
+        "identity": "翠风学园讲师，在圣辉城支起分讲席；离开东方群岛时对大贤者立过誓。",
+        "appearance": "精灵的长耳从发间露出一角，衣料是东方群岛的旧式样；说话时会先想半息。",
+        "personality": "书面腔、爱用反问句、把问题抛回给提问的人；不许学生拿名额做买卖。",
+        "abilities": "历法与经纬、时间褶皱的入门教法；能把最难的道理拆成能听懂的问句。",
+        "past": "十七岁在翠风港旧灯塔上，看着一个人把自己走成了两段；此后不许任何人碰时间工具。",
+        "flaw": "她发过两份推荐，其中一份是被出价买走的——买主如今在评议会的走廊上走来走去，这事她从没对人说过。",
+        "belongings": "一叠带着批注的讲义、一支东方制的笔、一页被她自己留白的书页。"
+      },
+      "gender": "female",
+      "title": "翠风学园讲师·时空科",
+      "race": "精灵",
+      "sv": "雅",
+      "color": "#6f9ec4",
+      "hours": [
+        4,
+        12
+      ],
+      "loc": "plaza",
+      "goal": "在圣辉城办起第一间翠风学园的分讲席，好让东方群岛的学问不必只靠海船捎带",
+      "interest": "能听懂时间褶皱的人、旧书、城里流传的怪谈",
+      "bottomLine": "不许任何人拿学园的推荐名额做买卖——这是她离开东方群岛时对大贤者立的誓",
+      "schedule": [
+        {
+          "from": 0,
+          "to": 4,
+          "loc": "temple",
+          "act": "在神殿偏殿校订讲义"
+        },
+        {
+          "from": 4,
+          "to": 9,
+          "loc": "plaza",
+          "act": "在广场支起翠风学园的分讲席"
+        },
+        {
+          "from": 9,
+          "to": 12,
+          "loc": "temple",
+          "act": "借神殿典籍比对历法"
+        }
+      ],
+      "greet": {
+        "cold": "“报名表在左边，不识字的话——那我更建议你先去别处。”",
+        "neutral": "“你的呼吸很稳。”她看了你一眼，“……有意思。学园收这样的学生。”",
+        "warm": "“来，坐我这边。今天讲时间褶皱，听不懂也没关系，先记住它长什么样。”"
+      },
+      "faction": "verdant",
+      "topics": [
+        {
+          "l": "时空与褶皱"
+        },
+        {
+          "l": "翠风学园的学制"
+        },
+        {
+          "l": "报名与推荐名额",
+          "tier": "warm"
+        }
+      ],
+      "likes": [
+        "relic",
+        "trinket"
+      ],
+      "dislikes": [
+        "food"
+      ],
+      "reciprocate": [
+        "moonherb"
+      ],
+      "intimacyGate": {
+        "gifts": 2,
+        "chats": 8,
+        "desc": "听得懂时间褶皱的人，她才认"
+      },
+      "voice": "书面腔，爱用反问句，把问题抛回给学生",
+      "priority": [
+        "讲席的体面",
+        "学园的推荐名额",
+        "愿意思考的人"
+      ],
+      "refuseStyle": "rational",
+      "worldImportance": 2
+    },
+    "tutor_deepwell": {
+      "name": "科兹·幽鸣",
+      "lore": {
+        "keywords": ["科兹·幽鸣", "深井学院", "符文科", "教习", "第七层"],
+        "identity": "深井学院符文科教习，为拓印主井第七层的符文墙而长住巷底。",
+        "appearance": "不死族的干枯面庞藏在兜帽下，手指细长；指甲缝里永远有拓墨。",
+        "personality": "声音干涩、常以「地表的」起头作对比；对太阳与地表的学者都不以为然。",
+        "abilities": "符文辨识、拓印、井下辨向；能听出同一符号在不同位置的不同念法。",
+        "past": "拓了六年才完成四成；三年前一名学生破了「井下不许点火」的规矩，之后再没认得人。",
+        "flaw": "他在找往主井运灯油的人——灯油不许下井这条规矩是为那面墙定的，不是为学生。",
+        "belongings": "一捆起边的拓片、一把磨秃的炭笔、一块用来镇纸的井底石。"
+      },
+      "gender": "male",
+      "title": "深井学院符文科教习",
+      "race": "不死族",
+      "sv": "科",
+      "color": "#4a4460",
+      "hours": [
+        10,
+        12
+      ],
+      "loc": "alley",
+      "goal": "把主井以下第七层的符文墙拓全——那面墙上的字，比地面上所有学院加起来都老",
+      "interest": "古符文、会发光的矿石、不怕黑的学生",
+      "bottomLine": "拓片可以卖，原墙一个字都不能凿下来——凿了就是毁掉整座图书馆",
+      "schedule": [
+        {
+          "from": 0,
+          "to": 2,
+          "loc": "market",
+          "act": "夜里去旧书摊换拓片"
+        },
+        {
+          "from": 2,
+          "to": 10,
+          "loc": "alley",
+          "act": "在白日的暗处蛰伏"
+        },
+        {
+          "from": 10,
+          "to": 12,
+          "loc": "alley",
+          "act": "在巷底拓印符文，躲着太阳"
+        }
+      ],
+      "greet": {
+        "cold": "“地表的太阳晃眼。”他把兜帽压得更低，“……报名的话，把手洗干净再来。”",
+        "neutral": "“你身上有星髓的味道。”科兹抬起头，“深井学院收这样的鼻子。”",
+        "warm": "“来。”他摊开一卷拓片，“这一笔是第七层的。你看它像不像一个人在往下走？”"
+      },
+      "faction": "deep",
+      "topics": [
+        {
+          "l": "古符文"
+        },
+        {
+          "l": "深井学院的规矩"
+        },
+        {
+          "l": "第七层的那面墙",
+          "tier": "warm"
+        }
+      ],
+      "likes": [
+        "gem",
+        "relic"
+      ],
+      "dislikes": [
+        "food"
+      ],
+      "reciprocate": [
+        "dust_dream"
+      ],
+      "intimacyGate": {
+        "gifts": 3,
+        "chats": 10,
+        "desc": "不怕黑的人，他才带你下井"
+      },
+      "voice": "声音干涩，常以\"地表的\"起头作对比",
+      "priority": [
+        "拓片的完整",
+        "第七层的墙",
+        "不怕黑的人"
+      ],
+      "refuseStyle": "cold",
+      "worldImportance": 2
+    },
+    "tutor_skycap": {
+      "name": "阿亚·晨羽",
+      "lore": {
+        "keywords": ["阿亚·晨羽", "观星台", "星象科", "翼族", "北天极", "织梭"],
+        "identity": "浮岛观星台星象科教习，为观星台在圣辉城寻找一处能看见北天极的屋顶。",
+        "appearance": "翼族、背部有未完全收拢的羽；手指常沾着银粉似的星图墨。",
+        "personality": "说话像在读星象，先抬头再回答；对「最亮」这类说法有明显抵触。",
+        "abilities": "星图校订、历法推算、观测记录；能算出浮岛的高度变化。",
+        "past": "父亲也是观星台的人，最后一次记录写的是「星在动，比去年快半格」，第二天他就没再上楼。",
+        "flaw": "她算出浮岛在下坠，知情的抄经人上个月失踪了——这份结论她只对两个人说过，另一个已经不在城里。",
+        "belongings": "一卷记满偏差值的星图、一枚北天极的定位针、父亲留下的最后一页记录。"
+      },
+      "gender": "female",
+      "title": "浮岛观星台星象科教习",
+      "race": "翼族",
+      "sv": "阿",
+      "color": "#8fb6d6",
+      "hours": [
+        8,
+        12
+      ],
+      "loc": "temple",
+      "goal": "替观星台在圣辉城找一块能看见北天极的屋顶——浮岛会漂，但星星不会",
+      "interest": "星图、能在夜里爬起来的人、神殿的旧历法",
+      "bottomLine": "不替任何人篡改星图；观星台的记录一旦落笔，错也要留在那里",
+      "schedule": [
+        {
+          "from": 0,
+          "to": 8,
+          "loc": "temple",
+          "act": "守着夜里的星图"
+        },
+        {
+          "from": 8,
+          "to": 11,
+          "loc": "temple",
+          "act": "在神殿屋顶校星图"
+        },
+        {
+          "from": 11,
+          "to": 12,
+          "loc": "plaza",
+          "act": "替人看星象换几个铜板"
+        }
+      ],
+      "greet": {
+        "cold": "“你踩到我的星图了。”阿亚把纸卷抽走，“……报名请从右边走。”",
+        "neutral": "“抬头看。”她说，“你能认出哪颗是‘织梭’吗？——认不出也没关系，我教。”",
+        "warm": "“来，坐屋顶上。”她拍拍身边的瓦，“今天风好，能看见三重星轨。八年很长，但值得。”"
+      },
+      "faction": "study",
+      "topics": [
+        {
+          "l": "星图与历法"
+        },
+        {
+          "l": "观星台的八年"
+        },
+        {
+          "l": "北天极的织梭",
+          "tier": "warm"
+        }
+      ],
+      "likes": [
+        "relic",
+        "trinket"
+      ],
+      "dislikes": [
+        "rare"
+      ],
+      "reciprocate": [
+        "star_shard"
+      ],
+      "intimacyGate": {
+        "gifts": 2,
+        "chats": 8,
+        "desc": "肯在夜里爬起来的人，她才教"
+      },
+      "voice": "说话像在读星象，先看天再回答",
+      "priority": [
+        "星图的准确",
+        "观星台的记录",
+        "愿意抬头的人"
+      ],
+      "refuseStyle": "principled",
+      "worldImportance": 2
+    },
+    "tutor_camp": {
+      "name": "罗兰·铁锋",
+      "lore": {
+        "keywords": ["罗兰·铁锋", "训练营", "教头", "退役冒险者", "免费", "基本功"],
+        "identity": "冒险者训练营教头，退役冒险者；带过三百一十七个新人，活到今天的只有九个。",
+        "appearance": "脸上有一道从眉骨到下颌的旧疤，木剑不离手；站姿永远是双腿分开的马步。",
+        "personality": "口令式短句、直接给结论、不留情面；不收付不起学费的人，也不许人拿「免费」当儿戏。",
+        "abilities": "基本功训练、野外路况判断、带队经验；能一眼看出谁在硬撑。",
+        "past": "当年他是被同伴「完整送出城门」的那一个；如今他把这件事反过来做。",
+        "flaw": "上个月他带人清了北树林，清出七具被剥了靴子的尸体——他在查收靴子的人，这件事他没报给公会。",
+        "belongings": "一把用了十年的木剑、一本记满名字与日期的名册、学员留下的第一双旧靴。"
+      },
+      "gender": "male",
+      "title": "冒险者训练营教头·退役冒险者",
+      "race": "人类",
+      "sv": "罗",
+      "color": "#a4503f",
+      "hours": [
+        4,
+        11
+      ],
+      "loc": "guild",
+      "goal": "把每一个走进训练营的愣头青都完整地送出城门——他当年没被这样送过，所以他要做这件事",
+      "interest": "肯练基本功的人、城外的路况、公会的新榜",
+      "bottomLine": "不收一个连站桩都撑不满一刻钟的人；也不许任何人拿“免费”当儿戏",
+      "schedule": [
+        {
+          "from": 0,
+          "to": 4,
+          "loc": "gate",
+          "act": "在城门口守夜"
+        },
+        {
+          "from": 4,
+          "to": 10,
+          "loc": "guild",
+          "act": "带新人站桩、跑圈、挨打"
+        },
+        {
+          "from": 10,
+          "to": 12,
+          "loc": "gate",
+          "act": "去城门看新人的第一次出城"
+        }
+      ],
+      "greet": {
+        "cold": "“免费。”罗兰把木剑扔给你，“所以别浪费我的时间。”",
+        "neutral": "“握剑的手别抖。”他绕着你走了一圈，“……行，留下。”",
+        "warm": "“来，先跑三圈热身。”他难得笑了一下，“跑完我教你第一个保命的动作。”"
+      },
+      "faction": "guild",
+      "topics": [
+        {
+          "l": "基本功"
+        },
+        {
+          "l": "训练营的免费规矩"
+        },
+        {
+          "l": "城外的路况",
+          "tier": "warm"
+        }
+      ],
+      "likes": [
+        "pelt",
+        "food"
+      ],
+      "dislikes": [
+        "rare"
+      ],
+      "reciprocate": [
+        "bread"
+      ],
+      "intimacyGate": {
+        "gifts": 2,
+        "chats": 8,
+        "desc": "站桩撑满一刻钟，他才正眼看你"
+      },
+      "voice": "口令式短句，直接给结论，不留情面",
+      "priority": [
+        "训练场的规矩",
+        "学生的性命",
+        "上一场战役"
+      ],
+      "refuseStyle": "direct",
+      "worldImportance": 2
+    }
+  },
+  "shops": {
+    "iron": {
+      "name": "布伦丹的铁匠铺",
+      "vendor": "brendan",
+      "faction": "guild",
+      "stock": [
+        "sword_iron",
+        "axe_steel",
+        "armor_leather",
+        "armor_chain",
+        "shield_oak",
+        "tome_craft"
+      ,
+        "piton_iron",
+        "knife_web"],
+      "sell": 0.5
+    },
+    "grocer": {
+      "name": "东市杂货摊",
+      "vendor": null,
+      "loc": "market",
+      "faction": "empire",
+      "stock": [
+        "bread",
+        "herb_paste",
+        "potion_moon",
+        "antidote",
+        "tome_history",
+        "tome_planar"
+      ,
+        "lamp_moss",
+        "jar_glow",
+        "stone_warm",
+        "food_lamb_chop",
+        "drink_ale",
+        "food_blood_sausage",
+        "tome_geo_central",
+        "tome_geo_route",
+        "tome_rites",
+        "grain_golden",
+        "cheese_soft",
+        "emp_signet",
+        "guild_patent",
+        "poison_viper",
+        "poison_ember",
+        "poison_sleep",
+        "poison_weaken"],
+      "sell": 0.5,
+      "herb": true
+    },
+    "black": {
+      "name": "灰烬的「货色」",
+      "vendor": "ash",
+      "faction": "shadow",
+      "stock": [
+        "dagger_black",
+        "dust_dream",
+        "tome_abyss",
+        "tome_faction"
+      ,
+        "tal_daze",
+        "tal_focus",
+        "tome_law",
+        "shadow_dust",
+        "soul_jar",
+        "heretic_icon",
+        "forged_seal",
+        "poison_dead",
+        "poison_king",
+        "drug_forget",
+        "drug_frenzy"],
+      "sell": 0.4,
+      "illegal": true,
+      "allyStock": {
+        "items": [
+          "void_essence"
+        ],
+        "needFlag": "shadow_ally"
+      }
+    },
+    "tshop": {
+      "name": "神殿圣物台",
+      "vendor": "adrian",
+      "faction": "temple_life",
+      "stock": [
+        "holy_water"
+      ,
+        "charm_ward",
+        "tal_ember",
+        "tome_godchosen",
+        "temple_wisdom_ink",
+        "temple_war_oil",
+        "temple_life_seed",
+        "temple_death_bell"],
+      "sell": 0.4
+    },
+    "frost_forge": {
+      "name": "哈兰的锻炉",
+      "vendor": "haran",
+      "faction": "frost",
+      "sell": 0.5,
+      "stock": [
+        "sword_iron",
+        "axe_steel",
+        "armor_chain",
+        "shield_oak",
+        "blade_blank"
+      ,
+        "rope_wormsilk",
+        "shears_bone",
+        "iron_wild"],
+      "loc": "frost_forge"
+    },
+    "frost_market": {
+      "name": "冻原商栈",
+      "vendor": "sigur",
+      "faction": "frost",
+      "sell": 0.55,
+      "herb": true,
+      "stock": [
+        "bread",
+        "rabbit_meat",
+        "wolf_pelt",
+        "herb_paste",
+        "moonherb"
+      ,
+        "stone_warm",
+        "mask_gas",
+        "food_stew_venison",
+        "drink_strong",
+        "tome_geo_north",
+        "tome_bestiary",
+        "frost_iron",
+        "pelt_white",
+        "frost_oath",
+        "poison_frost",
+        "poison_slow"],
+      "loc": "frost_market"
+    },
+    "wind_port": {
+      "name": "翠风港市",
+      "vendor": "lita_verdant",
+      "faction": "verdant",
+      "sell": 0.5,
+      "herb": true,
+      "stock": [
+        "tome_planar",
+        "tome_history",
+        "potion_moon",
+        "crystal_silk",
+        "antidote"
+      ,
+        "pouch_spore",
+        "tal_thaw",
+        "tal_haste",
+        "food_sea_fish",
+        "drink_flower_wine",
+        "tome_geo_east",
+        "tome_geo_sky",
+        "tome_travel",
+        "sea_silk",
+        "herb_mist",
+        "cloud_wheat",
+        "wind_crystal",
+        "seal_blank",
+        "star_dust"],
+      "loc": "wind_port"
+    },
+    "gold_bazaar": {
+      "name": "商邦会堂货栈",
+      "vendor": "amir",
+      "faction": "sand",
+      "sell": 0.45,
+      "stock": [
+        "platinum",
+        "tome_faction",
+        "tome_craft",
+        "potion_moon",
+        "holy_water"
+      ,
+        "compass_vein",
+        "lens_detect",
+        "tal_sunder",
+        "food_spice_roast",
+        "drink_wine_desert",
+        "tome_geo_south",
+        "tome_money",
+        "tome_races",
+        "spice_sandgold",
+        "gem_sunstone",
+        "date_crystal",
+        "sand_note",
+        "study_relic",
+        "tower_glass",
+        "net_ink"],
+      "loc": "gold_bazaar"
+    },
+    "gold_harbor": {
+      "name": "金砂港货栈",
+      "vendor": "dulan",
+      "faction": "sand",
+      "sell": 0.5,
+      "herb": true,
+      "stock": [
+        "moonherb",
+        "venom_gland",
+        "worm_hide",
+        "crystal_silk",
+        "slime_fluid"
+      ,
+        "hook_grapnel",
+        "tal_bleed",
+        "food_stew_beef",
+        "tome_geo_west",
+        "tome_mentor",
+        "horse_braid",
+        "iron_wild"],
+      "loc": "gold_harbor"
+    }
+  },
+  "quests": {
+    "q_rabbit": {
+      "name": "猎兔令",
+      "giver": "galon",
+      "type": "kill",
+      "target": "rabbit",
+      "count": 3,
+      "reward": {
+        "items": {
+          "q_witness_token": 1
+        },
+        "gold": 4000,
+        "rep": {
+          "guild": 10
+        },
+        "exp": 30
+      },
+      "desc": "城郊麦田的暴走角兔成灾，公会悬赏猎杀。讨伐 3 只后向戈林复命。",
+      "hint": "前往城外旷野·探索，遭遇角兔并战胜。",
+      "guildCut": true
+    },
+    "q_debt": {
+      "name": "醉汉的欠账",
+      "giver": "lita",
+      "type": "flag",
+      "reward": {
+        "items": {
+          "q_guild_contract": 1
+        },
+        "att": {
+          "lita": 15
+        },
+        "exp": 25,
+        "flag": "free_inn"
+      },
+      "desc": "老乔在「银鸥」赊了三个多月的酒钱。莉安希望你能把账收回——三百铜板。",
+      "hint": "入夜后老乔会窝在酒馆角落。垫付、说服、施压……办法不止一种。"
+    },
+    "q_theft": {
+      "name": "集市窃案",
+      "giver": "brendan",
+      "type": "flag",
+      "minDay": 2,
+      "reward": {
+        "items": {
+          "q_seal_broken": 1
+        },
+        "rep": {
+          "empire": 10
+        },
+        "att": {
+          "brendan": 15
+        },
+        "exp": 40
+      },
+      "desc": "布伦丹打成一半的精钢剑坯被人偷了。他怀疑东西还在城里——顺着线头查下去。",
+      "hint": "在集市调查现场，再深挖下去。夜里，深巷也许有销赃的动静。"
+    },
+    "q_holy": {
+      "name": "圣泉之露",
+      "giver": "adrian",
+      "type": "item",
+      "target": "moonherb",
+      "count": 3,
+      "reward": {
+        "items": {
+          "q_mourner_ring": 1,
+          "holy_water": 2
+        },
+        "rep": {
+          "temple_life": 10
+        },
+        "att": {
+          "adrian": 12
+        },
+        "exp": 30
+      },
+      "desc": "艾德里安要为月祭准备圣泉之露，需要三株旷野的月见草。",
+      "hint": "在城外旷野采集，运气好就能遇到月见草。"
+    },
+    "q_letter": {
+      "name": "米露的口信",
+      "giver": "mia",
+      "type": "deliver",
+      "target": "selina",
+      "reward": {
+        "items": {
+          "q_heresy_note": 1
+        },
+        "gold": 800,
+        "att": {
+          "mia": 12,
+          "selina": 10
+        },
+        "exp": 20,
+        "flag": "msg_unlock"
+      },
+      "desc": "米露有一封要紧的信，收信人是「银鸥酒馆」的赛琳娜——务必在天黑前送到。",
+      "hint": "赛琳娜只在入夜后现身酒馆。"
+    },
+    "q_caravan": {
+      "name": "商路的阴影",
+      "giver": "otto",
+      "type": "event",
+      "reward": {
+        "items": {
+          "q_exile_letter": 1
+        },
+        "gold": 6400,
+        "rep": {
+          "empire": 8
+        },
+        "att": {
+          "otto": 20
+        },
+        "exp": 60
+      },
+      "desc": "奥托的商队在城郊遭劫，药材被掳进旷野的劫掠者营地。夺回货物，市价才能回落。",
+      "hint": "接任务后在旷野探索，找到劫掠者营地。",
+      "guildCut": true
+    },
+    "q_shard": {
+      "name": "星穹的碎片",
+      "giver": "vandel",
+      "type": "item",
+      "target": "star_shard",
+      "count": 1,
+      "minDay": 3,
+      "reqTrust": {
+        "faction": "study",
+        "min": 10
+      },
+      "reward": {
+        "items": {
+          "q_star_map": 1,
+          "platinum": 1
+        },
+        "rep": {
+          "study": 15
+        },
+        "att": {
+          "vandel": 20
+        },
+        "exp": 80
+      },
+      "desc": "范德尔推断浅层洞窟深处的古代祭坛里埋着星枢残片。取回它——但小心守着祭坛的东西。",
+      "hint": "洞窟三层在等一个足够勇敢（或愚蠢）的人。"
+    }
+  },
+  "_guildComment": "卡 R5：quests[].guildCut=true 表示这单经公会分账（§23 抽 10%）；悬赏类（如 q_shard 的实物报酬）不抽。",
+  "_r6Comment": "卡 R6：voice=说话习惯；priority=多目标冲突时的选择序（§120 五要素之「优先级」）；refuseStyle ∈ direct/stout/smooth/cold/principled/rational（§119 性格×拒绝方式六类）。三项走 persona 注入与判定倾向，不进数值。"
+}
