@@ -1,5 +1,13 @@
 # Changelog · world-memory
 
+## [0.8.3] - 2026-10-03 · V2.4-07：MemoryEntry.sourceEventId 落档
+
+### Fixed
+- `ingestFact` / `spreadRumor` 摄取时已携带 `sourceEventId`，但 `remember`
+  落档时**未写入条目**——溯源字段在类型上存在、数据上丢失。现如实落档
+  （V2.4-07 Provenance：记忆可回溯到 Source Event）。
+
+
 ## [0.8.1] - 2026-09-30 · M1.1 HTTP 适配层（G7，只读 + 检索面）
 
 - **`world-memory/http` 子路径导出**：`createMemoryHttp`（纯路由协议，模式同

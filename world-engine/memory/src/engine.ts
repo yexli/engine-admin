@@ -106,6 +106,7 @@ export class MemoryEngine {
       confidence,
       importance: Math.max(0, Math.min(1, spec.importance ?? 0.3)),
       entities: spec.entities ?? [],
+      ...(spec.sourceEventId ? { sourceEventId: spec.sourceEventId } : {}),
       recallCount: 0,
       createdAt: new Date().toISOString(),
     };

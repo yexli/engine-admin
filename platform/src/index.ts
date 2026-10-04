@@ -57,3 +57,5 @@ export { createWorldMemoryService, deriveWitnesses, type WorldMemoryService, typ
 export { createMemoryRuntime, type MemoryRuntime, type MemoryRuntimeOptions, type MemoryWorldStatus } from './memory/runtime.ts';
 export { createEmbeddingsClient, type EmbeddingsClient } from './upstream/embeddings.ts';
 export { SCHEMA_VERSION, CANONICAL_ATTRIBUTES, GAME_KEY_PATTERN, CORE_EVENT_TYPES, EXTENSION_EVENT_GROUPS, ALL_EVENT_TYPES, inspectWorldSchema, type CanonicalAttribute, type WorldSchemaInput, type WorldSchemaReport } from './schema/worldSchema.ts';
+export { NPC_STATES, deriveNpcState, syncNpcStates, isNpcStateName, type NpcStateName, type NpcStateInput, type NpcStateSlot, type NpcStateSyncResult } from './npc/state.ts';
+export { buildPerspective, isVisibleTo, type PerspectiveInput, type PerspectiveView, type PerspectiveEvent } from './evolution/perspective.ts';

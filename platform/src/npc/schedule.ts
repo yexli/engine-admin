@@ -26,6 +26,9 @@ export interface ScheduleSlot {
   /** 结束刻（不含） */
   to: number;
   location: string;
+  /** 该档期的状态语义（V2.4-04：游戏数据声明「在这 = 在做什么」；
+   *  缺省 'working'。可选值见 npc/state.ts 的规范状态集） */
+  state?: string;
 }
 
 /** 每实体每日日程表：tickOfDay = world.t % 48 落进哪个 slot 就归哪 */

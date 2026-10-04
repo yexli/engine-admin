@@ -52,7 +52,21 @@ export function removeEntityRule<W extends EngineWorldState>(): WorldRule<W> {
         return false;
       }
       delete ctx.state.npcs[id];
-      ctx.emit({ type: 'entity_removed', target: id });
+      /* V2.4-02 不变量：级联清理悬空引用——世界关系表与实体关系网中
+         指向被删实体的边必须随实体一起消失（否则留下幽灵关系） */
+      let relationsPurged = 0;
+      if (ctx.state.relations?.length) {
+        const before = ctx.state.relations.length;
+        ctx.state.relations = ctx.state.relations.filter((r) => r.source !== id && r.target !== id);
+        relationsPurged += before - ctx.state.relations.length;
+      }
+      for (const dy of Object.values(ctx.state.npcs)) {
+        if (dy.rels && dy.rels[id]) {
+          delete dy.rels[id];
+          relationsPurged++;
+        }
+      }
+      ctx.emit({ type: 'entity_removed', target: id, data: { relationsPurged } });
     },
   };
 }
@@ -71,6 +85,12 @@ export function updateAttributeRule<W extends EngineWorldState>(): WorldRule<W> 
         return false;
       }
       const targetId = ctx.command.targetId ?? 'player';
+      /* V2.4-02 不变量：不存在的实体不能被修改（否则白名单动作即可凭空造实体，
+         绕过 create_entity 的显式建档禁令）。玩家为原生存在，不在此列。 */
+      if (targetId !== 'player' && !ctx.state.npcs[targetId]) {
+        ctx.emit({ type: 'attribute_update_failed', cause: '实体不存在', target: targetId });
+        return false;
+      }
       if (targetId === 'player') {
         const a = (ctx.state.player.attributes = ctx.state.player.attributes ?? {});
         a[key] = value;
@@ -98,6 +118,16 @@ export function setRelationRule<W extends EngineWorldState>(): WorldRule<W> {
         return false;
       }
       const source = ctx.command.actorId ?? 'player';
+      /* V2.4-02 不变量：非法 Relation 不能更新——来源/目标都必须真实存在，
+         否则会制造指向幽灵实体的悬空边 */
+      if (source !== 'player' && !ctx.state.npcs[source]) {
+        ctx.emit({ type: 'relation_set_failed', cause: '来源实体不存在', target: source });
+        return false;
+      }
+      if (target !== 'player' && !ctx.state.npcs[target]) {
+        ctx.emit({ type: 'relation_set_failed', cause: '目标实体不存在', target });
+        return false;
+      }
       const value = typeof p['value'] === 'number' ? p['value'] : undefined;
       const relations = (ctx.state.relations = ctx.state.relations ?? []);
       const existing = relations.find((r) => r.source === source && r.target === target && r.type === type);

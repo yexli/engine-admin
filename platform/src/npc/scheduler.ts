@@ -20,6 +20,7 @@
    ============================================================ */
 import type { EngineClient } from '../types.ts';
 import { applyNpcSchedule, type NpcScheduleTable } from './schedule.ts';
+import { syncNpcStates } from './state.ts';
 import type { ScheduleStore } from './scheduleStore.ts';
 import { createFingerprintTracker } from '../runtime/fingerprint.ts';
 
@@ -143,6 +144,10 @@ export function createScheduleRuntime(opts: ScheduleRuntimeOptions): ScheduleRun
     st.lastAlignAt = new Date().toISOString();
     for (const m of result.moved) log(`[schedule] ${worldId}：${m.id} 按日程归位 ${m.from} → ${m.to}（事实 ${m.eventIds.join(',')}）`);
     for (const r of result.rejected) log(`[schedule] ${worldId}：${r.id} → ${r.to} 被拒绝：${r.reason}`);
+    /* V2.4-04：状态视图同步（确定性推导，幂等——同态零命令，零 AI） */
+    const sync = await syncNpcStates(opts.engine, worldId, table);
+    for (const tr of sync.transitions) log(`[schedule] ${worldId}：${tr.id} 状态 ${tr.from ?? '（无）'} → ${tr.to}（事实 ${tr.eventIds.join(',')}）`);
+    for (const r of sync.rejected) log(`[schedule] ${worldId}：${r.id} 状态同步被拒：${r.reason}`);
   }
 
   async function pollOnce(): Promise<void> {

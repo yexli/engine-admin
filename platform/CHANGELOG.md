@@ -3,6 +3,67 @@
 本文件记录 World Platform 的版本演进。格式参考 Keep a Changelog。
 版本策略（semver）：0.x 期间允许带 CHANGELOG 注明的 API 调整。
 
+## [0.22.0] - 2026-10-03 · V2.4-04 · NPC State Machine：确定性状态视图
+
+方案 V2.4-04 落地（最小状态集；§八「避免退化成每 Tick 问一次 AI」）。
+
+### Added
+- **NPC 状态视图**（`npc/state.ts`）：状态由世界事实**确定性推导**
+  （位置 + 日程档期 + 注意力），不建第二份状态副本——与「Memory ≠
+  第二世界状态」同一纪律。首批规范状态五个：idle / traveling /
+  attending / working / resting（方案 8 态中 TALKING / PURSUING /
+  WAITING 无双游戏实践，前瞻不做）。
+  - `deriveNpcState`：纯函数推导（attention 被占用 → attending 优先；
+    档期内 → 档期声明语义；不在档期地点 → traveling；无档期 → idle）。
+  - `syncNpcStates`：状态同步——与 `attributes.state` 不同才发
+    update_attribute（幂等：同态零命令；每步走命令链 → Rules → 事实）。
+    状态事实随后进入上下文（P4/P13 attributes 面），AI 可读、可经提案
+    维护，但确定性推导每轮校正。
+- **档期状态声明**：`ScheduleSlot.state`（游戏数据声明「在这 = 在做什么」，
+  如深夜 home 档 = resting）——语义在 Adapter/游戏数据，机制在平台
+  （与日程对齐同构）；存储层校验规范状态集。
+- **调度循环接线**：Schedule Runtime 对齐后同步状态视图（确定性，零 AI）；
+  迁移与拒绝随日志/状态可观测。
+- 测试：`tests/npc-state.test.ts`（12 条：推导矩阵七例、迁移经命令链、
+  幂等同态零命令、attending 覆盖档期、对齐后 resting 切换、tick 防重复）。
+
+## [0.23.0] - 2026-10-03 · V2.4-05/06/07 · Decision 语义 / Perspective / Memory Provenance
+
+方案 V2.4-05/06/07 三项合并落地。
+
+### Added
+- **Decision 语义标注**（V2.4-05 · 方案 §九）：`EvolutionRun.decision`——
+  `act`（AI 提出了变化）/ `wait`（AI 判断此刻不该行动，空提案合法且常常
+  正确）。不改 Proposal Schema，仅 run 元数据标注。
+- **Perspective 视角构建**（V2.4-06 · 方案 §十）：`evolution/perspective.ts`
+  ——以实体为中心的知识视图过滤原语：witnesses 感知边界（列名者/当事人
+  可见）+ 同地点公开事实；`buildPerspective` / `isVisibleTo`。
+  NPC 不默认看到整个 World State。
+- **Memory Provenance**（V2.4-07 · 方案 §十一）：世界记忆包
+  `MemoryEntry.sourceEventId` 如实落档（V2.4-00 审计发现字段在类型上存在、
+  数据上丢失——world-memory 0.8.3）；平台 `recallFor` 投影带
+  `sourceEventId` → context.memory 段——「这句话为什么知道」可回溯到
+  Source Event（配合 V2.4-01 事件史按 id 查）。
+- 测试：`tests/v24-semantics.test.ts`（9 条）+ `tests/npc-state.test.ts`
+  扩 3 条（共 12）。
+
+## [0.21.0] - 2026-10-03 · V2.4-03 · Runtime 分层：AI unavailable → DEFER 语义
+
+方案 V2.4-03 落地（World Runtime / AI Runtime 分层的显式语义化）。基线审计
+判定分层已结构性成立（确定性调度/对齐/摄取全零 AI；AI 不在线世界照跑），
+本阶段把「AI 不可用」从「AI 出错」中显式区分。
+
+### Added
+- **DEFER 语义**：`EvolutionRunStatus` 新增 `deferred`——驱动抛
+  `model_unavailable`（模型 API 不可达/超时/未配置）时，run 状态 = deferred
+  （决策延后：世界照跑、Journal 留痕、可稍后重试），与「AI 出错」的 failed
+  （invalid_proposal / driver_error）区分。两者都绝不伪造世界事实。
+- 测试：`tests/runtime-layering.test.ts`（4 条：AI 完全不在线时确定性面全绿
+  ——玩家命令/日程对齐/记忆摄取零 AI；触发 tick → DEFER；invalid_proposal →
+  failed 语义区分；模型恢复后重试成功且全程 AI 零伪造事件）。
+- 既有用例语义升级：「Model Gateway 故障」从 failed 更新为 deferred（模型
+  不可用 ≠ AI 出错）；观察失败（世界 404）与坏提案仍为 failed。
+
 ## [0.20.0] - 2026-10-03 · P14 · Extension 层：按世界差异化围栏
 
 ### Added

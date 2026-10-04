@@ -152,7 +152,7 @@ console.log('[publish] done -> ' + REMOTE);
 const GH = 'https://github.com/yexli/engine-admin.git';
 if (process.env.PUBLISH_SKIP_GITHUB !== '1') {
   try {
-    if (!gitRemotes().includes(GH)) {
+    if (!gitRemotes().includes('github')) {
       git(['remote', 'add', 'github', GH]);
     }
     git(['push', 'github', 'master:main']);

@@ -45,6 +45,11 @@ export function talkRule<W extends EngineWorldState>(): WorldRule<W> {
         ctx.emit({ type: 'talk_failed', cause: '缺少对象' });
         return false;
       }
+      /* V2.4-02 不变量：不存在的实体不能被交谈（npcMet 惰性建档会凭空造实体） */
+      if (id !== 'player' && !ctx.state.npcs[id]) {
+        ctx.emit({ type: 'talk_failed', cause: '实体不存在', target: id });
+        return false;
+      }
       ctx.mutate.npcMet(id);
       if (ctx.command.text) ctx.mutate.pushLog(`＞ ${ctx.command.text}`, 'say');
       ctx.emit({ type: 'talk_started', actor: ctx.command.actorId ?? 'player', target: id });
@@ -61,6 +66,11 @@ export function setAttitudeRule<W extends EngineWorldState>(): WorldRule<W> {
       const id = ctx.command.targetId;
       if (!id) {
         ctx.emit({ type: 'attitude_change_failed', cause: '缺少对象' });
+        return false;
+      }
+      /* V2.4-02 不变量：不存在的实体不能被修改态度（惰性建档会凭空造实体） */
+      if (id !== 'player' && !ctx.state.npcs[id]) {
+        ctx.emit({ type: 'attitude_change_failed', cause: '实体不存在', target: id });
         return false;
       }
       const { from, to } = ctx.mutate.npcAtt(id, ctx.command.amount ?? 0);

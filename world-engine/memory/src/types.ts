@@ -38,6 +38,8 @@ export interface MemoryEntry {
   /** 重要度 [0,1]：高重要度衰得慢 */
   importance: number;
   entities: string[];
+  /** 来源世界事实 id（V2.4-07 Provenance：记忆可回溯到 Source Event；宿主自记可缺省） */
+  sourceEventId?: string;
   recallCount: number;
   lastRecalledDay?: number;
   /** 摄取时刻（ISO 8601；V0.8.1 起新条目携带，旧快照缺省） */

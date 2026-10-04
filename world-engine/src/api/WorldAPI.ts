@@ -63,6 +63,20 @@ export interface CreateWorldOptions<W extends EngineWorldState> {
 /** 世界时钟读数（实现与宿主共用：WorldQuery） */
 export type { WorldTimeView } from './WorldQuery';
 
+/** 世界事件史过滤（V2.4-01：getByEntity / getByTime / getByCausation） */
+export interface WorldEventFilter {
+  id?: string;
+  type?: string;
+  actor?: string;
+  target?: string;
+  location?: string;
+  /** 世界日区间（含端点） */
+  dayFrom?: number;
+  dayTo?: number;
+  /** 因果：parentId 或 sourceId 命中即返回（getByCausation） */
+  causedBy?: string;
+}
+
 export interface WorldHandle<W extends EngineWorldState> {
   readonly worldId: string;
   /** 当前世界状态（只读面；改写必须走命令 / mutate） */
@@ -75,6 +89,8 @@ export interface WorldHandle<W extends EngineWorldState> {
   advanceTime(ticks: number): CommandResult;
   /** 最近的世界事实（新 → 旧） */
   getEvents(n?: number): WorldEvent[];
+  /** 世界事件史查询（V2.4-01：可按实体/类型/时间/因果过滤全量历史；缺省 = 全量，新 → 旧） */
+  queryEvents?(filter?: WorldEventFilter): WorldEvent[];
   /** 注册游戏规则 */
   registerRule(rule: WorldRule<W>): void;
   /** 发布一条系统级世界事实（不经命令链；day / tick 按当前世界时间补全） */
@@ -131,12 +147,46 @@ export function createWorld<W extends EngineWorldState = EngineWorldState>(opts:
     rules: opts.noBuiltinRules ? (opts.rules ?? []) : [...builtinRules<W>(), ...(opts.rules ?? [])],
   });
 
+  /* ---------- 世界事件史（V2.4-01 Event Persistence · append-only）----------
+     事件从「运行时消息」升级为「世界历史事实」：装配了世界史通道的 SavePort 时——
+       · 启动恢复：loadWorldLog → 同 id 保末次去重 → 完整事件史（顺序稳定）；
+       · 追加：每个新事实按 id 唯一追加（重复写入不制造重复事实）；
+       · 持久化：saveWorldLog 整档快照（FileSavePort 防抖合并写；增量追加介质属 V2.5）；
+       · 环形窗口恢复：重启后 ring 回填最近窗口，getEvents / WS replay 语义不变。
+     未装配通道（缺省）= 内存往返，行为与此前完全一致。 */
+  const worldLog: WorldEvent[] = [];
+  const worldLogIds = new Set<string>();
+  const hasWorldLog = (): boolean => typeof savePort?.loadWorldLog === 'function';
+  if (hasWorldLog()) {
+    const rows = savePort?.loadWorldLog?.() ?? null;
+    if (Array.isArray(rows)) {
+      for (const row of rows) {
+        const e = row as WorldEvent;
+        if (!e || typeof e.id !== 'string' || typeof e.type !== 'string') continue;
+        if (worldLogIds.has(e.id)) {
+          const idx = worldLog.findIndex((x) => x.id === e.id);
+          worldLog[idx] = e; /* 同 id 保末次（幂等恢复） */
+          continue;
+        }
+        worldLogIds.add(e.id);
+        worldLog.push(e);
+      }
+    }
+  }
+
   /* 事件环形缓冲：世界事实的近期窗口（订阅本世界作用域的总线） */
   const ring: WorldEvent[] = [];
+  for (const e of worldLog.slice(-EVENT_RING)) ring.push(e); /* 重启恢复：历史窗口回填 */
   bus.on('*', (e) => {
     if (!container.core.S) return;
     ring.push(e);
     if (ring.length > EVENT_RING) ring.shift();
+    /* 事件史追加（幂等：同 id 不重复成事实；介质侧防抖合并写） */
+    if (hasWorldLog() && !worldLogIds.has(e.id)) {
+      worldLogIds.add(e.id);
+      worldLog.push(e);
+      savePort?.saveWorldLog?.(worldLog as unknown[]);
+    }
   });
 
   const handle: WorldHandle<W> = {
@@ -148,6 +198,18 @@ export function createWorld<W extends EngineWorldState = EngineWorldState>(opts:
     executeCommand: (cmd: WorldCommand) => runtime.execute(cmd),
     advanceTime: (ticks: number) => runtime.execute({ type: 'advance_time', amount: ticks }),
     getEvents: (n = 20) => ring.slice(-n).reverse(),
+    queryEvents: (f: WorldEventFilter = {}) => {
+      const match = (e: WorldEvent): boolean =>
+        (f.id === undefined || e.id === f.id) &&
+        (f.type === undefined || e.type === f.type) &&
+        (f.actor === undefined || e.actor === f.actor) &&
+        (f.target === undefined || e.target === f.target) &&
+        (f.location === undefined || e.location === f.location) &&
+        (f.dayFrom === undefined || e.day >= f.dayFrom) &&
+        (f.dayTo === undefined || e.day <= f.dayTo) &&
+        (f.causedBy === undefined || e.parentId === f.causedBy || e.sourceId === f.causedBy);
+      return worldLog.filter(match).reverse(); /* 新 → 旧，与 getEvents 同序 */
+    },
     registerRule: (rule: WorldRule<W>) => runtime.rules.register(rule),
     emitEvent: (draft: EventEmit) => {
       const s = container.need();

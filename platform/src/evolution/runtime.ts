@@ -73,7 +73,7 @@ export interface EvolutionRuntimeOptions {
   /** 记忆召回（P7 · 方案 §十）：个体决策（恰一个 HIGH 唤醒）时为焦点实体检索记忆，
    *  注入 context.memory（maxMemoryItems 预算内）。失败视作无记忆（记忆是建议材料，
    *  不是事实来源）；世界级 tick 无单一 owner，不检索。 */
-  memoryRetriever?: (worldId: string, entityId: string, query: string) => Promise<{ ref: string; summary: string; day?: number }[]>;
+  memoryRetriever?: (worldId: string, entityId: string, query: string) => Promise<{ ref: string; summary: string; day?: number; sourceEventId?: string }[]>;
 }
 
 export interface TickOptions {
@@ -294,7 +294,10 @@ export function createEvolutionRuntime(
           : e instanceof Error
             ? e.message
             : String(e);
-      return finish({ status: 'failed', error: msg, modelUsed: opts.driver.name });
+      /* V2.4-03 · 方案 §七 DEFER 语义：AI/模型不可用 = 决策延后（deferred，
+         世界照跑、可稍后重试），与「AI 出错」（failed）区分——两者都绝不伪造世界事实。 */
+      const deferred = e instanceof EvolutionDriverError && e.code === 'model_unavailable';
+      return finish({ status: deferred ? 'deferred' : 'failed', error: msg, modelUsed: opts.driver.name });
     }
     run.modelUsed = proposal.source.model ?? opts.driver.name;
     run.proposal = proposal;
@@ -393,8 +396,13 @@ export function createEvolutionRuntime(
     } else {
       status = 'rejected'; // 全部被拒，但每条都有原因可查
     }
+    /* V2.4-05 · 方案 §九 Decision 语义：act = AI 提出了变化；wait = AI 判断
+       此刻不该行动（空提案，合法且常常正确）。不改 Proposal Schema，
+       仅作 run 元数据标注（观测/调试可读）。 */
+    const decision: 'act' | 'wait' = acceptedCount > 0 ? 'act' : status === 'rejected' ? 'act' : 'wait';
     return finish({
       status,
+      decision,
       outcomes,
       acceptedCount,
       rejectedCount,

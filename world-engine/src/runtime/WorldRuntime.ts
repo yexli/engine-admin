@@ -71,7 +71,29 @@ export function createWorldRuntime<W extends EngineWorldState>(opts: WorldRuntim
   const commandRing: CommandHistoryEntry[] = [];
   let commandSeq = 0;
 
+  /* V2.4-02 · 方案 §二十一：命令幂等账（commandId → 首次结果，bounded FIFO）。
+     同 commandId 重复提交（HTTP 重试/网络重发）返回首次结果——不重复执行、
+     不产生重复 Mutation / Event。缺省无 commandId 的命令不受影响。 */
+  const IDEMPOTENCY_CAP = 500;
+  const idempotency = new Map<string, CommandResult>();
+
   function execute(cmd: WorldCommand): CommandResult {
+    if (typeof cmd.commandId === 'string' && cmd.commandId.length > 0 && cmd.commandId.length <= 128) {
+      const hit = idempotency.get(cmd.commandId);
+      if (hit) return { ...hit, duplicate: true };
+    }
+    const result = executeInner(cmd);
+    if (typeof cmd.commandId === 'string' && cmd.commandId.length > 0 && cmd.commandId.length <= 128) {
+      idempotency.set(cmd.commandId, result);
+      if (idempotency.size > IDEMPOTENCY_CAP) {
+        const drop = idempotency.keys().next().value;
+        if (drop !== undefined) idempotency.delete(drop);
+      }
+    }
+    return result;
+  }
+
+  function executeInner(cmd: WorldCommand): CommandResult {
     const startedAt = Date.now();
     const s0 = container.core.S;
     const record = (res: CommandResult): CommandResult => {

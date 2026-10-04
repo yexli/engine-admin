@@ -99,8 +99,8 @@ export interface EvolutionContext {
   trigger?: { primaryEventId?: string; woken?: string[] };
   /** 当前目标（方案 §七组成项；引擎暂无目标事实，P5 Goals 接入位——缺事实不编造） */
   goal?: string;
-  /** 相关记忆（方案 §七组成项；记忆源 P7 接入，本阶段只通预算与渲染通路） */
-  memory?: { ref: string; summary: string; day?: number }[];
+  /** 相关记忆（方案 §七组成项；每条可溯源到来源世界事实——V2.4-07 Provenance） */
+  memory?: { ref: string; summary: string; day?: number; sourceEventId?: string }[];
   /** 观察窗口内的世界事实（新 → 旧） */
   events: {
     id: string;
@@ -296,6 +296,7 @@ export type EvolutionRunStatus =
   | 'completed' // 全部 change 放行（含零 change：AI 判断无需演化）
   | 'partially_applied' // 部分放行、部分被拒
   | 'rejected' // 有 change 且全部被拒（每条都有原因可查）
+  | 'deferred' // V2.4-03 · 方案 §七 DEFER 语义：AI/模型不可用——决策延后（世界不受影响，可稍后重试；与「AI 出错」的 failed 区分）
   | 'failed'; // 观察/驱动失败（提案都没有，世界未被动过）
 
 /** 一次演化运行的完整留痕：Event → Observation → Context → Proposal → Rules → Mutation → Event */
@@ -328,6 +329,10 @@ export interface EvolutionRun {
   entitiesAffected?: string[];
   /** 本次运行最终产生/关联的全部世界事实 id */
   eventIds: string[];
+  /** 决策语义标注（V2.4-05 · 方案 §九：AI 可以判断「现在不应该行动」）——
+   *  act = AI 提出了变化（无论 Rules 是否放行）；wait = AI 判断此刻不该行动
+   *  （空提案，合法且常常正确）。仅 completed/partially_applied/rejected 有。 */
+  decision?: 'act' | 'wait';
   /** 幂等重放：同一提案/幂等键命中既有 run，未重复执行（方案 §二.3） */
   deduplicated?: boolean;
   /** 触发时携带的幂等键（落账留痕：进程重启后运行时据此从 Journal 重建幂等账） */

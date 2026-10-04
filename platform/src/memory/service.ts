@@ -72,7 +72,7 @@ export interface WorldMemoryService {
   /** 世界日推进（new_day 时调用）：线性衰减 + 遗忘；返回遗忘条数 */
   dayTick(worldId: string, day: number): number;
   /** 为一个实体召回记忆（4 因子排序；投影为上下文记忆段） */
-  recallFor(worldId: string, ownerId: string, query: string, limit?: number): Promise<{ ref: string; summary: string; day?: number }[]>;
+  recallFor(worldId: string, ownerId: string, query: string, limit?: number): Promise<{ ref: string; summary: string; day?: number; sourceEventId?: string }[]>;
   stats(worldId: string): MemoryServiceStats | null;
   /** 清除某世界的摄取去重账（P9 多代世界：世界重建后同 id 事实应重新记忆；
    *  已存记忆条目保留——旧世界的经历对新世界仍是这个角色的过去） */
@@ -252,7 +252,12 @@ export function createWorldMemoryService(opts: WorldMemoryServiceOptions = {}): 
       const engine = engineFor(worldId);
       const day = days.get(worldId) ?? 0;
       const entries = await engine.recall(ownerId, query, { limit, day });
-      return entries.map((e) => ({ ref: e.id, summary: e.text, ...(e.day !== undefined ? { day: e.day } : {}) }));
+      return entries.map((e) => ({
+        ref: e.id,
+        summary: e.text,
+        ...(e.day !== undefined ? { day: e.day } : {}),
+        ...(e.sourceEventId ? { sourceEventId: e.sourceEventId } : {}),
+      }));
     },
 
     setEmbed(worldId, hook) {

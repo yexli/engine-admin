@@ -133,6 +133,8 @@ function sanitizeCommand(body: unknown): Record<string, unknown> | null {
   const type = MAX_STR(64)(b['type']);
   if (!type) return null;
   const cmd: Record<string, unknown> = { type };
+  const commandId = MAX_STR(128)(b['commandId']);
+  if (commandId !== undefined) cmd['commandId'] = commandId; // V2.4-02 幂等键透传
   const actorId = MAX_STR(128)(b['actorId']);
   const targetId = MAX_STR(128)(b['targetId']);
   const text = MAX_STR(2000)(b['text']);
@@ -616,7 +618,27 @@ export function createWorldHttp<W extends EngineWorldState = EngineWorldState>(
       if (segments.length === 4 && leaf === 'events') {
         if (method === 'GET') {
           const n = Number(req.query?.['n'] ?? 20);
-          return { status: 200, body: { events: w.getEvents(Number.isFinite(n) && n > 0 ? Math.floor(n) : 20) } };
+          const cap = Number.isFinite(n) && n > 0 ? Math.floor(n) : 20;
+          /* V2.4-01：世界事件史过滤查询（可按实体/类型/时间/因果检索全量历史；
+             任一过滤参数出现即走事件史，否则保持热窗口快路径） */
+          const q = req.query ?? {};
+          const filter: Record<string, unknown> = {};
+          for (const k of ['id', 'type', 'actor', 'target', 'location', 'causedBy'] as const) {
+            const v = q[k];
+            if (typeof v === 'string' && v.length > 0) filter[k] = v;
+          }
+          for (const k of ['dayFrom', 'dayTo'] as const) {
+            const v = Number(q[k]);
+            if (Number.isFinite(v)) filter[k] = Math.floor(v);
+          }
+          if (Object.keys(filter).length > 0 || q['log'] === '1') {
+            if (typeof w.queryEvents !== 'function') {
+              return { status: 501, body: { error: '本世界未装配事件史查询' } };
+            }
+            const all = w.queryEvents(filter as never);
+            return { status: 200, body: { events: all.slice(0, cap), total: all.length } };
+          }
+          return { status: 200, body: { events: w.getEvents(cap) } };
         }
         return { status: 405, body: { error: 'method not allowed' } };
       }

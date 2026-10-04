@@ -3,6 +3,65 @@
 本文件记录 AI World Engine 的版本演进。格式参考 Keep a Changelog；版本线见 `docs/WORLD-ROADMAP.md`（方案 §69）。
 版本策略（semver）：0.x 期间允许带 CHANGELOG 注明的 API 调整；**1.0 起冻结公开 API**。
 
+## [1.4.0] - 2026-10-03 · V2.4-02：World Invariants——世界不变量加固
+
+方案 V2.4-02 落地（V2.4-00 基线审计 Q11/Q14 的 P1 缺口关闭 + §6.1/§6.3/§6.4
+不变量矩阵）。
+
+### Changed（行为加固：规则层拒绝语义收紧）
+- **不存在的实体不能被修改**（关闭惰性建档漏洞）：`update_attribute` /
+  `talk` / `set_attitude` 对不存在的目标实体原会经 `npcEntry/npcMet/npcAtt`
+  惰性建档**凭空造出实体**——AI 用白名单动作即可绕过 create_entity 显式
+  建档禁令。现对非玩家目标一律拒绝（`*_failed` 事实留痕：实体不存在）。
+  玩家为原生存在不受影响；宿主 entryOf 注入点仍对已存在实体生效。
+- **非法 Relation 不能更新**：`set_relation` 的来源/目标实体必须真实存在
+  （原实现会建指向幽灵实体的悬空边）。
+- **删除实体级联清理悬空引用**：`remove_entity` 现同步清理世界关系表中
+  涉及被删实体的边 + 其他实体关系网（rels）指向它的边，级联规模随
+  `entity_removed.data.relationsPurged` 可观测。宿主语义属性（如
+  attention 指向）不越权清理——引用已删实体的 AI 提案会被存在性守卫拒绝。
+- 时间单调性由钳制保证：负数/零 advance 钳制为最小 1 刻（只进不退）。
+
+### Added
+- **命令幂等键**（方案 §二十一）：`WorldCommand.commandId`（可选，≤128 字符，
+  HTTP 白名单透传）——同键重复提交返回首次结果 + `duplicate: true` 标记，
+  不重复执行、不产生重复 Mutation/Event（HTTP 重试安全；金币扣两次类缺陷
+  关闭）。缺省无 commandId 行为不变（bounded FIFO 500）。
+- 测试：`tests/invariants.test.ts`（15 条：§6.1 修改/移动/关系/删除/时间
+  单调 + §6.3 删除后行为 + §21 幂等三态 + §6.4 侧通道扫描）。
+
+### 诚实边界
+- `attention` 等宿主语义属性指向被删实体不越权清理（引擎不猜语义）——
+  引用已删实体的提案被存在性守卫拒绝；记忆条目保留为角色过去（P9 语义）。
+- 并发版本冲突检测（方案 §十六）维持串行化语义，实体版本化属 V2.5。
+
+## [1.3.0] - 2026-10-03 · V2.4-01：Event Persistence——事件从运行时消息升级为世界历史事实
+
+方案 V2.4-01 落地（V2.4-00 基线审计 Q1-Q3 的 P1 缺口关闭）：世界基础升级为
+**World State + Event History**。
+
+### Added
+- **世界事件史（append-only）**（`src/api/WorldAPI.ts`）：装配了世界史通道的
+  SavePort 时——启动恢复（loadWorldLog → 同 id 保末次去重 → 顺序稳定）、
+  追加（每个新事实按 id 唯一追加，重复写入不制造重复事实）、持久化
+  （saveWorldLog 整档快照，FileSavePort 防抖合并写）、环形窗口重启回填
+  （getEvents / WS replay 语义不变）。未装配通道 = 行为与此前完全一致。
+- **世界事件史查询**：`WorldHandle.queryEvents(filter)` ——按实体/类型/地点/
+  世界日区间/因果（parentId|sourceId）过滤全量历史（新 → 旧）。HTTP
+  `GET /v1/worlds/:id/events` 支持同款过滤参数（任一过滤参数出现即走事件史，
+  否则保持热窗口快路径）。
+- **事实墙钟时间戳**：`WorldEvent.ts`（ISO 8601，产生时刻；世界时间权威仍是
+  day/tick）——additive。
+- 测试：`tests/world-log.test.ts`（6 条：重启恢复顺序稳定、同 id 保末次幂等、
+  isolated 世界事件史隔离、实体/类型/时间/因果过滤、append-only 无公开覆盖
+  路径、HTTP 过滤与热路径兼容）。
+
+### 方案 §5.5 验收
+九项全部通过（重启存在 / ID 唯一 / World 隔离 / 顺序稳定 / 时间查询 / 实体
+查询 / 演化可追踪（P9 既有）/ 业务不可覆盖 / 重复写入幂等）。
+诚实边界：整档快照介质在超长世界史下有 O(n) 快照成本——增量追加介质属 V2.5
+（方案 §5.4 明确本阶段不做 Event Sourcing 全改造）。
+
 ## [1.2.1] - 2026-10-03 · P2：HTTP 建世界支持地点表（公开 API 只增不改）
 
 P0 审计 + P2 天穹接入发现的缺口：`POST /v1/worlds` 白名单不收 locations，

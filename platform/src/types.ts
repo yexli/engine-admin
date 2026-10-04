@@ -143,9 +143,9 @@ export interface EngineClient {
   /** 演化运行时提交命令（POST /v1/worlds/{id}/commands；命令链结果原样返回） */
   executeCommand(
     worldId: string,
-    cmd: { type: string; actorId?: string; targetId?: string; amount?: number; text?: string; payload?: Record<string, unknown> },
+    cmd: { type: string; actorId?: string; targetId?: string; amount?: number; text?: string; payload?: Record<string, unknown>; commandId?: string },
   ): Promise<
-    | { ok: true; result: { ok: boolean; events: string[]; reason?: string } }
+    | { ok: true; result: { ok: boolean; events: string[]; reason?: string; duplicate?: boolean } }
     | { ok: false; status: number; error: string }
   >;
 }

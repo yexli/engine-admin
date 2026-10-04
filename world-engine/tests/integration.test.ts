@@ -38,6 +38,8 @@ describe('完整链路（方案 §34）', () => {
     const all: WorldEvent[] = [];
     worldBus.on('*', (e) => all.push(e));
 
+    /* V2.4-02 不变量：先建档再改态度（不存在实体不可被修改） */
+    world.executeCommand({ type: 'create_entity', payload: { id: 'otto', name: '奥托', kind: 'npc' } });
     const root = world.emitEvent({ type: 'caravan_ambush' });
     causality.withParent(root.id, () => {
       world.executeCommand({ type: 'set_attitude', targetId: 'otto', amount: -25 });

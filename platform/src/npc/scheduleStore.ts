@@ -11,6 +11,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync, renameSync } from 'node:fs';
 import { dirname } from 'node:path';
 import type { NpcScheduleTable } from './schedule.ts';
+import { isNpcStateName } from './state.ts';
 
 export interface ScheduleStoreOptions {
   /** 持久化文件路径；不传 = 仅内存 */
@@ -42,8 +43,9 @@ export function sanitizeScheduleTable(raw: unknown): NpcScheduleTable | null {
       const from = typeof s['from'] === 'number' && Number.isFinite(s['from']) ? Math.floor(s['from']) : Number.NaN;
       const to = typeof s['to'] === 'number' && Number.isFinite(s['to']) ? Math.ceil(s['to']) : Number.NaN;
       const location = typeof s['location'] === 'string' && s['location'].length > 0 && s['location'].length <= 128 ? s['location'] : undefined;
+      const state = isNpcStateName(s['state']) ? s['state'] : undefined;
       if (!Number.isFinite(from) || !Number.isFinite(to) || from < 0 || to <= from || to > 48 || !location) continue;
-      clean.push({ from, to, location });
+      clean.push({ from, to, location, ...(state ? { state } : {}) });
     }
     if (clean.length) {
       out[npcId] = clean;

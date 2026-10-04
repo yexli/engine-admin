@@ -13,6 +13,10 @@
 export interface WorldCommand {
   /** 命令名（snake_case 意图名，如 move / attack / advance_time） */
   type: string;
+  /** 幂等键（V2.4-02 · 方案 §二十一，可选）：同键重复提交返回首次结果，不重复执行。
+   *  典型来源 = 客户端为一次逻辑操作生成的稳定 id（HTTP 重试安全）。
+   *  缺省 = 无幂等（既有行为不变）。 */
+  commandId?: string;
   /** 谁做的 */
   actorId?: string;
   /** 对谁 / 到哪 */
@@ -31,4 +35,6 @@ export interface CommandResult {
   events: string[];
   /** 拒绝原因（ok = false 时） */
   reason?: string;
+  /** V2.4-02：幂等命中——本次返回的是首次执行的结果，世界未再次变化 */
+  duplicate?: boolean;
 }

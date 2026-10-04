@@ -192,7 +192,7 @@ describe('方案 §七 异常与安全矩阵', () => {
     expect(excess.every((o) => o.rejectedBy === 'policy' && o.reason?.includes('变化数上限'))).toBe(true);
   });
 
-  it('9. Model Gateway 故障 → World State 不被破坏，Journal 有 failed 记录', async () => {
+  it('9. Model Gateway 故障（模型不可用）→ DEFER：世界不被破坏，Journal 留 deferred 记录', async () => {
     const before = await stateOf();
     const provider: GatewayProvider = {
       owner: 'timeout-test',
@@ -214,9 +214,9 @@ describe('方案 §七 异常与安全矩阵', () => {
       journal,
     );
     const run = await runtime.tick('w-v2', 'admin');
-    expect(run.status).toBe('failed');
+    expect(run.status).toBe('deferred'); /* V2.4-03：模型不可用 = 决策延后（非 AI 出错） */
     expect(run.proposal).toBeUndefined();
-    expect(journal.recent('w-v2', 5).some((r) => r.id === run.id && r.status === 'failed')).toBe(true);
+    expect(journal.recent('w-v2', 5).some((r) => r.id === run.id && r.status === 'deferred')).toBe(true);
     const after = await stateOf();
     expect(after.t).toBe(before.t);
     expect(after.npcs).toEqual(before.npcs);

@@ -16,7 +16,9 @@ export interface SavePort<W extends EngineWorldState = EngineWorldState> {
   /** 分片读写（可选：不实现则整档往返）。快照形状由介质与宿主的分片适配层约定 */
   loadShards?(): unknown;
   saveShards?(shards: unknown): void;
-  /** 世界史读写（可选：不实现则退化为内存，重启失去长期追溯——查不到，但不会出错） */
+  /** 世界事件史（V2.4-01：append-only——事件是历史事实，普通业务不得覆盖）。
+     可选：不实现则退化为内存（重启失去长期追溯——查不到，但不会出错）。
+     行形状 = WorldEvent；同 id 多行按「保末次」幂等恢复，重复写入不制造重复事实。 */
   loadWorldLog?(): unknown[] | null;
   saveWorldLog?(rows: unknown[]): void;
 }
