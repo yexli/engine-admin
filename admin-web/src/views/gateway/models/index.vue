@@ -53,7 +53,13 @@ function capTag(c: string) {
   return (map[c] ?? "info") as "success" | "info" | "warning" | "danger" | "primary";
 }
 
-/* ---------- 新建/编辑模型（草稿） ---------- */
+/* ---------- 新建/编辑模型（草稿；嵌入模型专属适配） ----------
+   Embedding 统一治理：embedding 是向量能力，与对话/推理能力互斥——
+   选「嵌入模型」时标签锁定为 embedding，占位符/提示/实测语义全部切换。 */
+type ModelKind = "chat" | "embedding";
+const editKind = ref<ModelKind>("chat");
+const isEmbedding = computed(() => editKind.value === "embedding");
+
 const editDialog = ref(false);
 const editIsNew = ref(true);
 const editForm = reactive({
@@ -64,8 +70,25 @@ const editForm = reactive({
   enabled: false
 });
 
+/** 类型切换：嵌入模型锁定 ['embedding']；对话模型剥离 embedding（互斥纪律） */
+function setKind(kind: ModelKind) {
+  editKind.value = kind;
+  if (kind === "embedding") {
+    editForm.tags = ["embedding"];
+  } else {
+    editForm.tags = editForm.tags.filter(t => t !== "embedding");
+    if (editForm.tags.length === 0) editForm.tags = ["fast"];
+  }
+}
+
+/** 对话模型可选标签（不含 embedding）；嵌入模型固定 embedding */
+const tagOptions = computed(() =>
+  isEmbedding.value ? ["embedding"] : ALLOWED_TAGS.filter(t => t !== "embedding")
+);
+
 function openCreate() {
   editIsNew.value = true;
+  editKind.value = "chat";
   Object.assign(editForm, {
     id: "",
     providerId: providers.value[0]?.id ?? "",
@@ -78,6 +101,7 @@ function openCreate() {
 
 function openEdit(row: AdminModel) {
   editIsNew.value = false;
+  editKind.value = row.tags.includes("embedding") ? "embedding" : "chat";
   Object.assign(editForm, {
     id: row.id,
     providerId: row.providerId,
@@ -100,11 +124,16 @@ function submitEdit() {
     return;
   }
   if (!editForm.wireModel.trim()) {
-    message("出站模型名（wireModel）必填：发送给上游的精确模型串", { type: "warning" });
+    message(isEmbedding.value ? "出站模型名（wireModel）必填：如 BAAI/bge-m3" : "出站模型名（wireModel）必填：发送给上游的精确模型串", { type: "warning" });
     return;
   }
   if (editForm.tags.length === 0) {
     message("至少选择一个能力标签", { type: "warning" });
+    return;
+  }
+  /* 双保险：后端 422 同规（嵌入模型标签互斥） */
+  if (editForm.tags.includes("embedding") && editForm.tags.length > 1) {
+    message("'embedding' 与其他能力标签互斥：嵌入模型只能挂 embedding", { type: "warning" });
     return;
   }
   const existing = mc.config.value.models.find(m => m.id === id);
@@ -131,7 +160,7 @@ function submitEdit() {
   message("已写入草稿，点「保存全部」生效", { type: "success" });
 }
 
-/* ---------- 实测（有界真实调用） ---------- */
+/* ---------- 实测（有界真实调用；嵌入模型走 embed 语义并返回维度） ---------- */
 interface TestDisplay {
   modelId: string;
   ok: boolean;
@@ -139,10 +168,13 @@ interface TestDisplay {
   reply: string | null;
   errorCode: string | null;
   errorMessage: string | null;
+  dimension: number | null;
 }
 const testDialog = ref(false);
 const testing = ref(false);
 const testOutcome = ref<TestDisplay | null>(null);
+
+const isEmbeddingRow = (row: AdminModel) => row.tags.includes("embedding");
 
 async function test(row: AdminModel) {
   testing.value = true;
@@ -163,7 +195,8 @@ async function test(row: AdminModel) {
         elapsedMs: r.elapsedMs,
         reply: r.reply ?? null,
         errorCode: r.error?.code ?? null,
-        errorMessage: r.error?.message ?? null
+        errorMessage: r.error?.message ?? null,
+        dimension: r.dimension ?? null
       };
     }
   } finally {
@@ -302,28 +335,33 @@ onMounted(() => mc.ensureLoaded());
           ><template #header
             ><BiText zh="思考强度" en="Thinking" /></template>
           <template #default="{ row }">
-            <el-select
-              :model-value="row.thinking ?? null"
-              clearable
-              placeholder="未配置"
-              size="small"
-              class="!w-full"
-              :disabled="!canManage"
-              @update:model-value="v => setThinking(row as AdminModel, (v as string | null) || null)"
+            <template v-if="!isEmbeddingRow(row as AdminModel)">
+              <el-select
+                :model-value="row.thinking ?? null"
+                clearable
+                placeholder="未配置"
+                size="small"
+                class="!w-full"
+                :disabled="!canManage"
+                @update:model-value="v => setThinking(row as AdminModel, (v as string | null) || null)"
+              >
+                <el-option
+                  v-for="lv in vendorOf(row.wireModel).levels"
+                  :key="lv"
+                  :value="lv"
+                  :label="lv"
+                />
+              </el-select>
+              <div
+                v-if="vendorOf(row.wireModel).hints[row.thinking ?? '']"
+                class="text-[10px] text-[--el-text-color-secondary] leading-tight mt-0.5"
+              >
+                {{ vendorOf(row.wireModel).hints[row.thinking ?? ""] }}
+              </div>
+            </template>
+            <span v-else class="text-xs text-[--el-text-color-secondary]"
+              >— 不适用</span
             >
-              <el-option
-                v-for="lv in vendorOf(row.wireModel).levels"
-                :key="lv"
-                :value="lv"
-                :label="lv"
-              />
-            </el-select>
-            <div
-              v-if="vendorOf(row.wireModel).hints[row.thinking ?? '']"
-              class="text-[10px] text-[--el-text-color-secondary] leading-tight mt-0.5"
-            >
-              {{ vendorOf(row.wireModel).hints[row.thinking ?? ""] }}
-            </div>
           </template>
         </el-table-column>
         <el-table-column label="操作" width="200" fixed="right">
@@ -368,6 +406,12 @@ onMounted(() => mc.ensureLoaded());
             </el-tag>
           </el-descriptions-item>
           <el-descriptions-item label="耗时">{{ testOutcome.elapsedMs }}ms</el-descriptions-item>
+          <el-descriptions-item v-if="testOutcome.dimension != null" label="向量维度">
+            <span class="font-mono text-sm">{{ testOutcome.dimension }}</span>
+            <span class="text-xs text-[--el-text-color-secondary] ml-1"
+              >（embed(['ping']) 实测）</span
+            >
+          </el-descriptions-item>
           <el-descriptions-item v-if="testOutcome.reply" label="上游回复">
             <span class="font-mono text-sm">{{ testOutcome.reply }}</span>
           </el-descriptions-item>
@@ -384,14 +428,30 @@ onMounted(() => mc.ensureLoaded());
       </template>
     </el-dialog>
 
-    <!-- 新增/编辑模型 -->
+    <!-- 新增/编辑模型（嵌入模型专属适配：类型切换 → 标签/占位符/提示联动） -->
     <el-dialog v-model="editDialog" :title="editIsNew ? '新增模型（禁用态）' : `编辑模型 · ${editForm.id}`" width="540px">
       <el-form label-width="150px">
+        <el-form-item label="模型类型">
+          <el-radio-group
+            :model-value="editKind"
+            @update:model-value="v => setKind(v as ModelKind)"
+          >
+            <el-radio-button value="chat">对话 / 推理模型</el-radio-button>
+            <el-radio-button value="embedding">嵌入模型</el-radio-button>
+          </el-radio-group>
+          <div class="text-xs text-[--el-text-color-secondary] leading-tight mt-0.5">
+            切换类型会自动调整能力标签（嵌入与对话能力互斥）
+          </div>
+        </el-form-item>
         <el-form-item label="内部 ID" required>
           <el-input
             v-model="editForm.id"
             :disabled="!editIsNew"
-            placeholder="如 mdl-deepseek-chat（路由引用它，非上游模型名）"
+            :placeholder="
+              isEmbedding
+                ? '如 mdl-bge-m3（路由引用它，非上游模型名）'
+                : '如 mdl-deepseek-chat（路由引用它，非上游模型名）'
+            "
           />
         </el-form-item>
         <el-form-item label="所属供应商" required>
@@ -405,13 +465,34 @@ onMounted(() => mc.ensureLoaded());
           </el-select>
         </el-form-item>
         <el-form-item label="出站模型名" required>
-          <el-input v-model="editForm.wireModel" placeholder="如 deepseek-chat——发给上游的精确 model 串" />
+          <el-input
+            v-model="editForm.wireModel"
+            :placeholder="
+              isEmbedding
+                ? '如 BAAI/bge-m3 / text-embedding-3-small——发给上游 /embeddings 的 model 串'
+                : '如 deepseek-chat——发给上游的精确 model 串'
+            "
+          />
         </el-form-item>
         <el-form-item label="能力标签" required>
-          <el-select v-model="editForm.tags" multiple class="!w-full" placeholder="至少一个">
-            <el-option v-for="t in ALLOWED_TAGS" :key="t" :label="t" :value="t" />
+          <el-select
+            v-model="editForm.tags"
+            multiple
+            :multiple-limit="isEmbedding ? 1 : 0"
+            class="!w-full"
+            :placeholder="isEmbedding ? '嵌入模型固定 embedding' : '至少一个'"
+          >
+            <el-option v-for="t in tagOptions" :key="t" :label="t" :value="t" />
           </el-select>
         </el-form-item>
+        <el-alert
+          v-if="isEmbedding"
+          type="info"
+          :closable="false"
+          show-icon
+          class="mb-1"
+          title="嵌入模型：向量能力（Memory 语义召回等消费）。标签锁定为 embedding——对话/推理能力对它无意义且必然失败。实测走 embed 语义并返回维度；保存后到「模型路由」→ embedding 指派主/备模型（Memory 零改动自动使用）。"
+        />
         <el-form-item v-if="editIsNew" label="初始状态">
           <el-tag size="small">禁用（建议先「实测」再启用）</el-tag>
         </el-form-item>

@@ -27,6 +27,16 @@ export interface WorldRuntimeOptions<W extends EngineWorldState> {
   events?: EventSchemaInstance;
   /** 额外注册的规则（引擎内置规则之外） */
   rules?: WorldRule<W>[];
+  /** 命令幂等账初始装载（V2.4 加固：跨重启幂等——介质在组合根读出后传入） */
+  initialCommandLedger?: CommandLedgerRow[];
+  /** 幂等账变化回调（组合根接介质持久化；账本为插入序，FIFO 上限内全量） */
+  onLedgerChange?: (rows: CommandLedgerRow[]) => void;
+}
+
+/** 幂等账一行：commandId → 首次执行结果（JSON 可序列化；跨重启恢复用） */
+export interface CommandLedgerRow {
+  commandId: string;
+  result: CommandResult;
 }
 
 export interface WorldRuntime<W extends EngineWorldState> {
@@ -73,9 +83,20 @@ export function createWorldRuntime<W extends EngineWorldState>(opts: WorldRuntim
 
   /* V2.4-02 · 方案 §二十一：命令幂等账（commandId → 首次结果，bounded FIFO）。
      同 commandId 重复提交（HTTP 重试/网络重发）返回首次结果——不重复执行、
-     不产生重复 Mutation / Event。缺省无 commandId 的命令不受影响。 */
+     不产生重复 Mutation / Event。缺省无 commandId 的命令不受影响。
+     V2.4 加固：账本可从介质装载（跨重启幂等）并在变化时回调持久化。 */
   const IDEMPOTENCY_CAP = 500;
   const idempotency = new Map<string, CommandResult>();
+  for (const row of opts.initialCommandLedger ?? []) {
+    if (typeof row?.commandId !== 'string' || !row.commandId || !row.result || typeof row.result.ok !== 'boolean') continue;
+    idempotency.set(row.commandId, row.result);
+  }
+  while (idempotency.size > IDEMPOTENCY_CAP) {
+    const drop = idempotency.keys().next().value;
+    if (drop === undefined) break;
+    idempotency.delete(drop);
+  }
+  const ledgerRows = (): CommandLedgerRow[] => [...idempotency].map(([commandId, result]) => ({ commandId, result }));
 
   function execute(cmd: WorldCommand): CommandResult {
     if (typeof cmd.commandId === 'string' && cmd.commandId.length > 0 && cmd.commandId.length <= 128) {
@@ -89,6 +110,7 @@ export function createWorldRuntime<W extends EngineWorldState>(opts: WorldRuntim
         const drop = idempotency.keys().next().value;
         if (drop !== undefined) idempotency.delete(drop);
       }
+      opts.onLedgerChange?.(ledgerRows());
     }
     return result;
   }
@@ -130,7 +152,12 @@ export function createWorldRuntime<W extends EngineWorldState>(opts: WorldRuntim
       mutate,
       clock,
       emit(draft: EventEmit): WorldEvent {
-        const e = events.makeEvent({ ...draft, day: draft.day ?? clock.sceneTime(s).day, tick: draft.tick ?? s.t });
+        const e = events.makeEvent({
+          ...draft,
+          worldId: draft.worldId ?? (s.worldId as string | undefined),
+          day: draft.day ?? clock.sceneTime(s).day,
+          tick: draft.tick ?? s.t,
+        });
         bus.emit(e);
         emitted.push(e);
         return e;

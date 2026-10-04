@@ -109,13 +109,16 @@ Admin Web 必须经 TLS 暴露。二选一：
   memory:
     environment:
       WORLD_API_URL: http://engine:8787
-      EMBEDDINGS_ENDPOINT: https://api.openai.com/v1   # 任意 OpenAI 兼容 /embeddings
-      EMBEDDINGS_MODEL: text-embedding-3-small          # 或本地 bge-m3 等
-      EMBEDDINGS_API_KEY: sk-...                        # 本地推理可留空
+      # Embedding 统一治理（2026-10）：向量能力经平台模型路由，Memory 不再持有
+      # Provider/Endpoint/Key——embedding 模型在「AI 网关 → 模型路由」配置；
+      # 本服务只连平台公共 API（EmbeddingService 传输层）：
+      EMBEDDING_SERVICE_URL: http://platform:8790
+      EMBEDDING_SERVICE_KEY: sk-world-...               # 需 embeddings 权限
 ```
 
-接通后管理台「记忆库 → Embedding」页的通道状态自动变为 attached（含模型名与
-维度）；未配置时该页如实显示「未接入向量通道」。注意：向量在**检索时现场计算**
+接通后管理台「记忆库 → 向量嵌入」诊断页显示路由实况（主/备模型、当前生效、
+实测维度）；embedding 模型本身在「AI 网关 → 模型路由」配置（唯一真相源）。
+未配置时该页如实显示「未接入向量通道」。注意：向量在**检索时现场计算**
 （查询 + 全部候选逐条 embed），条目量大后费用/延迟线性增长，向量化入库与
 索引属 SavePort/Phase 8 范畴。
 

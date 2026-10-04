@@ -1,5 +1,35 @@
 # Changelog · world-memory
 
+## [0.9.0] - 2026-10-04 · Embedding 配置统一治理：Memory 不再持有任何模型配置
+
+双配置源治理落地（docs/EMBEDDING_CONFIG_AUDIT.md）：**Embedding 模型的唯一
+配置源 = 平台 Model Router 的 embedding 能力路由**；Memory 只经注入的
+EmbeddingService 消费向量。
+
+### Removed（0.x semver；契约变更，见迁移脚本）
+- **删除 HTTP 配置端点**：`GET/PUT /v1/memory/embedding-config` 与
+  `POST /v1/memory/embedding-config/test` 一律 **410 Gone**（响应如实指路
+  平台模型路由）——本包不再有 Provider/Endpoint/Model/APIKey 的任何配置面
+  （MemoryHttpInit.embeddingConfig 回调随之删除）。
+- 引擎本体本就零 provider 依赖（EmbedHook 注入制），此删除只移除 HTTP 适配层
+  的历史配置端点。
+
+### Added
+- `EmbeddingService` 类型别名导出（= EmbedHook，固定"我要向量"契约命名）。
+- **维度保护**：引擎记录最近一次成功 embed 的维度；维度变化打上
+  `dimensionChanged` 告警（不静默）。本引擎不持久化向量（检索时现场计算），
+  无需重建索引，但语义分按新模型重算。
+- `GET /v1/memory/embedding` 观测端点新增 `engineDimension` 与
+  `dimensionChanged` 字段（诊断页消费）。
+
+### 迁移
+- 旧 `embedding-config.json` 由 `platform/scripts/migrate-memory-embedding.mjs`
+  迁移为模型路由配置（provider/model + SecretStore 加密凭证 + routes.embedding）。
+
+### 测试
+- world-memory **19/19 全绿**（配置端点 410 契约 + 维度变化告警新增；
+  原 embedding-config 端点测试随端点删除）。
+
 ## [0.8.3] - 2026-10-03 · V2.4-07：MemoryEntry.sourceEventId 落档
 
 ### Fixed

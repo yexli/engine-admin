@@ -26,7 +26,9 @@ export const DEFAULT_ROUTES: Record<Capability, CapabilityRoute> = {
   world_reasoning: { primary: 'reasoning', fallback: 'narrative' },
   evolution: { primary: 'reasoning', fallback: 'narrative' },
   npc_behavior: { primary: 'npc', fallback: 'narrative' },
-  embedding: { primary: 'embedding', fallback: null },
+  /* Embedding 统一治理：无配置 = 无语义召回（词面照常），绝不假装有一个
+     叫 'embedding' 的模型（旧缺省会产生注定 404 的出站调用） */
+  embedding: { primary: null, fallback: null },
   long_context: { primary: 'reasoning', fallback: 'narrative' },
   structured_output: { primary: 'reasoning', fallback: 'narrative' },
 };

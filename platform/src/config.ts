@@ -54,8 +54,6 @@ export interface PlatformConfig {
   evolutionDir: string;
   /** 演化提案走的能力通道（缺省 reasoning） */
   evolutionCapability: string;
-  /** 记忆库服务地址（M5 后特性：嵌入配置鉴权代理的目标） */
-  memoryBaseUrl: string;
 }
 
 export function resolvePlatformConfig(
@@ -91,7 +89,6 @@ export function resolvePlatformConfig(
     settingsFile: resolveFrom(env['PLATFORM_SETTINGS_FILE'] ?? resolve(dataDir, 'settings.json'), cwd),
     evolutionDir: resolveFrom(env['PLATFORM_EVOLUTION_DIR'] ?? resolve(dataDir, 'evolution'), cwd),
     evolutionCapability: env['PLATFORM_EVOLUTION_CAPABILITY'] ?? 'reasoning',
-    memoryBaseUrl: env['PLATFORM_MEMORY_URL'] ?? 'http://127.0.0.1:8789',
   };
 }
 

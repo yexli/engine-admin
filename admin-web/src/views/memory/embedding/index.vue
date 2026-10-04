@@ -1,80 +1,52 @@
 <script setup lang="ts">
-import { onMounted, reactive, ref } from "vue";
+import { onMounted, ref } from "vue";
+import { useRouter } from "vue-router";
 import { getEmbeddingInfo, type EmbeddingInfo } from "@/api/memory";
 import {
-  getEmbeddingConfig,
-  updateEmbeddingConfig,
-  testEmbedding,
-  type EmbeddingConfig,
-  type EmbeddingTestResult
-} from "@/api/memoryConfig";
+  modelControlApi,
+  type RouteLive,
+  type TestResult
+} from "@/api/modelControl";
 import { hasPerms } from "@/utils/auth";
 import { message } from "@/utils/message";
 import { useAsyncData } from "@/composables/useAsyncData";
 
 defineOptions({ name: "MemoryEmbedding" });
 
+/* Embedding 配置统一治理（2026-10）：本页是**状态 / 诊断页**，不再提供
+   任何模型配置表单——Embedding 模型的唯一配置源 = AI 网关 → 模型路由 →
+   embedding。这里展示的是路由实况（主/备模型、当前生效、冷却状态）与
+   Memory 运行时实况（通道维度 / 检索统计），「测试 Embedding」走真实
+   Router 链路（embed 语义，返回实测维度）。 */
+
+const router = useRouter();
 const info = ref<EmbeddingInfo | null>(null);
-const cfg = ref<EmbeddingConfig | null>(null);
+const live = ref<RouteLive | null>(null);
+const liveUnavailable = ref(false);
 const { loading, error, run } = useAsyncData();
-const canManage = hasPerms("system:manage");
+const canManage = hasPerms("gateway:manage");
+
+const testing = ref(false);
+const testResult = ref<TestResult | null>(null);
 
 const anyAttached = () => (info.value?.channels ?? []).some(c => c.attached);
-
-/* 配置表单（草稿；apiKey 留空 = 不修改已存密钥） */
-const form = reactive({
-  enabled: false,
-  endpoint: "",
-  model: "",
-  apiKey: ""
-});
-const saving = ref(false);
-const testing = ref(false);
-const testResult = ref<EmbeddingTestResult | null>(null);
+const dimChanged = () =>
+  (info.value?.channels ?? []).find(c => c.dimensionChanged)?.dimensionChanged ?? null;
 
 async function load() {
   const res = await run(async () => {
-    const [infoRes, cfgRes] = await Promise.all([
+    const [infoRes, liveRes] = await Promise.all([
       getEmbeddingInfo(),
-      getEmbeddingConfig().catch(() => null)
+      canManage
+        ? modelControlApi.getRouteLive("embedding").catch(() => null)
+        : Promise.resolve(null)
     ]);
-    return { info: infoRes, cfg: cfgRes };
+    return { info: infoRes, live: liveRes };
   });
   if (res) {
     info.value = res.info;
-    if (res.cfg) {
-      cfg.value = res.cfg;
-      form.enabled = res.cfg.enabled;
-      form.endpoint = res.cfg.endpoint;
-      form.model = res.cfg.model;
-      form.apiKey = "";
-    }
-  }
-}
-
-async function save() {
-  if (form.enabled && (!form.endpoint.trim() || !form.model.trim())) {
-    message("启用时 Endpoint 与模型名必填", { type: "warning" });
-    return;
-  }
-  saving.value = true;
-  try {
-    const out = await updateEmbeddingConfig({
-      enabled: form.enabled,
-      endpoint: form.endpoint.trim(),
-      model: form.model.trim(),
-      ...(form.apiKey ? { apiKey: form.apiKey } : {})
-    });
-    cfg.value = out;
-    form.apiKey = "";
-    message(`已保存并热应用（通道 ${out.enabled ? "启用" : "停用"}）`, {
-      type: "success"
-    });
-    load();
-  } catch (e) {
-    message(e instanceof Error ? e.message : "保存失败", { type: "error" });
-  } finally {
-    saving.value = false;
+    live.value = res.live;
+    liveUnavailable.value = canManage && res.live === null;
   }
 }
 
@@ -82,12 +54,16 @@ async function doTest() {
   testing.value = true;
   testResult.value = null;
   try {
-    testResult.value = await testEmbedding();
+    testResult.value = await modelControlApi.testRoute("embedding");
   } catch (e) {
     message(e instanceof Error ? e.message : "测试失败", { type: "error" });
   } finally {
     testing.value = false;
   }
+}
+
+function gotoRouter() {
+  router.push("/gateway/router");
 }
 
 onMounted(load);
@@ -110,97 +86,136 @@ onMounted(load);
       </template>
     </el-alert>
 
-    <!-- 嵌入模型配置（可写；system:manage） -->
+    <el-alert
+      type="info"
+      :closable="false"
+      show-icon
+      class="mb-3"
+      title="本页为向量嵌入的状态 / 诊断页。Embedding 模型的唯一配置源：AI 网关 → 模型路由 → embedding（Memory 只消费 embedding 能力，不再保存 Provider / Endpoint / API Key）。"
+    />
+
+    <!-- 路由实况（唯一真相源：Model Router） -->
     <el-card shadow="never" class="mb-3">
       <template #header>
         <div class="flex items-center justify-between">
-          <BiText zh="嵌入模型配置" en="Embedding Config" />
-          <el-tag
-            v-if="cfg"
-            :type="cfg.enabled ? 'success' : 'info'"
-            size="small"
-          >
-            {{ cfg.enabled ? "已启用" : "未启用" }}
-          </el-tag>
+          <BiText zh="Embedding 路由实况" en="Embedding Route (Live)" />
+          <div class="flex items-center gap-2">
+            <el-tag
+              v-if="live"
+              :type="live.route.primary ? 'success' : 'info'"
+              size="small"
+            >
+              {{ live.route.primary ? "已启用" : "未配置" }}
+            </el-tag>
+            <Perms value="gateway:manage">
+              <el-button size="small" @click="gotoRouter">
+                前往模型路由
+              </el-button>
+            </Perms>
+          </div>
         </div>
       </template>
-      <el-alert
-        type="info"
-        :closable="false"
-        show-icon
-        class="mb-3"
-        title="任意 OpenAI 兼容 /embeddings 端点（云上或本地推理均可）。保存后热应用（无需重启），检索语义相似度 ×0.2 并入总分；向量化失败自动回退纯词面。apiKey 加密边界：明文只存记忆服务侧配置，界面不回显。"
-      />
-      <el-form
-        v-if="cfg"
-        label-width="110px"
-        :disabled="!canManage"
-        class="max-w-[720px]"
-      >
-        <el-form-item label="启用">
-          <el-switch v-model="form.enabled" />
-        </el-form-item>
-        <el-form-item label="Endpoint" required>
-          <el-input
-            v-model="form.endpoint"
-            :placeholder="form.enabled ? '如 https://api.openai.com/v1 或 http://127.0.0.1:11434/v1' : '停用状态下可留空'"
-            maxlength="256"
-            class="font-mono"
-          />
-        </el-form-item>
-        <el-form-item label="模型名" required>
-          <el-input
-            v-model="form.model"
-            :placeholder="form.enabled ? '如 text-embedding-3-small / bge-m3' : ''"
-            maxlength="128"
-            class="font-mono"
-          />
-        </el-form-item>
-        <el-form-item label="API Key">
-          <el-input
-            v-model="form.apiKey"
-            type="password"
-            show-password
-            maxlength="4096"
-            :placeholder="
-              cfg.hasApiKey ? '已保存（留空 = 不修改；输入新值 = 覆盖）' : '本地推理可留空'
-            "
-          />
-        </el-form-item>
-        <el-form-item>
-          <Perms value="system:manage">
-            <el-button type="primary" :loading="saving" @click="save">
-              保存并热应用
-            </el-button>
-            <el-button :loading="testing" @click="doTest">连通性测试</el-button>
+
+      <template v-if="live">
+        <el-descriptions :column="2" border>
+          <el-descriptions-item label="能力">embedding</el-descriptions-item>
+          <el-descriptions-item label="当前生效">
+            <template v-if="live.resolved">
+              <span class="font-mono">{{ live.resolved.modelId }}</span>
+              <el-tag
+                v-if="live.resolved.usedFallback"
+                type="warning"
+                size="small"
+                class="ml-2"
+                >fallback 接管</el-tag
+              >
+            </template>
+            <span v-else class="text-[--el-text-color-secondary]"
+              >—（无可用模型，语义召回关闭，词面召回照常）</span
+            >
+          </el-descriptions-item>
+          <el-descriptions-item label="主模型（primary）">
+            <template v-if="live.primary">
+              <span class="font-mono">{{ live.primary.modelId }}</span>
+              <span
+                v-if="live.primary.wireModel"
+                class="text-xs text-[--el-text-color-secondary] ml-1"
+                >({{ live.primary.wireModel }})</span
+              >
+              <el-tag
+                v-if="live.primary.coolingDown"
+                type="danger"
+                size="small"
+                class="ml-2"
+                >冷却中</el-tag
+              >
+              <div
+                v-if="live.primary.providerName"
+                class="text-xs text-[--el-text-color-secondary]"
+              >
+                Provider：{{ live.primary.providerName }}
+              </div>
+            </template>
+            <span v-else class="text-[--el-text-color-secondary]">未指派</span>
+          </el-descriptions-item>
+          <el-descriptions-item label="备模型（fallback）">
+            <template v-if="live.fallback">
+              <span class="font-mono">{{ live.fallback.modelId }}</span>
+              <el-tag
+                v-if="live.fallback.coolingDown"
+                type="danger"
+                size="small"
+                class="ml-2"
+                >冷却中</el-tag
+              >
+              <div
+                v-if="live.fallback.providerName"
+                class="text-xs text-[--el-text-color-secondary]"
+              >
+                Provider：{{ live.fallback.providerName }}
+              </div>
+            </template>
+            <span v-else class="text-[--el-text-color-secondary]">无</span>
+          </el-descriptions-item>
+        </el-descriptions>
+
+        <div class="mt-3 flex items-center gap-2">
+          <Perms value="gateway:manage">
+            <el-button
+              type="primary"
+              :disabled="!live.route.primary"
+              :loading="testing"
+              @click="doTest"
+              >测试 Embedding</el-button
+            >
           </Perms>
-        </el-form-item>
-      </el-form>
+          <span
+            v-if="!canManage"
+            class="text-xs text-[--el-text-color-secondary]"
+            >当前角色无 gateway:manage 权限，测试与跳转不可用。</span
+          >
+        </div>
+
+        <el-alert
+          v-if="testResult"
+          :type="testResult.ok ? 'success' : 'error'"
+          :closable="false"
+          show-icon
+          class="mt-2"
+          :title="
+            testResult.ok
+              ? `测试通过 ✓ 能力 embedding · 模型 ${testResult.modelId} · 维度 ${testResult.dimension ?? '—'} · ${testResult.elapsedMs}ms`
+              : `测试失败：${testResult.error?.message ?? '未知原因'}（${testResult.elapsedMs}ms）`
+          "
+        />
+      </template>
       <el-alert
         v-else
         type="warning"
         :closable="false"
         show-icon
-        title="记忆服务未装配嵌入配置回调（旧版本或配置端点不可达）。"
+        title="无法读取路由实况（需要 gateway:manage 权限或平台管理面可达）。Memory 运行时实况仍正常展示。"
       />
-      <el-alert
-        v-if="testResult"
-        :type="testResult.ok ? 'success' : 'error'"
-        :closable="false"
-        show-icon
-        class="mt-2 max-w-[720px]"
-        :title="
-          testResult.ok
-            ? `连通 ✓ 维度 ${testResult.dimension} · ${testResult.ms}ms`
-            : `测试失败：${testResult.error ?? '未知原因'}（${testResult.ms}ms）`
-        "
-      />
-      <div
-        v-if="!canManage"
-        class="text-xs text-[--el-text-color-secondary] mt-1"
-      >
-        当前角色无 system:manage 权限，仅可查看。
-      </div>
     </el-card>
 
     <el-alert
@@ -211,7 +226,8 @@ onMounted(load);
       show-icon
     >
       <template #title>
-        当前未接入向量通道（检索为纯词面 + 新近度 + 重要度 + 置信度）。在上方启用并保存后即热接入。
+        当前未接入向量通道（检索为纯词面 + 新近度 + 重要度 + 置信度）。在模型路由配置
+        embedding 能力并确保 EmbeddingService 接入后即生效。
       </template>
     </el-alert>
 
@@ -250,6 +266,19 @@ onMounted(load);
       </el-col>
     </el-row>
 
+    <el-alert
+      v-if="dimChanged()"
+      type="warning"
+      :closable="false"
+      class="mb-3"
+      show-icon
+    >
+      <template #title>
+        检测到向量维度变化（{{ dimChanged()!.from }} →
+        {{ dimChanged()!.to }}）：本引擎向量按检索实时计算、无持久向量需要重建，但语义分将按新模型重算。
+      </template>
+    </el-alert>
+
     <el-card v-if="info" shadow="never">
       <template #header>
         <BiText zh="各 Store 向量通道" en="Embed Channels" />
@@ -265,7 +294,7 @@ onMounted(load);
           ><template #header><BiText zh="通道" en="Channel" /></template>
           <template #default="{ row }">
             <span v-if="row.attached" class="font-mono">{{
-              row.name ?? "attached"
+              row.name ?? "platform-model-router"
             }}</span>
             <span v-else class="text-xs text-[--el-text-color-secondary]"
               >—</span
@@ -275,6 +304,14 @@ onMounted(load);
         <el-table-column width="110" align="center"
           ><template #header><BiText zh="维度" en="Dimension" /></template>
           <template #default="{ row }">{{ row.dimension ?? "—" }}</template>
+        </el-table-column>
+        <el-table-column width="140" align="center"
+          ><template #header
+            ><BiText zh="引擎实测维度" en="Engine Dim" /></template
+          >
+          <template #default="{ row }">{{
+            row.engineDimension ?? "—"
+          }}</template>
         </el-table-column>
         <el-table-column width="120" align="center"
           ><template #header><BiText zh="状态" en="Status" /></template>

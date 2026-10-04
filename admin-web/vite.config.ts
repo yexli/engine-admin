@@ -35,7 +35,7 @@ export default ({ mode }: ConfigEnv): UserConfigExport => {
           ws: true,
           rewrite: p => p.replace(/^\/world-api/, "")
         },
-        // World Memory HTTP API（M1.1：适配层见 world-engine/memory/src/http/protocol.ts）
+        // Memory 管理（P12.5：8789 退役后由平台管理面 8791 提供原生记忆路由）
         "/memory-api": {
           target: env.VITE_MEMORY_API_URL ?? "http://127.0.0.1:8789",
           changeOrigin: true,

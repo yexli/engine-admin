@@ -22,8 +22,8 @@ export interface UsageEntry {
   ts: string;
   /** 与访问日志 / x-request-id 同源，可对账 */
   requestId: string;
-  /** chat = 模型调用；worlds = 世界 API 透传 */
-  kind: 'chat' | 'worlds';
+  /** chat = 模型调用；worlds = 世界 API 透传；embeddings = 向量嵌入（Embedding 统一治理后经 Router） */
+  kind: 'chat' | 'worlds' | 'embeddings';
   keyId: string;
   tenantId: string;
   /** 归属游戏方（G3 计量维度）：钥匙带 gameId 时盖章；null/缺省 = 平台钥匙 */
@@ -35,8 +35,8 @@ export interface UsageEntry {
   /* ---------- chat 路由留痕 ---------- */
   /** 请求的模型名（world-agent 或物理模型 ID） */
   model?: string;
-  /** world-agent 管线 / 保真代理 */
-  route?: 'world-agent' | 'proxy';
+  /** world-agent 管线 / 保真代理 / embedding 能力路由 */
+  route?: 'world-agent' | 'proxy' | 'embedding';
   /** world-agent 任务分析出的能力 */
   capability?: string;
   /** world-agent 实际使用的模型（含 fallback 接管后） */

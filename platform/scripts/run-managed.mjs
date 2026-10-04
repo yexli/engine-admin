@@ -32,7 +32,7 @@ import { SettingsStore } from '../dist/admin/settings.js';
 import { NPC_EVOLUTION_POLICY, createEvolutionJournal, createEvolutionRuntime, createTriggerRuntime, gatewayDriver } from '../dist/evolution/index.js';
 import { createScheduleRuntime, createScheduleStore } from '../dist/index.js';
 import { createMemoryRuntime, createWorldMemoryService } from '../dist/index.js';
-import { createEmbeddingsClient } from '../dist/upstream/embeddings.js';
+import { createEmbeddingsClient, createRoutedEmbeddingService, routedEmbeddingHook } from '../dist/upstream/embeddings.js';
 import { join } from 'node:path';
 import { existsSync, readFileSync } from 'node:fs';
 
@@ -122,7 +122,11 @@ if (evolutionLoaded.skippedCorrupt > 0) {
    写侧：Memory Runtime 轮询事实 → 感知边界派生 → 摄取（幂等、持久化）。
    读侧：个体决策时为焦点实体召回，注入 context.memory（maxMemoryItems 预算内）。
    纪律：Memory ≠ 第二世界状态——摄取零命令、只读世界；记忆内容只能经
-   AI 提案 → Rules 影响世界。 */
+   AI 提案 → Rules 影响世界。
+   Embedding 统一治理（2026-10）：向量能力只经模型路由——
+   Router.select('embedding') → 受管网关 /v1/embeddings，primary 失败自动
+   接管 fallback（markFailed/markHealthy 冷却）。Memory 不持有任何
+   Provider/Endpoint/Key 配置。 */
 const memoryWorlds = (process.env.PLATFORM_MEMORY_WORLDS ?? '')
   .split(',')
   .map((w) => w.trim())
@@ -134,21 +138,16 @@ const memoryLoaded = memoryService.loadAll();
 if (memoryLoaded.skippedCorrupt > 0) {
   console.warn(`[managed] ⚠ 记忆存储装载：${memoryLoaded.worlds} 个世界成功，${memoryLoaded.skippedCorrupt} 个损坏被跳过`);
 }
-/* 语义召回钩子（P8 · 方案 §十一 embedding 能力）：路由到 embedding 能力通道 →
-   受管网关 /v1/embeddings。通道未配置/调用失败 → null = 回纯词面（渐进增强，非硬依赖）。 */
+/* 语义召回钩子（P8 + Embedding 统一治理）：EmbeddingService = Router → 受管
+   网关 /v1/embeddings。primary 失败 → markFailed 冷却 → fallback 自动接管；
+   成功 → markHealthy。无路由/调用失败 → null = 回纯词面（渐进增强，非硬依赖）。
+   Memory 侧零 Provider/Endpoint/Key——模型选择唯一来自模型路由。 */
 if (memoryWorlds.length) {
-  const embeddings = createEmbeddingsClient({ baseUrl: runtime.gatewayUrl });
-  const embedHook = {
-    embed: async (texts) => {
-      try {
-        const selected = runtime.router.select('embedding');
-        if (!selected) return null;
-        return await embeddings.embed(selected.model, texts);
-      } catch {
-        return null;
-      }
-    },
-  };
+  const routedEmbeddings = createRoutedEmbeddingService({
+    router: runtime.router,
+    embeddings: createEmbeddingsClient({ baseUrl: runtime.gatewayUrl }),
+  });
+  const embedHook = { embed: routedEmbeddingHook(routedEmbeddings) };
   for (const worldId of memoryWorlds) memoryService.setEmbed(worldId, embedHook);
 }
 
@@ -271,7 +270,6 @@ const admin = await startAdminServer({
   scheduleRuntime: scheduler,
   memoryRuntime,
   memoryService,
-  memoryBaseUrl: config.memoryBaseUrl,
 });
 console.log(`[managed]   admin   : ${admin.url}  （仅回环；Admin Web 必须经服务端反代注入 x-admin-token 访问，令牌绝不下发浏览器）`);
 console.log(`[managed]   usage   : ${config.usageFile}（结构化用量记录，与访问日志凭 requestId 对账）`);

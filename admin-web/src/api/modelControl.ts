@@ -174,6 +174,31 @@ export interface TestResult {
   elapsedMs: number;
   reply?: string | null;
   error?: { code: string; message: string };
+  /** embedding 语义测试（routes/embedding/test）附实测维度 */
+  dimension?: number;
+}
+
+/** 路由实况（Embedding 统一治理）：只读解析，含当前 select() 结果与冷却状态 */
+export interface RouteLive {
+  capability: string;
+  route: { primary: string | null; fallback: string | null };
+  primary: {
+    modelId: string;
+    wireModel: string | null;
+    enabled: boolean;
+    providerId: string | null;
+    providerName: string | null;
+    coolingDown: boolean;
+  } | null;
+  fallback: {
+    modelId: string;
+    wireModel: string | null;
+    enabled: boolean;
+    providerId: string | null;
+    providerName: string | null;
+    coolingDown: boolean;
+  } | null;
+  resolved: { modelId: string; usedFallback: boolean } | null;
 }
 
 const BASE = "/control-api/v1/admin";
@@ -300,6 +325,11 @@ export const modelControlApi = {
       "POST",
       `/routes/${encodeURIComponent(capability)}/test`
     ).catch(e => probeFailureToResult(e, null as unknown as string));
+  },
+
+  /** 路由实况（只读）：槽位 → 模型/供应商投影 + 冷却 + 当前生效解析 */
+  getRouteLive(capability: ManagedCapability): Promise<RouteLive> {
+    return request("GET", `/routes/${encodeURIComponent(capability)}`);
   },
 
   rollback(revision: number): Promise<{ revision: number }> {

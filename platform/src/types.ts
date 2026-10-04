@@ -18,12 +18,14 @@
 export type PlatformPermission =
   | 'chat:completions'
   | 'worlds:read'
-  | 'worlds:write';
+  | 'worlds:write'
+  | 'embeddings';
 
 export const PLATFORM_PERMISSIONS: readonly PlatformPermission[] = [
   'chat:completions',
   'worlds:read',
   'worlds:write',
+  'embeddings',
 ];
 
 /** 密钥记录：明文只在创建时返回一次；落盘只存 SHA-256 哈希与展示前缀。

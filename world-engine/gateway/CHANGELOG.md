@@ -1,5 +1,12 @@
 # Changelog · world-gateway
 
+## [0.7.2] - 2026-10-04 · remoteEmbeddings 出站超时
+
+- `remoteEmbeddings` 增加可选 `{ timeoutMs }`（缺省 60s，AbortController）——
+  与 remoteChat 对齐。此前嵌入出站无超时，上游挂起会拖住调用方
+  （Embedding 统一治理后该函数是 embedding 路由的唯一出站执行件）。
+- 网络层异常归一为 `RemoteModelError('network')`（与 remoteChat 同纪律）。
+
 ## [0.7.0] - 2026-09-29 · Multi-Model 编排管线（V0.7，方案 §65 角色图运行时化）
 
 一轮任务多模型协作：管线 JSON 描述 + 确定性路由执行。

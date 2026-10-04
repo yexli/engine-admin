@@ -3,6 +3,53 @@
 本文件记录 AI World Engine 的版本演进。格式参考 Keep a Changelog；版本线见 `docs/WORLD-ROADMAP.md`（方案 §69）。
 版本策略（semver）：0.x 期间允许带 CHANGELOG 注明的 API 调整；**1.0 起冻结公开 API**。
 
+## [1.4.1] - 2026-10-04 · V2.4 Runtime Hardening 复审加固（事件史与幂等账闭环）
+
+V2.4-00 复审（V2.4 全量完成后）发现的事件史可靠性缺口逐项关闭。全部为
+additive 变更，公开 API 只增不改。
+
+### Fixed（P1）
+- **重启后事件 id 序号续接**：`createWorld` 恢复世界史时从史内 id
+  （`evt_<day>_<seq>`）推导最大序号并前移事件 id 序号域——原实现重启后
+  序号归零，新事件 id 与历史撞车，命中同 id 幂等守卫后**新事实只进观测
+  环、永不入史**（静默丢失）。序号只前移不回退（缺省作用域多世界共享
+  序号域安全）。
+- **缺省作用域多世界史渗透**：`WorldEvent`/`EventDraft` 增加 `worldId?`
+  归属字段（时钟/命令链/emitEvent 发射点自动盖章）；世界史与观测环的
+  通配订阅按归属过滤——两个非 isolated 命名世界共享缺省总线时，环与
+  世界史不再互相写入对方的事实。未命名世界保持缺省单世界语义（不过滤，
+  既有宿主零影响）。
+
+### Fixed（P2）
+- **命令幂等账跨重启**：`SavePort` 新增可选 `loadCommandLedger/
+  saveCommandLedger` 通道（FileSavePort 落 `<save>.commands.json`，
+  InMemoryWorldStorage 内存往返）；`WorldRuntime` 装载初始账本并在变化时
+  回调持久化——HTTP 重试跨进程重启不再重复执行（金币不扣两次）。账本
+  行 = `{ commandId, result }`（首次结果），插入序 FIFO，上限 500 不变。
+- **世界史损坏不静默覆盖**：`FileSavePort.loadWorldLog` 解析失败时备份为
+  `*.log.json.corrupt-<ts>` 再返回 null（与主档同纪律）——原实现仅报错，
+  下一次写入会把可修复的历史无声覆盖。
+- **setSavePort 后装介质吸收历史**：后装时合并介质世界史（幂等恢复 +
+  序号续接）+ 把后装前只记在观测环里的内存事实并入史并立即落盘——原实现
+  后装后首条事件会用近乎空的史覆盖介质既有档案。
+- **死信入史**：被限流/熔断丢弃的事件经 `onDeadLetter` 钩子（链式保留
+  宿主既有观察者）同样进观测环与世界史，丢弃原因写入 `data.deadLetter`——
+  世界史不再因事件风暴出现空洞。
+- **HTTP `/events?n` 上界钳制**（500）：全量检索走过滤参数路径（带 total），
+  窗口快路径不再能一次倒出全量史。
+
+### 诚实边界
+- 总线投递分级（channelOf）仍取模块级默认表——isolated 世界经
+  `registerEventTables` 注册的通道表不参与总线投递判定（分级 level 戳在
+  事件上不受影响）；通道表参数化属后续版本。
+- 后装介质不装载命令幂等账（构造时装载）；增量追加介质、并发实体版本化
+  仍属 V2.5。
+
+### 测试
+- `tests/v24-hardening.test.ts`（11 条：序号续接×2 / 归属过滤×2 / 死信入史 /
+  后装介质 / 幂等账跨重启×3 / 世界史损坏备份 / HTTP n 钳制）。
+- **world-engine 140/140 全绿**（129 既有回归 + 11 新增）；tsc --noEmit 通过。
+
 ## [1.4.0] - 2026-10-03 · V2.4-02：World Invariants——世界不变量加固
 
 方案 V2.4-02 落地（V2.4-00 基线审计 Q11/Q14 的 P1 缺口关闭 + §6.1/§6.3/§6.4

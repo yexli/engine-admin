@@ -495,7 +495,7 @@ describe('私有管理 API · API Key 生命周期（M2.1）', () => {
 
     const ok = await adminFetch(admin, '/v1/admin/keys', withToken({ method: 'POST', body: JSON.stringify({ name: 'default-perms' }) }));
     expect(ok.status).toBe(201);
-    expect((ok.body.key.permissions as string[]).sort()).toEqual(['chat:completions', 'worlds:read', 'worlds:write']);
+    expect((ok.body.key.permissions as string[]).sort()).toEqual(['chat:completions', 'embeddings', 'worlds:read', 'worlds:write']);
   });
 
   it('G2 · 游戏方钥匙：gameId 创建/清单回显；缺省 null = 管理钥匙；坏 gameId → 400', async () => {
@@ -1016,84 +1016,172 @@ describe('私有管理 API · 系统设置（M3.4）', () => {
   });
 });
 
-/* ---------------- M5 后特性 · 嵌入配置鉴权代理 ---------------- */
+/* ---------------- Embedding 配置统一治理 ---------------- */
 
 const embedCfgPath = '/v1/admin/memory/embedding-config';
 
-describe('私有管理 API · 嵌入配置代理', () => {
-  it('GET/PUT 代理到 memory 服务；PUT 走 system:manage 闸；viewer PUT 403；不可达 502', async () => {
-    const { runtime, keys, usage, sessions, users, settings } = await harness();
-
-    /* stub memory 服务：记录请求并回配置视图 */
-    const seen: { method: string; url: string; body: unknown }[] = [];
-    const mem = createServer((req, res) => {
-      let raw = '';
-      req.on('data', (c) => (raw += c));
-      req.on('end', () => {
-        seen.push({ method: req.method ?? '', url: req.url ?? '', body: raw ? JSON.parse(raw || '{}') : null });
-        res.writeHead(200, { 'content-type': 'application/json' });
-        res.end(JSON.stringify({ config: { enabled: true, endpoint: 'http://x/v1', model: 'm', hasApiKey: true } }));
-      });
-    });
-    await new Promise<void>((r) => mem.listen(0, '127.0.0.1', () => r()));
-    const memPort = (mem.address() as { port: number }).port;
-    cleanups.push(async () => {
-      await new Promise<void>((r) => mem.close(() => r()));
-    });
-
-    const admin2 = await startAdminServer({
-      runtime,
-      adminToken: ADMIN_TOKEN,
-      port: 0,
-      accessLog: false,
-      keys,
-      usage,
-      sessions,
-      users,
-      settings,
-      memoryBaseUrl: `http://127.0.0.1:${memPort}`,
-    });
-    cleanups.push(() => admin2.close());
-
-    /* viewer 会话 PUT → 403（system:manage 闸） */
-    const viewerLogin = await adminFetch(admin2, '/v1/admin/session/login', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: loginBody('viewer', seedPass('viewer')),
-    });
-    const vh = { 'x-admin-session': viewerLogin.body.data.accessToken as string };
-    expect((await adminFetch(admin2, embedCfgPath, { method: 'PUT', headers: { 'content-type': 'application/json', ...vh }, body: JSON.stringify({ enabled: false, endpoint: '', model: '' }) })).status).toBe(403);
-
-    /* 主令牌 PUT → 透传（memory 服务收到 body） */
-    const put = await adminFetch(admin2, embedCfgPath, withToken({
+describe('嵌入配置代理已删除（唯一配置源 = 模型路由）', () => {
+  it('GET/PUT/test 一律 404 not_found（路由已下线）', async () => {
+    const { admin } = await harness();
+    expect((await adminFetch(admin, embedCfgPath, withToken())).status).toBe(404);
+    expect((await adminFetch(admin, embedCfgPath, withToken({
       method: 'PUT',
-      body: JSON.stringify({ enabled: true, endpoint: 'http://127.0.0.1:9/v1', model: 'mock-embed', apiKey: 'sk-x' }),
-    }));
-    expect(put.status).toBe(200);
-    expect(put.body.config.hasApiKey).toBe(true);
-    expect(seen.some((s) => s.method === 'PUT')).toBe(true);
+      body: JSON.stringify({ enabled: true, endpoint: 'http://x/v1', model: 'm', apiKey: 'sk-x' }),
+    }))).status).toBe(404);
+    expect((await adminFetch(admin, `${embedCfgPath}/test`, withToken({ method: 'POST' }))).status).toBe(404);
+  });
+});
 
-    /* test 端点透传 */
-    expect((await adminFetch(admin2, `${embedCfgPath}/test`, withToken({ method: 'POST' }))).status).toBe(200);
-
-    /* memory 服务不可达 → 502 */
-    const dead = await startAdminServer({
-      runtime, adminToken: ADMIN_TOKEN, port: 0, accessLog: false,
-      memoryBaseUrl: 'http://127.0.0.1:1',
+/** embedding 语义的上游桩：POST /embeddings → OpenAI 兼容 data（可指定维度） */
+function startScriptedEmbeddingUpstream(dimension: number, status = 200): Promise<{ url: string; close: () => Promise<void> }> {
+  const server: Server = createServer((req, res) => {
+    const chunks: Buffer[] = [];
+    req.on('data', (c: Buffer) => chunks.push(c));
+    req.on('end', () => {
+      if (status !== 200) {
+        res.writeHead(status, { 'content-type': 'application/json' });
+        res.end(JSON.stringify({ error: { message: 'embed boom' } }));
+        return;
+      }
+      res.writeHead(200, { 'content-type': 'application/json' });
+      res.end(JSON.stringify({ object: 'list', data: [{ object: 'embedding', embedding: Array.from({ length: dimension }, (_, i) => i / dimension), index: 0 }] }));
     });
-    cleanups.push(() => dead.close());
-    const unreachable = await adminFetch(dead, embedCfgPath, withToken());
-    expect(unreachable.status).toBe(502);
-    expect(unreachable.body.error.code).toBe('upstream_unreachable');
+  });
+  return new Promise((resolve) => {
+    server.listen(0, '127.0.0.1', () => {
+      const port = (server.address() as { port: number }).port;
+      resolve({ url: `http://127.0.0.1:${port}/v1`, close: () => new Promise<void>((r) => server.close(() => r())) });
+    });
+  });
+}
+
+describe('路由实况与 embedding 语义测试（GET/POST /v1/admin/routes/embedding）', () => {
+  /** 真实工作流建档：禁用建档 → 传凭证 → 启用 + embedding 路由（顺序错了会被 422 拦） */
+  async function applyEmbeddingRoute(admin: Awaited<ReturnType<typeof harness>>['admin'], upstreamUrl: string): Promise<void> {
+    const cur = await adminFetch(admin, '/v1/admin/model-config', withToken());
+    const rev0 = cur.body.revision as number;
+    /* 磁盘必需键：旧六能力必须齐全（embedding 为可选键） */
+    const legacyRoutes = Object.fromEntries(['roleplay', 'narrative', 'reasoning', 'fast', 'cheap', 'memory'].map((c) => [c, { primary: null, fallback: null }]));
+    const base = {
+      version: 1,
+      providers: [{ id: 'prov-emb', name: 'embed-vendor', endpoint: upstreamUrl, auth: { kind: 'secret' }, enabled: false }],
+      models: [{ id: 'mdl-emb', providerId: 'prov-emb', wireModel: 'bge-m3', tags: ['embedding'], enabled: false }],
+      routes: { ...legacyRoutes, embedding: { primary: null, fallback: null } },
+    };
+    expect((await adminFetch(admin, '/v1/admin/model-config', withToken({
+      method: 'PUT', headers: { 'if-match': String(rev0) }, body: JSON.stringify(base),
+    }))).status).toBe(200);
+    expect((await adminFetch(admin, '/v1/admin/providers/prov-emb/credential', withToken({
+      method: 'PUT', body: JSON.stringify({ value: `cred-${randomBytes(8).toString('hex')}` }),
+    }))).status).toBe(200);
+    const enable = await adminFetch(admin, '/v1/admin/model-config', withToken({
+      method: 'PUT',
+      headers: { 'if-match': String((await adminFetch(admin, '/v1/admin/model-config', withToken())).body.revision) },
+      body: JSON.stringify({
+        ...base,
+        providers: [{ ...base.providers[0]!, enabled: true }],
+        models: [{ ...base.models[0]!, enabled: true }],
+        routes: { ...legacyRoutes, embedding: { primary: 'mdl-emb', fallback: null } },
+      }),
+    }));
+    expect(enable.status).toBe(200);
+  }
+
+  it('GET 路由实况：未配置 → resolved null；配置后 → 模型/供应商投影 + select 结果', async () => {
+    const { admin } = await harness();
+
+    const bare = await adminFetch(admin, '/v1/admin/routes/embedding', withToken());
+    expect(bare.status).toBe(200);
+    expect(bare.body.route.primary).toBeNull();
+    expect(bare.body.resolved).toBeNull();
+    expect(bare.body.primary).toBeNull();
+
+    const upstream = await startScriptedEmbeddingUpstream(7);
+    await applyEmbeddingRoute(admin, upstream.url);
+
+    const live = await adminFetch(admin, '/v1/admin/routes/embedding', withToken());
+    expect(live.status).toBe(200);
+    expect(live.body.route.primary).toBe('mdl-emb');
+    expect(live.body.primary).toMatchObject({ modelId: 'mdl-emb', wireModel: 'bge-m3', providerName: 'embed-vendor', enabled: true, coolingDown: false });
+    expect(live.body.resolved).toEqual({ modelId: 'mdl-emb', usedFallback: false });
+
+    expect((await adminFetch(admin, '/v1/admin/routes/nope', withToken())).status).toBe(400);
   });
 
-  it('未配置 memoryBaseUrl → 404 not_configured', async () => {
-    const { runtime } = await harness();
-    const bare = await startAdminServer({ runtime, adminToken: ADMIN_TOKEN, port: 0, accessLog: false });
-    cleanups.push(() => bare.close());
-    const res = await adminFetch(bare, embedCfgPath, withToken());
-    expect(res.status).toBe(404);
-    expect(res.body.error.code).toBe('not_configured');
+  it('POST routes/embedding/test 走 embed 语义（返回实测维度），不是 chat ping', async () => {
+    const { admin } = await harness();
+    const upstream = await startScriptedEmbeddingUpstream(1024);
+    await applyEmbeddingRoute(admin, upstream.url);
+
+    const ok = await adminFetch(admin, '/v1/admin/routes/embedding/test', withToken({ method: 'POST' }));
+    expect(ok.status).toBe(200);
+    expect(ok.body.ok).toBe(true);
+    expect(ok.body.modelId).toBe('mdl-emb');
+    expect(ok.body.dimension).toBe(1024);
+    expect(ok.body.reply).toBeNull();
+  });
+
+  it('POST models/:id/test 按模型类型选语义：embedding 标签模型返回维度（对话模型走 chat ping）', async () => {
+    const { admin } = await harness();
+    const upstream = await startScriptedEmbeddingUpstream(8);
+    await applyEmbeddingRoute(admin, upstream.url);
+
+    /* 嵌入标签模型 → embed 语义（有维度、无 reply） */
+    const emb = await adminFetch(admin, '/v1/admin/models/mdl-emb/test', withToken({ method: 'POST' }));
+    expect(emb.status).toBe(200);
+    expect(emb.body.ok).toBe(true);
+    expect(emb.body.dimension).toBe(8);
+    expect(emb.body.reply).toBeNull();
+
+    /* 对话模型 → chat 语义（无维度字段）。工作流同序：禁用建档 → 传凭证 → 启用+路由 */
+    const chatUpstream = await startScriptedUpstream('chat-pong');
+    const cur = await adminFetch(admin, '/v1/admin/model-config', withToken());
+    const legacyRoutes = Object.fromEntries(['roleplay', 'narrative', 'reasoning', 'fast', 'cheap', 'memory'].map((c) => [c, { primary: null, fallback: null }]));
+    const step1 = await adminFetch(admin, '/v1/admin/model-config', withToken({
+      method: 'PUT',
+      headers: { 'if-match': String(cur.body.revision) },
+      body: JSON.stringify({
+        version: 1,
+        providers: [
+          { id: 'prov-emb', name: 'embed-vendor', endpoint: upstream.url, auth: { kind: 'secret' }, enabled: true },
+          { id: 'prov-chat', name: 'chat-vendor', endpoint: chatUpstream.url, auth: { kind: 'secret' }, enabled: false },
+        ],
+        models: [
+          { id: 'mdl-emb', providerId: 'prov-emb', wireModel: 'bge-m3', tags: ['embedding'], enabled: true },
+          { id: 'mdl-chat', providerId: 'prov-chat', wireModel: 'chat-x', tags: ['fast'], enabled: false },
+        ],
+        routes: { ...legacyRoutes, embedding: { primary: 'mdl-emb', fallback: null }, fast: { primary: null, fallback: null } },
+      }),
+    }));
+    expect(step1.status).toBe(200);
+    expect((await adminFetch(admin, '/v1/admin/providers/prov-chat/credential', withToken({
+      method: 'PUT',
+      body: JSON.stringify({ value: `cred-${randomBytes(8).toString('hex')}` }),
+    }))).status).toBe(200);
+    const cur2 = await adminFetch(admin, '/v1/admin/model-config', withToken());
+    const put = await adminFetch(admin, '/v1/admin/model-config', withToken({
+      method: 'PUT',
+      headers: { 'if-match': String(cur2.body.revision) },
+      body: JSON.stringify({
+        version: 1,
+        providers: [
+          { id: 'prov-emb', name: 'embed-vendor', endpoint: upstream.url, auth: { kind: 'secret' }, enabled: true },
+          { id: 'prov-chat', name: 'chat-vendor', endpoint: chatUpstream.url, auth: { kind: 'secret' }, enabled: true },
+        ],
+        models: [
+          { id: 'mdl-emb', providerId: 'prov-emb', wireModel: 'bge-m3', tags: ['embedding'], enabled: true },
+          { id: 'mdl-chat', providerId: 'prov-chat', wireModel: 'chat-x', tags: ['fast'], enabled: true },
+        ],
+        routes: { ...legacyRoutes, embedding: { primary: 'mdl-emb', fallback: null }, fast: { primary: 'mdl-chat', fallback: null } },
+      }),
+    }));
+    expect(put.status).toBe(200);
+
+    const chat = await adminFetch(admin, '/v1/admin/models/mdl-chat/test', withToken({ method: 'POST' }));
+    expect(chat.status).toBe(200);
+    expect(chat.body.ok).toBe(true);
+    expect(chat.body.reply).toBe('chat-pong');
+    expect(chat.body.dimension).toBeUndefined();
   });
 });
 

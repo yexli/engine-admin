@@ -56,7 +56,7 @@ describe('KeyStore', () => {
   it('权限规范化：未知项过滤；空 → 默认全量', () => {
     expect(normalizePermissions(['chat:completions', 'hack:root'])).toEqual(['chat:completions']);
     expect(normalizePermissions(undefined).sort()).toEqual(
-      ['chat:completions', 'worlds:read', 'worlds:write'].sort(),
+      ['chat:completions', 'embeddings', 'worlds:read', 'worlds:write'].sort(),
     );
   });
 

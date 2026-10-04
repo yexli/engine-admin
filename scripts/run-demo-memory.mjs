@@ -11,21 +11,26 @@
    · 落盘持久化：FileSavePort 把每个 store 的 MemorySnapshot 写
      platform/data/memory/<worldId>.json（临时文件 + rename 原子替换），
      重启恢复，不再"重启即失忆"；MEMORY_DATA_DIR 可改位置
-   · 向量通道（可选）：设置 EMBEDDINGS_ENDPOINT + EMBEDDINGS_MODEL 后，
-     EmbedHook 经网关 remoteEmbeddings（OpenAI 兼容 /embeddings）现场
-     向量化——语义相似度 ×0.2 并入检索总分，失败静默回词面（渐进增强）；
-     缺省不设置 = 纯词面检索（诚实口径，管理台 embedding 页如实显示）
+
+   Embedding 配置统一治理（2026-10 · 方案全文）：本宿主**不持有任何
+   Provider/Endpoint/Key/模型配置**——向量能力唯一经平台模型路由：
+     设置 EMBEDDING_SERVICE_URL（平台公共 API，如 http://127.0.0.1:8790）
+     + EMBEDDING_SERVICE_KEY（带 embeddings 权限的 API Key）后，
+     EmbeddingService = POST {平台}/v1/embeddings（模型由 Router 的
+     embedding 能力路由决定，primary 失败自动接管 fallback）。
+     未设置 = 纯词面检索（诚实口径，管理台诊断页如实显示）。
+   原 embedding-config.json / EMBEDDINGS_ENDPOINT|MODEL|API_KEY 双配置源
+   已删除（迁移脚本：platform/scripts/migrate-memory-embedding.mjs）。
 
    环境变量：
-     WORLD_API_URL       引擎地址（缺省 http://127.0.0.1:8787）
-     MEMORY_API_PORT     本服务端口（缺省 8789）
-     MEMORY_DATA_DIR     快照目录（缺省 platform/data/memory）
-     EMBEDDINGS_ENDPOINT OpenAI 兼容根（如 https://api.openai.com/v1）[可选]
-     EMBEDDINGS_MODEL    embedding 模型名（如 text-embedding-3-small）[可选]
-     EMBEDDINGS_API_KEY  上游密钥（本地推理可留空）[可选]
+     WORLD_API_URL          引擎地址（缺省 http://127.0.0.1:8787）
+     MEMORY_API_PORT        本服务端口（缺省 8789）
+     MEMORY_DATA_DIR        快照目录（缺省 platform/data/memory）
+     EMBEDDING_SERVICE_URL  平台公共 API 地址 [可选，语义召回开关]
+     EMBEDDING_SERVICE_KEY  平台 API Key（需 embeddings 权限）[可选]
 
    前置：先启动引擎（node scripts/run-demo-engine.mjs），
-   且 world-engine、world-engine/gateway、world-engine/memory 已 build。
+   且 world-engine、world-engine/memory 已 build。
    用法：node scripts/run-demo-memory.mjs
    ============================================================ */
 import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
@@ -33,7 +38,6 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { startMemoryServer } from "../world-engine/memory/dist/http/server.js";
 import { MemoryEngine } from "../world-engine/memory/dist/index.js";
-import { remoteEmbeddings } from "../world-engine/gateway/dist/index.js";
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const ENGINE_BASE = process.env.WORLD_API_URL ?? "http://127.0.0.1:8787";
@@ -86,49 +90,31 @@ class FileSavePort {
   }
 }
 
-/* ---------------- 向量通道（EmbedHook；经网关 remoteEmbeddings） ----------------
-   配置来源优先级：管理台写入的配置文件（embedding-config.json）> 环境变量
-   （首次引导默认值，写入文件后即以文件为准）。配置可经管理台热应用。 */
+/* ---------------- 向量通道（EmbeddingService；唯一经平台模型路由） ----------------
+   Memory 不选择模型：POST {平台}/v1/embeddings 的模型由 Router 的 embedding
+   能力路由决定（primary 失败自动接管 fallback）。本宿主只持有一个服务地址
+   与一把钥匙（属于"怎么连"，不属于"用哪个模型"）。 */
 
-const cfgFile = join(dataDir, "embedding-config.json");
+const embedBase = (process.env.EMBEDDING_SERVICE_URL ?? "").trim().replace(/\/+$/, "");
+const embedKey = (process.env.EMBEDDING_SERVICE_KEY ?? "").trim();
+const embedChannel = { name: "platform-model-router" }; /* 首次成功后补 dimension */
 
-function loadEmbeddingConfig() {
-  if (existsSync(cfgFile)) {
-    try {
-      const c = JSON.parse(readFileSync(cfgFile, "utf8"));
-      if (typeof c.enabled === "boolean" && typeof c.endpoint === "string" && typeof c.model === "string") {
-        return c;
-      }
-    } catch (e) {
-      console.warn(`[demo-memory] 嵌入配置文件损坏，改用环境变量引导：${e.message}`);
-    }
-  }
-  /* 首次引导：环境变量 → 配置文件（成为此后的事实来源） */
-  const boot = {
-    enabled: !!(process.env.EMBEDDINGS_ENDPOINT && process.env.EMBEDDINGS_MODEL),
-    endpoint: process.env.EMBEDDINGS_ENDPOINT ?? "",
-    model: process.env.EMBEDDINGS_MODEL ?? "",
-    apiKey: process.env.EMBEDDINGS_API_KEY ?? "",
-  };
-  try {
-    mkdirSync(dirname(cfgFile), { recursive: true });
-    writeFileSync(cfgFile, JSON.stringify(boot, null, 2));
-  } catch { /* 写不进也继续（本次进程内生效） */ }
-  return boot;
-}
-
-function makeEmbedHook(cfg) {
-  if (!cfg.enabled || !cfg.endpoint || !cfg.model) return null;
-  const ref = { id: cfg.model, endpoint: cfg.endpoint, apiKeyRef: { env: "EMBEDDINGS_API_KEY" }, tags: [], wireModel: cfg.model };
-  const channel = { name: cfg.model }; /* 首次调用后补 dimension（HTTP 层如实上报） */
+function makeRoutedEmbedHook() {
+  if (!embedBase || !embedKey) return null;
   let failures = 0;
-  const hook = {
-    channel,
+  return {
+    channel: embedChannel,
     async embed(texts) {
       try {
-        const vectors = await remoteEmbeddings(ref, cfg.apiKey ?? "", texts);
-        if (!channel.dimension && vectors[0]?.length) channel.dimension = vectors[0].length;
-        return vectors;
+        const res = await fetch(`${embedBase}/v1/embeddings`, {
+          method: "POST",
+          headers: { "content-type": "application/json", authorization: `Bearer ${embedKey}` },
+          body: JSON.stringify({ input: texts })
+        });
+        const body = await res.json().catch(() => null);
+        if (!res.ok) throw new Error(body?.error?.message ?? `HTTP ${res.status}`);
+        if (!embedChannel.dimension && body?.dimensions) embedChannel.dimension = body.dimensions;
+        return body?.vectors ?? null;
       } catch (e) {
         failures++;
         if (failures === 1 || failures % 10 === 0) {
@@ -138,7 +124,6 @@ function makeEmbedHook(cfg) {
       }
     }
   };
-  return hook;
 }
 
 const worlds = await waitForEngine();
@@ -188,39 +173,19 @@ for (const id of worldIds) {
   );
 }
 
-/* ---------------- 配置热应用（管理台写入 → 不重启生效） ---------------- */
+/* ---------------- EmbeddingService 装配（启动时一次；换模型无需重启） ----------------
+   模型切换在平台模型路由页热替换——本宿主与 Memory 都不感知，只管"要向量"。 */
 
-let currentCfg = loadEmbeddingConfig();
-
-function persistCfg(cfg) {
-  try {
-    mkdirSync(dirname(cfgFile), { recursive: true });
-    writeFileSync(cfgFile, JSON.stringify(cfg, null, 2));
-  } catch { /* 写不进也继续（本次进程内生效） */ }
+const embedHook = makeRoutedEmbedHook();
+for (const s of stores) {
+  if (embedHook) s.embed = embedHook.channel;
+  s.engine.setEmbed(embedHook);
 }
-
-function applyEmbedding(cfg) {
-  /* apiKey 语义：undefined = 沿用已存密钥；字符串 = 覆盖；null = 清除 */
-  currentCfg = {
-    enabled: cfg.enabled,
-    endpoint: cfg.endpoint,
-    model: cfg.model,
-    apiKey: cfg.apiKey !== undefined ? (cfg.apiKey ?? "") : (currentCfg.apiKey ?? "")
-  };
-  currentHook = makeEmbedHook(currentCfg);
-  for (const s of stores) {
-    if (currentHook) s.embed = currentHook.channel;
-    else delete s.embed;
-    s.engine.setEmbed(currentHook);
-  }
-  persistCfg(currentCfg);
-  console.log(
-    `[demo-memory] 嵌入配置已${currentCfg.enabled ? "启用" : "停用"}并热应用：${currentCfg.model || "（无）"}（${currentCfg.endpoint || "—"}）`
-  );
-}
-
-let currentHook = makeEmbedHook(currentCfg);
-applyEmbedding(currentCfg); /* 启动时统一走热应用路径（引擎 setEmbed + store 通道声明） */
+console.log(
+  embedHook
+    ? `[demo-memory] EmbeddingService 已接入平台模型路由：${embedBase}（模型由 capability=embedding 决定）`
+    : `[demo-memory] 未配置 EMBEDDING_SERVICE_URL/KEY —— 语义召回关闭（词面召回照常）`
+);
 
 /* 摄取：WorldEvent 结构化满足 WorldFact（id/type/day/actor/target/location/witnesses/data） */
 function ingest(worldId, events) {
@@ -263,35 +228,7 @@ async function poll() {
 
 const server = await startMemoryServer({
   stores,
-  port: Number(process.env.MEMORY_API_PORT ?? 8789),
-  /* 嵌入配置读写（管理台经平台鉴权代理到达这里；本服务自身无鉴权） */
-  embeddingConfig: {
-    get: () => ({
-      enabled: currentCfg.enabled,
-      endpoint: currentCfg.endpoint,
-      model: currentCfg.model,
-      hasApiKey: !!currentCfg.apiKey
-    }),
-    apply: cfg => {
-      applyEmbedding(cfg);
-      return {
-        enabled: currentCfg.enabled,
-        endpoint: currentCfg.endpoint,
-        model: currentCfg.model,
-        hasApiKey: !!currentCfg.apiKey
-      };
-    },
-    test: async () => {
-      if (!currentHook) return { ok: false, ms: 0, error: "嵌入通道未启用（先启用并保存配置）" };
-      const t0 = Date.now();
-      try {
-        const v = await currentHook.embed(["ping"]);
-        return { ok: true, dimension: v?.[0]?.length ?? 0, ms: Date.now() - t0 };
-      } catch (e) {
-        return { ok: false, ms: Date.now() - t0, error: e.message };
-      }
-    }
-  }
+  port: Number(process.env.MEMORY_API_PORT ?? 8789)
 });
 console.log(`[demo-memory] Memory API listening at ${server.url}（stores: ${stores.map(s => s.name).join(", ")}）`);
 await poll();

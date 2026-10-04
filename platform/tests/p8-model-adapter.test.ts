@@ -43,10 +43,12 @@ afterAll(() => {
 describe('P8 能力词表（方案 §十一 11 项 + roleplay）', () => {
   it('平台 Capability 全集覆盖方案清单；缺省路由合理（evolution→reasoning、intent→fast、npc_behavior→npc）', () => {
     const router = new ModelRouter(null);
-    for (const cap of ['roleplay', 'intent', 'world_reasoning', 'evolution', 'npc_behavior', 'narrative', 'memory', 'embedding', 'fast', 'cheap', 'long_context', 'structured_output'] as const) {
+    for (const cap of ['roleplay', 'intent', 'world_reasoning', 'evolution', 'npc_behavior', 'narrative', 'memory', 'fast', 'cheap', 'long_context', 'structured_output'] as const) {
       const selected = router.select(cap);
       expect(selected, `缺省路由 ${cap}`).not.toBeNull(); /* 缺省路由到网关通道名（未注册通道 → 网关 404，如实） */
     }
+    /* Embedding 统一治理：缺省无路由 = 无语义召回（词面照常），绝不假装有一个 'embedding' 模型 */
+    expect(router.select('embedding')).toBeNull();
     expect(router.select('evolution')).toMatchObject({ model: 'reasoning' });
     expect(router.select('intent')).toMatchObject({ model: 'fast' });
     expect(router.select('npc_behavior')).toMatchObject({ model: 'npc' });
@@ -62,7 +64,8 @@ describe('P8 能力词表（方案 §十一 11 项 + roleplay）', () => {
     const cfg = {
       version: 1,
       providers: [{ id: 'prov-x', name: 'X', endpoint: 'http://127.0.0.1:9/v1', auth: { kind: 'none' as const }, enabled: true }],
-      models: [{ id: 'mdl-x', providerId: 'prov-x', enabled: true, wireModel: 'wire-x', tags: ['reasoning', 'embedding'] }],
+      /* 嵌入标签互斥（Embedding 统一治理）：对话模型不挂 embedding */
+      models: [{ id: 'mdl-x', providerId: 'prov-x', enabled: true, wireModel: 'wire-x', tags: ['reasoning'] }],
       routes: {
         roleplay: { primary: 'mdl-x', fallback: null },
         narrative: { primary: 'mdl-x', fallback: null },

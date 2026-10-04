@@ -161,49 +161,43 @@ describe('Memory HTTP 真实服务器端到端（node:http + fetch）', () => {
   });
 });
 
-/* 0.8.2 · 嵌入模型配置端点（宿主回调承担应用/持久化/实测） */
-describe('embedding-config 端点', () => {
-  const http = createMemoryHttp({
-    stores: [],
-    embeddingConfig: {
-      get: () => ({ enabled: true, endpoint: 'http://127.0.0.1:9/v1', model: 'mock-embed', hasApiKey: true }),
-      apply: (cfg) => {
-        if (cfg.enabled && !cfg.endpoint.includes('://')) throw new Error('endpoint 必须是 http/https URL');
-        /* 宿主热应用（setEmbed + 持久化）在此；测试只验证契约 */
-        return { enabled: cfg.enabled, endpoint: cfg.endpoint, model: cfg.model, hasApiKey: cfg.apiKey !== undefined ? cfg.apiKey !== '' : true };
-      },
-      test: async () => ({ ok: true, dimension: 8, ms: 5 }),
-    },
-  });
+/* Embedding 配置统一治理（2026-10）：配置端点已删除——唯一配置源 =
+   平台 Model Router 的 embedding 能力路由；本服务只经注入的
+   EmbeddingService 消费向量。旧端点一律 410 Gone（诚实指路）。 */
+describe('embedding-config 端点已删除（410 Gone）', () => {
+  const http = createMemoryHttp({ stores: fixtureStores() });
 
-  it('GET 脱敏视图（无 apiKey 明文）；PUT 白名单校验后交宿主应用', async () => {
-    const view = await http.handle(get('/v1/memory/embedding-config'));
-    expect(view.status).toBe(200);
-    const cfg = (view.body as { config: Record<string, unknown> }).config;
-    expect(cfg.hasApiKey).toBe(true);
-    expect(JSON.stringify(cfg)).not.toContain('sk-');
-
-    const put = await http.handle(put2('/v1/memory/embedding-config', { enabled: false, endpoint: '', model: '' }));
-    expect(put.status).toBe(200);
-    expect((put.body as { config: { enabled: boolean } }).config.enabled).toBe(false);
-  });
-
-  it('校验失败 → 400；未启用缺 endpoint 也放行（disabled 视图）；test 走宿主实测', async () => {
-    const bad = await http.handle(put2('/v1/memory/embedding-config', { enabled: true, endpoint: 'ftp://x', model: 'm' }));
-    expect(bad.status).toBe(400);
-
-    const disabledNoEndpoint = await http.handle(put2('/v1/memory/embedding-config', { enabled: false, endpoint: '', model: '' }));
-    expect(disabledNoEndpoint.status).toBe(200);
-
+  it('GET / PUT /test 一律 410，且响应不含任何配置内容', async () => {
+    const got = await http.handle(get('/v1/memory/embedding-config'));
+    expect(got.status).toBe(410);
+    const put = await http.handle(put2('/v1/memory/embedding-config', { enabled: true, endpoint: 'http://x/v1', model: 'm', apiKey: 'sk-x' }));
+    expect(put.status).toBe(410);
     const test = await http.handle({ method: 'POST', path: '/v1/memory/embedding-config/test', body: {} });
-    expect(test.status).toBe(200);
-    expect((test.body as { ok: boolean }).ok).toBe(true);
+    expect(test.status).toBe(410);
+    const body = JSON.stringify(put.body);
+    expect(body).not.toContain('sk-x');
+    expect(body).toContain('模型路由');
   });
+});
 
-  it('未装配回调 → 404 not-configured', async () => {
-    const bare = createMemoryHttp({ stores: [] });
-    const res = await bare.handle(get('/v1/memory/embedding-config'));
-    expect(res.status).toBe(404);
+/* 维度保护（Embedding 统一治理）：观测端点透出引擎实测维度与变化告警 */
+describe('GET /v1/memory/embedding：引擎维度实况', () => {
+  it('维度变化 → dimensionChanged 告警（不静默）', async () => {
+    let dims = 3;
+    const engine = new MemoryEngine({ save: new InMemoryMemoryStorage() });
+    engine.remember({ ownerId: 'lita', text: '铁匠对玩家的态度转为中立', day: 3 });
+    engine.setEmbed({
+      embed: async (texts) => texts.map((_, i) => Array.from({ length: dims }, (_, k) => i + k)),
+    });
+    await engine.recallScored('lita', '态度');
+    dims = 4;
+    await engine.recallScored('lita', '态度');
+
+    const http = createMemoryHttp({ stores: [{ name: 's', engine }] });
+    const res = await http.handle(get('/v1/memory/embedding'));
+    const ch = (res.body as { channels: { store: string; engineDimension?: number; dimensionChanged?: { from: number; to: number } }[] }).channels[0]!;
+    expect(ch.engineDimension).toBe(4);
+    expect(ch.dimensionChanged).toEqual({ from: 3, to: 4 });
   });
 });
 

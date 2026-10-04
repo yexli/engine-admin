@@ -155,6 +155,22 @@ export class MemoryEngine {
   }
 
   /**
+   * Embedding 通道实况（Embedding 统一治理 · 维度保护）：记录最近一次
+   * 成功 embed 的维度；模型切换导致维度变化时打上告警（不静默）。
+   * 本引擎不持久化向量（检索时现场计算）——维度变化不需要重建索引，
+   * 但语义分将按新模型重算，调用方（诊断页）应如实呈现。
+   */
+  embeddingStatus(): { attached: boolean; dimension?: number; dimensionChanged?: { from: number; to: number } } {
+    return {
+      attached: this.embed !== null,
+      ...(this.embedDimension !== undefined ? { dimension: this.embedDimension } : {}),
+      ...(this.dimensionChanged ? { dimensionChanged: this.dimensionChanged } : {}),
+    };
+  }
+  private embedDimension?: number;
+  private dimensionChanged?: { from: number; to: number };
+
+  /**
    * 召回（带评分）：词面分（查询词命中）+ 新近度 + 重要度 + 置信度加权；
    * 注入了向量钩子且可用时，语义相似度并入总分（失败静默回词面——渐进增强）。
    * 召回会强化记忆（recallCount++ / lastRecalledDay，衰减的对价）。
@@ -175,6 +191,13 @@ export class MemoryEngine {
       } catch {
         vectors = null; // 渐进增强：向量失败回词面
       }
+    }
+    if (vectors && vectors.length && vectors[0]!.length) {
+      const dim = vectors[0]!.length;
+      if (this.embedDimension !== undefined && this.embedDimension !== dim) {
+        this.dimensionChanged = { from: this.embedDimension, to: dim };
+      }
+      this.embedDimension = dim;
     }
     const qv = vectors?.[0];
 

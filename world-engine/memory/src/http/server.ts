@@ -29,7 +29,7 @@ export interface MemoryServer {
 }
 
 export function startMemoryServer(opts: MemoryServerOptions = {}): Promise<MemoryServer> {
-  const http = createMemoryHttp({ stores: opts.stores ?? [], embeddingConfig: opts.embeddingConfig });
+  const http = createMemoryHttp({ stores: opts.stores ?? [] });
   const host = opts.host ?? '127.0.0.1';
 
   const server: Server = createServer((req, res) => {

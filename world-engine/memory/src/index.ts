@@ -16,6 +16,7 @@ export type {
   MemoryConfig,
   MemorySavePort,
   EmbedHook,
+  EmbeddingService,
   MemoryEngineConfigAll,
 } from './types.ts';
 export { InMemoryMemoryStorage } from './storage.ts';

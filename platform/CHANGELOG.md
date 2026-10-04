@@ -3,6 +3,86 @@
 本文件记录 World Platform 的版本演进。格式参考 Keep a Changelog。
 版本策略（semver）：0.x 期间允许带 CHANGELOG 注明的 API 调整。
 
+## [0.25.1] - 2026-10-04 · 模型页嵌入模型专属适配（治理收尾）
+
+### Added
+- **标签互斥校验**（model-config.ts）：`embedding` 与任何对话/推理能力标签互斥
+  （混挂会让对话能力路由到必然失败的嵌入模型，反之亦然）——422 带可读原因。
+  存量数据已修正（mdl-BAAI-bge-m3 摘除 memory 标签，revision 43）；迁移脚本
+  同步收紧（tags 置换为 ['embedding'] + 清理其他能力路由槽位对它的引用）。
+- **模型实测按类型选语义**：`POST /v1/admin/models/:id/test` 对 embedding 标签
+  模型走 `embed(['ping'])` 并返回实测 `dimension`（chat ping 对嵌入模型是假
+  测试）；对话模型行为不变。
+
+### Admin Web（gateway/models）
+- 新增/编辑模型弹窗增加「模型类型」（对话/推理 vs 嵌入）：嵌入模式锁定标签
+  为 embedding、占位符与提示切换（wireModel 例 BAAI/bge-m3、路由指派引导），
+  编辑态可切换类型以纠正错挂标签；前端互斥为双保险（后端 422 同规）。
+- 列表「思考强度」列对嵌入模型显示「— 不适用」；实测弹窗新增「向量维度」行。
+
+### 测试
+- platform **315/315 全绿**（新增：标签互斥 422 / 纯 embedding 合法 /
+  models/:id/test 按类型选语义）；tsc --noEmit 通过；admin-web vite build 通过。
+
+## [0.25.0] - 2026-10-04 · Embedding 配置统一治理：Model Router 唯一真相源
+
+解决「记忆库独立 Embedding 配置」与「模型路由 embedding 能力」双配置源并存
+（docs/EMBEDDING_CONFIG_AUDIT.md）。最终原则：**Memory 只说"我要向量"，
+Model Router 决定"用哪个模型"**。
+
+### Added
+- `createRoutedEmbeddingService` / `routedEmbeddingHook`（upstream/embeddings.ts）：
+  Router（select → embed → markHealthy/markFailed）+ 网关嵌入客户端的唯一组合点，
+  primary 失败自动接管 fallback（修复 embedding 链路 fallback 死代码）。
+- 公共 `POST /v1/embeddings`（权限码 `embeddings` 新增）：跨进程 Memory 的
+  EmbeddingService 传输层。**拒绝客户端指定 model**（400 model_forbidden）；
+  返回 `{ model, dimensions, vectors, usedFallback }`；无路由 503、上游失败 502、
+  usage 以 kind=embeddings 留痕。
+- `GET /v1/admin/routes/:capability`：路由实况只读端点（槽位 → 模型/供应商投影
+  + 冷却状态 + 当前 select 结果）——诊断页据此展示"当前实际生效的模型"。
+- `POST /v1/admin/routes/embedding/test` 改走 **embed(['ping']) 语义**并返回实测
+  `dimension`（原实现发 chat ping，对嵌入模型是假测试）。
+- 缺省路由修正：`DEFAULT_ROUTES.embedding.primary = null`（旧值是字面通道名
+  'embedding'，会产生注定 404 的出站调用）；未配置 = 无语义召回（词面照常）。
+
+### Removed
+- `/v1/admin/memory/embedding-config[/test]` 鉴权代理与 `PLATFORM_MEMORY_URL`
+  配置（memory 服务侧配置端点同步删除，world-memory 0.9.0）。
+
+### 迁移（Phase B）
+- `scripts/migrate-memory-embedding.mjs`：旧 embedding-config.json（apiKey 明文）
+  → provider/model + SecretStore 加密凭证 + routes.embedding primary；旧文件封存
+  为 *.migrated-<ts>。已在本仓执行（primary = mdl-BAAI-bge-m3 @ prov-siliconflow）。
+
+### 测试
+- platform **313/313 全绿**（新增 embedding-unification.test.ts：primary/fallback/
+  模型切换/公共端点鉴权与降级；admin-http 代理测试改为删除断言 + 路由实况 +
+  embed 语义测试）；tsc --noEmit 通过。
+
+## [0.24.0] - 2026-10-04 · V2.4 复审加固：平台转发面租户隔离（G2 兑现）
+
+V2.4-00 复审发现：G2 的"游戏方只见自己的世界"只在**引擎直接鉴权面**
+实现（引擎装配钥匙表时）；平台公共口 `/v1/worlds*` 转发不带引擎凭证，
+引擎视角全部是管理钥匙——持游戏方 Key 经平台可读写**任意游戏**的世界。
+本版在平台转发面强制租户可见域：
+
+### Added（安全）
+- **清单过滤**：游戏方钥匙（带 gameId）`GET /v1/worlds` 只返回
+  `ownerGame` 匹配的世界（引擎清单照取，平台按归属过滤）。
+- **建世界盖章**：游戏方钥匙 `POST /v1/worlds` 强制 `ownerGame =
+  key.gameId`——客户端自报的 ownerGame 一律忽略。
+- **世界域核验**：世界域路由（state/events/commands/time/…）先核验
+  目标世界 `ownerGame` 匹配，不匹配 / 未归属 / 不存在一律 **404**
+  （不泄露存在性，与引擎越权语义同形）；引擎 502（不可达）如实上报
+  ——不可达不是授权答案。
+- **管理钥匙（无 gameId）全域可见**，转发行为与此前完全一致（bootstrap
+  / 运营 Key 不受影响）。
+
+### 测试
+- `tests/tenant-isolation.test.ts`（6 条：清单过滤 / 建世界盖章 / 越权
+  404 / 不存在同形 / 不可达 502 / 管理钥匙不变）。
+- **platform 305/305 全绿**（299 既有回归 + 6 新增）；tsc --noEmit 通过。
+
 ## [0.22.0] - 2026-10-03 · V2.4-04 · NPC State Machine：确定性状态视图
 
 方案 V2.4-04 落地（最小状态集；§八「避免退化成每 Tick 问一次 AI」）。

@@ -6,18 +6,31 @@
    · 预建两个演示世界（地点 / NPC / 关系 / 事件），便于管理后台联调
    不修改 world-engine 任何代码；仅作为宿主集成示例。
    用法：node scripts/run-demo-engine.mjs
+   可选持久模式（V2.4 复审加固）：设 WORLD_ENGINE_DATA_DIR 后，世界
+   状态 / 事件史 / 命令幂等账经 FileSavePort 落盘，重启自动恢复
+   （已播种的世界跳过重播种）：
+     WORLD_ENGINE_DATA_DIR=./.data/engine node scripts/run-demo-engine.mjs
    ============================================================ */
 import { startWorldServer } from "../world-engine/dist/http/server.js";
 import {
   createWorldRegistry,
+  FileSavePort,
   InMemoryWorldStorage
 } from "../world-engine/dist/index.js";
+import { mkdirSync } from "node:fs";
+import { join } from "node:path";
 import { readFileSync } from "node:fs";
 
 const registry = createWorldRegistry();
 
+/* 持久模式（opt-in）：缺省内存介质，演示栈行为与此前完全一致 */
+const dataDir = (process.env.WORLD_ENGINE_DATA_DIR ?? "").trim();
+if (dataDir) mkdirSync(dataDir, { recursive: true });
+const makeStore = (worldId) =>
+  dataDir ? new FileSavePort(join(dataDir, `${worldId}.json`)) : new InMemoryWorldStorage();
+
 function seed(worldId, playerName, startLoc) {
-  const store = new InMemoryWorldStorage();
+  const store = makeStore(worldId);
   const world = registry.create({
     worldId,
     playerName,
@@ -41,6 +54,15 @@ function seed(worldId, playerName, startLoc) {
       ]
     }
   });
+
+  /* 持久模式：已有存档 → 恢复状态（事件史由 createWorld 自动恢复），
+     跳过重播种——同一世界不产生两份 NPC */
+  const saved = store.load();
+  if (saved) {
+    world.container.core.S = saved;
+    console.log(`[demo-engine] world restored: ${worldId}（持久模式 ${dataDir}）`);
+    return;
+  }
 
   // NPC + 交互事件
   const r = [];
@@ -114,16 +136,14 @@ function seedTianqiong() {
   const geo = JSON.parse(
     readFileSync(new URL("../tianqiong2/src/data/world/geo.json", import.meta.url), "utf8")
   );
-  const people = JSON.parse(
-    readFileSync(new URL("../tianqiong2/src/data/world/people.json", import.meta.url), "utf8")
-  );
   const locs = Object.entries(geo.locations);
+  const store = makeStore("tianqiong-main");
   const world = registry.create({
     worldId: "tianqiong-main",
     playerName: "远道而来的旅人",
     startLoc: locs[0]?.[0] ?? "plaza",
     weather: "clear",
-    savePort: new InMemoryWorldStorage(),
+    savePort: store,
     definition: {
       locations: locs.map(([id, l]) => ({
         id,
@@ -137,6 +157,18 @@ function seedTianqiong() {
       }
     }
   });
+
+  /* 持久模式：已有存档 → 恢复，跳过重播种 */
+  const saved = store.load();
+  if (saved) {
+    world.container.core.S = saved;
+    console.log(`[demo-engine] tianqiong-main restored（持久模式 ${dataDir}）`);
+    return;
+  }
+
+  const people = JSON.parse(
+    readFileSync(new URL("../tianqiong2/src/data/world/people.json", import.meta.url), "utf8")
+  );
 
   /* NPC 落位 + 关系网：关系数据原样进状态表（数值含义由天穹定义） */
   const spawned = [];

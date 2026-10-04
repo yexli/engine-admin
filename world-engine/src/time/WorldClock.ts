@@ -160,7 +160,7 @@ export function createWorldClock<W extends ClockWorld>(opts: WorldClockOptions<W
   function newDay() {
     const s = need();
     bus.beginTick(); // 日结算引发的事件风暴要计在当天，而不是上一天的尾巴
-    bus.emit(events.makeEvent({ type: 'new_day', day: sceneTime(s).day, tick: s.t, level: events.levelOf('new_day') }));
+    bus.emit(events.makeEvent({ type: 'new_day', day: sceneTime(s).day, tick: s.t, level: events.levelOf('new_day'), worldId: s.worldId }));
     /* 到期计划事件：「2 小时后商会发现商人失踪」这类延迟后果在此落地。
        （新 tick 已开启，因此日结算的事件风暴计在当天。） */
     for (const pending of bus.due(sceneTime(s).day)) bus.emit(pending);
@@ -178,7 +178,7 @@ export function createWorldClock<W extends ClockWorld>(opts: WorldClockOptions<W
         /* 跨时辰的刷新走事件——时钟不直接调业务系统，只负责「推进时间 + 发布事实」。
            保留发布是刻意的：发布端不该因为此刻没人听就停止广播。
            派发是同步的，所以宿主钩子依旧排在这条广播之后执行。 */
-        bus.emit(events.makeEvent({ type: 'hour_advanced', day: sceneTime(s).day, tick: s.t, level: events.levelOf('hour_advanced') }));
+        bus.emit(events.makeEvent({ type: 'hour_advanced', day: sceneTime(s).day, tick: s.t, level: events.levelOf('hour_advanced'), worldId: s.worldId }));
         opts.onHourTick?.(s);
       }
     }

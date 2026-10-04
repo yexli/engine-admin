@@ -15,10 +15,10 @@
 
 | 包 | 版本 | 职责 | 测试 |
 |---|---|---|---|
-| `world-engine/` | **1.2.1** | 纯库内核：多世界注册表、规则/命令/查询原语、HTTP+WebSocket 面、建世界地点表 | 108 |
-| `world-engine/platform/` | **0.18.0** | 平台面：API Key、会话权限、用量计量、管线、设置、AI 世界演化运行时 V2（策略围栏/幂等/因果追溯）+ Trigger Engine（逐实体唤醒）+ Context 预算 + NPC 个体决策/金币禁令 + NPC 日程调度循环 + 角色记忆联动（感知边界摄取/个体召回）+ 模型能力路由对齐方案 §十一（embedding 通道/记忆语义召回）+ Admin Runtime 统一观测面/因果链/多代世界语义 | 251 |
-| `world-engine/gateway/` | 0.7.1 | AI 网关：多厂商模型调用、思考强度适配、任务路由 | 30 |
-| `world-engine/memory/` | 0.8.2 | 世界记忆：4 因子召回 + 向量嵌入（bge-m3 实测） | 20 |
+| `world-engine/` | **1.4.1** | 纯库内核：多世界注册表、规则/命令/查询原语、HTTP+WebSocket 面、建世界地点表、append-only 世界事件史（可恢复/可查询/幂等账跨重启） | 140 |
+| `platform/` | **0.25.0** | 平台面：API Key（多租户 gameId 隔离）、会话权限、用量计量、管线、设置、AI 世界演化运行时 V2（策略围栏/幂等/因果追溯）+ Trigger Engine（逐实体唤醒）+ Context 预算 + NPC 个体决策/金币禁令 + NPC 日程调度循环 + 角色记忆联动（感知边界摄取/个体召回）+ 模型能力路由对齐方案 §十一（embedding 通道/记忆语义召回）+ Admin Runtime 统一观测面/因果链/多代世界语义 + Embedding 统一治理（Router 唯一真相源 / POST /v1/embeddings / 路由实况与 embed 语义测试 / 嵌入模型标签互斥） | 315 |
+| `world-engine/gateway/` | 0.7.2 | AI 网关：多厂商模型调用、思考强度适配、任务路由 | 30 |
+| `world-engine/memory/` | 0.9.0 | 世界记忆：4 因子召回 + 向量嵌入（bge-m3 实测） | 19 |
 | `admin-web/` | 6.x | 管理后台（Vue3 + Element Plus，数据 Mock 清零） | e2e 冒烟 |
 
 设计纪律：**引擎零运行时依赖**（WebSocket 为 RFC6455 自实现、持久化只用 node:fs）；

@@ -470,6 +470,13 @@ function parseCandidate(
           issues.push(`${label}.tags 含未知标签 '${String(t).slice(0, 32)}'（词表：${ALLOWED_TAGS.join('/')}）`);
         }
       }
+      /* 嵌入模型专属语义（Embedding 统一治理）：embedding 是向量能力，
+         与任何对话/推理能力互斥——混挂会让对话能力路由到必然失败的嵌入
+         模型（embed 端点无 chat 语义，反之亦然）。 */
+      const known = rawTags.filter((t): t is string => typeof t === 'string' && ALLOWED_TAGS.includes(t));
+      if (known.includes('embedding') && known.length > 1) {
+        issues.push(`${label}.tags：'embedding' 与其他能力标签互斥（嵌入模型只能挂 embedding；对话模型不要挂 embedding）`);
+      }
     }
 
     if (typeof b['enabled'] !== 'boolean') issues.push(`${label}.enabled 必须是布尔值`);

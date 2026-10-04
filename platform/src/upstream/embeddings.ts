@@ -60,3 +60,64 @@ export function createEmbeddingsClient(opts: GatewayClientOptions): EmbeddingsCl
     },
   };
 }
+
+/* ============================================================
+   按 Router 路由的 EmbeddingService（Embedding 配置统一治理 · 2026-10）
+   ------------------------------------------------------------
+   Memory 只说"我要向量"：模型选择完全由 ModelRouter 的 embedding
+   能力路由决定（primary 失败 → markFailed 冷却 → 自动接管 fallback；
+   成功 → markHealthy 清冷却）。跨进程调用方走平台公共
+   POST /v1/embeddings（同一 Router 实例，冷却状态共享）。
+   ============================================================ */
+import type { ModelRouter } from '../router/modelrouter.ts';
+
+export interface RoutedEmbeddingResult {
+  vectors: number[][];
+  /** 实际使用的模型 ID（物理模型，Router 解析结果） */
+  model: string;
+  /** true = primary 不可用，本次由 fallback 接管 */
+  usedFallback: boolean;
+}
+
+export interface RoutedEmbeddingService {
+  /** 无可用路由（未配置或全部冷却）→ null；两次尝试都失败 → throw */
+  embed(texts: string[]): Promise<RoutedEmbeddingResult | null>;
+}
+
+export function createRoutedEmbeddingService(deps: {
+  router: ModelRouter;
+  embeddings: EmbeddingsClient;
+}): RoutedEmbeddingService {
+  return {
+    async embed(texts: string[]): Promise<RoutedEmbeddingResult | null> {
+      const first = deps.router.select('embedding');
+      if (!first) return null;
+      try {
+        const vectors = await deps.embeddings.embed(first.model, texts);
+        deps.router.markHealthy(first.model);
+        return { vectors, model: first.model, usedFallback: first.usedFallback };
+      } catch (err) {
+        deps.router.markFailed(first.model);
+        const second = deps.router.select('embedding');
+        if (!second || second.model === first.model) throw err;
+        const vectors = await deps.embeddings.embed(second.model, texts);
+        deps.router.markHealthy(second.model);
+        return { vectors, model: second.model, usedFallback: true };
+      }
+    },
+  };
+}
+
+/** EmbedHook 适配（world-memory engine.setEmbed 直接消费）：失败 → null 静默回词面 */
+export function routedEmbeddingHook(
+  service: RoutedEmbeddingService,
+): (texts: string[]) => Promise<number[][] | null> {
+  return async (texts) => {
+    try {
+      const out = await service.embed(texts);
+      return out ? out.vectors : null;
+    } catch {
+      return null;
+    }
+  };
+}

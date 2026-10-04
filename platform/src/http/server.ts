@@ -13,6 +13,7 @@ import { randomUUID } from 'node:crypto';
 import type { KeyStore } from '../keys/keystore.ts';
 import type { EngineClient, GatewayClient, StreamResponse } from '../types.ts';
 import type { ModelRouter } from '../router/modelrouter.ts';
+import type { EmbeddingsClient } from '../upstream/embeddings.ts';
 import type { UsageSink } from '../usage/recorder.ts';
 import { createWorldPlatform } from './protocol.ts';
 
@@ -24,6 +25,8 @@ export interface PlatformServerOptions {
   gateway: GatewayClient;
   router: ModelRouter;
   version?: string;
+  /** 嵌入客户端（Embedding 统一治理）：装配后暴露 POST /v1/embeddings */
+  embeddings?: EmbeddingsClient;
   port?: number;
   /** **缺省 127.0.0.1（仅本机）**——公共部署必须显式传 host */
   host?: string;
@@ -57,6 +60,7 @@ export function startPlatformServer(opts: PlatformServerOptions): Promise<Platfo
     router: opts.router,
     version: opts.version,
     usage: opts.usage,
+    ...(opts.embeddings ? { embeddings: opts.embeddings } : {}),
   });
   const accessLog = opts.accessLog ?? true;
 

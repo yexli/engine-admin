@@ -139,7 +139,7 @@ payload（一层基本类型，≤32 键）`。
 | 权限码目录与三档角色（只读真实契约；固定三档不在线编辑） | `getPermissions` | `GET /v1/admin/system/permissions` |
 | Settings 目录/更新（白名单 + 校验，`data/settings.json`） | `listSettings/updateSetting` | `GET /v1/admin/system/settings`、`PUT .../{key}` `[system:manage]` |
 | Status 服务连通性（真实探测四个同源代理，无编造字段） | `probeServices` | `GET /world-api/v1/worlds`、`/memory-api/v1/memory/stores`、`/gateway-api/v1/models`、`/control-api/healthz` |
-| **记忆库 → 嵌入配置页**（M5 后特性） | `api/memory.ts getEmbeddingInfo` + `api/memoryConfig.ts` | `GET /memory-api/v1/memory/embedding`（只读观测）+ `/control-api/v1/admin/memory/embedding-config`（配置，见上） |
+| **记忆库 → 向量嵌入诊断页**（Embedding 统一治理后） | `api/memory.ts getEmbeddingInfo` + `api/modelControl.ts getRouteLive/testRoute` | `GET /memory-api/v1/memory/embedding`（只读观测）+ `GET /control-api/v1/admin/routes/embedding`（路由实况 `[gateway:manage]`）+ `POST .../routes/embedding/test`（embed 语义实测，返回 dimension）。旧 `memory/embedding-config` 代理已删除（410/404） |
 
 > 双凭证模型：`x-admin-token`（主令牌，服务端反代注入，全权运维通道，保留不变）与
 > `x-admin-session`（登录会话，12h/刷新轮换 7d）。**代理会话感知注入**（Vite dev 与
@@ -160,7 +160,7 @@ payload（一层基本类型，≤32 键）`。
 | Dashboard 聚合（世界含 paused / 实体 / AI 24h 汇总 + 小时桶 / 最近错误） | `api/dashboard.ts getDashboardOverview` | `GET /v1/obs/overview` |
 | Dashboard 记忆条目卡（memory 独立服务，前端直读） | `api/memory.ts listMemoryStores` | `GET /v1/memory/stores` |
 | AI Calls 页 | `api/logs.ts listAiCalls` | `GET /v1/admin/usage?kind=chat`（M2.2 同一数据面） |
-| **嵌入模型配置**（M5 后特性；读写面） | `api/memoryConfig.ts get/update/testEmbedding` | `GET/PUT /v1/admin/memory/embedding-config`（PUT system:manage）、`POST .../test` → 平台鉴权代理 → memory 服务 `/v1/memory/embedding-config` |
+| **Embedding 路由实况/诊断**（统一治理后；只读面） | `api/modelControl.ts getRouteLive/testRoute` | `GET /v1/admin/routes/embedding`（实况 `[gateway:manage]`）、`POST /v1/admin/routes/embedding/test`（embed(['ping']) 实测，回 dimension）；配置唯一源 = `PUT /v1/admin/model-config` 的 routes.embedding |
 | **模型思考强度**（M5 后特性；配置列） | 模型页内联下拉（thinking 元数据由配置投影下发） | `ModelConfigModel.thinking` 随 `PUT /v1/admin/model-config` 保存；出站由厂商适配器翻译 |
 
 > 诚实边界：世界事件无墙钟时间（只有 day/tick），活动图为 AI 调用单序列；

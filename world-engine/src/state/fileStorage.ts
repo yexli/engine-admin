@@ -35,6 +35,7 @@ export class FileSavePort<W extends EngineWorldState = EngineWorldState> impleme
 
   private pending: W | null = null;
   private pendingLog: unknown[] | null = null;
+  private pendingLedger: unknown[] | null = null;
   private dirty = false;
   private timer: ReturnType<typeof setTimeout> | null = null;
   private readonly debounceMs: number;
@@ -46,6 +47,9 @@ export class FileSavePort<W extends EngineWorldState = EngineWorldState> impleme
   }
   private get logPath(): string {
     return `${this.filePath}.log.json`;
+  }
+  private get ledgerPath(): string {
+    return `${this.filePath}.commands.json`;
   }
   private readonly exitHook = (): void => this.flushSync();
 
@@ -97,6 +101,11 @@ export class FileSavePort<W extends EngineWorldState = EngineWorldState> impleme
         writeFileSync(`${this.logPath}.tmp`, logBody, 'utf8');
         renameSync(`${this.logPath}.tmp`, this.logPath);
       }
+      if (this.pendingLedger !== null) {
+        const ledgerBody = JSON.stringify(this.pendingLedger, null, this.pretty ? 2 : undefined);
+        writeFileSync(`${this.ledgerPath}.tmp`, ledgerBody, 'utf8');
+        renameSync(`${this.ledgerPath}.tmp`, this.ledgerPath);
+      }
       this.dirty = false;
     } catch (e) {
       this.onError?.(`存档落盘失败：${e instanceof Error ? e.message : String(e)}`);
@@ -135,9 +144,11 @@ export class FileSavePort<W extends EngineWorldState = EngineWorldState> impleme
   clear(): void {
     this.pending = null;
     this.pendingLog = null;
+    this.pendingLedger = null;
     this.dirty = true;
     this.flushSync();
     rmSync(this.logPath, { force: true });
+    rmSync(this.ledgerPath, { force: true });
   }
 
   loadWorldLog(): unknown[] | null {
@@ -145,13 +156,43 @@ export class FileSavePort<W extends EngineWorldState = EngineWorldState> impleme
     try {
       return JSON.parse(readFileSync(this.logPath, 'utf8')) as unknown[];
     } catch {
-      this.onError?.(`世界史损坏（忽略，不影响主档）：${this.logPath}`);
+      /* 损坏的世界史同样「不静默」：备份留证再返回 null——
+         否则下一次 saveWorldLog 会把可修复的历史无声覆盖掉 */
+      const backup = `${this.logPath}.corrupt-${Date.now()}`;
+      try {
+        renameSync(this.logPath, backup);
+        this.onError?.(`世界史损坏已备份：${backup}`);
+      } catch {
+        this.onError?.(`世界史损坏且备份失败：${this.logPath}`);
+      }
       return null;
     }
   }
 
   saveWorldLog(rows: unknown[]): void {
     this.pendingLog = JSON.parse(JSON.stringify(rows)) as unknown[];
+    this.dirty = true;
+    this.schedule();
+  }
+
+  loadCommandLedger(): unknown[] | null {
+    if (!existsSync(this.ledgerPath)) return null;
+    try {
+      return JSON.parse(readFileSync(this.ledgerPath, 'utf8')) as unknown[];
+    } catch {
+      const backup = `${this.ledgerPath}.corrupt-${Date.now()}`;
+      try {
+        renameSync(this.ledgerPath, backup);
+        this.onError?.(`命令幂等账损坏已备份：${backup}`);
+      } catch {
+        this.onError?.(`命令幂等账损坏且备份失败：${this.ledgerPath}`);
+      }
+      return null;
+    }
+  }
+
+  saveCommandLedger(rows: unknown[]): void {
+    this.pendingLedger = JSON.parse(JSON.stringify(rows)) as unknown[];
     this.dirty = true;
     this.schedule();
   }

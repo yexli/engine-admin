@@ -21,14 +21,19 @@ export interface SavePort<W extends EngineWorldState = EngineWorldState> {
      行形状 = WorldEvent；同 id 多行按「保末次」幂等恢复，重复写入不制造重复事实。 */
   loadWorldLog?(): unknown[] | null;
   saveWorldLog?(rows: unknown[]): void;
+  /** 命令幂等账（V2.4 加固：跨重启幂等）。可选：不实现则幂等账仅存进程内。
+     行形状 = { commandId, result }（首次执行结果），插入序 FIFO。 */
+  loadCommandLedger?(): unknown[] | null;
+  saveCommandLedger?(rows: unknown[]): void;
 }
 
 /** 内存介质：测试与最小运行用（new InMemoryWorldStorage()）。
-    世界史通道（loadWorldLog/saveWorldLog）同样在内存中往返，与主档同寿命。 */
+    世界史 / 幂等账通道在内存中往返，与主档同寿命。 */
 export class InMemoryWorldStorage<W extends EngineWorldState = EngineWorldState> implements SavePort<W> {
   readonly medium = 'memory';
   private row: W | null = null;
   private worldLog: unknown[] = [];
+  private commandLedger: unknown[] | null = null;
   save(s: W): void {
     /* 结构化克隆一层的浅防御：引擎不要求介质做深拷贝，但内存介质至少
        别把同一个引用存进去（省得测试里改了内存态把"已落盘"也改掉） */
@@ -40,11 +45,18 @@ export class InMemoryWorldStorage<W extends EngineWorldState = EngineWorldState>
   clear(): void {
     this.row = null;
     this.worldLog = [];
+    this.commandLedger = null;
   }
   loadWorldLog(): unknown[] | null {
     return this.worldLog.length ? [...this.worldLog] : null;
   }
   saveWorldLog(rows: unknown[]): void {
     this.worldLog = [...rows];
+  }
+  loadCommandLedger(): unknown[] | null {
+    return this.commandLedger && this.commandLedger.length ? [...this.commandLedger] : null;
+  }
+  saveCommandLedger(rows: unknown[]): void {
+    this.commandLedger = [...rows];
   }
 }

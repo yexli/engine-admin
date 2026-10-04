@@ -182,12 +182,17 @@ export async function remoteEmbeddings(
   ref: ModelRef,
   apiKey: string,
   input: string[],
+  opts: { timeoutMs?: number } = {},
 ): Promise<number[][]> {
-  const res = await fetch(embeddingsUrl(ref.endpoint), {
-    method: 'POST',
-    headers: headers(apiKey),
-    body: JSON.stringify({ model: ref.wireModel ?? ref.id, input }),
-  });
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), opts.timeoutMs ?? 60_000);
+  try {
+    const res = await fetch(embeddingsUrl(ref.endpoint), {
+      method: 'POST',
+      headers: headers(apiKey),
+      signal: ctrl.signal,
+      body: JSON.stringify({ model: ref.wireModel ?? ref.id, input }),
+    });
     if (res.status === 401 || res.status === 403) {
       throw new RemoteModelError(`上游拒绝凭证（HTTP ${res.status}）`, 'auth');
     }
@@ -195,9 +200,15 @@ export async function remoteEmbeddings(
       const why = sanitizeUpstreamBody(await res.text().catch(() => ''), apiKey);
       throw new RemoteModelError(`端点 HTTP ${res.status}${why ? '：' + why : ''}`, 'http');
     }
-  const json = (await res.json()) as { data?: { embedding: number[]; index: number }[] };
-  if (!Array.isArray(json.data)) {
-    throw new RemoteModelError('端点响应缺少 data 数组');
+    const json = (await res.json()) as { data?: { embedding: number[]; index: number }[] };
+    if (!Array.isArray(json.data)) {
+      throw new RemoteModelError('端点响应缺少 data 数组');
+    }
+    return json.data.sort((a, b) => a.index - b.index).map((d) => d.embedding);
+  } catch (e) {
+    if (e instanceof RemoteModelError) throw e;
+    throw new RemoteModelError(e instanceof Error ? e.message : String(e), 'network');
+  } finally {
+    clearTimeout(timer);
   }
-  return json.data.sort((a, b) => a.index - b.index).map((d) => d.embedding);
 }

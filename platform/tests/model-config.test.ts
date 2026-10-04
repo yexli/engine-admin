@@ -338,6 +338,24 @@ describe('ModelConfigStore（版本化配置 + 原子替换）', () => {
     expect(() => h.store.commit(candidateWithModel(), rev())).not.toThrow();
   });
 
+  it('嵌入模型标签互斥（Embedding 统一治理）：embedding 与对话能力混挂 422', () => {
+    const h = harness();
+    const mixed = candidateWithModel({
+      models: [
+        { id: 'mdl-emb', providerId: 'prov-ds', wireModel: 'BAAI/bge-m3', tags: ['embedding', 'fast'], enabled: false },
+      ],
+    });
+    expect(() => h.store.commit(mixed, 0)).toThrow(/互斥/);
+
+    /* 纯 ['embedding'] 合法 */
+    const pure = candidateWithModel({
+      models: [
+        { id: 'mdl-emb', providerId: 'prov-ds', wireModel: 'BAAI/bge-m3', tags: ['embedding'], enabled: false },
+      ],
+    });
+    expect(() => h.store.commit(pure, 0)).not.toThrow();
+  });
+
   it('提交时忽略传入的 secretId，保留既有密钥引用（防伪造）', () => {
     const h = harness();
     h.store.commit(candidateWithModel(), 0);

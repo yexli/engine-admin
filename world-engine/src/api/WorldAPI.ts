@@ -18,7 +18,7 @@ import { createWorldEventBus, worldBus, type WorldEventBus } from '../events/Wor
 import { createMutate, type KernelMutate } from '../mutate/WorldMutate.ts';
 import type { EventEmit, WorldRule } from '../rules/Rules.ts';
 import { builtinRules } from '../runtime/BuiltinRules.ts';
-import { createWorldRuntime, type WorldRuntime } from '../runtime/WorldRuntime.ts';
+import { createWorldRuntime, type CommandLedgerRow, type WorldRuntime } from '../runtime/WorldRuntime.ts';
 import { createBaseState, createWorldContainer, type WorldContainer } from '../state/WorldState.ts';
 import { applyDefinition, type WorldDefinition } from '../state/WorldDefinition.ts';
 import type { SavePort } from '../state/storage.ts';
@@ -138,6 +138,16 @@ export function createWorld<W extends EngineWorldState = EngineWorldState>(opts:
 
   const clock = createWorldClock<W>({ need: container.need, labels: opts.labels, bus, events });
   const mutate = createMutate<W>(container.need);
+  /* 命令幂等账跨重启（V2.4 加固）：介质带账本通道时装载——HTTP 重试跨进程
+     重启不再重复执行（金币不扣两次）；账本变化回调交介质持久化。 */
+  const rawLedger = savePort?.loadCommandLedger?.() ?? null;
+  const initialCommandLedger: CommandLedgerRow[] = Array.isArray(rawLedger)
+    ? rawLedger.filter(
+        (r): r is CommandLedgerRow =>
+          !!r && typeof (r as CommandLedgerRow).commandId === 'string' &&
+          !!(r as CommandLedgerRow).result && typeof (r as CommandLedgerRow).result.ok === 'boolean',
+      )
+    : [];
   const runtime = createWorldRuntime<W>({
     container,
     clock,
@@ -145,46 +155,86 @@ export function createWorld<W extends EngineWorldState = EngineWorldState>(opts:
     bus,
     events,
     rules: opts.noBuiltinRules ? (opts.rules ?? []) : [...builtinRules<W>(), ...(opts.rules ?? [])],
+    ...(initialCommandLedger.length ? { initialCommandLedger } : {}),
+    onLedgerChange: (rows) => savePort?.saveCommandLedger?.(rows as unknown[]),
   });
 
   /* ---------- 世界事件史（V2.4-01 Event Persistence · append-only）----------
      事件从「运行时消息」升级为「世界历史事实」：装配了世界史通道的 SavePort 时——
        · 启动恢复：loadWorldLog → 同 id 保末次去重 → 完整事件史（顺序稳定）；
+       · 序号续接：从恢复的事件史推导最大 id 序号（evt_<day>_<seq>）——不续接则
+         重启后新事件 id 与历史撞车，命中同 id 幂等守卫 → 新事实进环但不入史；
        · 追加：每个新事实按 id 唯一追加（重复写入不制造重复事实）；
+       · 归属过滤：缺省作用域多世界共享总线时，只吸收本世界（或未标注归属）的
+         事实——他世界的环与世界史不再互相渗透（事件自带 worldId，V2.4 加固）；
        · 持久化：saveWorldLog 整档快照（FileSavePort 防抖合并写；增量追加介质属 V2.5）；
-       · 环形窗口恢复：重启后 ring 回填最近窗口，getEvents / WS replay 语义不变。
+       · 环形窗口恢复：重启后 ring 回填最近窗口，getEvents / WS replay 语义不变；
+       · 死信入史：被限流/熔断丢弃的事件同样入史（链式保留宿主既有死信观察者）。
      未装配通道（缺省）= 内存往返，行为与此前完全一致。 */
   const worldLog: WorldEvent[] = [];
   const worldLogIds = new Set<string>();
+  /* 世界归属（V2.4 加固）：命名世界的事件带 worldId；未命名世界 = 缺省单世界
+     语义（不过滤，与既有宿主行为完全一致）。 */
+  const myWorldId: string | undefined = opts.worldId;
+  const belongTo = (e: WorldEvent): boolean => e.worldId === undefined || e.worldId === myWorldId;
   const hasWorldLog = (): boolean => typeof savePort?.loadWorldLog === 'function';
-  if (hasWorldLog()) {
-    const rows = savePort?.loadWorldLog?.() ?? null;
-    if (Array.isArray(rows)) {
-      for (const row of rows) {
-        const e = row as WorldEvent;
-        if (!e || typeof e.id !== 'string' || typeof e.type !== 'string') continue;
-        if (worldLogIds.has(e.id)) {
-          const idx = worldLog.findIndex((x) => x.id === e.id);
-          worldLog[idx] = e; /* 同 id 保末次（幂等恢复） */
-          continue;
-        }
-        worldLogIds.add(e.id);
-        worldLog.push(e);
+  const absorbLog = (rows: unknown[]): void => {
+    for (const row of rows) {
+      const e = row as WorldEvent;
+      if (!e || typeof e.id !== 'string' || typeof e.type !== 'string') continue;
+      if (!belongTo(e)) continue;
+      if (worldLogIds.has(e.id)) {
+        const idx = worldLog.findIndex((x) => x.id === e.id);
+        worldLog[idx] = e; /* 同 id 保末次（幂等恢复） */
+        continue;
       }
+      worldLogIds.add(e.id);
+      worldLog.push(e);
     }
-  }
+  };
+  const restoreWorldLog = (): void => {
+    if (!hasWorldLog()) return;
+    const rows = savePort?.loadWorldLog?.() ?? null;
+    if (Array.isArray(rows)) absorbLog(rows);
+    /* 序号续接：max（史内最大 id 序号，含历史污染数据的安全上界）> 当前才前移
+       （缺省作用域多世界共享同一序号域，绝不回退） */
+    let maxSeq = 0;
+    for (const e of worldLog) {
+      const m = /^evt_\d+_(\d+)$/.exec(e.id);
+      if (m) maxSeq = Math.max(maxSeq, Number(m[1]));
+    }
+    if (maxSeq > events.eventSeq()) events.setEventSeq(maxSeq);
+  };
+  restoreWorldLog();
 
   /* 事件环形缓冲：世界事实的近期窗口（订阅本世界作用域的总线） */
   const ring: WorldEvent[] = [];
   for (const e of worldLog.slice(-EVENT_RING)) ring.push(e); /* 重启恢复：历史窗口回填 */
-  bus.on('*', (e) => {
-    if (!container.core.S) return;
+  const absorbIntoRing = (e: WorldEvent): void => {
     ring.push(e);
     if (ring.length > EVENT_RING) ring.shift();
+  };
+  bus.on('*', (e) => {
+    if (!container.core.S) return;
+    if (!belongTo(e)) return; /* 他世界的事实不入本世界的环与史 */
+    absorbIntoRing(e);
     /* 事件史追加（幂等：同 id 不重复成事实；介质侧防抖合并写） */
     if (hasWorldLog() && !worldLogIds.has(e.id)) {
       worldLogIds.add(e.id);
       worldLog.push(e);
+      savePort?.saveWorldLog?.(worldLog as unknown[]);
+    }
+  });
+  /* 死信入史（V2.4 加固）：限流/熔断丢弃的也是「已经发生的事实」——
+     世界史不再有空洞。钩子链式保留宿主既有观察者。 */
+  const prevDeadLetterHook = bus.deadLetterHookOf();
+  bus.onDeadLetter((e, why) => {
+    prevDeadLetterHook?.(e, why);
+    if (!container.core.S || !belongTo(e)) return;
+    absorbIntoRing({ ...e, data: { ...(e.data ?? {}), deadLetter: why } });
+    if (hasWorldLog() && !worldLogIds.has(e.id)) {
+      worldLogIds.add(e.id);
+      worldLog.push({ ...e, data: { ...(e.data ?? {}), deadLetter: why } });
       savePort?.saveWorldLog?.(worldLog as unknown[]);
     }
   });
@@ -213,13 +263,42 @@ export function createWorld<W extends EngineWorldState = EngineWorldState>(opts:
     registerRule: (rule: WorldRule<W>) => runtime.rules.register(rule),
     emitEvent: (draft: EventEmit) => {
       const s = container.need();
-      const ev = events.makeEvent({ ...draft, day: draft.day ?? Math.floor(s.t / CHEN_PER_DAY) + 1, tick: draft.tick ?? s.t });
+      const ev = events.makeEvent({
+        ...draft,
+        worldId: draft.worldId ?? myWorldId,
+        day: draft.day ?? Math.floor(s.t / CHEN_PER_DAY) + 1,
+        tick: draft.tick ?? s.t,
+      });
       /* 总线通配订阅已记账入环——这里不再直推（曾导致环内双份，M4.3 修复） */
       bus.emit(ev);
       return ev;
     },
     setSavePort: (port: SavePort<W>) => {
       savePort = port;
+      /* 后装介质（V2.4 加固）：
+         · 吸收介质里已有的世界史（幂等恢复 + 序号续接）；
+         · 后装前只记在环形窗口里的内存事实并入史（缺省无介质时只记环——
+           否则这批事实永远到不了介质）；
+         · 立即合并落盘——下一条事件不会用「缺了内存事实」的史覆盖档案。 */
+      const preAttach = ring.slice(); /* 旧 → 新 */
+      worldLog.length = 0;
+      worldLogIds.clear();
+      ring.length = 0;
+      restoreWorldLog();
+      for (const e of worldLog.slice(-EVENT_RING)) ring.push(e);
+      const ringIds = new Set(ring.map((x) => x.id));
+      for (const e of preAttach) {
+        if (!ringIds.has(e.id)) {
+          ring.push(e);
+          ringIds.add(e.id);
+        }
+        if (!worldLogIds.has(e.id)) {
+          worldLogIds.add(e.id);
+          worldLog.push(e);
+        }
+      }
+      if (ring.length > EVENT_RING) ring.splice(0, ring.length - EVENT_RING);
+      if (hasWorldLog() && worldLog.length > 0) savePort?.saveWorldLog?.(worldLog as unknown[]);
     },
     mutate,
     clock,

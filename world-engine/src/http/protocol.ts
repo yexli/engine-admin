@@ -618,7 +618,9 @@ export function createWorldHttp<W extends EngineWorldState = EngineWorldState>(
       if (segments.length === 4 && leaf === 'events') {
         if (method === 'GET') {
           const n = Number(req.query?.['n'] ?? 20);
-          const cap = Number.isFinite(n) && n > 0 ? Math.floor(n) : 20;
+          /* 上界钳制（V2.4 加固）：n 无上界时一次可倒出全量世界史（DoS 面）；
+             全量检索走过滤参数（queryEvents），这里只是窗口快路径 */
+          const cap = Number.isFinite(n) && n > 0 ? Math.min(Math.floor(n), 500) : 20;
           /* V2.4-01：世界事件史过滤查询（可按实体/类型/时间/因果检索全量历史；
              任一过滤参数出现即走事件史，否则保持热窗口快路径） */
           const q = req.query ?? {};

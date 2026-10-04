@@ -114,8 +114,6 @@ export interface AdminServerOptions {
   /** Memory Runtime + 记忆服务（P7；缺省未装配 → runtime 观测面无 memory 段） */
   memoryRuntime?: import('../memory/runtime.ts').MemoryRuntime;
   memoryService?: import('../memory/service.ts').WorldMemoryService;
-  /** 记忆库服务地址（M5 后特性：嵌入配置鉴权代理目标；缺省 8789） */
-  memoryBaseUrl?: string;
 }
 
 export interface AdminServer {
@@ -278,10 +276,16 @@ export function startAdminServer(opts: AdminServerOptions): Promise<AdminServer>
     if (modelTestMatch && method === 'POST') {
       requirePerm('gateway:manage');
       const modelId = decodeURIComponent(modelTestMatch[1]!);
-      if (!opts.runtime.config.models.some((m) => m.id === modelId)) {
+      const target = opts.runtime.config.models.find((x) => x.id === modelId);
+      if (!target) {
         httpErr(404, 'model_not_found', `模型 '${modelId}' 不在配置中`);
       }
-      return probeResponse(await opts.runtime.probeModel(modelId));
+      /* 按模型类型选实测语义（Embedding 统一治理）：embedding 标签模型走
+         embed(['ping']) 并返回实测维度——chat ping 对嵌入模型是假测试 */
+      const result = target.tags.includes('embedding')
+        ? await opts.runtime.probeEmbedding(modelId)
+        : await opts.runtime.probeModel(modelId);
+      return probeResponse(result);
     }
 
     /* ---------- POST /v1/admin/routes/:capability/test ---------- */
@@ -296,7 +300,51 @@ export function startAdminServer(opts: AdminServerOptions): Promise<AdminServer>
       if (!route?.primary) {
         httpErr(503, 'no_model_configured', `能力 '${capability}' 未配置 primary 模型`);
       }
-      return probeResponse(await opts.runtime.probeModel(route.primary!));
+      /* Embedding 统一治理：embedding 能力走 embed(['ping']) 语义实测
+         （chat ping 对嵌入模型通常是假测试），并返回实测维度 */
+      const result =
+        capability === 'embedding'
+          ? await opts.runtime.probeEmbedding(route.primary!)
+          : await opts.runtime.probeModel(route.primary!);
+      return probeResponse(result);
+    }
+
+    /* ---------- GET /v1/admin/routes/:capability：路由实况（Embedding 统一治理） ----------
+       只读解析：primary/fallback 槽位 → 模型/供应商投影 + 冷却状态 + 当前
+       select() 结果。诊断页据此展示"当前实际生效的模型"，不读任何副本配置。 */
+    const routeLiveMatch = path.match(/^\/v1\/admin\/routes\/([^/]+)$/);
+    if (routeLiveMatch && method === 'GET') {
+      requirePerm('gateway:manage');
+      const capability = decodeURIComponent(routeLiveMatch[1]!);
+      if (!(MANAGED_CAPABILITIES as readonly string[]).includes(capability)) {
+        httpErr(400, 'malformed', `未知能力 '${capability}'（可用：${MANAGED_CAPABILITIES.join('/')}）`);
+      }
+      const cap = capability as (typeof MANAGED_CAPABILITIES)[number];
+      const route = opts.runtime.config.routes[cap] ?? { primary: null, fallback: null };
+      const resolveSlot = (modelId: string | null) => {
+        if (!modelId) return null;
+        const m = opts.runtime.config.models.find((x) => x.id === modelId);
+        const p = m ? opts.runtime.config.providers.find((x) => x.id === m.providerId) : undefined;
+        return {
+          modelId,
+          wireModel: m?.wireModel ?? null,
+          enabled: m?.enabled ?? false,
+          providerId: m?.providerId ?? null,
+          providerName: p?.name ?? null,
+          coolingDown: opts.runtime.router.isCoolingDown(modelId),
+        };
+      };
+      const selected = opts.runtime.router.select(cap);
+      return {
+        status: 200,
+        body: {
+          capability: cap,
+          route: { primary: route.primary ?? null, fallback: route.fallback ?? null },
+          primary: resolveSlot(route.primary ?? null),
+          fallback: resolveSlot(route.fallback ?? null),
+          resolved: selected ? { modelId: selected.model, usedFallback: selected.usedFallback } : null,
+        },
+      };
     }
 
     /* ---------- GET /v1/admin/keys：API Key 脱敏清单（M2.1；删除为硬删，清单即全部在档） ---------- */
@@ -1156,36 +1204,12 @@ export function startAdminServer(opts: AdminServerOptions): Promise<AdminServer>
       }
     }
 
-    /* ---------- 嵌入模型配置（记忆库菜单；鉴权代理到 memory 服务） ----------
-       memory 服务自身无鉴权——写入面由平台代理加闸：GET 需已认证身份
-       （gateway:manage 语义域的只读观测），PUT/test 需 system:manage。
-       apiKey 明文只在 memory 服务内存与其宿主持久化文件中，代理响应
-       一律脱敏视图（hasApiKey）。 */
-    const embedCfgPath = '/v1/admin/memory/embedding-config';
-    if (path === embedCfgPath || path === `${embedCfgPath}/test`) {
-      const base = opts.memoryBaseUrl;
-      if (!base) httpErr(404, 'not_configured', '本管理面未配置记忆库服务地址（PLATFORM_MEMORY_URL）');
-      const method = (req.method ?? 'GET').toUpperCase();
-      const sub = path === embedCfgPath ? '/v1/memory/embedding-config' : '/v1/memory/embedding-config/test';
-      if (sub.endsWith('/test')) {
-        requirePerm('system:manage');
-        if (method !== 'POST') httpErr(405, 'method_not_allowed', `test 端点只接受 POST，收到 ${method}`);
-      } else if (method === 'PUT') {
-        requirePerm('system:manage');
-      } else if (method !== 'GET') {
-        httpErr(405, 'method_not_allowed', `配置端点只接受 GET/PUT，收到 ${method}`);
-      }
-      const upstream = await fetch(`${base.replace(/\/+$/, '')}${sub}`, {
-        method,
-        headers: { 'content-type': 'application/json' },
-        ...(method === 'PUT' ? { body: raw.toString('utf8') } : {}),
-        ...(sub.endsWith('/test') ? { body: '{}' } : {}),
-      }).catch((e) => {
-        httpErr(502, 'upstream_unreachable', `记忆库服务不可达：${e instanceof Error ? e.message : String(e)}`);
-      });
-      const out = await (upstream as Response).json().catch(() => null);
-      return { status: (upstream as Response).status, body: out };
-    }
+    /* ---------- 嵌入模型配置代理已删除（Embedding 配置统一治理） ----------
+       唯一配置真相源 = Model Router（/v1/admin/model-config 的
+       routes.embedding）；路由实况见 GET /v1/admin/routes/embedding，
+       语义实测见 POST /v1/admin/routes/embedding/test（embed 语义）。
+       原 /v1/admin/memory/embedding-config[/test] 鉴权代理随 memory
+       服务配置端点一并下线。 */
 
     httpErr(404, 'not_found', `no such admin route: ${method} ${path}`);
   }
@@ -1364,7 +1388,17 @@ function normalizeError(e: unknown): { status: number; body: unknown } {
 /** 探测结果 → HTTP：成功 200；配置态问题 404/422/503；上游失败 502（均已脱敏） */
 function probeResponse(out: ProbeResult): { status: number; body: unknown } {
   if (out.ok) {
-    return { status: 200, body: { ok: true, modelId: out.modelId, elapsedMs: out.elapsedMs, reply: out.reply } };
+    return {
+      status: 200,
+      body: {
+        ok: true,
+        modelId: out.modelId,
+        elapsedMs: out.elapsedMs,
+        reply: out.reply,
+        /* embedding 语义探测附实测维度（chat 探测无此字段） */
+        ...(out.dimension !== undefined ? { dimension: out.dimension } : {}),
+      },
+    };
   }
   const statusMap: Record<string, number> = {
     model_not_found: 404,

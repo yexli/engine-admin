@@ -27,6 +27,7 @@ import type { EngineClient } from '../types.ts';
 import type { KeyStore } from '../keys/keystore.ts';
 import { ModelRouter } from '../router/modelrouter.ts';
 import type { UsageSink } from '../usage/recorder.ts';
+import { createEmbeddingsClient } from '../upstream/embeddings.ts';
 import { createGatewayClient } from '../upstream/gateway.ts';
 import { startPlatformServer, type PlatformServer } from '../http/server.ts';
 import type { EndpointPolicy, ManagedCapability, ModelConfig, ModelConfigStore } from './model-config.ts';
@@ -262,6 +263,8 @@ export interface ProbeResult {
   /** 失败分类码：no_model_configured / no_credential / upstream_credential_rejected / upstream_failure */
   code: string | null;
   message: string | null;
+  /** embedding 语义探测的实测维度（chat 探测无此值） */
+  dimension?: number;
 }
 
 export interface ManagedRuntime {
@@ -283,6 +286,8 @@ export interface ManagedRuntime {
   probeModel(modelId: string): Promise<ProbeResult>;
   /** 有界测试调用：只用该能力当前生效的 primary 路由 */
   probeCapability(capability: ManagedCapability): Promise<ProbeResult>;
+  /** embedding 语义探测：embed(['ping']) 实测并返回维度（chat ping 对嵌入模型是假测试） */
+  probeEmbedding(modelId: string): Promise<ProbeResult>;
   /**
    * 管线有界试跑（M2.3）：按当前生效配置桥接网关标签路由（物理模型
    * 视图），出站校验未通过的模型被剔除并留痕；deadline/maxCalls 被
@@ -298,18 +303,6 @@ export interface ManagedRuntime {
 export async function startManagedRuntime(opts: ManagedRuntimeOptions): Promise<ManagedRuntime> {
   const gateway: GatewayServer = await startGatewayServer({ port: opts.gatewayPort ?? 0, host: '127.0.0.1' });
   const router = new ModelRouter(null);
-  const platform: PlatformServer = await startPlatformServer({
-    keys: opts.keys,
-    engine: opts.engine,
-    gateway: createGatewayClient({ baseUrl: gateway.url }),
-    router,
-    port: opts.platformPort ?? 0,
-    host: opts.host ?? '127.0.0.1',
-    accessLog: opts.accessLog ?? true,
-    corsAllowOrigin: opts.corsAllowOrigin ?? '*',
-    usage: opts.usage,
-  });
-
   const validator = opts.outboundValidator ?? defaultOutboundValidator(opts.endpointPolicy);
   const timeoutMs = opts.upstreamTimeoutMs ?? 60_000;
   const providerOpts: ManagedProviderOptions = {
@@ -317,6 +310,20 @@ export async function startManagedRuntime(opts: ManagedRuntimeOptions): Promise<
     outboundValidator: validator,
     timeoutMs,
   };
+  const platform: PlatformServer = await startPlatformServer({
+    keys: opts.keys,
+    engine: opts.engine,
+    gateway: createGatewayClient({ baseUrl: gateway.url }),
+    router,
+    /* Embedding 统一治理：公共 POST /v1/embeddings 与 run-managed 的记忆钩子
+       共用同一 Router 实例（冷却状态共享）与网关嵌入通道 */
+    embeddings: createEmbeddingsClient({ baseUrl: gateway.url, timeoutMs }),
+    port: opts.platformPort ?? 0,
+    host: opts.host ?? '127.0.0.1',
+    accessLog: opts.accessLog ?? true,
+    corsAllowOrigin: opts.corsAllowOrigin ?? '*',
+    usage: opts.usage,
+  });
 
   function swapTo(config: ModelConfig): void {
     gateway.replaceProviders([buildManagedProvider(config, providerOpts)]);
@@ -367,6 +374,55 @@ export async function startManagedRuntime(opts: ManagedRuntimeOptions): Promise<
     }
   }
 
+  /** embedding 语义探测：embed(['ping']) 实测并返回维度（模型解析失败如实报错） */
+  async function probeEmbedding(modelId: string | null): Promise<ProbeResult> {
+    const started = Date.now();
+    if (!modelId) {
+      return { ok: false, modelId: null, elapsedMs: 0, reply: null, code: 'no_model_configured', message: "能力 'embedding' 未配置 primary 模型" };
+    }
+    const config = opts.configStore.current();
+    const m = config.models.find((x) => x.id === modelId);
+    if (!m) {
+      return { ok: false, modelId, elapsedMs: 0, reply: null, code: 'model_not_found', message: `模型 '${modelId}' 不在配置中` };
+    }
+    const p = config.providers.find((x) => x.id === m.providerId);
+    if (!p) {
+      return { ok: false, modelId, elapsedMs: 0, reply: null, code: 'provider_not_found', message: `模型 '${modelId}' 的供应商不存在` };
+    }
+    if (p.auth.kind === 'secret' && !p.auth.secretId) {
+      return { ok: false, modelId, elapsedMs: 0, reply: null, code: 'no_credential', message: `供应商 '${p.id}' 尚未上传凭证` };
+    }
+    const t = resolveModelTarget(config, opts.secrets, modelId, { requireEnabled: false });
+    if (!t) {
+      return { ok: false, modelId, elapsedMs: 0, reply: null, code: 'not_resolvable', message: `模型 '${modelId}' 无法解析出可用出站目标（供应商禁用/凭证不可解密/端点非法）` };
+    }
+    try {
+      await validator(t.endpoint);
+      const vectors = await remoteEmbeddings(toModelRef(modelId, t), t.apiKey, ['ping'], {
+        timeoutMs: Math.min(timeoutMs, 30_000),
+      });
+      return {
+        ok: true,
+        modelId,
+        elapsedMs: Date.now() - started,
+        reply: null,
+        code: null,
+        message: null,
+        dimension: vectors[0]?.length ?? 0,
+      };
+    } catch (e) {
+      const me = toManagedError(e);
+      return {
+        ok: false,
+        modelId,
+        elapsedMs: Date.now() - started,
+        reply: null,
+        code: me.code === 'upstream_credential_rejected' ? 'upstream_credential_rejected' : 'upstream_failure',
+        message: me.message,
+      };
+    }
+  }
+
   return {
     get gatewayUrl() {
       return gateway.url;
@@ -403,6 +459,7 @@ export async function startManagedRuntime(opts: ManagedRuntimeOptions): Promise<
       const r = opts.configStore.current().routes[capability];
       return probe(r?.primary ?? null);
     },
+    probeEmbedding: (modelId: string) => probeEmbedding(modelId),
     runPipelineSpec: async (spec, run) => {
       /* 桥接：受管配置（物理模型 + 加密凭证）→ 网关标签路由快照。
          每个启用模型先过出站校验（与 world-agent 同一道闸），未过者

@@ -63,10 +63,19 @@ export interface RecallOptions {
   includeForgotten?: boolean;
 }
 
-/** 向量钩子：宿主可注入（如经 V0.6 路由的 embedding 通道）；缺省纯词面检索 */
+/** 向量钩子：宿主可注入（如经平台模型路由的 embedding 能力）；缺省纯词面检索 */
 export interface EmbedHook {
   embed(texts: string[]): Promise<number[][] | null>;
 }
+
+/**
+ * EmbeddingService（Embedding 配置统一治理 · 2026-10）：Memory 只说
+ * "我要向量"，用哪个 Provider/Endpoint/Key/模型由注入方（Model Router
+ * 的 embedding 能力路由）决定——本包不保存、不选择、不直连任何模型。
+ * 形状与 EmbedHook 相同（null = 暂不可用，静默回词面），作为语义别名
+ * 导出以固定契约。
+ */
+export type EmbeddingService = EmbedHook;
 
 /** 持久化端口（形状对齐引擎 SavePort 纪律：载失败返回 null，不抛） */
 export interface MemorySavePort {

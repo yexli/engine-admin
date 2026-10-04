@@ -1,6 +1,6 @@
 {
   "name": "world-engine",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "type": "module",
   "description": "World Driving Engine —— 与具体应用无关的世界模拟内核。可独立运行、独立测试，经 Adapter 被多个游戏与 AI 应用复用。",
   "main": "dist/index.js",

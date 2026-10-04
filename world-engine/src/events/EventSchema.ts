@@ -16,6 +16,12 @@ export interface WorldEvent {
   id: string;
   /** 事件类型（snake_case 事实名，如 character_died） */
   type: string;
+  /**
+   * 事实的世界归属（V2.4-01 加固）：缺省作用域共享一条总线时，
+   * 订阅方据此过滤他世界的事实——环与世界史不再互相渗透。
+   * 未标注（undefined）= 旧数据 / 宿主自发事实，保持缺省作用域既有语义。
+   */
+  worldId?: string;
   /** 墙钟时间戳（ISO 8601，产生时刻；世界时间权威仍是 day/tick） */
   ts?: string;
   /** 世界日（世界时钟刻度） */
@@ -110,6 +116,7 @@ export function createEventSchema(): EventSchemaInstance {
         day: draft.day,
         tick: draft.tick ?? 0,
         level: draft.level ?? api.levelOf(draft.type),
+        worldId: draft.worldId,
         actor: draft.actor,
         target: draft.target,
         location: draft.location,
@@ -168,6 +175,7 @@ export interface EventDraft {
   day: number;
   tick?: number;
   level?: WorldEventLevel;
+  worldId?: string;
   actor?: string;
   target?: string;
   location?: string;

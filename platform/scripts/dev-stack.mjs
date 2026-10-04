@@ -92,7 +92,12 @@ const node = process.execPath;
    引擎/记忆是 scripts/ 下的宿主集成示例；缺席 dist 时对应子进程会失败，
    先在 world-engine 与 world-engine/memory 各跑一次 npm run build。 */
 spawnChild('world-engine-demo', node, [join(repoRoot, 'scripts', 'run-demo-engine.mjs')], repoRoot);
-spawnChild('memory-demo', node, [join(repoRoot, 'scripts', 'run-demo-memory.mjs')], repoRoot);
+/* Embedding 统一治理：记忆服务的向量能力经平台模型路由（EmbeddingService），
+   本宿主不持有任何 Provider/Endpoint/Key/模型配置 */
+spawnChild('memory-demo', node, [join(repoRoot, 'scripts', 'run-demo-memory.mjs')], repoRoot, {
+  EMBEDDING_SERVICE_URL: `http://127.0.0.1:${process.env.PLATFORM_PORT ?? 8790}`,
+  EMBEDDING_SERVICE_KEY: env.bootstrapKey,
+});
 spawnChild('managed-platform', node, [join(platformDir, 'scripts', 'run-managed.mjs')], platformDir, {
   PLATFORM_DATA_DIR: dataDir,
   PLATFORM_SECRET_MASTER_KEY: env.masterKey,
