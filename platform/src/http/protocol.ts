@@ -50,6 +50,9 @@ export interface WorldPlatformInit {
    * embedding 能力路由决定。缺省未装配 → 端点 501。
    */
   embeddings?: EmbeddingsClient;
+  /** 世界创建成功回调（P2 卡片5）：POST /v1/worlds 返回 201 时以 worldId 触发
+   *  ——装配方动态纳管（如 MemoryRuntime.addWorld），无需重启平台。 */
+  onWorldCreated?: (worldId: string) => void;
 }
 
 export function createWorldPlatform(init: WorldPlatformInit): {
@@ -253,6 +256,10 @@ export function createWorldPlatform(init: WorldPlatformInit): {
           };
           const res = await init.engine.proxy('POST', `/v1/worlds${listQuery}`, stamped);
           meter(key, { kind: 'worlds', status: res.status });
+          if (res.status === 201) {
+            const createdWorldId = (res.body as { worldId?: string } | null)?.worldId;
+            if (typeof createdWorldId === 'string' && createdWorldId) init.onWorldCreated?.(createdWorldId);
+          }
           return json(res.status, res.body);
         }
         const wid = worldIdOfPath(path);

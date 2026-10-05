@@ -78,6 +78,9 @@ const sessions = new SessionStore(config.sessionsFile);
 const users = new UserStore(config.usersFile);
 const settings = new SettingsStore(config.settingsFile);
 
+/* P2 卡片5：世界创建回调引用的记忆运行时在下方构造；先用 let 声明避免
+   装配 await 窗口内的 TDZ 访问（世界创建早于 memoryRuntime 构造时如实忽略） */
+let memoryRuntime;
 const runtime = await startManagedRuntime({
   configStore,
   secrets,
@@ -94,6 +97,11 @@ const runtime = await startManagedRuntime({
   upstreamTimeoutMs: config.upstreamTimeoutMs,
   accessLog: config.accessLog,
   usage,
+  onWorldCreated: (worldId) => {
+    if (!memoryRuntime) return;
+    memoryRuntime.addWorld(worldId);
+    if (!memoryRuntime.running()) memoryRuntime.start();
+  },
 });
 
 console.log('[managed] World Platform（受管模式）已启动');
@@ -239,7 +247,7 @@ console.log(`[managed]   schedule : 守护 ${scheduleStore.worlds().join(', ') |
 
 /* ---------- Memory Runtime（P7 · 方案 §十）---------- */
 const memoryIntervalMs = Number(process.env.PLATFORM_MEMORY_INTERVAL_MS ?? 3000);
-const memoryRuntime = createMemoryRuntime({
+memoryRuntime = createMemoryRuntime({
   engine,
   service: memoryService,
   worlds: memoryWorlds,

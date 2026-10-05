@@ -252,6 +252,8 @@ export interface ManagedRuntimeOptions {
   usage?: UsageSink;
   accessLog?: boolean;
   corsAllowOrigin?: string;
+  /** 世界创建成功回调（P2 卡片5）：透传平台协议层——装配方动态纳管（MemoryRuntime.addWorld 等） */
+  onWorldCreated?: (worldId: string) => void;
 }
 
 export interface ProbeResult {
@@ -323,6 +325,7 @@ export async function startManagedRuntime(opts: ManagedRuntimeOptions): Promise<
     accessLog: opts.accessLog ?? true,
     corsAllowOrigin: opts.corsAllowOrigin ?? '*',
     usage: opts.usage,
+    ...(opts.onWorldCreated ? { onWorldCreated: opts.onWorldCreated } : {}),
   });
 
   function swapTo(config: ModelConfig): void {

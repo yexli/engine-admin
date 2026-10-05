@@ -44,6 +44,8 @@ export interface PlatformServerOptions {
    * 任何持有 Key 的非浏览器客户端等价。公共部署建议收紧为具体来源列表。
    */
   corsAllowOrigin?: string;
+  /** 世界创建成功回调（P2 卡片5）：透传协议层 onWorldCreated（装配方动态纳管用） */
+  onWorldCreated?: (worldId: string) => void;
 }
 
 export interface PlatformServer {
@@ -61,6 +63,7 @@ export function startPlatformServer(opts: PlatformServerOptions): Promise<Platfo
     version: opts.version,
     usage: opts.usage,
     ...(opts.embeddings ? { embeddings: opts.embeddings } : {}),
+    ...(opts.onWorldCreated ? { onWorldCreated: opts.onWorldCreated } : {}),
   });
   const accessLog = opts.accessLog ?? true;
 

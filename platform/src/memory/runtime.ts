@@ -46,13 +46,16 @@ export interface MemoryRuntime {
   status(): { running: boolean; intervalMs: number; worlds: MemoryWorldStatus[] };
   /** 立即轮询一轮（测试/手动；不改定时器） */
   pollOnce(): Promise<void>;
+  /** 动态纳管新世界（P2 卡片5：运行中即可生效；重复添加幂等） */
+  addWorld(worldId: string): void;
+  /** 移除守护（停止摄取；已有记忆数据保留在 service 中） */
+  removeWorld(worldId: string): void;
 }
 
 export function createMemoryRuntime(opts: MemoryRuntimeOptions): MemoryRuntime {
   const intervalMs = Math.max(250, Math.floor(opts.intervalMs ?? 3000));
   const eventWindow = Math.max(1, Math.min(200, Math.floor(opts.eventWindow ?? 30)));
   const log = opts.log ?? (() => {});
-  const worlds = [...(opts.worlds ?? opts.service.worlds())];
 
   const worldSeeds = new Map<string, number>();
   interface WorldState extends MemoryWorldStatus {
@@ -60,7 +63,7 @@ export function createMemoryRuntime(opts: MemoryRuntimeOptions): MemoryRuntime {
     seenOrder: string[];
   }
   const states = new Map<string, WorldState>();
-  for (const worldId of worlds) {
+  for (const worldId of opts.worlds ?? opts.service.worlds()) {
     states.set(worldId, { worldId, polls: 0, ingestedTotal: 0, duplicatesTotal: 0, dayTicks: 0, errors: 0, seen: new Set(), seenOrder: [], worldResets: 0 });
   }
 
@@ -153,7 +156,7 @@ export function createMemoryRuntime(opts: MemoryRuntimeOptions): MemoryRuntime {
       if (!stopped) return;
       stopped = false;
       timer = setInterval(() => void pollOnce(), intervalMs);
-      log(`[memory] Memory Runtime 已启动：守护 ${worlds.join(', ') || '（无世界）'}，间隔 ${intervalMs}ms（确定性摄取，零 AI 调用）`);
+      log(`[memory] Memory Runtime 已启动：守护 ${[...states.keys()].join(', ') || '（无世界）'}，间隔 ${intervalMs}ms（确定性摄取，零 AI 调用）`);
     },
     stop() {
       stopped = true;
@@ -167,20 +170,28 @@ export function createMemoryRuntime(opts: MemoryRuntimeOptions): MemoryRuntime {
     status: () => ({
       running: !stopped,
       intervalMs,
-      worlds: worlds.map((worldId) => {
-        const st = states.get(worldId)!;
-        return {
-          worldId,
-          polls: st.polls,
-          ingestedTotal: st.ingestedTotal,
-          duplicatesTotal: st.duplicatesTotal,
-          dayTicks: st.dayTicks,
-          ...(st.lastDay !== undefined ? { lastDay: st.lastDay } : {}),
-          errors: st.errors,
-          worldResets: st.worldResets,
-        };
-      }),
+      worlds: [...states.values()].map((st) => ({
+        worldId: st.worldId,
+        polls: st.polls,
+        ingestedTotal: st.ingestedTotal,
+        duplicatesTotal: st.duplicatesTotal,
+        dayTicks: st.dayTicks,
+        ...(st.lastDay !== undefined ? { lastDay: st.lastDay } : {}),
+        errors: st.errors,
+        worldResets: st.worldResets,
+      })),
     }),
     pollOnce,
+    /* P2 卡片5：世界集不再静态——运行中新建的世界动态纳管，无需重启平台 */
+    addWorld(worldId: string) {
+      if (states.has(worldId)) return; /* 幂等 */
+      states.set(worldId, { worldId, polls: 0, ingestedTotal: 0, duplicatesTotal: 0, dayTicks: 0, errors: 0, seen: new Set(), seenOrder: [], worldResets: 0 });
+      log(`[memory] 动态纳管新世界：${worldId}`);
+    },
+    removeWorld(worldId: string) {
+      if (!states.has(worldId)) return;
+      states.delete(worldId);
+      log(`[memory] 移除守护：${worldId}（service 中已有记忆数据保留）`);
+    },
   };
 }
