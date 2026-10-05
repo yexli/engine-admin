@@ -83,9 +83,13 @@ function goBack() {
           </div>
         </div>
         <div class="flex-1" />
-        <el-tag v-if="info" type="success" effect="plain"
-          >assumed-running</el-tag
+        <el-tag
+          v-if="info"
+          :type="info.status === 'paused' ? 'warning' : 'success'"
+          effect="plain"
         >
+          {{ info.status === "paused" ? "已暂停" : "运行中" }}
+        </el-tag>
       </div>
     </el-card>
 
