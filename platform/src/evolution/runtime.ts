@@ -122,7 +122,11 @@ export function createEvolutionRuntime(
   const lock: WorldLock = createWorldLock();
 
   function tick(worldId: string, trigger: EvolutionRun['trigger'] = 'admin', tickOpts: TickOptions = {}): Promise<EvolutionRun> {
-    return lock.acquire(worldId, () => runTick(worldId, trigger, tickOpts));
+    /* P3 卡片7：锁从「按世界」放宽为「按 world|focus 分域」——同一 NPC 串行
+       （同焦点不并发），同一事件唤醒的不同 NPC 可并行（trigger 有界并发批量
+       发起时不再互等）。世界级 tick 的 focus 为空，行为与此前一致。 */
+    const lockKey = `${worldId}|${ledger.focusOf(worldId, tickOpts.wakePlan)}`;
+    return lock.acquire(lockKey, () => runTick(worldId, trigger, tickOpts));
   }
 
   async function runTick(worldId: string, trigger: EvolutionRun['trigger'], tickOpts: TickOptions): Promise<EvolutionRun> {

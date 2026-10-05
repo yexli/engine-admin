@@ -195,11 +195,15 @@ export function createTriggerRuntime(opts: TriggerRuntimeOptions): TriggerRuntim
              wakePlan 只留它一个 HIGH（context.trigger.woken = [npc]，驱动器以它的
              视角判断），幂等键按事件+实体分键，冷却/指纹按焦点分域（runtime）。
              「100 个 NPC 存在 ≠ 100 个 NPC 同时思考」：只有真正被唤醒的才思考，
-             一个事件至多产生 woken.length 次 AI 调用。 */
+             一个事件至多产生 woken.length 次 AI 调用。
+             P3 卡片7：多个唤醒实体走有界并发（上限 3）——runtime 的焦点分域锁
+             保证同 NPC 串行、不同 NPC 并行，批量总耗时从 Σt 降到 ≈max(t)。 */
           const eventId = plan.primaryEventId ?? fresh[0]!.id ?? 'batch';
           /* 幂等键含世界实例指纹（P9）：不同代世界的同 id 事件互不串挡 */
           const gen = fingerprints.known(st.worldId) ?? 0;
           let cooldownHit = false;
+          const TICK_CONCURRENCY = 3;
+          const executing: Promise<void>[] = [];
           for (const npc of woken) {
             const npcPlan: typeof plan = {
               ...plan,
@@ -207,23 +211,31 @@ export function createTriggerRuntime(opts: TriggerRuntimeOptions): TriggerRuntim
             };
             log(`[trigger] ${st.worldId}：High 事实 ${eventId} 唤醒 ${npc}（其余 ${plan.wakes.length - 1} 实体未唤醒）→ 个体演化 tick`);
             const key = `auto:${st.worldId}:${gen}:${eventId}:${npc}`;
-            try {
-              const run = await opts.evolution.tick(st.worldId, 'auto', { idempotencyKey: key, wakePlan: npcPlan });
-              st.ticksFired++;
-              for (const id of run.eventIds ?? []) st.born.add(id); /* 演化产物不再触发（双保险断环） */
-              if (run.status === 'completed' || run.status === 'partially_applied' || run.status === 'rejected') {
-                log(`[trigger] ${st.worldId}：run ${run.id} ${run.status}（${npc}）`);
+            const p = (async (): Promise<void> => {
+              try {
+                const run = await opts.evolution.tick(st.worldId, 'auto', { idempotencyKey: key, wakePlan: npcPlan });
+                st.ticksFired++;
+                for (const id of run.eventIds ?? []) st.born.add(id); /* 演化产物不再触发（双保险断环） */
+                if (run.status === 'completed' || run.status === 'partially_applied' || run.status === 'rejected') {
+                  log(`[trigger] ${st.worldId}：run ${run.id} ${run.status}（${npc}）`);
+                }
+              } catch (e) {
+                if (e instanceof EvolutionCooldownError) {
+                  cooldownHit = true; /* 先看后吃：本批不消费，冷却到期后重试 */
+                  st.cooldownSkips++;
+                  log(`[trigger] ${st.worldId}：${npc} 的个体演化冷却中，本批事实保留待重试（${Math.ceil(e.retryInMs / 1000)}s 后）`);
+                } else {
+                  throw e;
+                }
               }
-            } catch (e) {
-              if (e instanceof EvolutionCooldownError) {
-                cooldownHit = true; /* 先看后吃：本批不消费，冷却到期后重试 */
-                st.cooldownSkips++;
-                log(`[trigger] ${st.worldId}：${npc} 的个体演化冷却中，本批事实保留待重试（${Math.ceil(e.retryInMs / 1000)}s 后）`);
-              } else {
-                throw e;
-              }
-            }
+            })();
+            executing.push(p.then(() => {
+              const i = executing.indexOf(p);
+              if (i >= 0) executing.splice(i, 1);
+            }));
+            if (executing.length >= TICK_CONCURRENCY) await Promise.race(executing);
           }
+          await Promise.all(executing);
           if (cooldownHit) {
             /* 保留 fresh 未消费：冷却结束后的下一轮 poll 会重新评估并执行 */
           } else if (woken.length > 0) {
