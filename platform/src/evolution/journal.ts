@@ -40,6 +40,11 @@ export function createEvolutionJournal(opts: FileEvolutionJournalOptions = {}): 
   const dir = opts.dir;
   let failures = 0;
 
+  /* 磁盘回退缓存（P2 卡片4）：超窗 run 的冷路径查询结果。
+     上限 1000 条，超限淘汰最旧一半（Map 迭代序 = 插入序）。 */
+  const diskCache = new Map<string, EvolutionRun>(); // `${worldId}|${runId}` -> run
+  const DISK_CACHE_CAP = 1000;
+
   function push(run: EvolutionRun): void {
     let ring = rings.get(run.worldId);
     if (!ring) {
@@ -54,6 +59,42 @@ export function createEvolutionJournal(opts: FileEvolutionJournalOptions = {}): 
     }
     ring.push(run);
     if (ring.length > cap) ring.shift();
+  }
+
+  /** 磁盘回退（冷路径）：按行扫描该世界 JSONL 找 runId。
+     同一 run 多行（running 中间态 + 终态）按 upsert 语义取最后一行；
+     结果缓存进 diskCache（超窗 run 反复 trace 不重复读文件）。 */
+  function loadFromDisk(worldId: string, runId: string): EvolutionRun | null {
+    if (!dir) return null;
+    const cacheKey = `${worldId}|${runId}`;
+    const cached = diskCache.get(cacheKey);
+    if (cached) return cached;
+    const filePath = `${dir}/${sanitize(worldId)}.jsonl`;
+    if (!existsSync(filePath)) return null;
+    try {
+      const raw = readFileSync(filePath, 'utf8');
+      let hit: EvolutionRun | null = null;
+      for (const line of raw.split('\n')) {
+        const t = line.trim();
+        if (!t) continue;
+        try {
+          const run = JSON.parse(t) as EvolutionRun;
+          if (run && run.id === runId && run.worldId === worldId) hit = run; /* 后行覆盖前行 */
+        } catch {
+          /* 跳过损坏行 */
+        }
+      }
+      if (hit) {
+        if (diskCache.size >= DISK_CACHE_CAP) {
+          const stale = [...diskCache.keys()].slice(0, Math.floor(DISK_CACHE_CAP / 2));
+          for (const k of stale) diskCache.delete(k);
+        }
+        diskCache.set(cacheKey, hit);
+      }
+      return hit;
+    } catch {
+      return null; /* 文件不可读 */
+    }
   }
 
   return {
@@ -75,7 +116,11 @@ export function createEvolutionJournal(opts: FileEvolutionJournalOptions = {}): 
     },
 
     get(worldId, runId) {
-      return (rings.get(worldId) ?? []).find((r) => r.id === runId) ?? null;
+      /* 1) 环内查找（热路径）；2) 磁盘回退（P2 卡片4：超窗 run 因果链不断裂） */
+      const ring = rings.get(worldId) ?? [];
+      const hit = ring.find((r) => r.id === runId);
+      if (hit) return hit;
+      return loadFromDisk(worldId, runId);
     },
 
     knownWorlds() {
