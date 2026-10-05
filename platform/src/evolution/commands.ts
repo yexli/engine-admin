@@ -35,7 +35,12 @@ export const CORE_EVOLUTION_ACTIONS = [
 
 export type CoreEvolutionAction = (typeof CORE_EVOLUTION_ACTIONS)[number];
 
-/** 缺省策略 = 内核全集（向后兼容：不传 policy 的既有调用面行为不变） */
+/**
+ * 全开策略（无限制）：仅用于测试与受信任的内部装配。
+ * **不是 createEvolutionRuntime 的缺省值**——缺省为 NPC_EVOLUTION_POLICY
+ * （P3 卡片6 安全缺省：忘传策略的装配拿不到无限制 AI）。显式传入此策略
+ * 表示装配方确认：AI 可执行全部白名单动作、无变化数/实体数上限、无冷却。
+ */
 export const FULL_CORE_POLICY: EvolutionPolicy = {
   allowedActions: CORE_EVOLUTION_ACTIONS,
   forbiddenActionsOnPlayer: [],

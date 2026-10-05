@@ -38,8 +38,8 @@
    意图被翻译成 Command；ooc / narrative 只留档，永不进引擎。
    ============================================================ */
 import { randomUUID } from 'node:crypto';
-import { EvolutionCooldownError, EvolutionDriverError, type ChangeOutcome, type EvolutionProposal, type EvolutionRun, type IntentOutcome, type WorldIntent } from './types.ts';
-import { translateChange, FULL_CORE_POLICY } from './commands.ts';
+import { EvolutionCooldownError, EvolutionDriverError, NPC_EVOLUTION_POLICY, type ChangeOutcome, type EvolutionProposal, type EvolutionRun, type IntentOutcome, type WorldIntent } from './types.ts';
+import { translateChange } from './commands.ts';
 import { createLedger, type EvolutionLedger } from './ledger.ts';
 import { createWorldLock, type WorldLock } from './concurrency.ts';
 import { observe, type ObservationResult } from './observation.ts';
@@ -100,10 +100,13 @@ export function createEvolutionRuntime(
     knownWorlds?(): string[];
   },
 ): EvolutionRuntime {
-  const defaultPolicy = opts.policy ?? FULL_CORE_POLICY;
+  /* P3 卡片6：安全缺省 = NPC 演化策略（3 动作 / 3 变化 / 3 实体 / 30s 冷却 /
+     禁触玩家 / 金币禁令）。FULL_CORE_POLICY（全开）必须由装配方显式传入——
+     「我知道我在做什么」；忘传策略的装配不再拿到无限制 AI。 */
+  const defaultPolicy = opts.policy ?? NPC_EVOLUTION_POLICY;
   const eventWindow = Math.max(1, Math.min(200, Math.floor(opts.observationWindow ?? 20)));
 
-  /** 按世界解析策略（P14 Extension 层）：policyFor(worldId) → opts.policy → FULL_CORE_POLICY。
+  /** 按世界解析策略（P14 Extension 层）：policyFor(worldId) → opts.policy → NPC_EVOLUTION_POLICY（P3 卡片6 安全缺省）。
    *  硬上限 maxChangesPerRun 仍优先于策略（装配方最后一道闸）。 */
   function resolvePolicy(worldId: string): { policy: EvolutionPolicy; maxChanges: number; maxEntities: number; cooldownMs: number } {
     const policy = opts.policyFor?.(worldId) ?? defaultPolicy;

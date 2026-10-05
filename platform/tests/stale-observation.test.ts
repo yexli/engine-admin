@@ -2,7 +2,7 @@
 import { describe, expect, it } from 'vitest';
 import { createEvolutionJournal } from '../src/evolution/journal.ts';
 import { createEvolutionRuntime } from '../src/evolution/runtime.ts';
-import { NPC_EVOLUTION_POLICY, type EvolutionRun, type WakePlan } from '../src/index.ts';
+import { FULL_CORE_POLICY, NPC_EVOLUTION_POLICY, type EvolutionRun, type WakePlan } from '../src/index.ts';
 import type { EngineClient } from '../src/types.ts';
 
 interface WorldFixture {
@@ -100,5 +100,114 @@ describe('演化观察过期检测（P2 卡片8）', () => {
     const run = await rt.tick('w1', 'admin'); /* 无 wakePlan → focus 为空 */
     expect(run.status).toBe('completed');
     expect(run.staleObservation).toBeUndefined();
+  });
+});
+
+/* P3 卡片6：缺省策略安全收紧 */
+describe('缺省策略（P3 卡片6）', () => {
+  it('未传 policy → 缺省 NPC_EVOLUTION_POLICY（第 4 个实体被 policy 拒绝）', async () => {
+    const seen: string[] = [];
+    const state = {
+      t: 48, weather: 'clear',
+      player: { name: '旅人', loc: 'tavern', bag: [] },
+      npcs: Object.fromEntries(
+        ['a', 'b', 'c', 'd'].map((id) => [id, { att: 0, met: true, type: 'npc', attributes: { location: 'tavern' } }]),
+      ),
+      relations: [],
+    };
+    const engine = {
+      async getEvents() {
+        return { ok: true as const, events: [{ id: 'evt_x', type: 'entity_updated', day: 1, actor: 'player' }] };
+      },
+      async getState() {
+        return { ok: true as const, state };
+      },
+      async executeCommand(_worldId: string, cmd: { payload?: { key?: string } }) {
+        seen.push(String(cmd.payload?.key));
+        return { ok: true as const, result: { ok: true, events: ['evt_ok'] } };
+      },
+    } as unknown as EngineClient;
+    const rt = createEvolutionRuntime(
+      {
+        engine,
+        /* 不传 policy → 安全缺省 NPC_EVOLUTION_POLICY（maxEntitiesAffected=3） */
+        cooldownMs: 0,
+        driver: {
+          name: 'p3-default',
+          async propose(context) {
+            return {
+              id: `prop_${context.builtAt}`,
+              worldId: context.worldId,
+              reason: '一次想改 4 个实体',
+              observations: [{ ref: 'state', kind: 'state', summary: '快照' }],
+              changes: ['a', 'b', 'c', 'd'].map((id) => ({
+                targetId: id,
+                action: 'update_attribute',
+                payload: { key: 'mood', value: '唤醒' },
+                reason: `唤醒 ${id}`,
+              })),
+              source: { type: 'ai' as const, model: 'p3-default' },
+            };
+          },
+        },
+      },
+      createEvolutionJournal(),
+    );
+    const run = await rt.tick('w-default', 'auto', { wakePlan: wakePlanFor('a') });
+    expect(run.status).toBe('partially_applied');
+    expect(run.acceptedCount).toBe(3);
+    expect(run.rejectedCount).toBe(1);
+    expect(run.outcomes?.[3]?.rejectedBy).toBe('policy');
+  });
+
+  it('显式传 FULL_CORE_POLICY → 无限制（向后兼容）', async () => {
+    const state = {
+      t: 48, weather: 'clear',
+      player: { name: '旅人', loc: 'tavern', bag: [] },
+      npcs: Object.fromEntries(
+        Array.from({ length: 6 }, (_, i) => [`n${i}`, { att: 0, met: true, type: 'npc', attributes: { location: 'tavern' } }]),
+      ),
+      relations: [],
+    };
+    const engine = {
+      async getEvents() {
+        return { ok: true as const, events: [{ id: 'evt_x', type: 'entity_updated', day: 1, actor: 'player' }] };
+      },
+      async getState() {
+        return { ok: true as const, state };
+      },
+      async executeCommand(_worldId: string, _cmd: { payload?: { key?: string } }) {
+        return { ok: true as const, result: { ok: true, events: ['evt_ok'] } };
+      },
+    } as unknown as EngineClient;
+    const rt = createEvolutionRuntime(
+      {
+        engine,
+        policy: FULL_CORE_POLICY, /* 显式全开：装配方自知 */
+        cooldownMs: 0,
+        driver: {
+          name: 'p3-full',
+          async propose(context) {
+            return {
+              id: `prop_${context.builtAt}`,
+              worldId: context.worldId,
+              reason: '改 6 个实体',
+              observations: [{ ref: 'state', kind: 'state', summary: '快照' }],
+              changes: Array.from({ length: 6 }, (_, i) => ({
+                targetId: `n${i}`,
+                action: 'update_attribute',
+                payload: { key: 'mood', value: '唤醒' },
+                reason: `唤醒 n${i}`,
+              })),
+              source: { type: 'ai' as const, model: 'p3-full' },
+            };
+          },
+        },
+      },
+      createEvolutionJournal(),
+    );
+    const run = await rt.tick('w-full', 'auto', { wakePlan: wakePlanFor('n0') });
+    expect(run.status).toBe('completed');
+    expect(run.acceptedCount).toBe(6);
   });
 });

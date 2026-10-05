@@ -20,6 +20,7 @@ import { startWorldServer } from '../../world-engine/dist/http/server.js';
 import { createWorldRegistry, InMemoryWorldStorage } from '../../world-engine/dist/index.js';
 import { startGatewayServer, type GatewayProvider } from '../../world-engine/gateway/dist/index.js';
 import {
+  FULL_CORE_POLICY,
   ModelRouter,
   createEngineClient,
   createEvolutionJournal,
@@ -183,6 +184,9 @@ describe('确定性边界：Rules 与白名单拒绝 AI 的非法建议', () => 
     const evo = createEvolutionRuntime(
       {
         engine,
+        /* P3 卡片6 后缺省为 NPC 策略（remove_entity 不在其白名单）——本测试
+           验证的是「Rules 层拒绝」，故显式传 FULL 让翻译放行、由规则终审 */
+        policy: FULL_CORE_POLICY,
         driver: createScriptedDriver([
           {
             reason: '尝试清理不存在的实体（非法建议）',
