@@ -38,14 +38,19 @@ export interface CreatedKey {
   plaintext: string;
 }
 
-/** 规范权限列表：过滤未知项；空数组 → 全量默认（最小闭环所需三项） */
+/** 缺省最小权限（只读）（P2 卡片3）：未显式声明 permissions 时的安全回退。
+ *  最小权限原则——新 Key 拿不到写权限；需要写的调用方必须显式声明 worlds:write。
+ *  bootstrap 主密钥不受此影响（仍为全量权限，运维逃生通道）。 */
+export const MINIMAL_PERMISSIONS: readonly PlatformPermission[] = ['worlds:read'] as const;
+
+/** 规范权限列表：过滤未知项；空/未声明 → 最小只读回退 */
 export function normalizePermissions(input: unknown): PlatformPermission[] {
-  if (!Array.isArray(input) || input.length === 0) return [...PLATFORM_PERMISSIONS];
+  if (!Array.isArray(input) || input.length === 0) return [...MINIMAL_PERMISSIONS];
   const out = input.filter(
     (p): p is PlatformPermission =>
       typeof p === 'string' && (PLATFORM_PERMISSIONS as readonly string[]).includes(p),
   );
-  return out.length ? out : [...PLATFORM_PERMISSIONS];
+  return out.length ? out : [...MINIMAL_PERMISSIONS];
 }
 
 export function hashKey(plaintext: string): string {
@@ -78,17 +83,21 @@ export class KeyStore {
     const exitFlush = (): void => {
       this.flush();
     };
-    process.once('exit', exitFlush);
-    process.once('SIGINT', () => {
+    const onSigint = (): void => {
       exitFlush();
       process.exit(130);
-    });
-    process.once('SIGTERM', () => {
+    };
+    const onSigterm = (): void => {
       exitFlush();
       process.exit(143);
-    });
+    };
+    process.once('exit', exitFlush);
+    process.once('SIGINT', onSigint);
+    process.once('SIGTERM', onSigterm);
     this.dispose = (): void => {
       process.removeListener('exit', exitFlush);
+      process.removeListener('SIGINT', onSigint);
+      process.removeListener('SIGTERM', onSigterm);
       exitFlush();
     };
   }

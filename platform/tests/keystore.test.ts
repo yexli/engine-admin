@@ -53,11 +53,14 @@ describe('KeyStore', () => {
     rmSync(file, { force: true });
   });
 
-  it('权限规范化：未知项过滤；空 → 默认全量', () => {
+  it('权限规范化：未知项过滤；空/未声明 → 最小只读（P2 卡片3）', () => {
     expect(normalizePermissions(['chat:completions', 'hack:root'])).toEqual(['chat:completions']);
-    expect(normalizePermissions(undefined).sort()).toEqual(
-      ['chat:completions', 'embeddings', 'worlds:read', 'worlds:write'].sort(),
-    );
+    /* 最小权限原则：未显式声明 permissions 的新 Key 只拿只读 */
+    expect(normalizePermissions(undefined)).toEqual(['worlds:read']);
+    expect(normalizePermissions([])).toEqual(['worlds:read']);
+    expect(normalizePermissions(['hack:root'])).toEqual(['worlds:read']);
+    /* 显式声明则原样保留（含写权限） */
+    expect(normalizePermissions(['worlds:read', 'worlds:write'])).toEqual(['worlds:read', 'worlds:write']);
   });
 
   it('持久化往返：新实例读同一文件可验证', () => {
@@ -90,7 +93,12 @@ describe('KeyStore', () => {
   it('bootstrap 主密钥可验证且不落盘', () => {
     const file = tmpFile('keys.json');
     const store = new KeyStore(file, 'sk-world-master');
-    expect(store.verify('sk-world-master')?.id).toBe('bootstrap');
+    const boot = store.verify('sk-world-master');
+    expect(boot?.id).toBe('bootstrap');
+    /* bootstrap 不受最小权限影响：运维逃生通道保持全量（P2 卡片3） */
+    expect([...boot!.permissions].sort()).toEqual(
+      ['chat:completions', 'embeddings', 'worlds:read', 'worlds:write'].sort(),
+    );
     const { plaintext } = store.create({ name: 'regular' }); // 触发一次真实落盘
     store.flush();
     const raw = readFileSync(file, 'utf8');
