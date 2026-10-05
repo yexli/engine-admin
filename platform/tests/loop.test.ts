@@ -62,7 +62,7 @@ beforeAll(async () => {
   /* 3) 平台：临时数据目录 + 真实上游客户端 */
   dataDir = mkdtempSync(join(tmpdir(), 'platform-loop-'));
   const keys = new KeyStore(join(dataDir, 'keys.json'));
-  plaintextKey = keys.create({ name: 'loop-test' }).plaintext;
+  plaintextKey = keys.create({ name: 'loop-test', permissions: ['chat:completions', 'worlds:read', 'worlds:write', 'embeddings'] }).plaintext;
   readonlyKey = keys.create({ name: 'readonly', permissions: ['chat:completions'] }).plaintext;
   keys.flush();
   ModelRouter.seedDefault(join(dataDir, 'router.json'));

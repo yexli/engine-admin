@@ -485,7 +485,7 @@ describe('私有管理 API · API Key 生命周期（M2.1）', () => {
     expect(keys.verify(plaintext)?.name).toBe('world-runner');
   });
 
-  it('校验：空 name / 空权限数组 / 未知权限 / 坏 expiresAt → 400；缺省权限 = 全量', async () => {
+  it('校验：空 name / 空权限数组 / 未知权限 / 坏 expiresAt → 400；缺省权限 = 最小只读（P2 卡片3）', async () => {
     const { admin } = await harness();
 
     expect((await adminFetch(admin, '/v1/admin/keys', withToken({ method: 'POST', body: JSON.stringify({ name: '' }) }))).status).toBe(400);
@@ -495,7 +495,8 @@ describe('私有管理 API · API Key 生命周期（M2.1）', () => {
 
     const ok = await adminFetch(admin, '/v1/admin/keys', withToken({ method: 'POST', body: JSON.stringify({ name: 'default-perms' }) }));
     expect(ok.status).toBe(201);
-    expect((ok.body.key.permissions as string[]).sort()).toEqual(['chat:completions', 'embeddings', 'worlds:read', 'worlds:write']);
+    /* P2 卡片3：缺省收紧为最小只读；需要写权限必须显式声明 */
+    expect(ok.body.key.permissions).toEqual(['worlds:read']);
   });
 
   it('G2 · 游戏方钥匙：gameId 创建/清单回显；缺省 null = 管理钥匙；坏 gameId → 400', async () => {

@@ -145,6 +145,7 @@ export function createWorldRuntime<W extends EngineWorldState>(opts: WorldRuntim
     }
 
     const emitted: WorldEvent[] = [];
+    const appliedRules: string[] = []; /* P2 卡片7：已产生副作用的规则（命令链非事务性的观测面） */
     const s = container.need();
     const ctx: RuleContext<W> = {
       state: s,
@@ -170,17 +171,18 @@ export function createWorldRuntime<W extends EngineWorldState>(opts: WorldRuntim
         ok = rule.apply(ctx);
       } catch (err) {
         /* 规则异常不裸奔：命令层给一句可读的拒绝原因 */
-        return record({ ok: false, events: emitted.map((e) => e.id), reason: err instanceof Error ? err.message : String(err) });
+        return record({ ok: false, events: emitted.map((e) => e.id), reason: err instanceof Error ? err.message : String(err), appliedRules: [...appliedRules] });
       }
       if (ok === false) {
         container.sync();
-        return record({ ok: false, events: emitted.map((e) => e.id), reason: `规则 ${rule.name} 拒绝了命令 ${cmd.type}` });
+        return record({ ok: false, events: emitted.map((e) => e.id), reason: `规则 ${rule.name} 拒绝了命令 ${cmd.type}`, appliedRules: [...appliedRules] });
       }
+      appliedRules.push(rule.name);
     }
 
     /* 命令链统一落点：任何分支改过状态都必须通知 UI 并（节流）落盘 */
     container.sync();
-    return record({ ok: true, events: emitted.map((e) => e.id) });
+    return record({ ok: true, events: emitted.map((e) => e.id), appliedRules: [...appliedRules] });
   }
 
   return {

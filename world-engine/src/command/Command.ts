@@ -37,4 +37,8 @@ export interface CommandResult {
   reason?: string;
   /** V2.4-02：幂等命中——本次返回的是首次执行的结果，世界未再次变化 */
   duplicate?: boolean;
+  /** 已成功执行的规则名（P2 卡片7 · additive）。
+   *  命令链非事务性：ok:false ≠ 零副作用——appliedRules 列出已产生
+   *  副作用的规则；调用方需要「全有或全无」语义时应做前置校验。 */
+  appliedRules?: string[];
 }

@@ -128,4 +128,44 @@ describe('命令链', () => {
     expect(r.ok).toBe(false);
     expect(r.reason).toContain('库存损坏');
   });
+
+  it('appliedRules：ok:true 列出全部匹配规则（P2 卡片7）', () => {
+    const h = harness();
+    h.runtime.rules.register({ name: 'EchoRuleA', for: 'echo', apply: () => {} });
+    h.runtime.rules.register({ name: 'EchoRuleB', for: 'echo', apply: () => true });
+    const r = h.runtime.execute({ type: 'echo' });
+    expect(r.ok).toBe(true);
+    expect(r.appliedRules).toEqual(['EchoRuleA', 'EchoRuleB']);
+  });
+
+  it('appliedRules：ok:false 时列出已产生副作用的规则（命令链非事务性可见）', () => {
+    const h = harness();
+    h.runtime.rules.register({
+      name: 'SideEffectRule',
+      for: 'halfway',
+      apply: (ctx) => {
+        ctx.mutate.pushLog('先改了状态');
+      },
+    });
+    h.runtime.rules.register({ name: 'VetoRule', for: 'halfway', apply: () => false });
+    const r = h.runtime.execute({ type: 'halfway' });
+    expect(r.ok).toBe(false);
+    expect(r.appliedRules).toEqual(['SideEffectRule']); /* A 的变更已落地、不回滚 */
+    expect(h.s.log.at(-1)?.text).toBe('先改了状态');
+  });
+
+  it('appliedRules：规则抛错时同样带上已执行清单', () => {
+    const h = harness();
+    h.runtime.rules.register({ name: 'First', for: 'crash-mid', apply: () => {} });
+    h.runtime.rules.register({
+      name: 'CrashRule',
+      for: 'crash-mid',
+      apply: () => {
+        throw new Error('中途崩了');
+      },
+    });
+    const r = h.runtime.execute({ type: 'crash-mid' });
+    expect(r.ok).toBe(false);
+    expect(r.appliedRules).toEqual(['First']);
+  });
 });
