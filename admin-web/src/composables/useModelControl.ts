@@ -123,10 +123,12 @@ async function save(): Promise<boolean> {
     );
     dirty.value = 0;
     conflict.value = false;
-    message(`配置已保存并即时生效（revision ${config.value.revision + 1}）`, {
+    /* 先刷新拿服务端真实 revision，再提示（QA #13：本地预计算在并发写入/
+       凭证上传推进 revision 时会与实际不符） */
+    await load();
+    message(`配置已保存并即时生效（revision ${config.value?.revision ?? "?"}）`, {
       type: "success"
     });
-    await load();
     return true;
   } catch (e) {
     if (e instanceof ControlApiError && e.status === 409) {

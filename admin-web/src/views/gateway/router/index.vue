@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
+import { ElMessageBox } from "element-plus";
 import { useModelControl } from "@/composables/useModelControl";
 import {
   MANAGED_CAPABILITIES,
@@ -75,9 +76,19 @@ async function test(cap: ManagedCapability) {
   }
 }
 
-/** 草稿内整体清空某能力路由（诚实 503：宁缺毋滥） */
-function clearRoute(cap: ManagedCapability) {
+/** 草稿内整体清空某能力路由（诚实 503：宁缺毋滥）；二次确认防误触（QA #9） */
+async function clearRoute(cap: ManagedCapability) {
   if (!mc.config.value) return;
+  const zh = CAPABILITY_META[cap]?.zh ?? cap;
+  try {
+    await ElMessageBox.confirm(
+      `将「${zh}」能力的主/备路由全部清空（保存后该能力返回 503）。`,
+      "清空路由确认",
+      { type: "warning", confirmButtonText: "清空", cancelButtonText: "取消" }
+    );
+  } catch {
+    return; // 用户取消
+  }
   mc.config.value.routes[cap] = { primary: null, fallback: null };
   mc.markDirty();
 }
