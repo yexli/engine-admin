@@ -161,7 +161,7 @@ export function createWorld<W extends EngineWorldState = EngineWorldState>(opts:
 
   /* ---------- 世界事件史（V2.4-01 Event Persistence · append-only）----------
      事件从「运行时消息」升级为「世界历史事实」：装配了世界史通道的 SavePort 时——
-       · 启动恢复：loadWorldLog → 同 id 保末次去重 → 完整事件史（顺序稳定）；
+       · 启动恢复：loadWorldLog → 同 id 保首次去重 → 完整事件史（顺序稳定）；
        · 序号续接：从恢复的事件史推导最大 id 序号（evt_<day>_<seq>）——不续接则
          重启后新事件 id 与历史撞车，命中同 id 幂等守卫 → 新事实进环但不入史；
        · 追加：每个新事实按 id 唯一追加（重复写入不制造重复事实）；
@@ -184,8 +184,9 @@ export function createWorld<W extends EngineWorldState = EngineWorldState>(opts:
       if (!e || typeof e.id !== 'string' || typeof e.type !== 'string') continue;
       if (!belongTo(e)) continue;
       if (worldLogIds.has(e.id)) {
-        const idx = worldLog.findIndex((x) => x.id === e.id);
-        worldLog[idx] = e; /* 同 id 保末次（幂等恢复） */
+        /* 同 id 保首次（P2 卡片6：append-only 纪律——事件一旦成事实不可变）。
+           与 bus.emit 的 processedBy 幂等守卫、state 环窗口的保首次语义一致；
+           重复行（介质恢复/重放）跳过，不制造重复事实，也不覆盖首见内容。 */
         continue;
       }
       worldLogIds.add(e.id);

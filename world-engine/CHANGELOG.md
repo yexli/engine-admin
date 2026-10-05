@@ -3,6 +3,15 @@
 本文件记录 AI World Engine 的版本演进。格式参考 Keep a Changelog；版本线见 `docs/WORLD-ROADMAP.md`（方案 §69）。
 版本策略（semver）：0.x 期间允许带 CHANGELOG 注明的 API 调整；**1.0 起冻结公开 API**。
 
+## [Unreleased] · P2 遗留缺口修复
+
+### Changed
+- **世界事件史去重语义统一为「保首次」**（P2 卡片6）：`loadWorldLog` 恢复时
+  同 id 多行此前按「保末次」覆盖；现与 `WorldEventBus` 的 processedBy 幂等
+  守卫、事件环形窗口统一为**保首次**——append-only 纪律下事件一旦成事实
+  不可变，重复行（介质恢复/重放）跳过，不覆盖首见内容。重复写入仍不制造
+  重复事实，公开 API 无变化。
+
 ## [1.4.1] - 2026-10-04 · V2.4 Runtime Hardening 复审加固（事件史与幂等账闭环）
 
 V2.4-00 复审（V2.4 全量完成后）发现的事件史可靠性缺口逐项关闭。全部为

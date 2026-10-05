@@ -219,7 +219,7 @@ describe('V2.4 加固 · 世界史损坏备份（P2）', () => {
     expect(errors.some((m) => m.includes('世界史损坏'))).toBe(true);
     expect(existsSync(`${path}.log.json`)).toBe(false);
     expect(readdirSync(dir).some((f) => f.startsWith('w-log-corrupt.json.log.json.corrupt-'))).toBe(true);
-    /* 备份之后的新写入是干净档案（恢复语义：同 id 保末次） */
+    /* 备份之后的新写入是干净档案（恢复语义：P2 卡片6 起同 id 保首次） */
     p2.saveWorldLog([]);
     p2.flush();
     expect(p2.loadWorldLog()).toEqual([]);

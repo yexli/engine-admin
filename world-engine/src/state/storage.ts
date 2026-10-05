@@ -18,7 +18,9 @@ export interface SavePort<W extends EngineWorldState = EngineWorldState> {
   saveShards?(shards: unknown): void;
   /** 世界事件史（V2.4-01：append-only——事件是历史事实，普通业务不得覆盖）。
      可选：不实现则退化为内存（重启失去长期追溯——查不到，但不会出错）。
-     行形状 = WorldEvent；同 id 多行按「保末次」幂等恢复，重复写入不制造重复事实。 */
+     行形状 = WorldEvent；同 id 多行按「保首次」幂等恢复（P2 卡片6：与
+     总线 processedBy 守卫、state 环窗口语义统一——事实不可变），重复写入
+     不制造重复事实、也不覆盖首见内容。 */
   loadWorldLog?(): unknown[] | null;
   saveWorldLog?(rows: unknown[]): void;
   /** 命令幂等账（V2.4 加固：跨重启幂等）。可选：不实现则幂等账仅存进程内。

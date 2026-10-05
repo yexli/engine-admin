@@ -3,7 +3,7 @@
    ------------------------------------------------------------
    验收清单（方案 §5.5 逐项）：
      ✓ Event 重启后仍存在          （恢复：新世界实例读同一 SavePort）
-     ✓ Event ID 唯一               （同 id 多行保末次去重）
+     ✓ Event ID 唯一               （同 id 多行保首次去重）
      ✓ World 隔离                  （每世界独立事件史）
      ✓ 顺序稳定                    （append 顺序 = 恢复顺序）
      ✓ 可按时间/实体查询           （queryEvents 过滤 + HTTP 参数）
@@ -61,7 +61,7 @@ describe('V2.4-01 事件持久化（append-only 世界事件史）', () => {
     port.dispose();
   });
 
-  it('幂等恢复：同 id 多行保末次，重复写入不制造重复事实', async () => {
+  it('幂等恢复：同 id 多行保首次（P2 卡片6 统一 append-only 语义），重复写入不制造重复事实', async () => {
     const port = new FileSavePort(join(dir, 'w-dup.json'), { debounceMs: 50_000 });
     const row = (v: string) => ({ id: 'evt_1_1', type: 'entity_updated', day: 1, tick: v, ts: '2026-01-01T00:00:00Z' });
     port.saveWorldLog([
@@ -73,7 +73,7 @@ describe('V2.4-01 事件持久化（append-only 世界事件史）', () => {
     const w = createWorld({ worldId: 'w-dup', playerName: '旅人', startLoc: 'village', savePort: port });
     const dup = w.queryEvents!({ id: 'evt_1_1' });
     expect(dup).toHaveLength(1); /* 同 id 只剩一条 */
-    expect(dup[0]!.tick).toBe('末次（真相）'); /* 保末次 */
+    expect(dup[0]!.tick).toBe('第一次'); /* 保首次：事实不可变，后行不覆盖前行 */
     port.dispose();
   });
 
