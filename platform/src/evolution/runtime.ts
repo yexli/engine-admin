@@ -1,12 +1,12 @@
 /* ============================================================
-   Evolution Runtime（方案 §四：完整闭环的编排者；V2 收口）
+   Evolution Runtime（方案 §四：完整闭环的编排者；V2 收口；P2 卡片9 瘦身）
    ------------------------------------------------------------
    tick 一次 =
-     观察引擎（World State + 最近 Event）
+     观察引擎（World State + 最近 Event）        [observation.ts]
        → Context Builder 组装结构化事实（地点作用域）
        → AI World Driver 产出 Evolution Proposal（允许空变化集）
        → 策略围栏 + 白名单翻译成 Command（翻译不了的原地拒）
-       → 幂等检查（提案指纹 / 幂等键 / run 内重复 change）
+       → 幂等检查（提案指纹 / 幂等键 / run 内重复 change）   [ledger.ts]
        → 逐条提交引擎 Rules 链（Rules 拒绝 = 变化不存在）
        → 状态机落账（completed / partially_applied / rejected / failed）
        → Evolution Journal（观察/上下文/提案/每条裁决/事实 id 全留痕）
@@ -14,6 +14,11 @@
    本运行时自己不持有任何状态写入口：对世界的全部操作就是往
    EngineClient 发 Command——与任何游戏方客户端同权，零特权。
    「AI 不得直接修改 World State」在这里不是注释，是依赖形状。
+
+   本文件只保留编排骨架；三块内聚职责已拆出（P2 卡片9）：
+     · ledger.ts       幂等账 / 提案指纹 / 冷却（含重启惰性重建）
+     · concurrency.ts  同世界 tick 串行锁
+     · observation.ts  观察 + 记忆召回 + 触发分级 + 观察版本戳
 
    V2 收口（方案 §二）：
      · 每条 Change：changeId / commandId / 独立 status / 拒绝环节与原因
@@ -28,34 +33,22 @@
      · 并发互斥：同一世界并发 tick 串行化，后到者重走幂等/冷却检查
      · running 中间态即落账（append upsert）：崩溃 run 在账本有迹可查
      · 幂等账重启不丢：run 记录 idempotencyKey，按世界从 Journal 惰性重建
-       （幂等键 / 提案指纹 / 冷却时刻），重启不能成为重复执行的后门
 
    dispatchIntent：意图处置的隔离闸（方案 §七）——只有 ic_action
    意图被翻译成 Command；ooc / narrative 只留档，永不进引擎。
    ============================================================ */
 import { randomUUID } from 'node:crypto';
-import type { EngineClient } from '../types.ts';
-import { buildEvolutionContext, applyContextMemory } from './context.ts';
+import { EvolutionCooldownError, EvolutionDriverError, type ChangeOutcome, type EvolutionProposal, type EvolutionRun, type IntentOutcome, type WorldIntent } from './types.ts';
 import { translateChange, FULL_CORE_POLICY } from './commands.ts';
-import { proposalKey } from './driver.ts';
-import { highEventsOf } from './policy.ts';
-import {
-  EvolutionCooldownError,
-  EvolutionDriverError,
-  type ChangeOutcome,
-  type EvolutionContext,
-  type EvolutionDriver,
-  type EvolutionPolicy,
-  type EvolutionProposal,
-  type EvolutionRun,
-  type IntentOutcome,
-  type WakePlan,
-  type WorldIntent,
-} from './types.ts';
+import { createLedger, type EvolutionLedger } from './ledger.ts';
+import { createWorldLock, type WorldLock } from './concurrency.ts';
+import { observe, type ObservationResult } from './observation.ts';
+import type { EvolutionPolicy } from './types.ts';
+import type { EngineClient } from '../types.ts';
 
 export interface EvolutionRuntimeOptions {
   engine: EngineClient;
-  driver: EvolutionDriver;
+  driver: import('./types.ts').EvolutionDriver;
   /** 演化策略（缺省 = 内核全集，向后兼容；第一阶段 NPC 演化传 NPC_EVOLUTION_POLICY） */
   policy?: EvolutionPolicy;
   /** 兼容字段：单次提案变化数硬上限（优先级高于 policy.maxChangesPerProposal） */
@@ -73,7 +66,7 @@ export interface EvolutionRuntimeOptions {
   /** 记忆召回（P7 · 方案 §十）：个体决策（恰一个 HIGH 唤醒）时为焦点实体检索记忆，
    *  注入 context.memory（maxMemoryItems 预算内）。失败视作无记忆（记忆是建议材料，
    *  不是事实来源）；世界级 tick 无单一 owner，不检索。 */
-  memoryRetriever?: (worldId: string, entityId: string, query: string) => Promise<{ ref: string; summary: string; day?: number; sourceEventId?: string }[]>;
+  memoryRetriever?: import('./observation.ts').MemoryRetriever;
 }
 
 export interface TickOptions {
@@ -122,77 +115,21 @@ export function createEvolutionRuntime(
     };
   }
 
-  /* 幂等账（进程内缓存；权威在 Journal——重启后按世界惰性重建，见 ensureLedger） */
-  const runsByKey = new Map<string, string>(); // `${worldId}|${idempotencyKey}` -> runId
-  const runsByProposal = new Map<string, string>(); // `${worldId}|${focus}|${proposalKey}` -> runId
-  const lastRunAt = new Map<string, number>(); // `${worldId}|${focus}` -> 完成时刻（冷却用）
-  const ledgerRebuilt = new Set<string>(); // 已从 Journal 重建过幂等账的世界
-
-  /* 焦点作用域（P5 · 方案 §八：个体决策的隔离键）：
-     wakePlan 恰有一个 HIGH 唤醒 = 以该实体的视角做个体决策。
-     冷却与提案指纹都按 `world|focus` 分域——同一事件唤醒两个 NPC 时，
-     各自的个体决策互不挤兑冷却、互不指纹串挡（世界级 tick 的 focus 为空，
-     行为与 P4 前一致）。 */
-  function focusOf(worldId: string, wakePlan?: WakePlan): string {
-    const high = (wakePlan?.wakes ?? []).filter((w) => w.grade === 'high').map((w) => w.entityId);
-    void worldId;
-    return high.length === 1 ? high[0]! : '';
-  }
-
-  /* 幂等账重建（每世界一次）：进程重启后，Journal 历史里的幂等键 /
-     提案指纹 / 冷却时刻仍然生效——重启不能成为重复执行的后门（方案 §二.3）。
-     崩溃遗留的 'running' 记录同样登记幂等键：同键重试返回该记录而不是
-     重新执行——半程 run 的变化是否已落世界不可知，宁阻塞不重复。 */
-  function ensureLedger(worldId: string): void {
-    if (ledgerRebuilt.has(worldId)) return;
-    ledgerRebuilt.add(worldId);
-    for (const run of journal.recent(worldId, Number.MAX_SAFE_INTEGER)) {
-      if (run.idempotencyKey) runsByKey.set(`${worldId}|${run.idempotencyKey}`, run.id);
-      if (run.proposal) {
-        const scope = `${worldId}|${focusOf(worldId, run.wakePlan)}`;
-        runsByProposal.set(`${scope}|${proposalKey(worldId, run.proposal)}`, run.id);
-      }
-      if (run.finishedAt) {
-        const t = Date.parse(run.finishedAt);
-        const scope = `${worldId}|${focusOf(worldId, run.wakePlan)}`;
-        if (Number.isFinite(t) && t > (lastRunAt.get(scope) ?? 0)) lastRunAt.set(scope, t);
-      }
-    }
-  }
-
-  /* 同一世界的并发 tick 串行化：冷却与指纹都在 run 收尾时才登记，
-     并发窗口内的两个 tick 会双双通过检查、各自完整执行闭环——重复 Mutation。
-     锁保证后到者等先到者落账，再重走幂等/冷却检查（方案 §二.3）。 */
-  const inFlight = new Map<string, Promise<EvolutionRun>>();
+  const ledger: EvolutionLedger = createLedger(journal);
+  const lock: WorldLock = createWorldLock();
 
   function tick(worldId: string, trigger: EvolutionRun['trigger'] = 'admin', tickOpts: TickOptions = {}): Promise<EvolutionRun> {
-    const prev = inFlight.get(worldId);
-    const exec = (async () => {
-      if (prev) {
-        try {
-          await prev;
-        } catch {
-          /* 前一 tick 的失败已由它自己落账（failed）；这里照常走检查 */
-        }
-      }
-      return runTick(worldId, trigger, tickOpts);
-    })();
-    inFlight.set(worldId, exec);
-    const cleanup = (): void => {
-      if (inFlight.get(worldId) === exec) inFlight.delete(worldId);
-    };
-    exec.then(cleanup, cleanup); /* 清理挂双臂：拒绝已交给调用方，这里只摘锁 */
-    return exec;
+    return lock.acquire(worldId, () => runTick(worldId, trigger, tickOpts));
   }
 
   async function runTick(worldId: string, trigger: EvolutionRun['trigger'], tickOpts: TickOptions): Promise<EvolutionRun> {
-    ensureLedger(worldId);
+    ledger.ensureRebuilt(worldId);
     /* P14 Extension 层：围栏按世界解析（多游戏差异化围栏，零共享代码改动） */
     const { policy, maxChanges, maxEntities, cooldownMs } = resolvePolicy(worldId);
 
     /* 幂等键命中：直接返回既有结果，不再触碰世界（方案 §二.3） */
     if (tickOpts.idempotencyKey) {
-      const hit = runsByKey.get(`${worldId}|${tickOpts.idempotencyKey}`);
+      const hit = ledger.checkIdempotencyKey(worldId, tickOpts.idempotencyKey);
       if (hit) {
         const existing = journal.get(worldId, hit);
         if (existing) return { ...existing, deduplicated: true };
@@ -201,18 +138,15 @@ export function createEvolutionRuntime(
 
     /* 冷却：只约束自动/公共触发；admin 手动是运营判断，不受限。
        作用域 = world|focus（P5）：同一事件唤醒的多个 NPC 各有各的冷却，互不挤兑。 */
-    const scope = `${worldId}|${focusOf(worldId, tickOpts.wakePlan)}`;
+    const scope = `${worldId}|${ledger.focusOf(worldId, tickOpts.wakePlan)}`;
     if (trigger !== 'admin' && cooldownMs > 0) {
-      const last = lastRunAt.get(scope);
-      if (last !== undefined) {
-        const elapsed = Date.now() - last;
-        if (elapsed < cooldownMs) {
-          const focus = scope.slice(worldId.length + 1);
-          throw new EvolutionCooldownError(
-            `世界 '${worldId}'${focus ? `（聚焦 ${focus}）` : ''}演化冷却中（${Math.ceil((cooldownMs - elapsed) / 1000)}s 后可再次自动触发）`,
-            cooldownMs - elapsed,
-          );
-        }
+      const remaining = ledger.checkCooldown(scope, cooldownMs);
+      if (remaining > 0) {
+        const focus = scope.slice(worldId.length + 1);
+        throw new EvolutionCooldownError(
+          `世界 '${worldId}'${focus ? `（聚焦 ${focus}）` : ''}演化冷却中（${Math.ceil(remaining / 1000)}s 后可再次自动触发）`,
+          remaining,
+        );
       }
     }
 
@@ -236,53 +170,28 @@ export function createEvolutionRuntime(
     const finish = (patch: Partial<EvolutionRun>): EvolutionRun => {
       Object.assign(run, patch, { finishedAt: new Date().toISOString(), tookMs: Date.now() - t0 });
       journal.append(run);
-      lastRunAt.set(scope, Date.now());
-      /* 指纹登记用 setIfAbsent：同一提案重复出现时保留首次（真正执行变化）的 run。
-         指纹按 world|focus 分域（P5）：不同 NPC 的相同结论互不串挡。 */
-      if (run.proposal) {
-        const key = `${scope}|${proposalKey(worldId, run.proposal)}`;
-        if (!runsByProposal.has(key)) runsByProposal.set(key, run.id);
-      }
+      ledger.recordFinish(worldId, scope, run.id, run.proposal);
       return run;
     };
 
-    /* 1-2. 观察 + 组装上下文（读失败 = 本次演化没发生，世界零影响）。
-       P4：wakePlan 产出 trigger 段（当前事件 + 被唤醒者）；budget 按方案 §七裁剪。 */
-    let context: EvolutionContext;
+    /* 1-2.5 观察 + 记忆召回 + 分级（observation.ts；读失败 = 本次演化没发生，世界零影响） */
+    let obs: ObservationResult;
     try {
-      const built = await buildEvolutionContext(opts.engine, worldId, {
-        eventCount: eventWindow,
+      obs = await observe(opts.engine, worldId, {
+        eventWindow,
         ...(tickOpts.wakePlan ? { wakePlan: tickOpts.wakePlan } : {}),
         ...(opts.contextBudget ? { budget: opts.contextBudget } : {}),
+        ...(opts.memoryRetriever ? { memoryRetriever: opts.memoryRetriever } : {}),
       });
-      if (!built.ok) throw new Error(`世界观察失败（${built.status}）：${built.error}`);
-      context = built.context;
     } catch (e) {
       return finish({ status: 'failed', error: e instanceof Error ? e.message : String(e) });
     }
+    const context = obs.context;
+    const focusEntity = obs.focusEntity;
+    const observedVer = obs.observedVer;
     run.observationWindow.latestEventId = context.events[0]?.id;
     run.context = context;
-
-    /* 2.5 记忆召回（P7 · 方案 §十）：个体决策聚焦唯一唤醒实体时，
-       为它检索相关记忆注入 context.memory（预算内；失败 = 无记忆，
-       绝不影响演化闭环——记忆是建议材料，不是事实来源）。 */
-    const focusEntity = tickOpts.wakePlan ? focusOf(worldId, tickOpts.wakePlan) : '';
-    /* P2 卡片8：观察时记录焦点实体的版本戳（个体决策 tick 专属） */
-    const observedVer = focusEntity ? (context.entities[focusEntity]?._ver ?? 0) : null;
-    if (opts.memoryRetriever && focusEntity) {
-      try {
-        const primary = tickOpts.wakePlan!.primaryEventId ? context.events.find((e) => e.id === tickOpts.wakePlan!.primaryEventId) : undefined;
-        const query = primary ? [primary.type, primary.actor, primary.target].filter((x): x is string => !!x).join(' ') : focusEntity;
-        const memories = await opts.memoryRetriever(worldId, focusEntity, query);
-        applyContextMemory(context, memories, opts.contextBudget);
-      } catch {
-        /* 记忆召回失败：个体决策照常进行（无记忆段），失败不外溢 */
-      }
-    }
-
-    /* auto 触发的分级依据（方案 §五：High 事件才值得自动演化） */
-    const highs = highEventsOf(context.events.map((e) => ({ type: e.type, ...(e.data?.['witnesses'] !== undefined ? { witnesses: e.data['witnesses'] as string[] } : {}), ...(e.actor !== undefined ? { actor: e.actor } : {}) })));
-    run.triggerGrade = highs.length ? 'high' : context.events.length ? 'medium' : 'low';
+    run.triggerGrade = obs.triggerGrade;
 
     /* 3. AI 提案（驱动失败同样零影响；坏提案绝不放行给引擎）。
        超限的变化不静默丢弃——逐条落成 policy 拒绝（方案 §二.2：失败必须可见）。 */
@@ -306,9 +215,8 @@ export function createEvolutionRuntime(
 
     /* 幂等：AI 重复提交相同提案 → 直接返回既有结果，绝不重复 Mutation（方案 §二.3）。
        本 run 的观察与模型调用都已发生（running 行已落账），必须落一条终态——
-       如实记 completed（零变化，提案已被既有 run 应用），不留孤儿 running 行。
-       指纹按 world|focus 分域（P5）：个体决策的「无事发生」不跨 NPC 串挡。 */
-    const proposalHit = runsByProposal.get(`${scope}|${proposalKey(worldId, proposal)}`);
+       如实记 completed（零变化，提案已被既有 run 应用），不留孤儿 running 行。 */
+    const proposalHit = ledger.proposalHit(worldId, scope, proposal);
     if (proposalHit) {
       const existing = journal.get(worldId, proposalHit);
       if (existing && existing.id !== run.id) {
@@ -317,7 +225,7 @@ export function createEvolutionRuntime(
       }
     }
 
-    if (tickOpts.idempotencyKey) runsByKey.set(`${worldId}|${tickOpts.idempotencyKey}`, run.id);
+    if (tickOpts.idempotencyKey) ledger.recordKey(worldId, tickOpts.idempotencyKey, run.id);
 
     /* 4-5. 策略围栏 + 白名单翻译 + run 内去重，产出裁决骨架。
        单条被拒不影响其余（AI 的一次推演 = 一组独立建议，不是事务）。
