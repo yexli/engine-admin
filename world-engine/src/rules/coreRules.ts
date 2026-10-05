@@ -142,6 +142,16 @@ export function setRelationRule<W extends EngineWorldState>(): WorldRule<W> {
   };
 }
 
+/** 地点存在性校验（P3 卡片3）：有地点表时目的地必须在表内；
+ *  无地点表（locations 为空/未定义）时保持既有行为（向后兼容）。 */
+function locationExists(state: EngineWorldState, id: string): boolean {
+  const locations = state.locations;
+  if (!locations) return true;
+  const keys = Object.keys(locations);
+  if (keys.length === 0) return true;
+  return locations[id] !== undefined;
+}
+
 /** 移动实体：targetId='player'（或缺省）走玩家位置；否则写实体 attributes.location */
 export function moveEntityRule<W extends EngineWorldState>(): WorldRule<W> {
   return {
@@ -151,6 +161,10 @@ export function moveEntityRule<W extends EngineWorldState>(): WorldRule<W> {
       const location = typeof ctx.command.payload?.['location'] === 'string' ? (ctx.command.payload!['location'] as string) : ctx.command.text;
       if (!location) {
         ctx.emit({ type: 'entity_move_failed', cause: '缺少目的地' });
+        return false;
+      }
+      if (!locationExists(ctx.state, location)) {
+        ctx.emit({ type: 'entity_move_failed', cause: '地点不存在', location });
         return false;
       }
       const id = ctx.command.targetId ?? 'player';
@@ -184,6 +198,10 @@ export function moveRule<W extends EngineWorldState>(): WorldRule<W> {
       }
       if (ctx.state.player.loc === target) {
         ctx.emit({ type: 'move_failed', cause: '已经在这里', location: target });
+        return false;
+      }
+      if (!locationExists(ctx.state, target)) {
+        ctx.emit({ type: 'move_failed', cause: '地点不存在', location: target });
         return false;
       }
       ctx.mutate.playerLoc(target);

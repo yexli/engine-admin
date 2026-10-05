@@ -209,4 +209,26 @@ describe('命令链', () => {
     expect(h.s.t - t1).toBe(5);
     expect(types).not.toContain('time_advance_clamped');
   });
+
+  it('地点存在性校验：有表拒绝悬空位置、无表向后兼容（P3 卡片3）', () => {
+    const h = harness();
+    /* 有地点表：move 到不存在地点 → 拒绝 + move_failed */
+    h.s.locations = { plaza: { id: 'plaza' }, market: { id: 'market' } };
+    const bad = h.runtime.execute({ type: 'move', targetId: 'nowhere' });
+    expect(bad.ok).toBe(false);
+    expect(h.s.player.loc).not.toBe('nowhere');
+    /* 缺省出生地就是 plaza（move plaza 会命中「已经在这里」），改走 market */
+    const good = h.runtime.execute({ type: 'move', targetId: 'market' });
+    expect(good.ok).toBe(true);
+    expect(h.s.player.loc).toBe('market');
+    /* move_entity 同理 */
+    h.mutate.npcEntry('milu');
+    const badNpc = h.runtime.execute({ type: 'move_entity', targetId: 'milu', payload: { location: 'nowhere' } });
+    expect(badNpc.ok).toBe(false);
+    expect(h.runtime.execute({ type: 'move_entity', targetId: 'milu', payload: { location: 'market' } }).ok).toBe(true);
+    /* 无地点表：任意字符串可走（向后兼容，既有宿主行为） */
+    const h2 = harness();
+    expect(h2.runtime.execute({ type: 'move', targetId: 'anywhere' }).ok).toBe(true);
+    expect(h2.s.player.loc).toBe('anywhere');
+  });
 });
