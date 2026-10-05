@@ -3,6 +3,14 @@
 本文件记录 AI World Engine 的版本演进。格式参考 Keep a Changelog；版本线见 `docs/WORLD-ROADMAP.md`（方案 §69）。
 版本策略（semver）：0.x 期间允许带 CHANGELOG 注明的 API 调整；**1.0 起冻结公开 API**。
 
+### 已知边界（P3 记录）
+- `channelOf(e)` 取模块级默认 CHANNEL_TABLE：isolated 世界经 `createEventSchema()`
+  注册的通道表参与该世界内部的 `channelOf` 判定，但**全局缺省导出**
+  （`import { channelOf } from 'world-engine/events'`）始终读默认表。
+  影响：直接导入全局 `channelOf` 的宿主代码对 isolated 世界的通道判定不准。
+  缓解：isolated 世界应使用 `handle.events.channelOf`（实例方法）而非全局导出。
+  通道表参数化（全局导出感知多世界）属 V2.5。
+
 ## [Unreleased] · P2 遗留缺口修复
 
 ### Changed

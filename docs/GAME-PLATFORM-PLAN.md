@@ -196,3 +196,13 @@ export interface GameAdapter {
 P1 → P2 → P3 为主线（形态 → 门面 → 运营安全）；P4 可与 P3 并行（纯引擎面）；
 P5 收尾。规模天花板到达前（单机文件存储 / 单进程世界数），P5 的 PG 与进程池
 隔离按量启动，不提前建设。
+
+### V2.5 方向记录（P3 文档化批次）
+- **传闻传播（spreadRumor）**：跨 NPC 口口相传需要「谁告诉谁」的社交事实
+  （`npc_told_npc` 事件类型），引擎暂无对应事件。落地路径：
+  ① World Schema 增加 `communication` 事实类型面；② MemoryRuntime 消费该事实
+  触发 spreadRumor；③ 衰减按社交距离（关系值）加权。属 V2.5 Relationship Runtime 批次。
+- **定时事件平台消费**：引擎 `bus.schedule(event, delayDays)` / `bus.due(day)` 已实现，
+  但平台 ScheduleRuntime 当前只消费 `new_day` / `hour_advanced` 做位置对齐。
+  任务型定时（「第 3 天集市开张」「午夜刺客来袭」）需平台增加 `due` 轮询 →
+  触发演化或直接 emit。属 V2.5 Quest Runtime 批次前置。

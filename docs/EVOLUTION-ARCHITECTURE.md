@@ -43,6 +43,11 @@ AI World Driver        platform/src/evolution/driver.ts（网关驱动=真模型
    │ 每条变化的裁决 + 事实 id
    ▼
 Evolution Journal      platform/src/evolution/journal.ts（JSONL 账本，可反向追溯）
+
+> **写失败纪律**：Journal JSONL 落盘失败时**不炸运行时**（演化账本损坏不能反过来
+> 伤害世界进程）——失败计数经 `writeFailures()` 暴露，Admin Runtime 观测面可查。
+> 这是设计决定而非缺口：世界正确性 > 账本完整性。若需强一致账本，
+> 应替换为事务性介质（PostgreSQL）而非改变失败语义。
    ▼
 Admin 演化控制台        /v1/evolution/* + admin-web「AI 演化」页（触发 / 留痕 / 因果链）
    │

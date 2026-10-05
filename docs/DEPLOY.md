@@ -130,3 +130,14 @@ Admin Web 必须经 TLS 暴露。二选一：
   内网——对外绝不暴露 8787/8789/8790/8791；
 - 管理监听跨容器可达依赖 `PLATFORM_ADMIN_ALLOW_NON_LOOPBACK=1`（platform 启动时
   大声告警）：隔离责任由 compose 内网 + 端口绑定策略承担。
+
+### /intent 端点（ic_action 命令直通）
+
+`POST /v1/evolution/worlds/:id/intent` 的 `ic_action` 分支接受 `command` 对象，
+经权限校验（`gateway:manage`）后**直通引擎命令链**——不经演化围栏/白名单/冷却。
+
+这是设计决定（游戏方需要确定性命令通道），但意味着：
+
+- 持有 `gateway:manage` 权限的 Key 可绕过 AI 围栏直接改世界；
+- 对外部署时，`gateway:manage` 权限只授予受信任的管理面会话；
+- 游戏方公共 Key 不应持有此权限（缺省最小权限 = `worlds:read`，见 P2 #3）。

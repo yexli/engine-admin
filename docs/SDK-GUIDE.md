@@ -163,6 +163,14 @@ world.registerRule({
 通用子集之外的玩法命令，也可以在你自己的服务执行后把**结果事实**经
 `world.emitEvent(...)` 喂回——后台事件流与记忆摄取照常可见。
 
+> **Token 估算口径**：`estimatedTokens` 使用 `ceil(chars/4)` 保守估算（非模型分词器
+> 精确值）。预算语义是「裁剪依据」而非计费口径——实际模型消耗可能低于估算值。
+> 若需精确计费，请从 Gateway 的 usage 记录（`prompt_tokens`/`completion_tokens`）取数。
+
+> **记忆文本本地化**：缺省记忆描述使用英文 id 拼接（`world-min` 面：
+> `"player talk_started → milu"`）。游戏方可通过 `MemoryEngine.remember()` 自定义
+> 叙事化文案（中文/本地化）；自定义文案优先于缺省拼接（同 sourceEventId 幂等覆盖）。
+
 ### 命令链非事务性（设计决定）
 
 引擎命令按注册序逐规则执行。若规则 B 拒绝或抛错，规则 A 已产生的状态变更与
