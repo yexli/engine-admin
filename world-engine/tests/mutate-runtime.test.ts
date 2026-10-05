@@ -168,4 +168,27 @@ describe('命令链', () => {
     expect(r.ok).toBe(false);
     expect(r.appliedRules).toEqual(['First']);
   });
+
+  it('实体版本戳 _ver：create 不设；写入路径单调递增（P2 卡片8）', () => {
+    const h = harness();
+    expect(h.runtime.execute({ type: 'create_entity', payload: { id: 'milu', type: 'npc', name: '米露' } }).ok).toBe(true);
+    expect(h.s.npcs['milu']!._ver).toBeUndefined(); /* 建档不经受控写入访问 */
+    expect(h.runtime.execute({ type: 'update_attribute', targetId: 'milu', payload: { key: 'mood', value: '平静' } }).ok).toBe(true);
+    expect(h.s.npcs['milu']!._ver).toBe(1);
+    expect(h.runtime.execute({ type: 'update_attribute', targetId: 'milu', payload: { key: 'mood', value: '开心' } }).ok).toBe(true);
+    expect(h.s.npcs['milu']!._ver).toBe(2);
+    h.mutate.npcAtt('milu', 10);
+    expect(h.s.npcs['milu']!._ver).toBe(3);
+    /* 玩家不设版本戳（并发检测只针对实体） */
+    h.mutate.playerLoc('tavern');
+    expect((h.s.player as unknown as { _ver?: number })._ver).toBeUndefined();
+  });
+
+  it('实体版本戳 _ver 随状态序列化持久化（P2 卡片8）', () => {
+    const h = harness();
+    h.mutate.npcAtt('milu', 10);
+    const ver = h.s.npcs['milu']!._ver;
+    const roundtrip = JSON.parse(JSON.stringify(h.s)) as EngineWorldState;
+    expect(roundtrip.npcs['milu']!._ver).toBe(ver);
+  });
 });

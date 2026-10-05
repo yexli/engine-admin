@@ -73,10 +73,17 @@ export function createMutate<W extends EngineWorldState>(need: () => W, opts: Mu
     return s;
   }
 
+  /* P2 卡片8：实体版本戳。经受控写入路径的每次访问/修改单调递增——
+     演化侧观察时记录、落地前比对，检测「观察基于过期状态」。 */
+  function touch(dy: EntityDynamic): EntityDynamic {
+    dy._ver = (dy._ver ?? 0) + 1;
+    return dy;
+  }
+
   function entryOf(s: W, id: string): EntityDynamic {
     if (opts.entryOf) return opts.entryOf(s, id);
     let dy = s.npcs[id];
-    if (!dy) dy = s.npcs[id] = { att: 0, mem: [], met: false };
+    if (!dy) dy = s.npcs[id] = { att: 0, mem: [], met: false, _ver: 0 };
     return dy;
   }
 
@@ -107,22 +114,22 @@ export function createMutate<W extends EngineWorldState>(need: () => W, opts: Mu
     },
 
     npcEntry(id: string, s?: W): EntityDynamic {
-      return entryOf(mutate(s ?? need()), id);
+      return touch(entryOf(mutate(s ?? need()), id));
     },
 
     npcAtt(id: string, delta: number): { from: number; to: number } {
-      const dy = entryOf(need(), id);
+      const dy = touch(entryOf(need(), id));
       const from = dy.att;
       dy.att = clamp(from + delta, -100, 100);
       return { from, to: dy.att };
     },
 
     npcMet(id: string, v = true): void {
-      entryOf(need(), id).met = v;
+      touch(entryOf(need(), id)).met = v;
     },
 
     npcBag(id: string, itemId: string, qty: number): boolean {
-      const dy = entryOf(need(), id);
+      const dy = touch(entryOf(need(), id));
       const bag = (dy.bag = dy.bag ?? []);
       if (!qty) return false;
       if (qty > 0) {
@@ -140,7 +147,7 @@ export function createMutate<W extends EngineWorldState>(need: () => W, opts: Mu
 
     npcGold(id: string, delta: number): number {
       if (!Number.isFinite(delta)) return 0;
-      const dy = entryOf(need(), id);
+      const dy = touch(entryOf(need(), id));
       dy.gold = Math.max(0, (dy.gold ?? 0) + delta);
       return dy.gold;
     },
@@ -162,7 +169,7 @@ export function createMutate<W extends EngineWorldState>(need: () => W, opts: Mu
       const arr =
         owner === 'player'
           ? (s.player.effects = s.player.effects ?? [])
-          : (entryOf(s, owner).effects = entryOf(s, owner).effects ?? []);
+          : (touch(entryOf(s, owner)).effects = entryOf(s, owner).effects ?? []);
       const i = arr.findIndex((x) => x.id === eff.id);
       if (i >= 0) arr[i] = { ...arr[i], ...eff };
       else arr.push(eff);
@@ -171,7 +178,7 @@ export function createMutate<W extends EngineWorldState>(need: () => W, opts: Mu
 
     removeEffect(owner: string, id: string): boolean {
       const s = mutate(need());
-      const arr = owner === 'player' ? s.player.effects : entryOf(s, owner).effects;
+      const arr = owner === 'player' ? s.player.effects : touch(entryOf(s, owner)).effects;
       if (!arr) return false;
       const i = arr.findIndex((x) => x.id === id);
       if (i < 0) return false;

@@ -88,7 +88,7 @@ export interface EvolutionContext {
   /** 在场实体（玩家当前地点，完整字段） */
   entities: Record<
     string,
-    { att: number; met: boolean; type?: string; location?: string; attributes?: Record<string, unknown> }
+    { att: number; met: boolean; type?: string; location?: string; attributes?: Record<string, unknown>; _ver?: number }
   >;
   /** 世界其余实体（轻量名册：id/type/location——跨系统推演看得见，细节不可写） */
   otherEntities: { id: string; type?: string; location?: string }[];
@@ -339,6 +339,9 @@ export interface EvolutionRun {
   idempotencyKey?: string;
   /** 驱动/翻译/执行异常（failed 时必有，completed 时通常为空） */
   error?: string;
+  /** 观察过期检测（P2 卡片8）：落地前焦点实体的引擎版本戳与观察时不一致。
+   *  第一阶段留痕不拒绝（提案合理性仍由 Rules 终审）；V2.5 可配置为拒绝。 */
+  staleObservation?: { entityId: string; observedVer: number; currentVer: number };
   tookMs?: number;
 }
 

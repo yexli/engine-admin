@@ -52,6 +52,9 @@ export interface EntityDynamic {
   type?: string;
   /** 通用属性袋（V1.0）：新游戏与新规则的正解字段；旧字段保留兼容 */
   attributes?: Record<string, unknown>;
+  /** 内部版本戳（P2 卡片8 · additive）：经受控写入路径修改时单调递增。
+   *  并发冲突检测用（演化侧观察/落地比对）；游戏语义不消费。 */
+  _ver?: number;
 }
 
 /** 玩家实体：引擎要求的最小面（其余字段归游戏） */

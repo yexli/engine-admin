@@ -100,6 +100,8 @@ export async function buildEvolutionContext(
         ...(n.type !== undefined ? { type: n.type } : {}),
         location: loc,
         ...(n.attributes !== undefined ? { attributes: n.attributes } : {}),
+        /* P2 卡片8：版本戳随在场实体投影透出（观察/落地比对用；游戏语义不消费） */
+        ...(typeof (n as { _ver?: number })._ver === 'number' ? { _ver: (n as { _ver?: number })._ver } : {}),
       };
     } else {
       otherEntities.push({ id, ...(n.type !== undefined ? { type: n.type } : {}), ...(loc !== undefined ? { location: loc } : {}) });

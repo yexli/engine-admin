@@ -267,6 +267,8 @@ export function createEvolutionRuntime(
        为它检索相关记忆注入 context.memory（预算内；失败 = 无记忆，
        绝不影响演化闭环——记忆是建议材料，不是事实来源）。 */
     const focusEntity = tickOpts.wakePlan ? focusOf(worldId, tickOpts.wakePlan) : '';
+    /* P2 卡片8：观察时记录焦点实体的版本戳（个体决策 tick 专属） */
+    const observedVer = focusEntity ? (context.entities[focusEntity]?._ver ?? 0) : null;
     if (opts.memoryRetriever && focusEntity) {
       try {
         const primary = tickOpts.wakePlan!.primaryEventId ? context.events.find((e) => e.id === tickOpts.wakePlan!.primaryEventId) : undefined;
@@ -359,6 +361,20 @@ export function createEvolutionRuntime(
         commandId: `cmd_${randomUUID().slice(0, 12)}`,
         eventIds: [],
       });
+    }
+
+    /* P2 卡片8：观察过期检测——落地前比对焦点实体的版本戳。
+       观察后被外部命令改过（currentVer ≠ observedVer）→ run.staleObservation
+       留痕；第一阶段不拒绝（提案合理性仍由 Rules 终审），V2.5 可配置拒绝。 */
+    if (focusEntity && observedVer !== null) {
+      const cur = await opts.engine.getState(worldId);
+      if (cur.ok) {
+        const npcs = (cur.state as { npcs?: Record<string, { _ver?: number }> }).npcs ?? {};
+        const currentVer = npcs[focusEntity]?._ver ?? 0;
+        if (currentVer !== observedVer) {
+          run.staleObservation = { entityId: focusEntity, observedVer, currentVer };
+        }
+      }
     }
 
     /* 引擎逐条执行（串行：提案内部变化可能有时序依赖）。
