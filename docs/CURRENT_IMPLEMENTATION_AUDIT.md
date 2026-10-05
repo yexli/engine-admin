@@ -376,6 +376,8 @@ platform **241/241**（232 + 9 新增）；其余包不变。
 - 检索查询是词面拼接（事件 type+actor+target）；语义召回需注入 EmbedHook（world-memory 已支持热替换，网关 embedding 通道待 P8 收口后接）。
 - 传闻传播（spreadRumor）未接：跨 NPC 口口相传需要「谁告诉谁」的社交事实，引擎暂无对应事件——留待后续批次。
 - 记忆文本是英文 id 拼接（describe 的 world-min 面），游戏方可用 remember() 自定义文案；中文叙事化属游戏 Adapter 层。
+- 感知边界派生取摄取时刻快照（非事实发生时刻）：轮询间隔内 NPC 移动可致 witnesses 偏差。
+  缓解=事实自带 location 优先；修正需事件溯源（V2.5）。判定=可接受设计边界，不修代码（P2 卡片10）。
 
 ---
 

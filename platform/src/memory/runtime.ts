@@ -11,6 +11,11 @@
 
    双驱动共存安全：宿主/其它进程亦可喂记忆（服务按事实 id 幂等）；
    平台循环是权威兜底（为没有宿主记忆管线的世界工作）。
+
+   已知边界（P2 卡片10 记录，V2.5 方向）：
+   感知边界派生使用摄取时刻的状态快照（npcLocations），而非事实发生时刻。
+   轮询间隔（缺省 3s）内 NPC 移动会导致 witnesses 派生偏差。
+   缓解：事实自带 location 字段优先；修正需事件溯源（V2.5 增量介质）。
    ============================================================ */
 import type { EngineClient } from '../types.ts';
 import type { WorldMemoryService } from './service.ts';
