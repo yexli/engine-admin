@@ -130,6 +130,21 @@ export function createWorld<W extends EngineWorldState = EngineWorldState>(opts:
   const bus: WorldEventBus = isolated ? createWorldEventBus().bus : worldBus;
   const events: EventSchemaInstance = isolated ? createEventSchema() : defaultEventSchema;
 
+  /* P3 卡片8：事件分级/通道表随档恢复——宿主注册的表重启后不回落缺省。
+     SavePort 无通道（如内存介质）时行为与此前一致（表不随档）。 */
+  const savedTables = savePort?.loadEventTables?.() ?? null;
+  if (savedTables && typeof savedTables === 'object') {
+    events.importTables(savedTables as { levels: Record<string, never>; channels: Record<string, never> });
+  }
+  /* 注册即落盘：包装 registerEventTables，注册后把最新表写进 SavePort */
+  {
+    const origRegister = events.registerEventTables.bind(events);
+    events.registerEventTables = (levels, channels) => {
+      origRegister(levels, channels);
+      savePort?.saveEventTables?.(events.exportTables());
+    };
+  }
+
   /* 引擎自建最小合法状态：应用可经 definition 注入世界数据（§八 World Definition） */
   container.core.S = createBaseState({
     worldId: opts.worldId,
@@ -341,6 +356,12 @@ export function createWorld<W extends EngineWorldState = EngineWorldState>(opts:
       }
       if (ring.length > EVENT_RING) ring.splice(0, ring.length - EVENT_RING);
       if (hasWorldLog() && worldLog.length > 0) savePort?.saveWorldLog?.(worldLog as unknown[]);
+      /* P3 卡片8：后装介质恢复事件表 + 把当前内存表落盘（介质与表同寿命） */
+      const attachedTables = savePort?.loadEventTables?.() ?? null;
+      if (attachedTables && typeof attachedTables === 'object') {
+        events.importTables(attachedTables as { levels: Record<string, never>; channels: Record<string, never> });
+      }
+      savePort?.saveEventTables?.(events.exportTables());
     },
     mutate,
     clock,

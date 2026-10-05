@@ -51,6 +51,9 @@ export class FileSavePort<W extends EngineWorldState = EngineWorldState> impleme
   private get ledgerPath(): string {
     return `${this.filePath}.commands.json`;
   }
+  private get tablesPath(): string {
+    return `${this.filePath}.tables.json`;
+  }
   private readonly exitHook = (): void => this.flushSync();
 
   constructor(
@@ -195,6 +198,26 @@ export class FileSavePort<W extends EngineWorldState = EngineWorldState> impleme
     this.pendingLedger = JSON.parse(JSON.stringify(rows)) as unknown[];
     this.dirty = true;
     this.schedule();
+  }
+
+  /* 事件分级/通道表（P3 卡片8）：同步小文件直写（表变更低频，无防抖必要） */
+  loadEventTables(): { levels: Record<string, number>; channels: Record<string, string> } | null {
+    if (!existsSync(this.tablesPath)) return null;
+    try {
+      return JSON.parse(readFileSync(this.tablesPath, 'utf8'));
+    } catch {
+      this.onError?.(`事件分级/通道表损坏：${this.tablesPath}（回落缺省表）`);
+      return null;
+    }
+  }
+
+  saveEventTables(tables: { levels: Record<string, number>; channels: Record<string, string> }): void {
+    try {
+      mkdirSync(dirname(this.tablesPath), { recursive: true });
+      writeFileSync(this.tablesPath, JSON.stringify(tables, null, 2), 'utf8');
+    } catch (e) {
+      this.onError?.(`事件分级/通道表落盘失败：${e instanceof Error ? e.message : String(e)}`);
+    }
   }
 
   /** 释放进程退出钩子（关闭世界/测试收尾用；退出前先 flush） */

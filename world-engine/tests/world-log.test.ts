@@ -160,3 +160,37 @@ describe('V2.4-01 HTTP 事件史过滤', () => {
     expect(hot.body.events?.length).toBeLessThanOrEqual(5); /* 快路径不变 */
   });
 });
+
+/* P3 卡片8：事件分级/通道表随 SavePort 持久化——重启后恢复宿主注册 */
+describe('事件表持久化（P3 卡片8）', () => {
+  it('registerEventTables → 重启恢复（levelOf/channelOf 不回落缺省）', async () => {
+    const { createWorld, defaultEventSchema } = await import('../src/index');
+    const dir2 = mkdtempSync(join(tmpdir(), 'w-tables-'));
+    const port = new FileSavePort(join(dir2, 'w.json'), { debounceMs: 50_000 });
+    const before = defaultEventSchema.levelOf('combat_hit');
+    const w = createWorld({ worldId: 'w-tables', playerName: '旅人', startLoc: 'village', savePort: port });
+    w.registerRule({ name: 'noop', for: '__noop__', apply: () => {} }); /* 保证句柄可用 */
+    defaultEventSchema.registerEventTables({ combat_hit: 3 }, { combat_hit: 'critical' });
+    expect(defaultEventSchema.levelOf('combat_hit')).toBe(3);
+    w.dispose(); /* 顺带 flush */
+    port.dispose();
+
+    /* 模拟重启：新世界同介质文件 → 表从介质恢复 */
+    const port2 = new FileSavePort(join(dir2, 'w.json'), { debounceMs: 50_000 });
+    const w2 = createWorld({ worldId: 'w-tables', playerName: '旅人', startLoc: 'village', savePort: port2 });
+    expect(defaultEventSchema.levelOf('combat_hit')).toBe(3);
+    expect(defaultEventSchema.channelOf({ type: 'combat_hit', day: 1 } as never)).toBe('critical');
+    w2.dispose();
+    port2.dispose();
+    /* 还原全局表（后续测试不受污染） */
+    defaultEventSchema.importTables({ levels: { combat_hit: before }, channels: { combat_hit: 'ambient' } });
+    rmSync(dir2, { recursive: true, force: true });
+  });
+
+  it('exportTables/importTables 幂等（P3 卡片8）', async () => {
+    const { defaultEventSchema } = await import('../src/index');
+    const tables = defaultEventSchema.exportTables();
+    defaultEventSchema.importTables(tables);
+    expect(defaultEventSchema.exportTables()).toEqual(tables);
+  });
+});

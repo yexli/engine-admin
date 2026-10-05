@@ -27,6 +27,11 @@ export interface SavePort<W extends EngineWorldState = EngineWorldState> {
      行形状 = { commandId, result }（首次执行结果），插入序 FIFO。 */
   loadCommandLedger?(): unknown[] | null;
   saveCommandLedger?(rows: unknown[]): void;
+  /** 事件分级/通道表持久化（P3 卡片8：重启后恢复宿主注册的表——
+     否则回落 Level 1 / ambient，触发器分级判断失准）。可选：不实现 =
+     表不随档（行为与此前一致）。 */
+  loadEventTables?(): { levels: Record<string, number>; channels: Record<string, string> } | null;
+  saveEventTables?(tables: { levels: Record<string, number>; channels: Record<string, string> }): void;
 }
 
 /** 内存介质：测试与最小运行用（new InMemoryWorldStorage()）。

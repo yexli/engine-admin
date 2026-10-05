@@ -71,6 +71,10 @@ export interface EventSchemaInstance {
   resetEventSeq(): void;
   nextEventId(day: number): string;
   registerEventTables(levels: Record<string, WorldEventLevel>, channels?: Record<string, EventChannel>): void;
+  /** 导出当前分级/通道表（P3 卡片8：持久化用） */
+  exportTables(): { levels: Record<string, WorldEventLevel>; channels: Record<string, EventChannel> };
+  /** 导入表（恢复用；经 registerEventTables 幂等覆盖） */
+  importTables(tables: { levels: Record<string, WorldEventLevel>; channels: Record<string, EventChannel> }): void;
   traceChain(events: WorldEvent[], leafId: string, maxDepth?: number): WorldEvent[];
   allEventTypes(): readonly string[];
 }
@@ -143,6 +147,13 @@ export function createEventSchema(): EventSchemaInstance {
     },
     allEventTypes(): readonly string[] {
       return allTypes; // 活引用：registerEventTables 原地维护，绑定方自动跟上
+    },
+    /* P3 卡片8：分级/通道表导出/导入（随 SavePort 持久化——重启后恢复宿主注册） */
+    exportTables() {
+      return { levels: { ...LEVEL_TABLE }, channels: { ...CHANNEL_TABLE } };
+    },
+    importTables(tables) {
+      api.registerEventTables(tables.levels, tables.channels);
     },
   };
   return api;
