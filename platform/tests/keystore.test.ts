@@ -98,4 +98,36 @@ describe('KeyStore', () => {
     expect(raw).toContain(hashKey(plaintext));
     rmSync(file, { force: true });
   });
+
+  it('exit 钩子兜底（P2 卡片2）：防抖窗口内 kill 不丢数据', () => {
+    const file = tmpFile('keys-exit.json');
+    const store = new KeyStore(file);
+    const { plaintext } = store.create({ name: 'crash-window' });
+    /* 防抖窗口内不 flush：此刻文件尚无该 key */
+    expect(() => readFileSync(file, 'utf8')).toThrow();
+    /* 进程退出事件触发钩子 → 同步落盘 */
+    process.emit('exit', 0);
+    const raw = readFileSync(file, 'utf8');
+    expect(raw).toContain(hashKey(plaintext));
+    const store2 = new KeyStore(file);
+    expect(store2.verify(plaintext)?.name).toBe('crash-window');
+    store2.dispose();
+    rmSync(file, { force: true });
+  });
+
+  it('dispose 释放钩子后 exit 不再触发 flush；dispose 本身落盘', () => {
+    const file = tmpFile('keys-dispose.json');
+    let flushed = 0;
+    const store = new KeyStore(file, undefined, () => Date.now(), () => {
+      flushed++;
+    });
+    store.create({ name: 'before-dispose' });
+    store.dispose(); // 释放钩子并同步落盘一次
+    const afterDispose = flushed;
+    expect(afterDispose).toBeGreaterThan(0);
+    store.create({ name: 'after-dispose' });
+    process.emit('exit', 0); // 钩子已移除：不再冲刷
+    expect(flushed).toBe(afterDispose);
+    rmSync(file, { force: true });
+  });
 });

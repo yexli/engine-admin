@@ -61,6 +61,8 @@ export class KeyStore {
   private dirty = false;
   private timer: ReturnType<typeof setTimeout> | null = null;
   readonly bootstrapKeyHash: string | null;
+  /** 释放进程钩子并同步落盘（测试/优雅退出用；避免钩子累积） */
+  dispose!: () => void;
 
   constructor(
     private readonly filePath: string,
@@ -71,6 +73,24 @@ export class KeyStore {
   ) {
     this.bootstrapKeyHash = bootstrapKey ? hashKey(bootstrapKey) : null;
     this.load();
+    /* 崩溃兜底（P2 卡片2）：防抖窗口（2s）内进程退出时，最近 2s 的
+       create/remove/revoke 变更不能丢——exit/SIGINT/SIGTERM 同步冲刷。 */
+    const exitFlush = (): void => {
+      this.flush();
+    };
+    process.once('exit', exitFlush);
+    process.once('SIGINT', () => {
+      exitFlush();
+      process.exit(130);
+    });
+    process.once('SIGTERM', () => {
+      exitFlush();
+      process.exit(143);
+    });
+    this.dispose = (): void => {
+      process.removeListener('exit', exitFlush);
+      exitFlush();
+    };
   }
 
   private load(): void {
