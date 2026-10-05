@@ -5,6 +5,9 @@
    语义：执行基础设施，非世界状态），不在隔离断言之列。
    ============================================================ */
 import { describe, expect, it } from 'vitest';
+import { existsSync, mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import {
   createWorld,
   createWorldRegistry,
@@ -90,6 +93,39 @@ describe('W9.3 · WorldRegistry', () => {
     expect(registry.get('a')).toBeNull();
     expect(registry.close('a')).toBe(false);
   });
+
+  it('close 资源收尾（P3 卡片2）：flush/dispose/守卫/reset', async () => {
+    const { FileSavePort, InMemoryWorldStorage } = await import('../src/index');
+    const dir = mkdtempSync(join(tmpdir(), "registry-close-"));
+    /* 1) dispose 冲刷挂起存档：防抖窗口内未 flush，dispose 后 SavePort 有完整状态 */
+    const file = join(dir, 'w.json');
+    const port = new FileSavePort(file, { debounceMs: 50_000 });
+    const w1 = createWorld({ worldId: 'w-flush', playerName: '旅人', startLoc: 'village', isolated: true, savePort: port });
+    w1.executeCommand({ type: 'move', targetId: 'tavern' });
+    expect(existsSync(file)).toBe(false); /* 防抖窗口内尚未落盘 */
+    w1.dispose(); /* flush 挂起存档 + dispose SavePort */
+    expect(existsSync(file)).toBe(true);
+
+    /* 2) close 后句柄操作抛错（防悬垂使用）+ 重复 close 幂等 */
+    const registry = createWorldRegistry();
+    const w = registry.create({ worldId: 'w-x', playerName: '旅人', startLoc: 'village', savePort: new InMemoryWorldStorage() });
+    w.executeCommand({ type: 'move', targetId: 'tavern' });
+    expect(registry.close('w-x')).toBe(true);
+    expect(() => w.getState()).toThrow(/disposed/);
+    expect(() => w.executeCommand({ type: 'move', targetId: 'plaza' })).toThrow(/disposed/);
+    expect(() => w.getEvents(5)).toThrow(/disposed/);
+    expect(registry.close('w-x')).toBe(false); /* 已移除，不重复 dispose */
+
+    /* 3) isolated 世界 close 后 bus.reset（订阅者清空） */
+    const w2 = registry.create({ worldId: 'w-bus', playerName: '旅人', startLoc: 'village', savePort: new InMemoryWorldStorage() });
+    const seen: string[] = [];
+    w2.bus.on('*', () => seen.push('x'));
+    expect(w2.bus.stats().subscribers).toBeGreaterThan(0);
+    registry.close('w-bus');
+    expect(w2.bus.stats().subscribers).toBe(0);
+    rmSync(dir, { recursive: true, force: true });
+  });
+
 
   it('隔离作用域强制：注册表创建的世界永不落在全局总线上', () => {
     const registry = createWorldRegistry();

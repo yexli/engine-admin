@@ -111,6 +111,9 @@ export interface WorldHandle<W extends EngineWorldState> {
   readonly events: EventSchemaInstance;
   /** 注入 World Definition（幂等：重复 id 跳过） */
   applyDefinition(def: WorldDefinition): void;
+  /** 释放世界资源（P3 卡片2）：flush 挂起存档 → 事件史落盘 → dispose SavePort
+   *  → reset 事件总线（isolated）。关闭后的句柄一切操作抛错（防悬垂使用）。 */
+  dispose(): void;
 }
 
 export { createQuery } from './WorldQuery.ts';
@@ -240,16 +243,49 @@ export function createWorld<W extends EngineWorldState = EngineWorldState>(opts:
     }
   });
 
+  /* P3 卡片2：disposed 守卫——关闭后的句柄一切操作抛错（防悬垂使用：
+     误持已关闭世界引用的代码会得到可诊断错误，而不是静默读写僵尸状态）。 */
+  let disposed = false;
+  const guardDisposed = (): void => {
+    if (disposed) throw new Error(`world '${opts.worldId ?? 'world'}' has been disposed`);
+  };
+  function disposeHandle(): void {
+    if (disposed) return;
+    disposed = true;
+    /* 1. 冲刷挂起的脏档（节流窗口内的变更不丢） */
+    container.flushSave();
+    /* 2. 世界事件史落盘 */
+    if (hasWorldLog() && worldLog.length > 0) savePort?.saveWorldLog?.(worldLog as unknown[]);
+    /* 3. 释放 SavePort（移除 exit 钩子、清定时器；介质自声明 dispose 时） */
+    const sp = savePort as { dispose?: () => void } | null;
+    if (sp && typeof sp.dispose === 'function') sp.dispose();
+    /* 4. 重置事件总线（isolated 世界：清订阅者/死信/定时事件） */
+    if (isolated) bus.reset();
+  }
+
   const handle: WorldHandle<W> = {
     worldId: opts.worldId ?? 'world',
-    getState: () => container.core.S,
+    getState: () => {
+      guardDisposed();
+      return container.core.S;
+    },
 
     query: createQuery<W>({ getState: () => container.core.S, clock }),
 
-    executeCommand: (cmd: WorldCommand) => runtime.execute(cmd),
-    advanceTime: (ticks: number) => runtime.execute({ type: 'advance_time', amount: ticks }),
-    getEvents: (n = 20) => ring.slice(-n).reverse(),
+    executeCommand: (cmd: WorldCommand) => {
+      guardDisposed();
+      return runtime.execute(cmd);
+    },
+    advanceTime: (ticks: number) => {
+      guardDisposed();
+      return runtime.execute({ type: 'advance_time', amount: ticks });
+    },
+    getEvents: (n = 20) => {
+      guardDisposed();
+      return ring.slice(-n).reverse();
+    },
     queryEvents: (f: WorldEventFilter = {}) => {
+      guardDisposed();
       const match = (e: WorldEvent): boolean =>
         (f.id === undefined || e.id === f.id) &&
         (f.type === undefined || e.type === f.type) &&
@@ -261,8 +297,12 @@ export function createWorld<W extends EngineWorldState = EngineWorldState>(opts:
         (f.causedBy === undefined || e.parentId === f.causedBy || e.sourceId === f.causedBy);
       return worldLog.filter(match).reverse(); /* 新 → 旧，与 getEvents 同序 */
     },
-    registerRule: (rule: WorldRule<W>) => runtime.rules.register(rule),
+    registerRule: (rule: WorldRule<W>) => {
+      guardDisposed();
+      runtime.rules.register(rule);
+    },
     emitEvent: (draft: EventEmit) => {
+      guardDisposed();
       const s = container.need();
       const ev = events.makeEvent({
         ...draft,
@@ -275,6 +315,7 @@ export function createWorld<W extends EngineWorldState = EngineWorldState>(opts:
       return ev;
     },
     setSavePort: (port: SavePort<W>) => {
+      guardDisposed();
       savePort = port;
       /* 后装介质（V2.4 加固）：
          · 吸收介质里已有的世界史（幂等恢复 + 序号续接）；
@@ -307,7 +348,11 @@ export function createWorld<W extends EngineWorldState = EngineWorldState>(opts:
     container,
     bus,
     events,
-    applyDefinition: (def: WorldDefinition) => applyDefinition(container.core.S as EngineWorldState, def),
+    applyDefinition: (def: WorldDefinition) => {
+      guardDisposed();
+      applyDefinition(container.core.S as EngineWorldState, def);
+    },
+    dispose: disposeHandle,
   };
 
   return handle;

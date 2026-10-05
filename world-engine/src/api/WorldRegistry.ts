@@ -19,7 +19,8 @@ export interface WorldRegistry<W extends EngineWorldState = EngineWorldState> {
   create(opts: CreateWorldOptions<W> & { worldId: string }): WorldHandle<W>;
   get(worldId: string): WorldHandle<W> | null;
   list(): WorldHandle<W>[];
-  /** 关闭世界：移出注册表（其作用域随句柄释放；持久化归宿主 SavePort） */
+  /** 关闭世界：先做资源收尾（P3 卡片2：flush 挂起存档 / dispose SavePort /
+   *  reset isolated 总线），再移出注册表。未知 worldId → false。 */
   close(worldId: string): boolean;
   readonly size: number;
 }
@@ -47,7 +48,11 @@ export function createWorldRegistry<W extends EngineWorldState = EngineWorldStat
     },
 
     close(worldId: string): boolean {
-      return worlds.delete(worldId);
+      const handle = worlds.get(worldId);
+      if (!handle) return false;
+      handle.dispose();
+      worlds.delete(worldId);
+      return true;
     },
 
     get size(): number {
