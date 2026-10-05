@@ -115,6 +115,8 @@ export interface WorldHttpInit<W extends EngineWorldState = EngineWorldState> {
   registry?: WorldRegistry<W>;
   /** G2：API Key 鉴权（缺省关）。开启后全部路由需有效钥匙；写入类需 worlds:write */
   auth?: WorldAuthInit;
+  /** 单次 advance_time 的最大刻数（P3 卡片1；缺省 1440 = 30 天；防同步阻塞 DoS） */
+  maxTicksPerAdvance?: number;
 }
 
 /* ---------------- 载荷净化（纵深防御，0.4.1 起） ----------------
@@ -704,6 +706,12 @@ export function createWorldHttp<W extends EngineWorldState = EngineWorldState>(
           const n = typeof ticks === 'number' ? ticks : Number(ticks);
           if (!Number.isFinite(n) || Math.floor(n) < 1) {
             return { status: 400, body: { error: 'body must be {"ticks": <positive number>}' } };
+          }
+          /* P3 卡片1：单次推进上限（防同步阻塞 DoS；缺省 1440 刻 = 30 天，
+             装配方经 init.maxTicksPerAdvance 覆盖。规则层另有同口径兜底钳制） */
+          const maxTicks = init.maxTicksPerAdvance ?? 1440;
+          if (Math.floor(n) > maxTicks) {
+            return { status: 400, body: { error: `ticks exceeds max (${maxTicks}); split into multiple requests` } };
           }
           const res = w.advanceTime(Math.floor(n));
           touch(w, res);

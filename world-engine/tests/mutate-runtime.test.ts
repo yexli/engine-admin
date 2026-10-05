@@ -191,4 +191,22 @@ describe('命令链', () => {
     const roundtrip = JSON.parse(JSON.stringify(h.s)) as EngineWorldState;
     expect(roundtrip.npcs['milu']!._ver).toBe(ver);
   });
+
+  it('advance_time 规则层钳制：超限推进 1440 刻 + clamp 事实（P3 卡片1）', () => {
+    const h = harness();
+    const types: string[] = [];
+    worldBus.on('*', (e) => types.push(e.type));
+    const t0 = h.s.t;
+    const r = h.runtime.execute({ type: 'advance_time', amount: 9999 });
+    expect(r.ok).toBe(true);
+    expect(h.s.t - t0).toBe(1440); /* 实际只推进 1440，不是 9999 */
+    expect(types).toContain('time_advance_clamped');
+    expect(types).toContain('time_advanced');
+    /* 正常推进不受影响 */
+    types.length = 0;
+    const t1 = h.s.t;
+    expect(h.runtime.execute({ type: 'advance_time', amount: 5 }).ok).toBe(true);
+    expect(h.s.t - t1).toBe(5);
+    expect(types).not.toContain('time_advance_clamped');
+  });
 });

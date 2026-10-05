@@ -64,6 +64,20 @@ describe('HTTP 协议适配器（纯路由 · 单世界模式兼容）', () => {
     expect((await http.handle(post('/v1/worlds/w-4/time', { ticks: 'many' }))).status).toBe(400);
   });
 
+  it('POST time：单次推进上限钳制（P3 卡片1；缺省 1440，装配方可覆盖）', async () => {
+    const world = createWorld({ worldId: 'w-tick' });
+    const http = createWorldHttp({ world });
+    const t0 = world.getState()!.t;
+    const over = await http.handle(post('/v1/worlds/w-tick/time', { ticks: 99999 }));
+    expect(over.status).toBe(400);
+    expect((over.body as { error: string }).error).toContain('max (1440)');
+    const custom = createWorldHttp({ world, maxTicksPerAdvance: 10 });
+    expect((await custom.handle(post('/v1/worlds/w-tick/time', { ticks: 11 }))).status).toBe(400);
+    const ok = await custom.handle(post('/v1/worlds/w-tick/time', { ticks: 10 }));
+    expect(ok.status).toBe(200);
+    expect(world.getState()!.t).toBe(t0 + 10);
+  });
+
   it('命令载荷净化：未知键与嵌套结构截在门口；超长 type → 400', async () => {
     const world = createWorld({ worldId: 'w-san' });
     const http = createWorldHttp({ world });

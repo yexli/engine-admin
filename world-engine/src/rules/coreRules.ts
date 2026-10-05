@@ -198,7 +198,14 @@ export function advanceTimeRule<W extends EngineWorldState>(): WorldRule<W> {
     name: 'AdvanceTimeRule',
     for: 'advance_time',
     apply(ctx) {
-      const ticks = Math.max(1, Math.floor(ctx.command.amount ?? 1));
+      /* P3 卡片1：单次推进上限兜底（HTTP 层同口径钳制之外的规则层防线——
+         库内调用/宿主直连不经 HTTP，也受保护）。缺省 1440 刻 = 30 天。 */
+      const MAX_SINGLE_ADVANCE = 1440;
+      const raw = Math.max(1, Math.floor(ctx.command.amount ?? 1));
+      const ticks = Math.min(raw, MAX_SINGLE_ADVANCE);
+      if (ticks < raw) {
+        ctx.emit({ type: 'time_advance_clamped', data: { requested: raw, applied: ticks } });
+      }
       ctx.clock.advance(ticks);
       ctx.emit({ type: 'time_advanced', data: { ticks } });
     },
