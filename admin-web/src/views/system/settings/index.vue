@@ -14,8 +14,6 @@ const canManage = hasPerms("system:manage");
 const GROUPS = [
   { name: "general", label: "常规" },
   { name: "world", label: "世界" },
-  { name: "gateway", label: "AI Gateway" },
-  { name: "memory", label: "Memory" },
   { name: "observability", label: "监控" }
 ];
 

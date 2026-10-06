@@ -26,10 +26,11 @@ export type RunChan =
   | 'save'
   | 'perf'
   | 'error'
-  | 'ui';
+  | 'ui'
+  | 'extsync';
 export type RunLvl = 'debug' | 'info' | 'warn' | 'error';
 
-export const RUN_CHANNELS: RunChan[] = ['boot', 'event', 'combat', 'ai', 'memory', 'exec', 'valid', 'save', 'perf', 'error', 'ui'];
+export const RUN_CHANNELS: RunChan[] = ['boot', 'event', 'combat', 'ai', 'memory', 'exec', 'valid', 'save', 'perf', 'error', 'ui', 'extsync'];
 
 /** 通道中文名（面板与导出都用它，避免界面里散落英文缩写） */
 export const RUN_CHAN_LABEL: Record<RunChan, string> = {
@@ -44,6 +45,7 @@ export const RUN_CHAN_LABEL: Record<RunChan, string> = {
   perf: '耗时',
   error: '错误',
   ui: '界面',
+  extsync: '外擎同步',
 };
 
 export interface RunEntry {

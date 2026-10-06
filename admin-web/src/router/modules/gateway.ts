@@ -1,15 +1,18 @@
 const Layout = () => import("@/layout/index.vue");
 
-/** AI Gateway：Providers / Models / Router / Pipelines / API Keys / Usage */
+/** 接入管理（Access）：游戏方（租户） / API 密钥
+ *  Engine Control Plane 收束（docs/ENGINE-CORE-SCOPE.md §3.5）：
+ *  AI 网关类页面（providers/models/router/pipelines/usage）已随 AI 功能冻结移除。
+ */
 export default {
   path: "/gateway",
   name: "Gateway",
   component: Layout,
-  redirect: "/gateway/providers",
+  redirect: "/gateway/keys",
   meta: {
-    icon: "ep/coin",
-    title: "AI 网关",
-    titleEn: "AI Gateway",
+    icon: "ep/key",
+    title: "接入管理",
+    titleEn: "Access",
     rank: 4
   },
   children: [
@@ -25,50 +28,6 @@ export default {
       }
     },
     {
-      path: "/gateway/providers",
-      name: "GatewayProviders",
-      component: () => import("@/views/gateway/providers/index.vue"),
-      meta: {
-        title: "提供方",
-        titleEn: "Providers",
-        icon: "ep/connection",
-        roles: ["admin"]
-      }
-    },
-    {
-      path: "/gateway/models",
-      name: "GatewayModels",
-      component: () => import("@/views/gateway/models/index.vue"),
-      meta: {
-        title: "模型",
-        titleEn: "Models",
-        icon: "ep/cpu",
-        roles: ["admin"]
-      }
-    },
-    {
-      path: "/gateway/router",
-      name: "GatewayRouter",
-      component: () => import("@/views/gateway/router/index.vue"),
-      meta: {
-        title: "模型路由",
-        titleEn: "Router",
-        icon: "ep/guide",
-        roles: ["admin"]
-      }
-    },
-    {
-      path: "/gateway/pipelines",
-      name: "GatewayPipelines",
-      component: () => import("@/views/gateway/pipelines/index.vue"),
-      meta: {
-        title: "管线",
-        titleEn: "Pipelines",
-        icon: "ep/histogram",
-        roles: ["admin"]
-      }
-    },
-    {
       path: "/gateway/keys",
       name: "GatewayKeys",
       component: () => import("@/views/gateway/keys/index.vue"),
@@ -76,17 +35,6 @@ export default {
         title: "API 密钥",
         titleEn: "Keys",
         icon: "ep/key",
-        roles: ["admin"]
-      }
-    },
-    {
-      path: "/gateway/usage",
-      name: "GatewayUsage",
-      component: () => import("@/views/gateway/usage/index.vue"),
-      meta: {
-        title: "用量",
-        titleEn: "Usage",
-        icon: "ep/trend-charts",
         roles: ["admin"]
       }
     }

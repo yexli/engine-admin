@@ -46,7 +46,7 @@ const noUiDeps = {
 export default tseslint.config(
   /* outputs/ 是验证产物目录（.gitignore 同样忽略它）：截图、运行日志、一次性复测脚本
      都落在那里，跑完即弃，不该按产品代码的规则来查。 */
-  { ignores: ['dist/**', 'node_modules/**', 'src-tauri/target/**', 'src-tauri/gen/**', '.npm-cache/**', 'outputs/**', '.trash/**'] },
+  { ignores: ['dist/**', '.server-build/**', 'node_modules/**', 'src-tauri/target/**', 'src-tauri/gen/**', '.npm-cache/**', 'outputs/**', '.trash/**'] },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
@@ -74,6 +74,8 @@ export default tseslint.config(
         document: 'readonly',
         localStorage: 'readonly',
         Buffer: 'readonly',
+        URL: 'readonly',
+        URLSearchParams: 'readonly',
         /* Node 18+ 的全局：脚本在 Node 侧直连 OpenAI 兼容端点时要用
            （项目早期的脚本没有这个需求，所以当时没声明） */
         fetch: 'readonly',
@@ -103,6 +105,27 @@ export default tseslint.config(
     name: 'arch-engine',
     files: engineFiles,
     rules: noUiDeps,
+  },
+  {
+    /* 外部连接层（src/world-engine，脱离内置引擎方案 Phase 1）：
+       天穹 → 外部 World Engine 的唯一通道。纪律与引擎层相同——
+       无 React/Zustand/UI/store 依赖，且不得 import 本地游戏引擎层
+       （它镜像的是外部世界的协议，不是本地世界的状态）。 */
+    name: 'arch-external-client',
+    files: ['src/world-engine/**/*.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            { group: ['react', 'react-dom', 'react/*'], message: '连接层禁止依赖 React（它必须能在无 UI 环境运行）。' },
+            { group: ['zustand'], message: '连接层禁止依赖 Zustand（镜像在 cache/worldCache，不进 store）。' },
+            { group: presentationSpecifiers, message: '连接层禁止反向依赖表现层/store。' },
+            { group: engineSpecifiers, message: '连接层不得依赖本地游戏引擎层——外部世界的真相只来自 HTTP/WS 协议。' },
+          ],
+        },
+      ],
+    },
   },
   {
     name: 'arch-ai',

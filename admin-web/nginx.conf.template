@@ -7,8 +7,9 @@
 #   PLATFORM_ADMIN_UPSTREAM 受管 Platform 私有管理监听（host:port，如 platform:8791）
 #   PLATFORM_PUBLIC_UPSTREAM 受管 Platform 公共监听（host:port，如 platform:8790）
 #   WORLD_API_UPSTREAM      World Engine（如 engine:8787；可选）
-#   MEMORY_API_UPSTREAM     World Memory API（如 memory:8789；可选）
-#   GATEWAY_API_UPSTREAM    AI Gateway（如 gateway:8788；可选）
+#
+# Control Plane 收束（docs/ENGINE-CORE-SCOPE.md §3.5）：
+# /memory-api 与 /gateway-api 代理随 AI 产品页移除而删除。
 #
 # 安全基线：
 # · /control-api 是管理面唯一入口：令牌由本层注入 x-admin-token，
@@ -62,24 +63,10 @@ server {
         client_max_body_size 2m;
     }
 
-    # ---------- World Engine / AI Gateway（既有 dev 代理的生产等价物） ----------
+    # ---------- World Engine（既有 dev 代理的生产等价物） ----------
     location /world-api/ {
         proxy_pass http://${WORLD_API_UPSTREAM}/;
         proxy_set_header Host $host;
         client_max_body_size 1m;
-    }
-
-    location /gateway-api/ {
-        proxy_pass http://${GATEWAY_API_UPSTREAM}/;
-        proxy_set_header Host $host;
-        proxy_buffering off;
-        client_max_body_size 1m;
-    }
-
-    # ---------- World Memory HTTP API（M1.1 起真实接入） ----------
-    location /memory-api/ {
-        proxy_pass http://${MEMORY_API_UPSTREAM}/;
-        proxy_set_header Host $host;
-        client_max_body_size 256k;
     }
 }

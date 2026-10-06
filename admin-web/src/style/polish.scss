@@ -2,13 +2,26 @@
    管理台视觉打磨层（全局，一次生效所有页面）
    ------------------------------------------------------------
    只用 Element Plus CSS 变量（浅色/暗色主题自动适配），不改结构：
+   · 基底：圆角阶（控件 6 / 卡片 10 / 弹窗 12）、等宽数字
    · 卡片：圆角、头部字重与分隔、悬停极轻抬升
    · 表格：表头底色/字重、行悬停、密度观感
    · 弹窗 / 抽屉 / 消息框：圆角与头部字重
-   · 标签 / 按钮：微调圆角
+   · 标签 / 按钮：圆角、主按钮着色阴影、去默认描边感
    · 滚动条：窄条细杆（内容区）
-   · 数字：统计值等宽对齐
+   · 双语排版：英文小字不折行；页脚弱化
    ============================================================ */
+
+/* ---------- 基底：圆角阶 + 等宽数字 ---------- */
+:root {
+  /* 控件圆角（按钮/输入/选择器统一 6px；卡片/弹窗在下方各自覆盖） */
+  --el-border-radius-base: 6px;
+}
+
+.el-table .cell,
+.el-pagination,
+.el-descriptions__content {
+  font-variant-numeric: tabular-nums;
+}
 
 /* ---------- 卡片 ---------- */
 .el-card {
@@ -35,6 +48,9 @@
 .el-table .el-table__cell {
   padding: 8px 0;
 }
+.el-table .el-table__row {
+  transition: background-color 0.15s ease;
+}
 .el-table--striped .el-table__body tr.el-table__row--striped td.el-table__cell {
   background: var(--el-fill-color-extra-light);
 }
@@ -60,6 +76,9 @@
 /* ---------- 标签 / 按钮 ---------- */
 .el-tag {
   border-radius: 5px;
+  /* 去掉默认描边感：浅底色标签更干净（尺寸不变） */
+  border-color: transparent;
+  font-weight: 500;
 }
 .el-button {
   border-radius: 6px;
@@ -67,10 +86,37 @@
 .el-button.is-text {
   padding: 5px 8px;
 }
+/* 主按钮：带主色调的着色阴影（浅/暗均使用主色变量派生） */
+.el-button--primary:not(.is-text):not(.is-link):not(.is-plain) {
+  box-shadow: 0 1px 2px rgb(64 110 235 / 22%);
+}
+.el-button--primary:not(.is-text):not(.is-link):not(.is-plain):hover {
+  box-shadow: 0 3px 8px rgb(64 110 235 / 28%);
+}
+.el-button:not(.is-text):not(.is-link):active {
+  transform: translateY(1px);
+}
 
 /* ---------- 描述列表（详情视图） ---------- */
 .el-descriptions__label {
   font-weight: 600;
+}
+
+/* ---------- 侧栏品牌标题 ---------- */
+.sidebar-title {
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+/* ---------- 双语文本：英文小字不折行（窄表头防挤压换行） ---------- */
+.bi-en {
+  white-space: nowrap;
+}
+
+/* ---------- 页脚弱化 ---------- */
+.footer {
+  color: var(--el-text-color-secondary);
+  font-size: 12px;
 }
 
 /* ---------- 内容区滚动条（窄条细杆，浅/暗自适应） ---------- */

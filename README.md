@@ -1,7 +1,9 @@
 # 世界驱动引擎 · World Driving Engine
 
-**AI 世界运行托管平台**——把"世界"变成一种可以被托管、观测、推进和消费的运行时。
-做游戏的、做小说的、任何需要 AI 世界推演的场景，都可以把世界交给这台引擎运行。
+**世界运行引擎托管平台**——把"世界"变成一种可以被托管、观测、推进和消费的运行时。
+引擎负责世界状态、规则、时间、事件、调度和持久化；至于 AI 怎么思考、NPC 怎么说话、故事怎么发展，由接入方自己决定（AI 是引擎的使用者，不是引擎的核心）。
+
+> **产品边界（2026-10 收束定稿）**：`docs/ENGINE-SCOPE-AUDIT.md`（功能范围审计）· `docs/ENGINE-CORE-SCOPE.md`（内核边界宪法与冻结清单）· `docs/ENGINE-API-CONTRACT.md`（公开接口契约）。
 
 ```
 世界书数据 → GameAdapter → 引擎常驻世界 → HTTP / WebSocket 全量可观测
@@ -96,6 +98,9 @@ docs/                  规划与指南（GAME-PLATFORM-PLAN / SDK-GUIDE / DEPLOY
 
 | 文档 | 内容 |
 |---|---|
+| [docs/ENGINE-CORE-SCOPE.md](docs/ENGINE-CORE-SCOPE.md) | **内核边界宪法**：Core/Extension 分层裁定、AI 功能冻结清单、部署形态（纯托管/受管全栈） |
+| [docs/ENGINE-API-CONTRACT.md](docs/ENGINE-API-CONTRACT.md) | **公开接口契约（冻结）**：TS API / HTTP+WS 面 / 命令·事件·时间契约 / 兼容纪律 |
+| [docs/ENGINE-SCOPE-AUDIT.md](docs/ENGINE-SCOPE-AUDIT.md) | 功能范围审计：A–G 分类、依赖审计（Core→AI 为零）、Admin 页面盘点 |
 | [docs/SDK-GUIDE.md](docs/SDK-GUIDE.md) | 第三方从零接入：安装 → 30 行宿主 → 持久化/实时流/鉴权/规则 |
 | [docs/EVOLUTION-ARCHITECTURE.md](docs/EVOLUTION-ARCHITECTURE.md) | AI 世界演化运行时：概念边界（Intent/Proposal/Mutation/Event）、闭环、AI/引擎边界、因果链 |
 | [docs/GAME-PLATFORM-PLAN.md](docs/GAME-PLATFORM-PLAN.md) | 平台化路线：G1–G3 已兑现；P 系列托管平台路线（托管运行服务/自助接入中心/配额/客户端 SDK/云端硬化） |

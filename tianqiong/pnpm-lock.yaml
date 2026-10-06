@@ -26,6 +26,9 @@ importers:
       world-engine:
         specifier: file:..\world-engine
         version: file:../world-engine
+      world-gateway:
+        specifier: link:../world-engine/gateway
+        version: link:../world-engine/gateway
       zustand:
         specifier: ^5.0.15
         version: 5.0.15(@types/react@19.3.0)(react@19.3.0)

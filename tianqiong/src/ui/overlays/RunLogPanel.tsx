@@ -27,6 +27,7 @@ const CHAN_COLOR: Record<RunChan, string> = {
   perf: '#7c8896',
   error: '#e0605a',
   ui: '#93a1b1',
+  extsync: '#d9b45f',
 };
 /** 面板一次渲染的尾部条数（缓冲本身有 1000 条上限，这里再收一道保证滚动流畅） */
 const VIEW_MAX = 400;

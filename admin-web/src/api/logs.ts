@@ -1,9 +1,9 @@
 /** Observability 客户端（M4.1 起接真：管理监听 /v1/obs/*，数据源 = M2.2 用量数据面
- *  与引擎只读聚合）；AI Calls 见下方（M2.2 起接真）。诚实边界：Logs = 平台请求日志
- *  （公共面），不含引擎/记忆的进程内日志；Errors = 失败请求登记（只读，无工作流）。
+ *  与引擎只读聚合）。诚实边界：Logs = 平台请求日志（公共面），不含引擎的进程内日志；
+ *  Errors = 失败请求登记（只读，无工作流）。
+ *  Control Plane 收束（docs/ENGINE-CORE-SCOPE.md §3.5）：AI Calls 页与 usage 客户端已移除。
  */
 import { http } from "@/utils/http";
-import type { UsageData, UsageRow } from "./usage";
 
 async function failWith(e: unknown): Promise<never> {
   const err = e as {
@@ -48,17 +48,6 @@ export async function listLogs(
     return failWith(e);
   }
 }
-
-/* ---------- AI Calls（M2.2 起接真：与 Usage 页共用平台用量数据面） ---------- */
-/* 诚实边界：记录不落 Prompt / 响应原文（隐私边界），详情只有路由留痕；
-   代理透传路径拿不到上游 usage → tokens 为 null。 */
-import { listUsage } from "./usage";
-export type AiCallRow = UsageRow;
-export type AiCallData = UsageData;
-
-export const listAiCalls = (params?: Record<string, unknown>) => {
-  return listUsage({ kind: "chat", ...params });
-};
 
 /* ---------- Errors（失败请求登记；只读投影） ---------- */
 export interface ErrorRow {

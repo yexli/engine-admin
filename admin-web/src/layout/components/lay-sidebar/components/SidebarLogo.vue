@@ -61,9 +61,11 @@ const { title, getLogo } = useNav();
       margin: 2px 0 0 12px;
       overflow: hidden;
       text-overflow: ellipsis;
-      font-size: 18px;
+      /* 15px：完整容纳「World Engine 控制台」（18px 会截断成省略号） */
+      font-size: 15px;
       font-weight: 600;
       line-height: 32px;
+      letter-spacing: 0.3px;
       color: var(--pure-theme-sub-menu-active-text);
       white-space: nowrap;
     }

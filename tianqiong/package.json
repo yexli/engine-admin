@@ -3,9 +3,11 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "天穹纪元 2.0 —— 世界书驱动的 AI+RPG 单机游戏（React + TypeScript + Vite + Zustand + 自研 GameCore）",
+  "description": "天穹纪元 2.0 —— World Engine 的外部游戏客户端（React + TypeScript + Vite；世界裁定在会话宿主 server/game-host，客户端纯表现）",
   "scripts": {
     "dev": "vite",
+    "host:world": "node scripts/world-host.mjs",
+    "host:http": "node scripts/http-host.mjs",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
@@ -13,7 +15,9 @@
     "test:watch": "vitest",
     "lint": "eslint .",
     "format": "prettier --write \"src/**/*.{ts,tsx,css}\"",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "build:game": "vite build -c vite.game-host.config.ts",
+    "host:game": "npm run build:game && node .server-build/game-host.mjs"
   },
   "dependencies": {
     "@fontsource/noto-serif-sc": "^5.3.0",
@@ -22,7 +26,8 @@
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "world-engine": "file:..\\world-engine",
-    "zustand": "^5.0.15"
+    "zustand": "^5.0.15",
+    "world-gateway": "link:../world-engine/gateway"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

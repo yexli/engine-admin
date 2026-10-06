@@ -27,6 +27,9 @@ import type { WorldState } from '@/types/world';
 import type { SavePort } from '@/plugins/PluginInterface';
 import { LocalSaveRepository } from '@/repo';
 import { attachCoreBridge, useGame } from '@/store/useGame';
+import { platformStorage, readExternalEngineConfig } from '@/world-engine';
+import { attachExternalSession } from '@/plugins/extSession';
+import { attachSessionWeave } from '@/plugins/sessionWeave';
 import { loadPersonLore } from '@/data/lore';
 import { bootstrapWorld } from '@/plugins/bootstrap';
 import { makeHybridReasoner } from '@/ai/llmReasoner';
@@ -46,9 +49,36 @@ runLog.mark('组合根开始装配', { tauri: inTauri });
 /* 订阅必须先于存档装配：否则 F-21 的介质回落提示会在无人订阅时丢掉 */
 const disposeBridge = attachCoreBridge();
 
+/* 外部 World Engine（Phase 9 · 默认形态）：客户端 = 外部会话宿主的游戏端。
+   `npm run dev` 前先 `npm run host:game`（断线为 §22 停摆：停止世界写、自动重连）。
+   逃生门：VITE_TIANQIONG_EXTERNAL_WORLD_ENGINE=false（或 localStorage enabled:false）
+   回落本地引擎（迁移期开发用；Phase 10 之后仅存开发形态）。 */
+const extCfg = readExternalEngineConfig(undefined, platformStorage());
+
 /* 世界模拟架构装配（顺序敏感，见 plugins/bootstrap.ts）：
-   有真实模型走模型、否则/失败退回规则推演——世界不会因未配置 Key 而停摆 */
-const disposeWorld = bootstrapWorld({ reasoner: makeHybridReasoner((system, user) => gateway.ask(system, user)) });
+   session 档不装配：裁定全在服务端，客户端订阅栈会对重放事实双触发
+   （推演/记忆/感知都由服务端做），本地 core 只是一份被快照刷新的投影。
+   逃生门关闭外部模式时才装配本地裁定栈。 */
+const disposeWorld = extCfg.enabled
+  ? () => {}
+  : bootstrapWorld({ reasoner: makeHybridReasoner((system, user) => gateway.ask(system, user)) });
+
+const disposeExtSession = extCfg.enabled
+  ? attachExternalSession({
+      baseUrl: extCfg.baseUrl,
+      report: (patch) =>
+        useGame.setState((s) => ({
+          extWorld: {
+            ...s.extWorld,
+            enabled: true,
+            ...patch,
+          },
+        })),
+    })
+  : () => {};
+/* session 档的客户端编织（§30 表现层）：服务端不织，快照回灌后由
+   客户端差分新见闻、织成正文进覆盖表（渲染叠加，状态零改动）。 */
+const disposeSessionWeave = extCfg.enabled ? attachSessionWeave() : () => {};
 
 let repo: SavePort;
 if (inTauri) {
@@ -77,7 +107,7 @@ restoreVectorIndex();
 /* 开发期续档：vite 的整页重载（改源码 / 手动 F5）会把内存里的世界清空、页面退回
    标题屏——改一次代码就得重开一次档，刷新看得到更新却丢了进度。这里在卸载前把
    世界暂存进 sessionStorage，重载后自动接上。只在 DEV 生效：生产包没有 HMR，也就没有这段。 */
-if (import.meta.env.DEV) {
+if (import.meta.env.DEV && !extCfg.enabled) {
   const SNAP = 'tq2_dev_snapshot';
   window.addEventListener('beforeunload', () => {
     try {
@@ -101,6 +131,8 @@ if (import.meta.env.DEV) {
 
 /** 关闭/退出前的落盘：清掉 sync 的尾节流并把写穿队列排空 */
 const flushAll = async () => {
+  /* session 档不落本地（真相在服务端；副本进本地槽会让逃生门读到陈旧档） */
+  if (extCfg.enabled) return;
   flushSave();
   await (repo as { flush?: () => Promise<void> }).flush?.();
 };
@@ -135,6 +167,8 @@ const hot = (import.meta as { hot?: HotCtx }).hot;
 if (hot) {
   hot.dispose(disposeBridge);
   hot.dispose(disposeWorld);
+  hot.dispose(disposeExtSession);
+  hot.dispose(disposeSessionWeave);
   hot.dispose(disposeRunLog);
   hot.on('vite:ws:disconnect', () => {
     bus.emit({ type: 'toast', text: '⚠ 与开发服务器的连接已断开——按 Ctrl+F5 刷新以载入最新代码', cls: 'bad' });

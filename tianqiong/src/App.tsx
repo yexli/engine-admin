@@ -11,6 +11,7 @@ import { CombatOverlay } from './ui/overlays/CombatOverlay';
 import { DungeonOverlay } from './ui/overlays/DungeonOverlay';
 import { ToastHost } from './ui/overlays/ToastHost';
 import { RunLogPanel } from './ui/overlays/RunLogPanel';
+import { ExtWorldBadge } from './ui/overlays/ExtWorldBadge';
 import { useAutoFlow } from './ui/useAutoFlow';
 
 export default function App() {
@@ -41,6 +42,8 @@ export default function App() {
       <CombatOverlay />
       <DungeonOverlay />
       <ToastHost />
+      {/* 外部 World Engine 连接指示器（开关打开时才渲染，见 ExtWorldBadge） */}
+      <ExtWorldBadge />
       {/* 开发观测面板：默认收起，Ctrl+Shift+L 打开；未启用运行日志时不渲染 */}
       <RunLogPanel />
     </ErrorBoundary>

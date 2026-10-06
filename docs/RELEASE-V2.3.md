@@ -96,4 +96,5 @@
 
 ## 下一步
 
-V3.0 AI World Runtime 定版（后续能力按真实需求逐个进 v3.x）。
+V3.0 Runtime 定版（后续能力按真实需求逐个进 v3.x）。
+> **2026-10 收束澄清**："AI World Runtime"指 platform 侧 AI 扩展运行时（Extension 层），非引擎内核能力；引擎内核零 AI 依赖（见 docs/ENGINE-CORE-SCOPE.md）。同日起 AI 功能冻结：演化/记忆/模型路由等只作 Extension 维护，不再新增（docs/ENGINE-CORE-SCOPE.md §四）。

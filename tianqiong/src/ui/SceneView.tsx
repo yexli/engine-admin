@@ -3,6 +3,7 @@ import { bus, periodSeg, rich, sceneTime, stationAt, stationGate, world } from '
 import { abilitiesOf } from '@/data/regions';
 import { formatMoney } from '@/systems/economy/Money';
 import { gateway } from '@/ai/gateway';
+import { applyWeaveOverride } from '@/plugins/sessionWeave';
 import { useGame } from '@/store/useGame';
 import type { WorldState } from '@/types/world';
 import { Fragment, useEffect, useMemo, useReducer, useRef, useState } from 'react';
@@ -264,10 +265,15 @@ export function SceneView() {
      没配模型时 core 根本不发 weave 事件，weaveFrom 恒为 null，原文即时显示。 */
   const visibleLog = useMemo(
     () =>
-      (S.log || []).filter(
+      (S.log || []).flatMap((e) => {
         /* meta = 内部标记（意图解析结果之类）：不是给玩家读的，也不参与叙事 */
-        (e) => e.cls !== 'meta' && (weaveFrom === null || (e.id ?? 0) <= weaveFrom),
-      ),
+        if (e.cls === 'meta') return [];
+        if (weaveFrom !== null && (e.id ?? 0) > weaveFrom) return [];
+        /* session 档的客户端编织覆盖（§30 表现层）：织后正文替换原条目、
+           被吸收的条目隐藏。覆盖表为空（本地/bridge 档）= 原样通过。 */
+        const w = applyWeaveOverride(e as never) as (typeof e) | null;
+        return w ? [w] : [];
+      }),
     [S.log, logLen, weaveFrom],
   );
   const logGroups = useMemo(() => {

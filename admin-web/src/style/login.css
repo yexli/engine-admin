@@ -38,19 +38,40 @@
   width: 360px;
 }
 
+/* 品牌标（引擎 logo） */
 .avatar {
-  width: 350px;
-  height: 80px;
+  width: 52px;
+  height: 52px;
+  margin: 0 auto;
+  border-radius: 14px;
+  box-shadow: 0 4px 14px rgb(64 110 235 / 18%);
 }
 
+/* 产品标题：深色、收紧字距，替代旧的灰色等宽大写 */
 .login-form h2 {
-  text-transform: uppercase;
-  margin: 15px 0;
-  color: #999;
-  font:
-    bold 200% Consolas,
-    Monaco,
-    monospace;
+  margin: 14px 0 6px;
+  color: var(--el-text-color-primary);
+  font-size: 1.5rem;
+  font-weight: 650;
+  letter-spacing: 0.5px;
+}
+
+/* 定位副标语：一句边界话 + 英文能力域小字 */
+.login-sub {
+  margin: 0 0 22px;
+  color: var(--el-text-color-secondary);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.login-sub .login-sub-en {
+  display: block;
+  margin-top: 2px;
+  color: var(--el-text-color-placeholder);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+  letter-spacing: 0.4px;
+  white-space: nowrap;
 }
 
 @media screen and (max-width: 1180px) {
@@ -63,17 +84,12 @@
   }
 
   .login-form h2 {
-    font-size: 2.4rem;
-    margin: 8px 0;
+    font-size: 1.35rem;
+    margin: 10px 0 4px;
   }
 
   .img img {
     width: 360px;
-  }
-
-  .avatar {
-    width: 280px;
-    height: 80px;
   }
 }
 

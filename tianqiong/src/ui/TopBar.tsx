@@ -11,20 +11,29 @@ import { useGame } from '@/store/useGame';
    日晷盘、状态胶囊、资源条全部移入左列 HUD——B 把「我是什么状态」收进左列，
    顶栏只回答「我在哪、什么时候」。金币也不在这里，它在 HUD 的 badges 里。
 
+   读面切换（脱离内置引擎方案 Phase 2）：外部引擎开关打开、连接在线且
+   镜像水位就绪时，「现在几点、我在哪」读**引擎镜像**（数值由引擎裁定，
+   Cache ≠ Truth，同步桥保证收敛）；时辰名/地名文案仍是天穹的表现资产
+   （方案 §12 的边界：数值归引擎，显示归客户端）。开关关闭或水位未就绪
+   = 与现状逐字节相同。
+
    导航 = PANEL_TABS 一处声明、两处排布（顶栏 + 移动端标签栏）：
    项目在卡 P2 吃过集合漂移的亏（桌面有「纪闻/档案」而移动端没有），
    所以不在这里另写一份面板清单。
    ============================================================ */
 export function TopBar() {
   const S = world.query.get_world_state()!;
-  const t = sceneTime(S);
-  const L = WB.locations[S.player.loc];
+  const ext = useGame((s) => s.extWorld);
+  const extReady = ext.enabled && ext.status === 'online' && ext.tick !== null && ext.playerLoc !== null;
+  const t = extReady ? { day: ext.day ?? 1, h: Math.floor(((ext.tick ?? 0) % 48) / TICKS_PER_HOUR) } : sceneTime(S);
+  const locId = extReady && WB.locations[ext.playerLoc!] ? ext.playerLoc! : S.player.loc;
+  const L = WB.locations[locId];
   const curTab = useGame((s) => s.curTab);
   const setTab = useGame((s) => s.setTab);
   const setBag = useGame((s) => s.setBag);
   const bagOpen = useGame((s) => s.bagOpen);
 
-  const tickInHour = S.t % TICKS_PER_HOUR;
+  const tickInHour = (extReady ? (ext.tick ?? 0) : S.t) % TICKS_PER_HOUR;
   const shichen = WB.shichen[t.h];
 
   return (

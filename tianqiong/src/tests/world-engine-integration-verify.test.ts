@@ -46,7 +46,7 @@ beforeEach(() => {
   worldEventLog.clear();
   resetEventSeq();
   rng.seed(20261001);
-  engineScheduler.inject((ms, fn) => { fn(); return 0 as unknown as ReturnType<typeof setTimeout>; });
+  engineScheduler.inject((_ms, fn) => { fn(); return 0 as unknown as ReturnType<typeof setTimeout>; });
   /* 与生产同一条装配路径 */
   bootstrapWorld({ reasoner: ruleReasoner });
 });

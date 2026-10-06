@@ -74,10 +74,8 @@ services:
       PLATFORM_ADMIN_UPSTREAM: platform:8791
       PLATFORM_PUBLIC_UPSTREAM: platform:8790
       WORLD_API_UPSTREAM: engine:8787
-      MEMORY_API_UPSTREAM: memory:8789
-      # 托管模式下 gateway 内嵌于 platform（内部回环），无独立 8788 上游；
-      # /gateway-api 为遗留直连通道，误命中时由引擎诚实 404
-      GATEWAY_API_UPSTREAM: engine:8787
+      # Control Plane 收束（docs/ENGINE-CORE-SCOPE.md §3.5）：
+      # nginx 模板不再代理 /memory-api 与 /gateway-api，相应变量已删。
     ports:
       - "8080:80"
     depends_on:

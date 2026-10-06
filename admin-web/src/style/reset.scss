@@ -16,13 +16,17 @@ body {
   width: 100%;
   height: 100%;
   margin: 0;
+  /* 现代本地字体栈（内网/离线优先，不加载 webfont）：
+     优先系统中文字体的新版字形，西文回落 Segoe UI / system-ui */
   font-family:
-    "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB",
-    "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
+    "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system,
+    "PingFang SC", "HarmonyOS Sans SC", "MiSans", "Microsoft YaHei UI",
+    "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
   line-height: inherit;
   -moz-osx-font-smoothing: grayscale;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizelegibility;
+  font-variant-numeric: tabular-nums;
 }
 
 hr {

@@ -5,6 +5,7 @@
    ============================================================ */
 import { create } from 'zustand';
 import { bus, core, world } from '@/world';
+import type { ExtWorldReport } from '@/plugins/extSession';
 import type { CheckDesc, GameCommand, SheetDesc, ToastDesc } from '@/types/uispec';
 
 export type ScreenName = 'title' | 'create' | 'game';
@@ -70,6 +71,13 @@ interface GameState {
    */
   bagOpen: boolean;
   toasts: (ToastDesc & { fade: boolean })[];
+  /**
+   * 外部 World Engine 连接态（脱离内置引擎方案 Phase 2 接入点）。
+   * enabled=开关（TIANQIONG_EXTERNAL_WORLD_ENGINE）打开；其余是连接状态机
+   * 与引擎镜像水位的镜像（Cache ≠ Truth，只喂显示与重连提示）。
+   * 断线时 UI 据此进入重连态——绝不回落本地引擎（方案 §22）。
+   */
+  extWorld: ExtWorldReport;
   setScreen: (s: ScreenName) => void;
   setTab: (t: TabName) => void;
   setSrTab: (t: SrTabName) => void;
@@ -103,6 +111,7 @@ export const useGame = create<GameState>((set, get) => ({
   h6Panel: null,
   bagOpen: false,
   toasts: [],
+  extWorld: { enabled: false, status: 'off', worldId: null, baseUrl: '', day: null, tick: null, timeView: null, playerLoc: null, lastError: null },
   setScreen: (s) => set({ screen: s }),
   /* 换页意图一律收行囊（含点当前页）：行囊开着时 data-view='bag' 的让位规则
      把 #pnl-ovl 整个 display:none 盖着，若只在 curTab **变化**时才收（旧实现，

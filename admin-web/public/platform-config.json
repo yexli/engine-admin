@@ -1,6 +1,6 @@
 {
-  "Version": "6.2.0",
-  "Title": "World Driving Engine Admin",
+  "Version": "6.3.0",
+  "Title": "World Engine 控制台",
   "FixedHeader": true,
   "HiddenSideBar": false,
   "MultiTagsCache": false,
@@ -15,7 +15,7 @@
   "HideFooter": false,
   "Stretch": false,
   "SidebarStatus": true,
-  "EpThemeColor": "#409EFF",
+  "EpThemeColor": "#406EEB",
   "ShowLogo": true,
   "ShowModel": "smart",
   "MenuArrowIconNoTransition": false,

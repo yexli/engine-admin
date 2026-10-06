@@ -28,7 +28,9 @@ const INCLUDE_FILES = ['README.md', 'publish-to-gitee.mjs', '.dockerignore'];
 
 const SKIP_DIR = new Set([
   'node_modules', 'dist', '.git', '.mimosa', '.npm-cache', '.pnpm-store',
-  '.turbo', 'coverage', 'test-results', 'playwright-report', '.trash'
+  '.turbo', 'coverage', 'test-results', 'playwright-report', '.trash',
+  '.qa-tmp',            // QA 临时会话存档
+  '.ai-legacy-backup'   // admin-web AI 页面移除前的本地回滚备份，不入库
 ]);
 const SKIP_EXT = new Set(['.log', '.tsbuildinfo']);
 const SKIP_FILE = new Set(['.eslintcache', '.icon-src.png']);

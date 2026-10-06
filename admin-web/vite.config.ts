@@ -35,19 +35,9 @@ export default ({ mode }: ConfigEnv): UserConfigExport => {
           ws: true,
           rewrite: p => p.replace(/^\/world-api/, "")
         },
-        // Memory 管理（P12.5：8789 退役后由平台管理面 8791 提供原生记忆路由）
-        "/memory-api": {
-          target: env.VITE_MEMORY_API_URL ?? "http://127.0.0.1:8789",
-          changeOrigin: true,
-          rewrite: p => p.replace(/^\/memory-api/, "")
-        },
-        // AI Gateway HTTP API
-        "/gateway-api": {
-          target: env.VITE_GATEWAY_API_URL ?? "http://127.0.0.1:8788",
-          changeOrigin: true,
-          rewrite: p => p.replace(/^\/gateway-api/, "")
-        },
-        // Model Control Plane 私有管理面（真实 API，见 src/api/modelControl.ts）：
+        // Control Plane 收束（docs/ENGINE-CORE-SCOPE.md §3.5）：
+        // /memory-api 与 /gateway-api 代理随 AI 页面移除而删除。
+        // 平台私有管理面（真实 API）：
         // 改写到受管 Platform 的 loopback 管理监听，并在【服务端】注入管理令牌。
         // 令牌只从本进程环境变量读取（PLATFORM_ADMIN_TOKEN），绝不使用 VITE_* 前缀、
         // 不进前端产物、不下发浏览器。

@@ -58,6 +58,11 @@ Core（world-engine，玩法无关）
 
 P14 完成后，方案 §16 的通用 Schema 清单（World/State/Entity/Relation/Command/
 Rule/Mutation/Event/Time/Scheduler/Memory）全部有实现、文档与测试三方对应；
-Extension 层最小自洽。**V3.0「AI World Runtime」的抽象门槛已到**——后续能力
+Extension 层最小自洽。**V3.0「Runtime 定版」的抽象门槛已到**——后续能力
 （Quest、物品容器、多游戏计费）按真实需求逐个进 v3.x，不再以「V3.0 前必须」
 驱动。
+
+> **2026-10 收束澄清**：历史表述中的"AI World Runtime"指 **platform 侧 AI
+> 扩展运行时**（`platform/src/evolution/*` 等 Extension 层），不是引擎内核
+> 能力——引擎内核对 AI 零依赖并由测试守卫固化（见 `docs/ENGINE-SCOPE-AUDIT.md`
+> §四与 `docs/ENGINE-CORE-SCOPE.md`）。

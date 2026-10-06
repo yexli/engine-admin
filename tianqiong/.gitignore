@@ -31,3 +31,5 @@ Thumbs.db
 
 # ---- AI 工具会话状态（安全扫描/审查的当日运行态，重跑即再生成）----
 .mimosa
+.server-build/
+.world-data/

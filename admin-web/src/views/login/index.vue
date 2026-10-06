@@ -11,7 +11,7 @@ import type { FormInstance } from "element-plus";
 import { useLayout } from "@/layout/hooks/useLayout";
 import { useUserStoreHook } from "@/store/modules/user";
 import { initRouter, getTopMenu } from "@/router/utils";
-import { bg, avatar, illustration } from "./utils/static";
+import { bg, illustration } from "./utils/static";
 import { useRenderIcon } from "@/components/ReIcon/src/hooks";
 import { useDataThemeChange } from "@/layout/hooks/useDataThemeChange";
 
@@ -34,7 +34,7 @@ initStorage();
 
 const { dataTheme, overallStyle, dataThemeChange } = useDataThemeChange();
 dataThemeChange(overallStyle.value);
-const { title } = useNav();
+const { title, getLogo } = useNav();
 
 const ruleForm = reactive({
   username: "admin",
@@ -110,9 +110,15 @@ useEventListener(document, "keydown", ({ code }) => {
       </div>
       <div class="login-box">
         <div class="login-form">
-          <avatar class="avatar" />
+          <img class="avatar" :src="getLogo()" alt="logo" />
           <Motion>
             <h2 class="outline-hidden">{{ title }}</h2>
+          </Motion>
+          <Motion :delay="60">
+            <p class="login-sub">
+              世界运行引擎 · Control Plane
+              <span class="login-sub-en">Worlds · Entities · Commands · Events · Runtime</span>
+            </p>
           </Motion>
 
           <el-form

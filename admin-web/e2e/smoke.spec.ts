@@ -2,10 +2,12 @@
    管理后台生产构建冒烟（M5.2 · ADMIN-TEST-REPORT 建议落地）
    ------------------------------------------------------------
    流程（对 world-engine 生产构建的 vite preview 跑，非 dev server）：
-     登录 → 世界详情 → 执行命令 → 修改路由（保存 revision+1）→ 回滚
+     登录 → 世界详情 → 执行命令（advance_time）
+   Control Plane 收束（docs/ENGINE-CORE-SCOPE.md §3.5）：
+   原"修改模型路由 → 回滚"段随 AI 网关页面移除而删除。
    选择器约定：优先角色/文案定位；pure-admin 多标签缓存会导致 hash 直跳
    与视图脱节，故每次 hash 导航后强制 reload（与人工操作一致）。
-   环境由 e2e/smoke.mjs 编排（脚本化上游 + 引擎 + 受管平台 + preview）。
+   环境由 e2e/smoke.mjs 编排（引擎 + 受管平台 + preview）。
    ============================================================ */
 import { expect, test } from "@playwright/test";
 
@@ -16,7 +18,7 @@ async function gotoHash(page: import("@playwright/test").Page, hash: string) {
   await page.waitForLoadState("domcontentloaded");
 }
 
-test("冒烟：登录 → 世界详情 → 执行命令 → 修改路由 → 回滚", async ({ page }) => {
+test("冒烟：登录 → 世界详情 → 执行命令", async ({ page }) => {
   /* ---------- 登录（真实管理会话） ---------- */
   await page.goto("/#/login");
   await page.reload();
@@ -39,37 +41,4 @@ test("冒烟：登录 → 世界详情 → 执行命令 → 修改路由 → 回
   await expect(
     page.getByText("执行成功", { exact: true })
   ).toBeVisible({ timeout: 20_000 });
-
-  /* ---------- 修改路由（改 快速响应 primary → 保存，revision +1） ---------- */
-  await gotoHash(page, "/gateway/router");
-  /* 等配置从服务端加载完成（种子化后 revision ≥ 1）再取基线 */
-  await expect(page.getByText(/^revision [1-9]\d*$/)).toBeVisible({
-    timeout: 20_000
-  });
-  const revisionText = () => page.getByText(/^revision \d+$/).innerText();
-  const revBefore = Number((await revisionText()).replace("revision ", ""));
-
-  const fastRow = page.getByRole("row", { name: /快速响应/ });
-  await fastRow.locator(".el-select").first().click();
-  await page
-    .getByRole("option")
-    .filter({ hasText: "mdl-smoke" })
-    .first()
-    .click();
-  await page.getByRole("button", { name: "保存全部" }).click();
-  await expect(page.getByText(/^revision \d+$/)).toHaveText(
-    `revision ${revBefore + 1}`,
-    { timeout: 20_000 }
-  );
-
-  /* ---------- 回滚（revision 再 +1，路由还原为上一版） ---------- */
-  await page.getByRole("button", { name: "回滚上一版" }).click();
-  await page
-    .getByRole("button", { name: "回滚", exact: true })
-    .last()
-    .click();
-  await expect(page.getByText(/^revision \d+$/)).toHaveText(
-    `revision ${revBefore + 2}`,
-    { timeout: 20_000 }
-  );
 });

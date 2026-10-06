@@ -72,7 +72,7 @@ function serviceTag(s: string) {
       </el-button>
     </div>
 
-    <!-- 服务连通性（真实探测：四个同源代理） -->
+    <!-- 服务连通性（真实探测：同源代理） -->
     <el-card shadow="never" class="mb-3">
       <template #header>
         <div class="flex items-center justify-between">

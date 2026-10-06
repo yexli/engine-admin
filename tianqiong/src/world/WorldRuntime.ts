@@ -36,6 +36,7 @@ import { depart } from '@/systems/travel/Travel';
 import { closeSheet, confirmSheet } from '@/systems/character/Sheet';
 import { formatMoney } from '@/systems/economy/Money';
 import { advance, CHEN_PER_DAY } from '@/world/WorldClock';
+import { externalCommandPort } from '@/world/extGate';
 import { core, newState, save, sync, hydrate } from '@/world/WorldState';
 import type { CharSpec } from '@/world/WorldState';
 import { validateState } from '@/validation/RuleValidator';
@@ -158,6 +159,15 @@ function npcOk(id: unknown): id is string {
 }
 
 export function dispatch(cmd: GameCommand) {
+  /* 会话门（session 档 · Phase 3 终局形态）：端口激活时**全部**命令
+     转投服务端会话宿主裁定（server/game-host.ts），本地不做任何裁决；
+     事实流与快照由 plugins/extSession 回灌 core。未注入端口（本地
+     模式 / bridge 档 / 断线回落）= 行为与现状完全一致。 */
+  const session = externalCommandPort();
+  if (session?.isActive()) {
+    session.sendCommand(cmd);
+    return;
+  }
   /* 叙事编织的水位：出口要把**这一轮新写的见闻**交给 AI 织成小说，
      所以先在入口记下 logSeq；纯面板操作不写见闻，出口那一步会直接返回。 */
   const seq0 = core.S?.logSeq ?? 0;
@@ -195,6 +205,7 @@ export function dispatch(cmd: GameCommand) {
       return;
     case 'wait':
       /* 原地等待 n 刻——自动流逝按刻提交这条命令。
+         （session 档下本分支只在服务端进程里执行；客户端经会话门整投。）
          它存在、而不是让 UI 直接调 advance()，是因为 dispatch 的两个兜底：
          入口 worldBus.beginTick() 重置本 tick 的事件风暴配额（§31），
          出口 sync() 统一 emitChanged + 节流落盘（F-12）。

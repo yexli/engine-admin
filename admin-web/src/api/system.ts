@@ -1,5 +1,6 @@
 /** System 客户端（M3 起接真：管理监听 users / permissions / settings 端点）
- *  Status 的服务连通性由本模块对四个同源代理做真实探测（无 Mock）。
+ *  Status 的服务连通性由本模块对同源代理做真实探测（无 Mock）。
+ *  Control Plane 收束（docs/ENGINE-CORE-SCOPE.md §3.5）：不再探测 memory/gateway 服务。
  */
 import { http } from "@/utils/http";
 
@@ -156,7 +157,7 @@ export async function updateSetting(
   }
 }
 
-/* ---------- Status（真实探测：四个同源代理的连通性；无版本/时长等编造字段） ---------- */
+/* ---------- Status（真实探测：同源代理的连通性；无版本/时长等编造字段） ---------- */
 export interface ServiceRow {
   name: string;
   /** 探测端点（同源代理） */
@@ -170,8 +171,6 @@ export interface ServiceRow {
 export async function probeServices(): Promise<ServiceRow[]> {
   const targets: Array<{ name: string; probe: string }> = [
     { name: "world-engine", probe: "/world-api/v1/worlds" },
-    { name: "world-memory", probe: "/memory-api/v1/memory/stores" },
-    { name: "ai-gateway", probe: "/gateway-api/v1/models" },
     { name: "platform-admin", probe: "/control-api/healthz" }
   ];
   return Promise.all(

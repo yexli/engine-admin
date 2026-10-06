@@ -1,6 +1,6 @@
 const Layout = () => import("@/layout/index.vue");
 
-/** 运行监控：Logs / Events / AI Calls / Errors */
+/** 运行监控：Logs / Events / Errors（Engine Control Plane 收束：AI 调用页已移除） */
 export default {
   path: "/observability",
   name: "Observability",
@@ -24,12 +24,6 @@ export default {
       name: "ObsEvents",
       component: () => import("@/views/observability/events/index.vue"),
       meta: { title: "事件流", titleEn: "Events", icon: "ep/bell" }
-    },
-    {
-      path: "/observability/ai-calls",
-      name: "ObsAiCalls",
-      component: () => import("@/views/observability/ai-calls/index.vue"),
-      meta: { title: "AI 调用", titleEn: "AI Calls", icon: "ep/coin" }
     },
     {
       path: "/observability/errors",
